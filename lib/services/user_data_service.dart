@@ -16,23 +16,41 @@ class UserDataService extends ChangeNotifier {
   static const String _watchlistMoviesKey = 'watchlistMovies';
   static const String _watchlistAnimeKey = 'watchlistAnime';
   static const String _watchlistTvSeriesKey = 'watchlistTvSeries';
+  static const String _isWatchedEpisodeKey = 'isWatchedEpisode';
+  static const String _isWatchedSeasonKey = 'isWatchedSeason';
+  static const String _isWatchedMovieKey = 'isWatchedMovie';
+  static const String _isWatchedSeriesKey = 'isWatchedSeries';
+  static const String _myListKey = 'myList';
+
   // Add keys for history, downloads if implemented later
-
+  String _custoombaseurl = '';
   SharedPreferences? _prefs;
-
+  bool _historyformodelsenabled = false;
+  bool _historychatenabled = true;
   List<int> _favoriteMovieIds = [];
   List<int> _favoriteAnimeIds = [];
   List<int> _favoriteTvSeriesIds = [];
   List<int> _watchlistMovieIds = [];
   List<int> _watchlistAnimeIds = [];
   List<int> _watchlistTvSeriesIds = [];
+  List<int> _isWatchedEpisodeIds = [];
+  List<int> _isWatchedSeasonIds = [];
+  List<int> _isWatchedSeriesIds = [];
+  List<int> _isWatchedMovieIds = [];
 
   List<int> get favoriteMovieIds => List.unmodifiable(_favoriteMovieIds);
   List<int> get favoriteAnimeIds => List.unmodifiable(_favoriteAnimeIds);
   List<int> get favoriteTvSeriesIds => List.unmodifiable(_favoriteTvSeriesIds);
   List<int> get watchlistMovieIds => List.unmodifiable(_watchlistMovieIds);
   List<int> get watchlistAnimeIds => List.unmodifiable(_watchlistAnimeIds);
+  List<int> get isWatchedEpisodeIds => List.unmodifiable(_isWatchedEpisodeIds);
+  List<int> get isWatchedSeasonIds => List.unmodifiable(_isWatchedSeasonIds);
+  List<int> get isWatchedSeriesIds => List.unmodifiable(_isWatchedSeriesIds);
+  List<int> get isWatchedMovieIds => List.unmodifiable(_isWatchedMovieIds);
 
+  bool get historyformodelsenabled => _historyformodelsenabled;
+  bool get historychatenabled => _historychatenabled;
+  String get custoombaseurl => _custoombaseurl;
   List<int> get watchlistTvSeriesIds =>
       List.unmodifiable(_watchlistTvSeriesIds);
 
@@ -47,7 +65,7 @@ class UserDataService extends ChangeNotifier {
   // Default settings values
   String _externalPlayer = '';
   String _downloadManager = '';
-  late double _gridSize; // Example: number of columns
+  late double _gridSize = 3; // Example: number of columns
   String _decoderPreference =
       'default'; // Example: 'default', 'hardware', 'software'
   // Getters
@@ -65,26 +83,151 @@ class UserDataService extends ChangeNotifier {
   String get decoderPreference => _decoderPreference;
 
   UserDataService() {
-    _loadPreferences();
-    _loadSettings();
+    _init();
+  }
+  Future<void> _init() async {
+    _prefs ??= await SharedPreferences.getInstance();
+    await _loadPreferences();
+    await _loadSettings();
   }
 
   Future<void> _loadPreferences() async {
     _prefs = await SharedPreferences.getInstance();
     _favoriteMovieIds = _getIntList(_favoriteMoviesKey);
+    _isWatchedEpisodeIds = _getIntList(_isWatchedEpisodeKey);
+    _isWatchedSeasonIds = _getIntList(_isWatchedSeasonKey);
+    _isWatchedSeriesIds = _getIntList(_isWatchedSeriesKey);
+    _isWatchedMovieIds = _getIntList(_isWatchedMovieKey);
+
     _favoriteAnimeIds = _getIntList(_favoriteAnimeKey);
     _favoriteTvSeriesIds = _getIntList(_favoriteTvSeriesKey);
     _watchlistMovieIds = _getIntList(_watchlistMoviesKey);
     _watchlistAnimeIds = _getIntList(_watchlistAnimeKey);
     _watchlistTvSeriesIds = _getIntList(_watchlistTvSeriesKey);
-    
+    _custoombaseurl = _prefs!.getString('custoombaseurl') ?? '';
+    _historyformodelsenabled =
+        _prefs!.getBool('historyformodelsenabled') ?? false;
+    _historychatenabled = _prefs!.getBool('historychatenabled') ??
+        false; // Use string key for bool
+
     notifyListeners(); // Notify listeners once prefs are loaded
+  }
+
+  Future<void> _setString(
+    String key,
+    String newValue,
+    String currentValue,
+  ) async {
+    if (currentValue == newValue) return;
+    // Update internal state immediately for responsiveness
+    switch (key) {
+      case 'custoombaseurl':
+        _custoombaseurl = newValue;
+        break;
+      default:
+        debugPrint("Warning: Unhandled key in _setString: $key");
+        return;
+    }
+    notifyListeners(); // Notify UI immediately
+    await _prefs?.setString(key, newValue); // Save asynchronously
   }
 
   List<int> _getIntList(String key) {
     final List<String>? stringList = _prefs?.getStringList(key);
     if (stringList == null) return [];
     return stringList.map((id) => int.tryParse(id)).whereType<int>().toList();
+  }
+
+  /// Set watched episode info. Only [url] is required, others are optional.
+  Future<void> _setIntListIsWatched(
+      seriesId, seasonNumber, episodeNumber, url) async {
+    // Compose a unique string key for the watched episode using the provided info
+    final String watchedKey = [seriesId, seasonNumber, episodeNumber, url]
+        .where((e) => e != null)
+        .join(":");
+    // Store as a string in a list (for flexibility)
+    final List<String> watchedList =
+        _prefs?.getStringList(_isWatchedEpisodeKey) ?? [];
+    if (!watchedList.contains(watchedKey)) {
+      watchedList.add(watchedKey);
+      await _prefs?.setStringList(_isWatchedEpisodeKey, watchedList);
+      notifyListeners();
+    }
+  }
+
+  /// Check if an episode is watched by matching all provided info (url required)
+  bool isWatchedEpisode(
+    dynamic seriesId,
+    dynamic seasonNumber,
+    dynamic episodeNumber,
+    dynamic url,
+  ) {
+    final String watchedKey = [seriesId, seasonNumber, episodeNumber, url]
+        .where((e) => e != null)
+        .join(":");
+    final List<String> watchedList =
+        _prefs?.getStringList(_isWatchedEpisodeKey) ?? [];
+    return watchedList.contains(watchedKey);
+  }
+
+  /// Toggle watched state for an episode by id, season, episode, and url
+  Future<void> toggleIsWatchedLink(dynamic seriesId, dynamic seasonNumber,
+      dynamic episodeNumber, dynamic url) async {
+    final String watchedKey = [seriesId, seasonNumber, episodeNumber, url]
+        .where((e) => e != null)
+        .join(":");
+    final List<String> watchedList =
+        _prefs?.getStringList(_isWatchedEpisodeKey) ?? [];
+    if (watchedList.contains(watchedKey)) {
+      watchedList.remove(watchedKey);
+    } else {
+      watchedList.add(watchedKey);
+    }
+    await _prefs?.setStringList(_isWatchedEpisodeKey, watchedList);
+    notifyListeners();
+  }
+
+  /// Check if a season is watched by matching all provided info
+  bool isWatchedSeason(
+    seriesId,
+    seasonNumber,
+  ) {
+    final String watchedKey =
+        [seriesId, seasonNumber].where((e) => e != null).join(":");
+    final List<String> watchedList =
+        _prefs?.getStringList(_isWatchedEpisodeKey) ?? [];
+    return watchedList.contains(watchedKey);
+  }
+
+  /// Check if a series is watched by matching the series ID
+  bool isWatchedSeries(
+    seriesId,
+  ) {
+    final String watchedKey = [seriesId].where((e) => e != null).join(":");
+    final List<String> watchedList =
+        _prefs?.getStringList(_isWatchedEpisodeKey) ?? [];
+    return watchedList.contains(watchedKey);
+  }
+
+  /// Check if a media is watched by its URL
+  bool isWatched(
+    url,
+  ) {
+    final String watchedKey = [url].where((e) => e != null).join(":");
+    final List<String> watchedList =
+        _prefs?.getStringList(_isWatchedEpisodeKey) ?? [];
+    return watchedList.contains(watchedKey);
+  }
+
+  /// Check if a movie is watched by its ID and URL
+  bool isWatchedMovie(
+    movieId,
+    url,
+  ) {
+    final String watchedKey = [movieId, url].where((e) => e != null).join(":");
+    final List<String> watchedList =
+        _prefs?.getStringList(_isWatchedEpisodeKey) ?? [];
+    return watchedList.contains(watchedKey);
   }
 
   Future<void> _setIntList(String key, List<int> list) async {
@@ -105,11 +248,49 @@ class UserDataService extends ChangeNotifier {
     notifyListeners();
   }
 
+// Generic Bool Setter
+  Future<void> _setBool(String key, bool newValue, bool currentValue) async {
+    if (currentValue == newValue) return;
+    switch (key) {
+      case 'historyformodelsenabled':
+        _historyformodelsenabled = newValue;
+        break;
+      case 'historychatenabled':
+        _historychatenabled = newValue;
+        break;
+      default:
+        debugPrint("Warning: Unhandled key in _setBool: $key");
+        return;
+    }
+    notifyListeners();
+    await _prefs?.setBool(
+      key,
+      newValue,
+    ); // Use string key for bools per original load logic
+  }
+
   Future<void> toggleFavoriteAnime(int animeId) async {
     isFavoriteAnime(animeId)
         ? _favoriteAnimeIds.remove(animeId)
         : _favoriteAnimeIds.add(animeId);
     await _setIntList(_favoriteAnimeKey, _favoriteAnimeIds);
+    notifyListeners();
+  }
+
+  // Future<void> toggleIsWatchedLink(
+  //     seriesId, seasonNumber, episodeNumber, url) async {
+  //   isWatchedEpisode(seriesId, seasonNumber, episodeNumber, url)
+  //       ? _isWatchedEpisodeIds.remove(url)
+  //       : _isWatchedEpisodeIds.add(url);
+  //   await _setIntListIsWatched(seriesId, seasonNumber, episodeNumber, url);
+  //   notifyListeners();
+  // }
+
+  Future<void> toggleIsWatched(url) async {
+    isWatched(url)
+        ? _isWatchedEpisodeIds.remove(url)
+        : _isWatchedEpisodeIds.add(url);
+    await _setIntListIsWatched(url, url, url, url);
     notifyListeners();
   }
 
@@ -152,16 +333,30 @@ class UserDataService extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Future<void> setExternalPlayer(String ext) async {
+  //   await _prefs?.setString('externalPlayer', ext);
+  // }
+
   // --- Clear All (Optional - useful for debugging/settings) ---
+  Future<void> setHistoryformodelsenabled(bool value) =>
+      _setBool('historyformodelsenabled', value, _historyformodelsenabled);
+  Future<void> setHistorychatenabled(bool value) =>
+      _setBool('historychatenabled', value, _historychatenabled);
+  Future<void> setCustoombaseurl(String value) =>
+      _setString('custoombaseurl', value, _custoombaseurl);
   Future<void> clearAllUserData() async {
     _favoriteMovieIds.clear();
     _favoriteAnimeIds.clear();
-
+    _isWatchedEpisodeIds.clear();
+    _isWatchedMovieIds.clear();
+    _isWatchedSeasonIds.clear();
+    _isWatchedSeriesIds.clear();
     _favoriteTvSeriesIds.clear();
     _watchlistMovieIds.clear();
     _watchlistAnimeIds.clear();
 
     _watchlistTvSeriesIds.clear();
+    _custoombaseurl = '';
     await _prefs?.remove(_favoriteMoviesKey);
     await _prefs?.remove(_favoriteAnimeKey);
 
@@ -170,9 +365,15 @@ class UserDataService extends ChangeNotifier {
     await _prefs?.remove(_watchlistAnimeKey);
 
     await _prefs?.remove(_watchlistTvSeriesKey);
-
+    await _prefs?.remove(_isWatchedEpisodeKey);
+    await _prefs?.remove(_isWatchedMovieKey);
+    await _prefs?.remove(_isWatchedSeasonKey);
+    await _prefs?.remove(_isWatchedSeriesKey);
+    await _prefs?.remove('custoombaseurl');
     // Clear settings keys
     await _prefs?.remove('themeMode');
+    await _prefs?.remove('historyformodelsenabled');
+    await _prefs?.remove('historychatenabled');
     await _prefs?.remove('homeGridLayout');
     await _prefs?.remove('useHardwareDecoder');
     await _prefs?.remove('useSecondaryPlayer');
@@ -190,6 +391,22 @@ class UserDataService extends ChangeNotifier {
     await _loadSettings();
 
     notifyListeners();
+  }
+
+  dynamic getValue(String key) {
+    switch (key) {
+      case 'custoombaseurl':
+        return _custoombaseurl;
+      case 'historyformodelsenabled':
+        return _historyformodelsenabled;
+      case 'historychatenabled':
+        return _historychatenabled;
+      default:
+        debugPrint(
+          'SettingsService: Unknown setting key requested in getValue: $key',
+        );
+        return null;
+    }
   }
 
   // Load settings from SharedPreferences
@@ -219,7 +436,6 @@ class UserDataService extends ChangeNotifier {
     _downloadManager = _prefs?.getString('downloadManager') ?? '';
     _gridSize = _prefs?.getDouble('gridSize') ?? 3.0;
     _decoderPreference = _prefs?.getString('decoderPreference') ?? 'default';
-
     notifyListeners(); // Notify listeners after loading
   }
 

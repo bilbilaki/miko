@@ -214,7 +214,7 @@ class TvSeriesCard extends StatelessWidget {
                   const SizedBox(height: 2.0),
                   // Additional Info: Episodes, Seasons, Language
                   Text(
-                    'Seasons: ${series.numberOfSeasons ?? 'N/A'} • Episodes: ${series.numberOfEpisodes ?? 'N/A'}',
+                    'Seasons: ${series.numberOfSeasons} • Episodes: ${series.numberOfEpisodes}',
                     style: const TextStyle(
                       color: AppColors.secondaryText,
                       fontSize: 10.0,

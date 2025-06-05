@@ -7,8 +7,6 @@ import 'package:miko/providers/tv_series_provider.dart'; // Use TvSeriesProvider
 import 'package:miko/utils/colors.dart';
 import 'package:miko/widgets/tv_series_card.dart'; // Use TvSeriesCard
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:miko/router.dart';
-import 'package:go_router/go_router.dart';
 
 class SearchScreenTv extends StatefulWidget {
   final String? query;

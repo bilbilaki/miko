@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'seasondetailpage.dart';
-import 'tv_model.dart';
+import 'model.dart';
 import 'movie_service.dart';
 import 'person_detail_page.dart';
 import 'episodedetailpage.dart';
-import 'person_detail_page.dart';
 
 class TvShowDetailPage extends StatefulWidget {
   final TvShow tvShow;
 
-  const TvShowDetailPage({Key? key, required this.tvShow}) : super(key: key);
+  const TvShowDetailPage({super.key, required this.tvShow});
 
   @override
   State<TvShowDetailPage> createState() => _TvShowDetailPageState();
@@ -71,7 +70,7 @@ class _TvShowDetailPageState extends State<TvShowDetailPage>
       }
     }).catchError((e) {
       // Error is handled by FutureBuilder for _tvShowDataFuture
-      print("Error loading base TV Show details: $e");
+      debugPrint("Error loading base TV Show details: $e");
     });
   }
 
@@ -635,10 +634,7 @@ class _TvShowDetailPageState extends State<TvShowDetailPage>
   }
 
   Widget _buildCastTab(BuildContext context, int tvShowId) {
-    if (_creditsFuture == null) {
-      // Ensure future is initialized
-      _creditsFuture = _movieService.getTVCredits(tvId: tvShowId);
-    }
+    _creditsFuture ??= _movieService.getTVCredits(tvId: tvShowId);
     return FutureBuilder<TVCredits>(
       future: _creditsFuture,
       builder: (context, snapshot) {
@@ -684,13 +680,12 @@ class _TvShowDetailPageState extends State<TvShowDetailPage>
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 12)),
-                    if (member.character != null)
-                      Text(member.character!,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style:
-                              TextStyle(fontSize: 10, color: Colors.grey[400])),
+                    Text(member.character,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style:
+                            TextStyle(fontSize: 10, color: Colors.grey[400])),
                   ],
                 ),
               );
@@ -752,10 +747,7 @@ class _TvShowDetailPageState extends State<TvShowDetailPage>
   // }
     
   Widget _buildVideosTab(BuildContext context, int tvShowId) {
-    if (_videosFuture == null) {
-      // Ensure future is initialized
-      _videosFuture = _movieService.getTvShowVideos(tvShowId: tvShowId);
-    }
+    _videosFuture ??= _movieService.getTvShowVideos(tvShowId: tvShowId);
     return FutureBuilder<YoutubeVideoForSeries>(
       future: _videosFuture,
       builder: (context, snapshot) {
@@ -767,8 +759,9 @@ class _TvShowDetailPageState extends State<TvShowDetailPage>
           final videos = snapshot.data!.results
               .where((v) => v.site.toLowerCase() == 'youtube')
               .toList();
-          if (videos.isEmpty)
+          if (videos.isEmpty) {
             return const Center(child: Text('No YouTube videos available.'));
+          }
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
@@ -998,7 +991,7 @@ class _TvShowDetailPageState extends State<TvShowDetailPage>
           height: 230, // Adjusted for better title visibility
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: recommendations!.results.length > 10
+            itemCount: recommendations!.results.length > 30
                 ? 10
                 : recommendations!.results.length,
             itemBuilder: (context, index) {

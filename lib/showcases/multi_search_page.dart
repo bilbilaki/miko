@@ -1,15 +1,15 @@
 // multi_search_page.dart
 import 'package:flutter/material.dart';
-import 'package:miko/showcases/tv_model.dart';
+import 'package:miko/showcases/model.dart';
 import 'dart:async';
 import 'movie_service.dart';
-import 'movie_model.dart';
+import 'model.dart';
 import 'person_detail_page.dart';
 import 'movie_detail_page.dart';
 import 'tv_detail_page.dart';
 
 class MultiSearchPage extends StatefulWidget {
-  const MultiSearchPage({Key? key}) : super(key: key);
+  const MultiSearchPage({super.key});
 
   @override
   State<MultiSearchPage> createState() => _MultiSearchPageState();
@@ -268,25 +268,25 @@ class _MultiSearchPageState extends State<MultiSearchPage> {
         final movie = result as MultiSearchMovie;
         imagePath = movie.posterPath;
         title = movie.title;
-        subtitle = 'Movie • ${movie.releaseDate ?? 'Unknown'}';
+        subtitle = 'Movie • ${movie.releaseDate}';
         break;
       case MediaType.tv:
         final tv = result as MultiSearchTV;
         imagePath = tv.posterPath;
         title = tv.name;
-        subtitle = 'TV Show • ${tv.firstAirDate ?? 'Unknown'}';
+        subtitle = 'TV Show • ${tv.firstAirDate}';
         break;
       case MediaType.person:
         final person = result as MultiSearchPerson;
         imagePath = person.profilePath;
         title = person.name;
-        subtitle = 'Person • ${person.knownForDepartment ?? 'Unknown'}';
+        subtitle = 'Person • ${person.knownForDepartment}';
         break;
     }
 
     final String posterUrl = imagePath != null
         ? 'https://inosdb.worker-inosuke.workers.dev/w500$imagePath'
-        : 'https://via.placeholder.com/200x300?text=No+Image';
+        : 'https://inosdb.worker-inosuke.workers.dev/w500$imagePath';
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),

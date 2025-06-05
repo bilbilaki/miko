@@ -1,116 +1,91 @@
-// lib/widgets/video_card.dart
+// main.dart
 import 'package:flutter/material.dart';
-import 'package:miko/models/video.dart';
-import 'package:miko/utils/colors.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:miko/services/user_data_service.dart';
+import 'package:miko/widgets/vt.dart';
+import 'package:provider/provider.dart';
 
-class VideoCard extends StatelessWidget {
-  final Video video;
+int pageNumber(int page) {
+  if (page == 69) {
+    return 0;
+  } else {
+    return -1;
+  }
+}
+//   if (page > 1000) {
+//     return 1000;
+//   }
+//   return page;
+// }
 
-  const VideoCard({required this.video, super.key});
+int getPageNumber(int page) {
+  if (page > 510) return getPageNumber(0);
+
+  return loadmore(page);
+}
+
+int loadmore(int page) {
+  return getPageNumber(page) + 1;
+}
+
+class FullScreenGridPage extends StatefulWidget {
+  const FullScreenGridPage({super.key});
+  @override
+  State<FullScreenGridPage> createState() => _FullScreenGridPageState();
+}
+
+class _FullScreenGridPageState extends State<FullScreenGridPage> {
+  @override
+  void initState() {
+    super.initState();
+          SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+    // Hide status bar, nav bar, etc.
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Thumbnail
-        Stack(
-          alignment: Alignment.bottomRight,
-          children: [
-            Image.network(
-              video.thumbnailUrl,
-              height: 200, // Adjust height as needed
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                  height: 200, color: Colors.grey[800], child: const Icon(Icons.error)),
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return Container(
-                  height: 200,
-                  color: AppColors.secondaryBackground,
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                          loadingProgress.expectedTotalBytes!
-                          : null,
-                      strokeWidth: 2,
-                      color: AppColors.accentColor,
-                    ),
-                  ),
-                );
-              },
-            ),
-            Container(
-              margin: const EdgeInsets.all(6.0),
-              padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 2.0),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.7),
-                borderRadius: BorderRadius.circular(4.0),
-              ),
-              child: Text(
-                video.duration,
-                style: const TextStyle(color: AppColors.primaryText, fontSize: 12.0),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10.0),
-        // Video Info
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CircleAvatar(
-                radius: 18.0,
-                backgroundImage: NetworkImage(video.channelAvatarUrl),
-                backgroundColor: Colors.grey,
-              ),
-              const SizedBox(width: 12.0),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      video.title,
-                      style: const TextStyle(
-                        color: AppColors.primaryText,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 15.0,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4.0),
-                    Text(
-                      '${video.channelName} • ${video.viewCount} • ${video.uploadedDate}',
-                      style: const TextStyle(
-                        color: AppColors.secondaryText,
-                        fontSize: 13.0,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.more_vert, color: AppColors.iconColor, size: 20.0),
-                onPressed: () {
-                  // TODO: Implement more options action
-                },
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(), // Remove default padding
-              ),
-            ],
+    final userData = Provider.of<UserDataService>(context);
+    final int nnnn = 504;
+final linkurl = userData.custoombaseurl;
+
+      // Generate exactly 504 items, each cycling n = 1…504
+      final items = List<Map<String, Object>>.generate(
+        nnnn,
+        (j) {
+          final n = (j % nnnn) + 1; // 1,2,3…504
+          return {
+            'n': n, // pass along if you like
+            'image': 'http://$linkurl/scene/$n/screenshot',
+            'preview': 'http://$linkurl/scene/$n/preview',
+            'stream': 'http://$linkurl/scene/$n/stream',
+          };
+        },
+      );
+    
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: MasonryGridView.count(
+          crossAxisCount: 3,
+          mainAxisSpacing: 4,
+          crossAxisSpacing: 4,
+          itemCount: items.length,
+          itemBuilder: (ctx, idx) {
+            final it = items[idx];
+            return TileWidget(
+              n: it['n'] as int,
+              imageUrl: it['image'] as String,
+              videoUrl: it['preview'] as String,
+              streamUrl: it['stream'] as String,
+              // if you need 'stream' somewhere you can pass it too
+            );
+          },
           ),
-        ),
-        const SizedBox(height: 16.0), // Space below each card
-      ],
+      ),
     );
   }
 }
+
+/// 2) Tile widget

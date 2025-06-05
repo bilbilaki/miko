@@ -1,12 +1,12 @@
 // --- tv_search_page.dart ---
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'tv_model.dart'; // For TVSearchResponse and TVSearchResult
+import 'model.dart'; // For TVSearchResponse and TVSearchResult
 import 'movie_service.dart'; // Your service
 import 'tv_detail_page.dart'; // To navigate to details
 
 class TvSearchPage extends StatefulWidget {
-  const TvSearchPage({Key? key}) : super(key: key);
+  const TvSearchPage({super.key});
 
   @override
   State<TvSearchPage> createState() => _TvSearchPageState();
@@ -67,7 +67,11 @@ class _TvSearchPageState extends State<TvSearchPage> {
     if (_currentQuery.isEmpty || _isFetchingMore) return;
 
     setState(() {
-      if (loadMore) _isFetchingMore = true; else _isLoading = true;
+      if (loadMore) {
+        _isFetchingMore = true;
+      } else {
+        _isLoading = true;
+      }
       _error = null;
     });
 
@@ -90,14 +94,22 @@ class _TvSearchPageState extends State<TvSearchPage> {
           } else {
             _searchResponse = response;
           }
-          if (loadMore) _isFetchingMore = false; else _isLoading = false;
+          if (loadMore) {
+            _isFetchingMore = false;
+          } else {
+            _isLoading = false;
+          }
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
           _error = e.toString();
-          if (loadMore) _isFetchingMore = false; else _isLoading = false;
+          if (loadMore) {
+            _isFetchingMore = false;
+          } else {
+            _isLoading = false;
+          }
         });
       }
     }
@@ -181,7 +193,7 @@ class _TvSearchPageState extends State<TvSearchPage> {
   Widget _buildTvShowResultCard(BuildContext context, TVSearchResult tvResult) {
     final String posterUrl = tvResult.posterPath != null
         ? 'https://inosdb.worker-inosuke.workers.dev/w500${tvResult.posterPath}'
-        : 'https://via.placeholder.com/200x300?text=No+Image';
+        : 'https://inosdb.worker-inosuke.workers.dev/w500${tvResult.posterPath}';
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),

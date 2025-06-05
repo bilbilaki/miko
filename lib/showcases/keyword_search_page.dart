@@ -2,11 +2,11 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'movie_service.dart';
-import 'movie_model.dart';
+import 'model.dart';
 import 'movie_detail_page.dart';
 
 class KeywordSearchPage extends StatefulWidget {
-  const KeywordSearchPage({Key? key}) : super(key: key);
+  const KeywordSearchPage({super.key});
 
   @override
   State<KeywordSearchPage> createState() => _KeywordSearchPageState();
@@ -66,7 +66,11 @@ class _KeywordSearchPageState extends State<KeywordSearchPage> {
     if (_currentQuery.isEmpty || _isFetchingMore) return;
 
     setState(() {
-      if (loadMore) _isFetchingMore = true; else _isLoading = true;
+      if (loadMore) {
+        _isFetchingMore = true;
+      } else {
+        _isLoading = true;
+      }
       _error = null;
     });
 
@@ -90,14 +94,22 @@ class _KeywordSearchPageState extends State<KeywordSearchPage> {
             _keywordSearchResponse = response;
           }
           
-          if (loadMore) _isFetchingMore = false; else _isLoading = false;
+          if (loadMore) {
+            _isFetchingMore = false;
+          } else {
+            _isLoading = false;
+          }
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
           _error = e.toString();
-          if (loadMore) _isFetchingMore = false; else _isLoading = false;
+          if (loadMore) {
+            _isFetchingMore = false;
+          } else {
+            _isLoading = false;
+          }
         });
       }
     }
@@ -215,7 +227,7 @@ class _KeywordSearchPageState extends State<KeywordSearchPage> {
 class KeywordMoviesPage extends StatefulWidget {
   final Keyword keyword;
 
-  const KeywordMoviesPage({Key? key, required this.keyword}) : super(key: key);
+  const KeywordMoviesPage({super.key, required this.keyword});
 
   @override
   State<KeywordMoviesPage> createState() => _KeywordMoviesPageState();
@@ -240,7 +252,11 @@ class _KeywordMoviesPageState extends State<KeywordMoviesPage> {
 
   Future<void> _fetchKeywordMovies({bool loadMore = false}) async {
     setState(() {
-      if (loadMore) _isFetchingMore = true; else _isLoading = true;
+      if (loadMore) {
+        _isFetchingMore = true;
+      } else {
+        _isLoading = true;
+      }
       _error = null;
     });
 
@@ -265,14 +281,22 @@ class _KeywordMoviesPageState extends State<KeywordMoviesPage> {
             _keywordMoviesResponse = response;
           }
           
-          if (loadMore) _isFetchingMore = false; else _isLoading = false;
+          if (loadMore) {
+            _isFetchingMore = false;
+          } else {
+            _isLoading = false;
+          }
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
           _error = e.toString();
-          if (loadMore) _isFetchingMore = false; else _isLoading = false;
+          if (loadMore) {
+            _isFetchingMore = false;
+          } else {
+            _isLoading = false;
+          }
         });
       }
     }
@@ -375,7 +399,7 @@ class _KeywordMoviesPageState extends State<KeywordMoviesPage> {
                       movie.title, 
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)
                     ),
-                    if (movie.releaseDate != null && movie.releaseDate!.isNotEmpty)
+                    if (movie.releaseDate.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4.0),
                         child: Text(

@@ -1,0 +1,97 @@
+Here is the list of comments in the format // --- [number]. [Description] --- extracted from the provided code:
+
+- // --- 33. Movie Translations ---
+- // --- 34. Movie Videos ---
+- // --- 35. Movie Watch Providers ---
+- // --- 36. Movie Add Rating ---
+- // --- 37. Movie Delete Rating ---
+- // --- 38. Authentication Create Guest Session ---
+- // --- 39. Authentication Create Request Token ---
+- // --- 40. Authentication Create Session ---
+- // --- 41. Authentication Create Session from v4 token ---
+- // --- 42. Authentication Delete Session ---
+- // --- 43. Find By ID ---
+- // --- 44. Person Details ---
+- // --- 45. Person Changes ---
+- // --- 46. TV Series Changes ---
+- // --- 47. Person Images ---
+- // --- 48. Person Movie Credits ---
+- // --- 49. Person TV Credits ---
+- // --- 50. Person Combined Credits ---
+- // --- 51. Person External IDs ---
+- // --- 52. Person Tagged Images ---
+- // --- 53. Person Popular List ---
+- // --- 54. Movie Popular List ---
+- // --- 55. Movie Top Rated List ---
+- // --- 56. Movie Upcoming List ---
+- // --- 57. Movie Now Playing List ---
+- // --- 58. TV Series Airing Today List ---
+- // --- 59. TV Series Popular List ---
+- // --- 60. TV Series Top Rated List ---
+- // --- 61. Movie Latest ID ---
+- // --- 62. TV Series Latest ID ---
+- // --- 63. TV Series Aggregate Credits ---
+- // --- 64. TV Series Alternative Titles ---
+- // --- 65. TV Series Content Ratings ---
+- // --- 66. TV Series Credits ---
+- // --- 67. TV Series Episode Groups ---
+- // --- 68. TV Series External IDs ---
+- // --- 69. TV Series Keywords ---
+- // --- 70. TV Series Recommendations ---
+- // --- 71. TV Series Reviews ---
+- // --- 72. TV Series Screened Theatrically ---
+- // --- 73. TV Series Similar ---
+- // --- 74. TV Series Translations ---
+- // --- 75. TV Series Videos ---
+- // --- 76. TV Series Watch Providers ---
+- // --- 77. TV Series Add Rating ---
+- // --- 78. TV Series Delete Rating ---
+- // --- 79. TV Season Account States ---
+- // --- 80. TV Season Aggregate Credits ---
+- // --- 81. TV Season Changes By ID ---
+- // --- 82. TV Season Credits ---
+- // --- 83. TV Season External IDs ---
+- // --- 84. TV Season Translations ---
+- // --- 85. TV Season Videos ---
+- // --- 86. TV Episode Credits ---
+- // --- 87. TV Episode External IDs ---
+- // --- 88. TV Episode Translations ---
+- // --- 89. TV Episode Videos ---
+- // --- 90. TV Episode Add Rating ---
+- // --- 91. TV Episode Delete Rating ---
+- // --- 92. Account Details ---
+- // --- 93. Account Lists ---
+- // --- 94. Account Favorite Movies ---
+- // --- 95. Account Favorite TV ---
+- // --- 96. Account Rated Movies ---
+- // --- 97. Account Rated TV ---
+- // --- 98. Account Rated TV Episodes ---
+- // --- 99. Account Watchlist Movies ---
+- // --- 100. Account Watchlist TV ---
+- // --- 101. Account Add Favorite ---
+- // --- 102. Account Add To Watchlist ---
+- // --- 103. Certification Movie List ---
+- // --- 104. Certification TV List ---
+- // --- 105. Changes Movie List ---
+- // --- 106. Changes TV List ---
+- // --- 107. Changes People List ---
+- // --- 108. Collection Details ---
+- // --- 109. Collection Images ---
+- // --- 110. Collection Translations ---
+- // --- 111. Company Details ---
+- // --- 112. Company Alternative Names ---
+- // --- 113. Company Images ---
+- // --- 114. Credit Details ---
+- // --- 115. Genre Movie List ---
+- // --- 116. Genre TV List ---
+- // --- 117. Guest Session Rated Movies ---
+- // --- 118. Guest Session Rated TV ---
+- // --- 119. Guest Session Rated TV Episodes ---
+- // --- 120. Watch Providers Available Regions ---
+- // --- 121. Watch Providers Movie Providers ---
+- // --- 122. Watch Providers TV Providers ---
+- // --- 123. Keyword Details ---
+- // --- 124. Keyword Movies ---
+- // --- 125. List Details ---
+- // --- 126. List Delete ---
+- // --- 127. List Check Item Status ---

@@ -1,12 +1,12 @@
 // movie_search_page.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'movie_model.dart'; // Assuming you have a similar model structure
+import 'model.dart'; // Assuming you have a similar model structure
 import 'movie_service.dart';
 import 'movie_detail_page.dart';
 
 class MovieSearchPage extends StatefulWidget {
-  const MovieSearchPage({Key? key}) : super(key: key);
+  const MovieSearchPage({super.key});
 
   @override
   State<MovieSearchPage> createState() => _MovieSearchPageState();
@@ -67,7 +67,11 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
     if (_currentQuery.isEmpty || _isFetchingMore) return;
 
     setState(() {
-      if (loadMore) _isFetchingMore = true; else _isLoading = true;
+      if (loadMore) {
+        _isFetchingMore = true;
+      } else {
+        _isLoading = true;
+      }
       _error = null;
     });
 
@@ -91,14 +95,22 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
             _searchResponse = response;
           }
           
-          if (loadMore) _isFetchingMore = false; else _isLoading = false;
+          if (loadMore) {
+            _isFetchingMore = false;
+          } else {
+            _isLoading = false;
+          }
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
           _error = e.toString();
-          if (loadMore) _isFetchingMore = false; else _isLoading = false;
+          if (loadMore) {
+            _isFetchingMore = false;
+          } else {
+            _isLoading = false;
+          }
         });
       }
     }
@@ -190,7 +202,7 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
   Widget _buildMovieResultCard(BuildContext context, Movie movie) {
     final String posterUrl = movie.posterPath != null
       ? 'https://inosdb.worker-inosuke.workers.dev/w500${movie.posterPath}'
-      : 'https://via.placeholder.com/200x300?text=No+Image';
+      : 'https://inosdb.worker-inosuke.workers.dev/w500${movie.posterPath}';
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -229,7 +241,7 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
                       movie.title, 
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)
                     ),
-                    if (movie.releaseDate != null && movie.releaseDate!.isNotEmpty)
+                    if (movie.releaseDate.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4.0),
                         child: Text(

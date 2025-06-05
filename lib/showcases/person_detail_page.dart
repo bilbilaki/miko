@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'movie_model.dart';
+import 'model.dart';
 import 'movie_service.dart';
 
 class PersonDetailPage extends StatefulWidget {
@@ -8,11 +8,11 @@ class PersonDetailPage extends StatefulWidget {
   final String? initialProfilePath;
 
   const PersonDetailPage({
-    Key? key, 
+    super.key,
     required this.personId,
     this.initialName,
     this.initialProfilePath,
-  }) : super(key: key);
+  });
 
   @override
   State<PersonDetailPage> createState() => _PersonDetailPageState();
@@ -21,24 +21,25 @@ class PersonDetailPage extends StatefulWidget {
 class _PersonDetailPageState extends State<PersonDetailPage> {
   final MovieService _movieService = MovieService();
   late Future<Person> _personDetailsFuture;
-  bool _isLoading = true;
+  bool _isLoading = false;
   bool _hasError = false;
   String _errorMessage = '';
-  
+
   @override
   void initState() {
     super.initState();
     _loadPersonDetails();
   }
-  
+
   @override
   void dispose() {
     _movieService.dispose();
     super.dispose();
   }
-  
+
   void _loadPersonDetails() {
-    _personDetailsFuture = _movieService.getPersonDetails(personId: widget.personId);
+    _personDetailsFuture =
+        _movieService.getPersonDetails(personId: widget.personId);
     _personDetailsFuture.then((_) {
       if (mounted) {
         setState(() {
@@ -78,13 +79,13 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
       ),
     );
   }
-  
+
   Widget _buildLoadingView() {
     return Stack(
       children: [
         // Show a basic view with the initial data while loading
         _buildBasicView(context),
-        
+
         // Overlay with loading indicator
         Container(
           color: Colors.black54,
@@ -95,13 +96,13 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
       ],
     );
   }
-  
+
   Widget _buildErrorView(BuildContext context) {
     return Stack(
       children: [
         // Show a basic view with the initial data
         _buildBasicView(context),
-        
+
         // Error overlay
         Container(
           color: Colors.black87,
@@ -139,7 +140,7 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
       ],
     );
   }
-  
+
   Widget _buildBasicView(BuildContext context) {
     return CustomScrollView(
       slivers: [
@@ -161,9 +162,9 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
                 ],
               ),
             ),
-            background: widget.initialProfilePath != null
+            background: widget.initialProfilePath ==widget.initialProfilePath
                 ? Image.network(
-                    'https://image.tmdb.org/t/p/w500${widget.initialProfilePath}',
+                    'https://inosdb.worker-inosuke.workers.dev/w500${widget.initialProfilePath}',
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
@@ -261,9 +262,9 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
               children: [
                 // Personal Info Section
                 _buildPersonalInfoSection(context, person),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Biography Section
                 Text(
                   'Biography',
@@ -271,14 +272,15 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  person.biography?.isNotEmpty == true 
-                      ? person.biography! 
+                  person.biography?.isNotEmpty == true
+                      ? person.biography!
                       : 'No biography available.',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
-                
+
                 // Also Known As Section
-                if (person.alsoKnownAs != null && person.alsoKnownAs!.isNotEmpty) ...[
+                if (person.alsoKnownAs != null &&
+                    person.alsoKnownAs!.isNotEmpty) ...[
                   const SizedBox(height: 24),
                   Text(
                     'Also Known As',
@@ -296,9 +298,9 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
                     }).toList(),
                   ),
                 ],
-                
+
                 // External Links
-                if (person.imdbId != null || person.homepage != null) ...[
+                if (person.imdbId != null ||person.homepage != null) ...[
                   const SizedBox(height: 24),
                   Text(
                     'External Links',
@@ -327,7 +329,7 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
                     ],
                   ),
                 ],
-                
+
                 const SizedBox(height: 32),
               ],
             ),
@@ -336,7 +338,7 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
       ],
     );
   }
-  
+
   Widget _buildPersonalInfoSection(BuildContext context, Person person) {
     return Card(
       color: Colors.grey[850],
@@ -350,7 +352,7 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
-            
+
             // Known For
             _buildInfoRow(
               context,
@@ -358,9 +360,9 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
               person.knownForDepartment,
               Icons.work,
             ),
-            
+
             const Divider(height: 24),
-            
+
             // Gender
             _buildInfoRow(
               context,
@@ -368,9 +370,9 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
               person.genderText,
               Icons.person,
             ),
-            
+
             const Divider(height: 24),
-            
+
             // Birthday
             if (person.birthday != null)
               _buildInfoRow(
@@ -379,10 +381,9 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
                 '${person.formattedBirthday} (${person.age})',
                 Icons.cake,
               ),
-              
-            if (person.birthday != null)
-              const Divider(height: 24),
-            
+
+            if (person.birthday != null) const Divider(height: 24),
+
             // Place of Birth
             if (person.placeOfBirth != null)
               _buildInfoRow(
@@ -391,10 +392,9 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
                 person.placeOfBirth!,
                 Icons.location_on,
               ),
-              
-            if (person.placeOfBirth != null)
-              const Divider(height: 24),
-              
+
+            if (person.placeOfBirth != null) const Divider(height: 24),
+
             // Popularity
             _buildInfoRow(
               context,
@@ -407,8 +407,9 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
       ),
     );
   }
-  
-  Widget _buildInfoRow(BuildContext context, String title, String value, IconData icon) {
+
+  Widget _buildInfoRow(
+      BuildContext context, String title, String value, IconData icon) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

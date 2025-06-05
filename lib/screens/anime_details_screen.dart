@@ -422,7 +422,7 @@ class AnimeDetailsScreen extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16.0, vertical: 0),
-                    child: _buildSeasonsList(context, series.seasons),
+                    child: _buildSeasonsList(context, series.seasons, series.tmdbId),
                   ),
 
                 const SizedBox(height: 40),
@@ -452,7 +452,7 @@ class AnimeDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSeasonsList(BuildContext context, List<SeasonAnime> seasons) {
+  Widget _buildSeasonsList(BuildContext context, List<SeasonAnime> seasons, id) {
     final defaultExpansion = seasons.length == 1;
     return ListView.builder(
       shrinkWrap: true,
@@ -494,7 +494,7 @@ class AnimeDetailsScreen extends StatelessWidget {
               context: ctx,
               color: AppColors.dividerColor.withOpacity(0.3),
               tiles:
-                  s.episodes.map((e) => AnimeEpisodeTile(episode: e)).toList(),
+                  s.episodes.map((e) => AnimeEpisodeTile(episode: e, season: s,id: id,)).toList(),
             ).toList(),
           ),
         );

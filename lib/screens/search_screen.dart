@@ -6,8 +6,6 @@ import 'package:miko/providers/movie_provider.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:miko/widgets/movie_card.dart'; // Reuse MovieCard
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:miko/router.dart';
-import 'package:go_router/go_router.dart';
 // Import the original Movie model if needed for type hints,
 // but the provider should handle the type correctly.
 // import '../models/movie.dart';

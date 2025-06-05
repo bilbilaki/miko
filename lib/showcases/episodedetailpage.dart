@@ -1,6 +1,6 @@
 // --- episode_detail_page.dart ---
 import 'package:flutter/material.dart';
-import 'tv_model.dart';
+import 'model.dart';
 import 'movie_service.dart';
 import 'person_detail_page.dart'; // For navigating to crew/guest star details
 
@@ -12,13 +12,13 @@ class EpisodeDetailPage extends StatefulWidget {
   final MovieService movieService;
 
   const EpisodeDetailPage({
-    Key? key,
+    super.key,
     required this.tvShowId,
     required this.seasonNumber,
     required this.episodeNumber,
     required this.episodeName,
     required this.movieService,
-  }) : super(key: key);
+  });
 
   @override
   State<EpisodeDetailPage> createState() => _EpisodeDetailPageState();
@@ -63,8 +63,8 @@ class _EpisodeDetailPageState extends State<EpisodeDetailPage> {
           } else if (snapshot.hasData) {
             final episode = snapshot.data!;
             final String fullStillPath = episode.stillPath != null
-              ? 'https://image.tmdb.org/t/p/w780${episode.stillPath}' // Larger still
-              : 'https://via.placeholder.com/780x439?text=No+Still+Image';
+              ? 'https://image.tmdb.org/t/p/w500${episode.stillPath}' // Larger still
+              : 'https://image.tmdb.org/t/p/w500${episode.stillPath}';
 
             return CustomScrollView(
               slivers: [
@@ -162,7 +162,7 @@ class _EpisodeDetailPageState extends State<EpisodeDetailPage> {
           
           final String fullProfileUrl = profilePath != null
             ? 'https://inosdb.worker-inosuke.workers.dev/w500$profilePath'
-            : 'https://via.placeholder.com/200x300?text=No+Image';
+            : 'https://inosdb.worker-inosuke.workers.dev/w500$profilePath';
           return GestureDetector(
             onTap: () => _navigateToPersonDetail(person.id, name, profilePath),
             child: Container(

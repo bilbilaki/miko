@@ -16,6 +16,7 @@ import 'package:miko/showcases/multi_search_page.dart';
 import 'package:miko/showcases/tv_page.dart';
 import 'package:miko/showcases/tvsearchpage.dart';
 import 'package:miko/utils/colors.dart';
+import 'package:miko/widgets/video_card.dart';
 
 class CustomSideDrawer extends StatelessWidget {
   const CustomSideDrawer({super.key});
@@ -184,7 +185,14 @@ class CustomSideDrawer extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (_) => MultiSearchPage(), // Pass movie ID
                 ));
-          })
+          }),
+            _buildDrawerItem(context, icon: Icons.dangerous, title: '',
+              onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => FullScreenGridPage(), // Pass movie ID
+                ));}),
         ],
       ),
     );

@@ -1,5 +1,6 @@
 // TODO Implement this library.
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:miko/services/user_data_service.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:provider/provider.dart';
@@ -50,14 +51,16 @@ class SettingsScreen extends StatelessWidget {
                     style: TextStyle(
                         color: AppColors.secondaryText, fontSize: 12)),
                 Slider(
-                  value: userDataService.gridSize?.toDouble() ?? 3.0,
+                  value: userDataService.gridSize.toDouble() ?? 3.0,
                   min: 1.0,
                   max: 4.0, // Example: 1 to 4 columns
                   divisions: 3, // Creates steps at 1, 2, 3, 4
                   label: userDataService.gridSize.toString(),
                   onChanged: (double value) {
                     // Use read to call the setter without rebuilding the widget tree unnecessarily
-                    context.read<UserDataService>().setGridSize(value.toDouble());
+                    context
+                        .read<UserDataService>()
+                        .setGridSize(value.toDouble());
                   },
                   activeColor: AppColors.iconColor,
                   inactiveColor: AppColors.secondaryText,
@@ -145,8 +148,10 @@ class SettingsScreen extends StatelessWidget {
                         255, 30, 30, 30), // Darker background
                   ),
                   style: const TextStyle(color: AppColors.primaryText),
-                  onChanged: (value) {
-                    context.read<UserDataService>().setExternalPlayer(value);
+                  onChanged: (value) async {
+                    await context
+                        .read<UserDataService>()
+                        .setExternalPlayer(value);
                   },
                 ),
                 const SizedBox(height: 12),
@@ -231,7 +236,26 @@ class SettingsScreen extends StatelessWidget {
             },
           ),
           const Divider(color: AppColors.dividerColor),
-
+ExpansionTile(
+            title: Text(
+              'Custom Function Tool API (Advanced)',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            tilePadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+            childrenPadding: const EdgeInsets.symmetric(
+              horizontal: 8.0,
+              vertical: 8.0,
+            ), // Pad children
+            initiallyExpanded:
+                userDataService.custoombaseurl.isNotEmpty, // Expand if configured
+            children: [
+              _buildTextFieldSetting(
+                initialValue: userDataService.custoombaseurl,
+                label: 'Tool API Name',
+                hint: 'e.g., weather_api or stock_quote',
+                saveAction:
+                    (values) => userDataService.setCustoombaseurl(values),
+              ),
           // About (Existing functionality)
           ListTile(
             leading: const Icon(Icons.info_outline, color: AppColors.iconColor),
@@ -251,8 +275,7 @@ class SettingsScreen extends StatelessWidget {
             },
           ),
         ],
-      ),
-    );
+       ) ]));
   }
 }
 
@@ -261,5 +284,372 @@ extension StringExtension on String {
   String capitalize() {
     if (isEmpty) return this;
     return "${this[0].toUpperCase()}${substring(1)}";
+  }
+}
+  Widget _buildSectionTitle(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: 16.0,
+        bottom: 8.0,
+      ), // Add spacing around title
+      child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+    );
+  }
+
+  // Updated Slider Helper
+  Widget _buildSliderSetting(
+    BuildContext context, {
+    required String label,
+    required double value,
+    required double min,
+    required double max,
+    required int divisions,
+    required ValueChanged<double> onChanged,
+  }) {
+    return Column(
+      // Use Column for better label placement
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
+        ),
+        Slider(
+          value: value,
+          min: min,
+          max: max,
+          divisions: divisions,
+          label: value.toStringAsFixed(2), // Keep label on slider
+          onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+
+  // Updated Int Input Helper (Uses FocusNode for saving on focus loss)
+  Widget _buildIntInputSetting(
+    BuildContext context, {
+    required String label,
+    required int value,
+    required ValueChanged<int> onChanged,
+    int minValue = 0,
+    int? maxValue,
+  }) {
+    return _SettingTextField<int>(
+      label: label,
+      initialValue: value,
+      onSave: onChanged,
+      keyboardType: TextInputType.number,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      parser: (text) => int.tryParse(text),
+      validator: (val) {
+        if (val == null) return value; // Revert if parse fails
+        int finalVal = val;
+        if (finalVal < minValue) finalVal = minValue;
+        if (maxValue != null && finalVal > maxValue) finalVal = maxValue;
+        return finalVal;
+      },
+      textAlign: TextAlign.right,
+      width: 80,
+    );
+  }
+
+  // Updated Text Field Helper (Uses FocusNode for saving on focus loss)
+  Widget _buildTextFieldSetting({
+    required String initialValue,
+    String? label, // Label can be optional if using _buildSectionTitle
+    String? hint,
+    required Function(String) saveAction,
+    bool obscureText = false,
+    int maxLines = 1,
+    int minLines = 1,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return _SettingTextField<String>(
+      initialValue: initialValue,
+      label: label,
+      hint: hint,
+      onSave: saveAction,
+      obscureText: obscureText,
+      maxLines: maxLines,
+      minLines: minLines,
+      keyboardType: keyboardType,
+      parser: (text) => text.trim(), // Trim whitespace on save
+      validator:
+          (val) =>
+              val ??
+              initialValue, // Revert if parse fails (shouldn't for string)
+    );
+  }
+
+  // Updated Dropdown Helper
+  Widget _buildDropdownSetting<T>({
+    required String label,
+    required T value,
+    required List<T> items,
+    required ValueChanged<T?> onSelected,
+    String? hintWhenEmpty,
+    // Optional: Add a way to get the current value for robust checking
+    required T Function() currentValueProvider,
+  }) {
+    bool isEmpty = items.isEmpty;
+    // Ensure the currently selected value is actually in the list,
+    // otherwise, fallback or show hint more clearly.
+    T? selection = isEmpty ? null : (items.contains(value) ? value : null);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        vertical: 4.0,
+      ), // Consistent vertical padding
+      child: DropdownButtonFormField<T>(
+        value: selection,
+        isExpanded: true, // Make dropdown take available width
+        decoration: InputDecoration(
+          labelText: label,
+          // hintText: isEmpty ? hintWhenEmpty : (selection == null ? "Select..." : null), // Show hint if empty OR current value not in list
+          hintText:
+              isEmpty
+                  ? hintWhenEmpty
+                  : (selection == null
+                      ? (items.isNotEmpty
+                          ? 'Select a valid model'
+                          : 'No models available')
+                      : null),
+          border: const OutlineInputBorder(),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 12,
+          ),
+          isDense: true,
+          enabled: !isEmpty, // Disable interaction if empty
+        ),
+        items:
+            isEmpty
+                ? [] // No items if the list is empty
+                : items
+                    .map(
+                      (item) => DropdownMenuItem<T>(
+                        value: item,
+                        child: Text(
+                          item.toString().split('.').last,
+                        ), // Attempt to shorten long model names if needed
+                      ),
+                    )
+                    .toList(),
+        onChanged:
+            isEmpty
+                ? null
+                : (T? newValue) {
+                  // Only call onSelected if the value actually changes
+                  if (newValue != null && newValue != currentValueProvider()) {
+                    onSelected(newValue);
+                  }
+                },
+      ),
+    );
+  }
+
+  // Helper method for reset confirmation
+  void _showResetConfirmationDialog(
+    BuildContext context,
+    UserDataService service,
+  ) {
+    showDialog<bool>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Reset Settings?'),
+            content: const Text(
+              'This will reset all settings to their default values. Reloading the app may be required for all changes to take effect.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(foregroundColor: Colors.orange),
+                onPressed: () => Navigator.of(ctx).pop(true),
+                child: const Text('Reset'),
+              ),
+            ],
+          ),
+    ).then((confirmed) {
+      if (confirmed == true) {
+        service.clearAllUserData();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Settings reset to defaults.')),
+        );
+      }
+    });
+  }
+
+
+// --- Reusable Stateful Helper Widget for Text Fields ---
+// This manages controller and focus node lifecycle and saves on focus loss
+class _SettingTextField<T> extends StatefulWidget {
+  final T initialValue;
+  final String? label;
+  final String? hint;
+  final Function(T) onSave;
+  final bool obscureText;
+  final int maxLines;
+  final int minLines;
+  final TextInputType keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final T? Function(String) parser; // Function to parse text to type T
+  final T Function(T?) validator; // Function to validate/clamp parsed value
+  final TextAlign textAlign;
+  final double? width; // Optional fixed width
+
+  const _SettingTextField({
+    super.key,
+    required this.initialValue,
+    this.label,
+    this.hint,
+    required this.onSave,
+    this.obscureText = false,
+    this.maxLines = 1,
+    this.minLines = 1,
+    this.keyboardType = TextInputType.text,
+    this.inputFormatters,
+    required this.parser,
+    required this.validator,
+    this.textAlign = TextAlign.start,
+    this.width,
+  });
+
+  @override
+  State<_SettingTextField<T>> createState() => _SettingTextFieldState<T>();
+}
+
+class _SettingTextFieldState<T> extends State<_SettingTextField<T>> {
+  late final TextEditingController _controller;
+  late final FocusNode _focusNode;
+  late T _currentValue;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentValue = widget.initialValue;
+    _controller = TextEditingController(text: widget.initialValue.toString());
+    _focusNode = FocusNode();
+    _focusNode.addListener(_handleFocusChange);
+  }
+
+  void _handleFocusChange() {
+    if (!_focusNode.hasFocus) {
+      _saveValue();
+    }
+  }
+
+  void _saveValue() {
+    final parsed = widget.parser(_controller.text);
+    final validatedValue = widget.validator(parsed);
+
+    // Only trigger save if the value has actually changed
+    if (validatedValue != _currentValue) {
+      widget.onSave(validatedValue);
+      _currentValue = validatedValue; // Update internal state tracking
+      // Update controller text only if validation changed it (e.g., clamping)
+      if (_controller.text != validatedValue.toString()) {
+        final newText = validatedValue.toString();
+        _controller.text = newText;
+        // Optionally move cursor to end after programmatic change
+        _controller.selection = TextSelection.fromPosition(
+          TextPosition(offset: newText.length),
+        );
+      }
+    } else {
+      // If validation didn't change the value, but parsing failed or resulted
+      // in the same value, ensure the text field reflects the known good state.
+      // This handles cases where the user types invalid chars then clicks away.
+      if (_controller.text != _currentValue.toString()) {
+        _controller.text = _currentValue.toString();
+        _controller.selection = TextSelection.fromPosition(
+          TextPosition(offset: _controller.text.length),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_handleFocusChange);
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant _SettingTextField<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // If the initialValue coming from the provider changes externally
+    // (e.g., due to reset), update the text field.
+    if (widget.initialValue != oldWidget.initialValue &&
+        widget.initialValue != _currentValue) {
+      _currentValue = widget.initialValue;
+      _controller.text = widget.initialValue.toString();
+      // Move cursor to end if needed
+      _controller.selection = TextSelection.fromPosition(
+        TextPosition(offset: _controller.text.length),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget textField = TextFormField(
+      controller: _controller,
+      focusNode: _focusNode,
+      decoration: InputDecoration(
+        labelText: widget.label,
+        hintText: widget.hint,
+        border: const OutlineInputBorder(),
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 12,
+        ),
+      ),
+      obscureText: widget.obscureText,
+      maxLines: widget.maxLines,
+      minLines: widget.minLines,
+      keyboardType: widget.keyboardType,
+      inputFormatters: widget.inputFormatters,
+      textAlign: widget.textAlign,
+      // Save on submission (e.g., pressing Enter on keyboard)
+      onFieldSubmitted: (_) => _saveValue(),
+    );
+
+    // Wrap with SizedBox if width is specified
+    if (widget.width != null) {
+      textField = SizedBox(width: widget.width, child: textField);
+    }
+
+    // If label is provided standalone (not part of InputDecoration)
+    if (widget.label != null && widget.width != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                widget.label!,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            ),
+            textField, // SizedBox is now inside the 'textField' variable
+          ],
+        ),
+      );
+    } else {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        child: textField, // Regular text field, label is inside InputDecoration
+      );
+    }
   }
 }

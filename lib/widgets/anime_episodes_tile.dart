@@ -1,32 +1,46 @@
 // lib/widgets/episode_tile.dart
 import 'package:flutter/material.dart';
 import 'package:miko/models/episode_anime.dart';
+import 'package:miko/models/season_anime.dart';
 import 'package:miko/screens/video_player_screen.dart'; // Your player screen
+import 'package:miko/services/user_data_service.dart';
 import 'package:miko/utils/colors.dart';
+import 'package:provider/provider.dart';
+import 'package:tmdb_flutter/tmdb_flutter.dart';
 
 class AnimeEpisodeTile extends StatelessWidget {
   final EpisodeAnime episode;
-
-  const AnimeEpisodeTile({required this.episode, super.key});
-
-  void _playVideo(BuildContext context, String url) {
-    // URL encode the video URL to make it safe for use in the path
-    final encodedUrl = Uri.encodeComponent(url);
-       Navigator.push(
-       context,
-    MaterialPageRoute(
-      builder: (_) => VideoPlayerScreen(videoUrl: url), // Pass movie ID
-       ));
-  }
+  final  season;
+  final  id;
+  const AnimeEpisodeTile(
+      {required this.episode,
+      required this.season,
+      required this.id,
+      super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ) {
     final availableQualities = episode.getAvailableQualityUrls();
+    final userDataService = Provider.of<UserDataService>(context);
+
+  void playVideo(BuildContext context, String url) async{
+                    await userDataService.toggleIsWatchedLink(id, episode, season, availableQualities.toString());
+
+    // URL encode the video URL to make it safe for use in the path
+    final encodedUrl = Uri.encodeComponent(url);
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => VideoPlayerScreen(videoUrl: url), // Pass movie ID
+        ));
+  }
 
     // Create a display title: "E01: Episode Name" or just "Episode 1" if no name
     // Since we removed tmdbTitle, we'll rely on season/episode numbers.
     final displayTitle = 'Episode ${episode.episodeNumber}'; // Simple display
     // Or use the identifier: final displayTitle = episode.episodeIdentifier;
+    bool isInWatchlist = userDataService.isWatchedEpisode(
+        id, episode, season, availableQualities.toString());
 
     return Padding(
       // Add padding instead of using Card margin for better control with dividers
@@ -73,11 +87,11 @@ class AnimeEpisodeTile extends StatelessWidget {
                   final quality = entry.key;
                   final url = entry.value;
                   return ElevatedButton(
-                    onPressed: () => _playVideo(context, url),
+                    onPressed: () => playVideo(context, url),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accentColor
+                      backgroundColor: AppColors2.watchlistActive
                           .withOpacity(0.7), // Button color
-                      foregroundColor: AppColors.primaryText, // Text color
+                      foregroundColor: AppColors2.primaryText, // Text color
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 5), // Adjusted padding
                       minimumSize: const Size(45, 28), // Ensure minimum size
@@ -89,8 +103,13 @@ class AnimeEpisodeTile extends StatelessWidget {
                       ),
                       elevation: 1, // Slight elevation
                     ),
-                    child: Text(quality
-                        .toUpperCase()), // Uppercase quality (e.g., 1080P)
+                    child: Text(
+                      isInWatchlist?
+                      
+                      
+                        quality.toUpperCase()+''+'' "Watched this Episode"'':quality
+                        .toUpperCase()),
+                        // Uppercase quality (e.g., 1080P)
                   );
                 }).toList(),
               ),
@@ -100,7 +119,7 @@ class AnimeEpisodeTile extends StatelessWidget {
             const Text(
               'No links',
               style: TextStyle(
-                  color: AppColors.secondaryText,
+                  color: AppColors2.secondaryText,
                   fontSize: 12,
                   fontStyle: FontStyle.italic),
             ),

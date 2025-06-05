@@ -1,8 +1,7 @@
 import 'package:flutter/foundation.dart'; // For kDebugMode
-import 'package:tmdb_flutter/tmdb_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../constants.dart' as c;
-import '../../showcases/movie_model.dart' as TmdbApiMovieModel;
+import '../showcases/model.dart' as TmdbApiMovieModel;
 
 class VideoInfo {
   final String title;

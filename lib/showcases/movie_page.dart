@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'movie_model.dart';
+import 'model.dart';
 import 'movie_service.dart';
 import 'movie_detail_page.dart';
 
 class MoviePage extends StatefulWidget {
-  const MoviePage({Key? key}) : super(key: key);
+  const MoviePage({super.key});
 
   @override
   State<MoviePage> createState() => _MoviePageState();
@@ -12,6 +12,8 @@ class MoviePage extends StatefulWidget {
 
 class _MoviePageState extends State<MoviePage> {
   final MovieService _movieService = MovieService();
+    final  TmdbApiService _tmdbService = TmdbApiService();
+
   final List<Movie> _movies = [];
   int _currentPage = 1;
   int _totalPages = 1;
@@ -51,7 +53,7 @@ class _MoviePageState extends State<MoviePage> {
     });
 
     try {
-      final response = await _movieService.getPopularMovies(page: _currentPage);
+      final response = await _tmdbService.discoverMovies(page: _currentPage);
       
       setState(() {
         _movies.addAll(response.results);

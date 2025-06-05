@@ -66,18 +66,18 @@ final userData = Provider.of<UserDataService>(context);
     // Get the list to display (handles search results automatically)
     final seriesList = seriesProvider.animeseriesForDisplay;
 
-    if (seriesList.isEmpty && seriesProvider.searchQuery.isNotEmpty) {
-      return Center(
-          child: Text('No results found for "${seriesProvider.searchQuery}"',
-              style: const TextStyle(
-                  color: AppColors.secondaryText, fontSize: 16)));
-    }
+    // if (seriesList.isEmpty && seriesProvider.searchQuery.isNotEmpty) {
+    //   return Center(
+    //       child: Text('No results found for "${seriesProvider.searchQuery}"',
+    //           style: const TextStyle(
+    //               color: AppColors.secondaryText, fontSize: 16)));
+    // }
 
-    if (seriesList.isEmpty) {
-      return const Center(
-          child: Text('No TV Series found in the database.',
-              style: TextStyle(color: AppColors.secondaryText)));
-    }
+    // if (seriesList.isEmpty) {
+    //   return const Center(
+    //       child: Text('No TV Series found in the database.',
+    //           style: TextStyle(color: AppColors.secondaryText)));
+    // }
     return MasonryGridView.count(
       padding: const EdgeInsets.all(5.0),
       crossAxisCount: 1*gridSize, // Adjust number of 

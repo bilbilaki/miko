@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'tv_model.dart';
+import 'package:miko/showcases/movie_detail_page.dart';
+import 'package:miko/showcases/person_detail_page.dart';
+import 'model.dart';
 import 'movie_service.dart';
 import 'tv_detail_page.dart';
 
 class TvShowPage extends StatefulWidget {
-  const TvShowPage({Key? key}) : super(key: key);
+  const TvShowPage({super.key});
 
   @override
   State<TvShowPage> createState() => _TvShowPageState();
@@ -12,6 +16,8 @@ class TvShowPage extends StatefulWidget {
 
 class _TvShowPageState extends State<TvShowPage> {
   final MovieService _movieService = MovieService();
+  final TmdbApiService _tmdbService = TmdbApiService();
+
   final List<TvShow> _tvShows = [];
   int _currentPage = 1;
   int _totalPages = 1;
@@ -19,23 +25,36 @@ class _TvShowPageState extends State<TvShowPage> {
   bool _hasError = false;
   String _errorMessage = '';
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
 
+  MultiSearchResponse? _searchResponse;
+  bool _isLoadings = false;
+  String? _error;
+  String _currentQuery = '';
+  int _currentPages = 1;
+  bool _isFetchingMore = false;
   @override
   void initState() {
     super.initState();
     _loadTvShows();
     _scrollController.addListener(_scrollListener);
+    _searchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
     _movieService.dispose();
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
   void _scrollListener() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.8) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent * 0.8) {
       if (!_isLoading && _currentPage < _totalPages) {
         _loadMoreTvShows();
       }
@@ -44,15 +63,15 @@ class _TvShowPageState extends State<TvShowPage> {
 
   Future<void> _loadTvShows() async {
     if (_isLoading) return;
-    
+
     setState(() {
       _isLoading = true;
       _hasError = false;
     });
 
     try {
-      final response = await _movieService.getPopularTvShows(page: _currentPage);
-      
+      final response = await _tmdbService.discoverTvShows(page: _currentPage);
+
       setState(() {
         _tvShows.addAll(response.results);
         _totalPages = response.totalPages;
@@ -101,13 +120,424 @@ class _TvShowPageState extends State<TvShowPage> {
           ),
         ],
       ),
-      body: _hasError
-          ? _buildErrorWidget()
-          : RefreshIndicator(
-              onRefresh: _refreshTvShows,
-              child: _buildTvShowGrid(),
+      body: Stack(
+        children: [
+          // Existing body content
+          _hasError
+              ? _buildErrorWidget()
+              : RefreshIndicator(
+                  onRefresh: _refreshTvShows,
+                  child: _buildTvShowGrid(),
+                ),
+
+          // Search Overlay
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: GestureDetector(
+              onTap: _showSearchOverlay,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(20)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      spreadRadius: 5,
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.search),
+                    const SizedBox(width: 16),
+                    Text(
+                      'Search TV Shows',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ],
+                ),
+              ),
             ),
+          ),
+        ],
+      ),
     );
+  }
+
+  void _showSearchOverlay() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) {
+          // Listen to changes in the search controller and update overlay state
+          _searchController.removeListener(_onSearchChanged);
+          _searchController.addListener(() {
+            setModalState(() {}); // Rebuild overlay on text change
+            _onSearchChanged();
+          });
+          return DraggableScrollableSheet(
+            initialChildSize: 0.9,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            builder: (context, controller) => Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(25)),
+              ),
+              child: Column(
+                children: [
+                  // Search Header
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search TV Shows...',
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchController.clear();
+                            setModalState(() {});
+                          },
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      onChanged: (value) {
+                        setModalState(() {});
+                        _onSearchChanged();
+                      },
+                    ),
+                  ),
+
+                  // Search Results
+                  Expanded(
+                    child: _buildBody(),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading &&
+        (_searchResponse == null || _searchResponse!.results.isEmpty)) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_error != null) {
+      return Center(child: Text('Error: $_error'));
+    }
+
+    if (_searchResponse == null && _currentQuery.isEmpty) {
+      return const Center(child: Text('Start typing to search...'));
+    }
+
+    if (_searchResponse == null || _searchResponse!.results.isEmpty) {
+      return Center(child: Text('No results found for "$_currentQuery".'));
+    }
+
+    final results = _searchResponse!.results;
+
+    return ListView.builder(
+      controller: _scrollController,
+      padding: const EdgeInsets.all(8.0),
+      itemCount: results.length + (_isFetchingMore ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index == results.length && _isFetchingMore) {
+          return const Center(
+              child: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: CircularProgressIndicator()));
+        }
+
+        final result = results[index];
+        return _buildMultiSearchResultCard(context, result);
+      },
+    );
+  }
+
+  Widget _buildMultiSearchResultCard(
+      BuildContext context, MultiSearchResult result) {
+    String? imagePath;
+    String title = '';
+    String subtitle = '';
+
+    switch (result.mediaType) {
+      case MediaType.movie:
+        final movie = result as MultiSearchMovie;
+        imagePath = movie.posterPath;
+        title = movie.title;
+        subtitle = 'Movie • ${movie.releaseDate}';
+        break;
+      case MediaType.tv:
+        final tv = result as MultiSearchTV;
+        imagePath = tv.posterPath;
+        title = tv.name;
+        subtitle = 'TV Show • ${tv.firstAirDate}';
+        break;
+      case MediaType.person:
+        final person = result as MultiSearchPerson;
+        imagePath = person.profilePath;
+        title = person.name;
+        subtitle = 'Person • ${person.knownForDepartment}';
+        break;
+    }
+
+    final String posterUrl = imagePath != null
+        ? 'https://inosdb.worker-inosuke.workers.dev/w500$imagePath'
+        : 'https://inosdb.worker-inosuke.workers.dev/w500$imagePath';
+
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _navigateToDetailPage(result),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 100,
+              height: 150,
+              child: Image.network(
+                posterUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (c, e, s) => Container(
+                    color: Colors.grey[700],
+                    child: Center(
+                        child: Icon(result.mediaType == MediaType.movie
+                            ? Icons.movie_outlined
+                            : result.mediaType == MediaType.tv
+                                ? Icons.tv_outlined
+                                : Icons.person_outline))),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold)),
+                    Text(subtitle,
+                        style: Theme.of(context).textTheme.bodySmall),
+                    const SizedBox(height: 8),
+                    Text(
+                      result.mediaType == MediaType.movie
+                          ? (result as MultiSearchMovie).overview ?? ''
+                          : result.mediaType == MediaType.tv
+                              ? (result as MultiSearchTV).overview ?? ''
+                              : '',
+                      style: Theme.of(context).textTheme.bodySmall,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // List<TvShow> _searchResults = [];
+
+  // Future<void> _performSearch(String query) async {
+  //   if (query.isEmpty) {
+  //     setState(() {
+  //       _searchResults = [];
+  //     });
+  //     return;
+  //   }
+
+  //   try {
+  //     final response = await _tmdbService.searchTvShows(query: query);
+  //     setState(() {
+  //       _searchResults = response.results;
+  //     });
+  //   } catch (e) {
+  //     // Handle error
+  //     debugPrint('Search error: $e');
+  //   }
+  // }
+
+  void _onSearchChanged() {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 700), () {
+      if (_searchController.text.trim() != _currentQuery) {
+        _currentQuery = _searchController.text.trim();
+        _currentPages = 1;
+        _searchResponse = null;
+        if (_currentQuery.isNotEmpty) {
+          _fetchMultiSearch();
+        } else {
+          setState(() {
+            _isLoadings = false;
+            _searchResponse = null;
+            _error = null;
+          });
+        }
+      }
+    });
+  }
+
+  Future<void> _fetchMultiSearch({bool loadMore = false}) async {
+    if (_currentQuery.isEmpty || _isFetchingMore) return;
+
+    setState(() {
+      if (loadMore) {
+        _isFetchingMore = true;
+      } else {
+        _isLoading = true;
+      }
+      _error = null;
+    });
+
+    try {
+      final response = await _movieService.multiSearch(
+        query: _currentQuery,
+        page: _currentPage,
+      );
+
+      if (mounted) {
+        setState(() {
+          if (loadMore) {
+            _searchResponse?.results.addAll(response.results);
+            _searchResponse = MultiSearchResponse(
+              page: response.page,
+              results: _searchResponse?.results ?? response.results,
+              totalPages: response.totalPages,
+              totalResults: response.totalResults,
+            );
+          } else {
+            _searchResponse = response;
+          }
+
+          if (loadMore) {
+            _isFetchingMore = false;
+          } else {
+            _isLoading = false;
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          if (loadMore) {
+            _isFetchingMore = false;
+          } else {
+            _isLoading = false;
+          }
+        });
+      }
+    }
+  }
+
+  // void _onScroll() {
+  //   if (_scrollController.position.pixels >=
+  //           _scrollController.position.maxScrollExtent - 200 &&
+  //       !_isFetchingMore &&
+  //       _searchResponse != null &&
+  //       _currentPage < _searchResponse!.totalPages) {
+  //     _currentPage++;
+  //     _fetchMultiSearch(loadMore: true);
+  //   }
+  // }
+
+  void _navigateToDetailPage(MultiSearchResult result) {
+    switch (result.mediaType) {
+      case MediaType.movie:
+        if (result is MultiSearchMovie) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MovieDetailPage(
+                movie: Movie(
+                  id: result.id,
+                  title: result.name,
+                  originalTitle: result.originalName,
+                  posterPath: result.posterPath,
+                  backdropPath: result.backdropPath,
+                  adult: result.adult,
+                  genreIds: result.genreIds,
+                  originalLanguage: result.originalLanguage.toString(),
+                  overview: result.overview.toString(),
+                  popularity: result.popularity,
+                  voteAverage: result.voteAverage,
+                  voteCount: result.voteCount,
+                  releaseDate: result.releaseDate.toString(),
+                  video: result.video,
+                  // Add other necessary fields from the multi search result
+                ),
+              ),
+            ),
+          );
+        }
+        break;
+      case MediaType.tv:
+        if (result is MultiSearchTV) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TvShowDetailPage(
+                tvShow: TvShow(
+                  id: result.id,
+                  name: result.name,
+                  originalName: result.originalName,
+                  posterPath: result.posterPath,
+                  backdropPath: result.backdropPath,
+                  adult: result.adult,
+                  genreIds: result.genreIds,
+                  originCountry: result.originCountry,
+                  originalLanguage: result.originalLanguage.toString(),
+                  overview: result.overview.toString(),
+                  popularity: result.popularity,
+                  voteAverage: result.voteAverage,
+                  voteCount: result.voteCount,
+                  // Add other necessary fields from the multi search result
+                ),
+              ),
+            ),
+          );
+        }
+        break;
+      case MediaType.person:
+        if (result is MultiSearchPerson) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PersonDetailPage(
+                  personId: result.id,
+                  initialName: result.name,
+                  initialProfilePath: result.profilePath),
+            ),
+          );
+        }
+        break;
+    }
   }
 
   Widget _buildErrorWidget() {
@@ -152,7 +582,7 @@ class _TvShowPageState extends State<TvShowPage> {
         if (index >= _tvShows.length) {
           return const Center(child: CircularProgressIndicator());
         }
-        
+
         final tvShow = _tvShows[index];
         return _buildTvShowCard(tvShow);
       },
@@ -178,7 +608,8 @@ class _TvShowPageState extends State<TvShowPage> {
                   fit: StackFit.expand,
                   children: [
                     ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(12)),
                       child: Image.network(
                         tvShow.fullPosterPath,
                         fit: BoxFit.cover,
@@ -227,7 +658,8 @@ class _TvShowPageState extends State<TvShowPage> {
                       top: 8,
                       right: 8,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(0.7),
                           borderRadius: BorderRadius.circular(4),
@@ -243,12 +675,13 @@ class _TvShowPageState extends State<TvShowPage> {
                       ),
                     ),
                     // Add country indicator
-                    if (tvShow.originCountry.isNotEmpty)
+                    if (tvShow.originCountry == tvShow.originCountry)
                       Positioned(
                         top: 8,
                         left: 8,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             color: Colors.blue.withOpacity(0.8),
                             borderRadius: BorderRadius.circular(4),
@@ -268,7 +701,8 @@ class _TvShowPageState extends State<TvShowPage> {
                       bottom: 8,
                       right: 8,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: _getRatingColor(tvShow.voteAverage),
                           borderRadius: BorderRadius.circular(4),
@@ -283,7 +717,8 @@ class _TvShowPageState extends State<TvShowPage> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.star, color: Colors.white, size: 14),
+                            const Icon(Icons.star,
+                                color: Colors.white, size: 14),
                             const SizedBox(width: 4),
                             Text(
                               tvShow.formattedRating,
@@ -298,12 +733,13 @@ class _TvShowPageState extends State<TvShowPage> {
                       ),
                     ),
                     // Add genre at the bottom left
-                    if (tvShow.genreIds.isNotEmpty)
+                    if (tvShow.genreIds == tvShow.genreNames)
                       Positioned(
                         bottom: 8,
                         left: 8,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             color: _getGenreColor(tvShow.genreIds.first),
                             borderRadius: BorderRadius.circular(4),
@@ -360,7 +796,7 @@ class _TvShowPageState extends State<TvShowPage> {
       ),
     );
   }
-  
+
   Color _getRatingColor(double rating) {
     if (rating >= 8.0) {
       return Colors.green;
@@ -370,30 +806,30 @@ class _TvShowPageState extends State<TvShowPage> {
       return Colors.red;
     }
   }
-  
+
   Color _getGenreColor(int genreId) {
     final Map<int, Color> genreColors = {
-      10759: Colors.orange,  // Action & Adventure
-      16: Colors.blue,       // Animation
-      35: Colors.pink,       // Comedy
-      80: Colors.red,        // Crime
-      99: Colors.teal,       // Documentary
-      18: Colors.purple,     // Drama
-      10751: Colors.green,   // Family
-      10762: Colors.amber,   // Kids
-      9648: Colors.indigo,   // Mystery
-      10763: Colors.blue,    // News
-      10764: Colors.cyan,    // Reality
+      10759: Colors.orange, // Action & Adventure
+      16: Colors.blue, // Animation
+      35: Colors.pink, // Comedy
+      80: Colors.red, // Crime
+      99: Colors.teal, // Documentary
+      18: Colors.purple, // Drama
+      10751: Colors.green, // Family
+      10762: Colors.amber, // Kids
+      9648: Colors.indigo, // Mystery
+      10763: Colors.blue, // News
+      10764: Colors.cyan, // Reality
       10765: Colors.deepPurple, // Sci-Fi & Fantasy
-      10766: Colors.pink,    // Soap
-      10767: Colors.brown,   // Talk
+      10766: Colors.pink, // Soap
+      10767: Colors.brown, // Talk
       10768: Colors.blueGrey, // War & Politics
-      37: Colors.amber,      // Western
+      37: Colors.amber, // Western
     };
-    
+
     return genreColors[genreId] ?? Colors.grey;
   }
-  
+
   // Helper method to get TV genre name from ID
   String _getTvGenreName(int genreId) {
     final Map<int, String> genres = {
@@ -414,7 +850,7 @@ class _TvShowPageState extends State<TvShowPage> {
       10768: 'War & Politics',
       37: 'Western',
     };
-    
+
     return genres[genreId] ?? 'Unknown';
   }
 }

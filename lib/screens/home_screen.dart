@@ -60,17 +60,17 @@ class HomeScreen extends StatelessWidget {
       );
     }
 
-    if (movieProvider.movies.isEmpty && movieProvider.searchQuery.isNotEmpty) {
-      return Center(
-          child: Text('No results found for "${movieProvider.searchQuery}"',
-              style: const TextStyle(color: AppColors2.error2, fontSize: 16)));
-    }
+    // if (movieProvider.movies.isEmpty && movieProvider.searchQuery.isNotEmpty) {
+    //   return Center(
+    //       child: Text('No results found for "${movieProvider.searchQuery}"',
+    //           style: const TextStyle(color: AppColors2.error2, fontSize: 16)));
+    // }
 
-    if (movieProvider.movies.isEmpty) {
-      return const Center(
-          child: Text('No movies found.',
-              style: TextStyle(color: AppColors2.error)));
-    }
+    // if (movieProvider.movies.isEmpty) {
+    //   return const Center(
+    //       child: Text('No movies found.',
+    //           style: TextStyle(color: AppColors2.error)));
+    // }
 
     // --- Display Movies using a Grid ---
     // Using MasonryGridView for variable height potential, or simple GridView.count

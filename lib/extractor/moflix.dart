@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:crypto/crypto.dart';
 
 class MoflixExtractor {
   static const String name = "Moflix";

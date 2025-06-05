@@ -1,6 +1,6 @@
 // --- season_detail_page.dart ---
 import 'package:flutter/material.dart';
-import 'tv_model.dart';
+import 'model.dart';
 import 'movie_service.dart';
 import 'episodedetailpage.dart'; // For navigation
 
@@ -12,13 +12,13 @@ class SeasonDetailPage extends StatefulWidget {
   final MovieService movieService;
 
   const SeasonDetailPage({
-    Key? key,
+    super.key,
     required this.tvShowId,
     required this.seasonNumber,
     required this.seasonName,
     this.posterPath,
     required this.movieService,
-  }) : super(key: key);
+  });
 
   @override
   State<SeasonDetailPage> createState() => _SeasonDetailPageState();
@@ -40,7 +40,7 @@ class _SeasonDetailPageState extends State<SeasonDetailPage> {
   Widget build(BuildContext context) {
     final String fullPosterPath = widget.posterPath != null
         ? 'https://inosdb.worker-inosuke.workers.dev/w500${widget.posterPath}'
-        : 'https://via.placeholder.com/500x750?text=No+Image';
+        : 'https://inosdb.worker-inosuke.workers.dev/w500${widget.posterPath}';
 
     return Scaffold(
       body: CustomScrollView(

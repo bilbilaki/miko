@@ -66,18 +66,18 @@ class TvSeriesGridScreen extends StatelessWidget {
     // Get the list to display (handles search results automatically)
     final seriesList = seriesProvider.seriesForDisplay;
 
-    if (seriesList.isEmpty && seriesProvider.searchQuery.isNotEmpty) {
-      return Center(
-          child: Text('No results found for "${seriesProvider.searchQuery}"',
-              style: const TextStyle(
-                  color: AppColors.secondaryText, fontSize: 16)));
-    }
+    // if (seriesList.isEmpty && seriesProvider.searchQuery.isNotEmpty) {
+    //   return Center(
+    //       child: Text('No results found for "${seriesProvider.searchQuery}"',
+    //           style: const TextStyle(
+    //               color: AppColors.secondaryText, fontSize: 16)));
+    // }
 
-    if (seriesList.isEmpty) {
-      return const Center(
-          child: Text('No TV Series found in the database.',
-              style: TextStyle(color: AppColors.secondaryText)));
-    }
+    // if (seriesList.isEmpty) {
+    //   return const Center(
+    //       child: Text('No TV Series found in the database.',
+    //           style: TextStyle(color: AppColors.secondaryText)));
+    // }
 
     // Display the grid using the loaded list
     return MasonryGridView.count(

@@ -555,7 +555,7 @@ class TvSeriesDetailsScreen extends StatelessWidget {
               context: context,
               color: AppColors.dividerColor.withOpacity(0.3),
               tiles: season.episodes
-                  .map((episode) => EpisodeTile(episode: episode))
+                  .map((episode) => EpisodeTile(episode: episode, season: seasons.toString(),id: tvSeriesId,))
                   .toList(),
             ).toList(),
           ),

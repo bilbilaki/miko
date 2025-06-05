@@ -1,22 +1,19 @@
-// --- СОЗДАЙТЕ НОВЫЙ ФАЙЛ: movies_by_keyword_screen.dart ---
-// --- CREATE A NEW FILE: movies_by_keyword_screen.dart ---
-
 import 'package:flutter/material.dart';
-import 'movie_model.dart'; // Ваш MovieModel и KeywordMoviesResponse
-import 'movie_service.dart'; // Ваш MovieService
-import 'movie_detail_page.dart'; // Для перехода на страницу деталей фильма
+import 'model.dart'; 
+import 'movie_service.dart';
+import 'movie_detail_page.dart';
 
 class MoviesByKeywordScreen extends StatefulWidget {
   final int keywordId;
   final String keywordName;
-  final MovieService movieService; // Принимаем сервис
+  final MovieService movieService;
 
   const MoviesByKeywordScreen({
-    Key? key,
+    super.key,
     required this.keywordId,
     required this.keywordName,
     required this.movieService,
-  }) : super(key: key);
+  });
 
   @override
   State<MoviesByKeywordScreen> createState() => _MoviesByKeywordScreenState();

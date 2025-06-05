@@ -1,6 +1,127 @@
 // TODO Implement this library.
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
+class AppThemes {
+  // Netflix Dark Theme
+  static final ThemeData netflixDarkTheme = ThemeData(
+    brightness: Brightness.dark,
+    useMaterial3: true,
+    scaffoldBackgroundColor: Colors.black,
+    primaryColor: const Color(0xFFE50914), // Netflix Red
+    hintColor: Colors.grey[600],
+    colorScheme: ColorScheme.dark(
+      primary: const Color(0xFFE50914),
+      secondary: const Color(0xFFB20710), // Darker Red
+      surface: const Color(0xFF1A1A1A),
+      surfaceVariant: const Color(0xFF2D2D2D),
+      onPrimary: Colors.white,
+      onSecondary: Colors.white,
+      onSurface: Colors.grey[300]!,
+      onSurfaceVariant: Colors.grey[500]!,
+      error: const Color(0xFFE50914),
+      background: Colors.black,
+      onBackground: Colors.grey[300]!,
+    ),
+    appBarTheme: AppBarTheme(
+      backgroundColor: Colors.black,
+      elevation: 0,
+      iconTheme: IconThemeData(color: Colors.grey[300]),
+      titleTextStyle: GoogleFonts.roboto(
+          color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: const Color(0xFF2D2D2D),
+      hintStyle: GoogleFonts.roboto(color: Colors.grey[600]),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(4),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(4),
+        borderSide: const BorderSide(color: Color(0xFFE50914), width: 2),
+      ),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFFE50914),
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        textStyle: GoogleFonts.roboto(
+            fontWeight: FontWeight.bold, fontSize: 16),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: const Color(0xFFE50914),
+        textStyle: GoogleFonts.roboto(fontWeight: FontWeight.bold),
+      )
+    ),
+    textTheme: TextTheme(
+      displayLarge: GoogleFonts.robotoCondensed(
+          color: Colors.white, fontWeight: FontWeight.bold),
+      titleLarge: GoogleFonts.roboto(
+          color: Colors.white, fontWeight: FontWeight.bold),
+      bodyLarge: GoogleFonts.roboto(color: Colors.grey[300]),
+    ),
+    cardTheme: CardTheme(
+      color: const Color(0xFF1A1A1A),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(4)),
+    ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      backgroundColor: Colors.black,
+      selectedItemColor: Colors.white,
+      unselectedItemColor: Colors.grey[600],
+    ),
+    tabBarTheme: TabBarTheme(
+      labelColor: Colors.white,
+      unselectedLabelColor: Colors.grey[600],
+      indicator: const UnderlineTabIndicator(
+        borderSide: BorderSide(color: Color(0xFFE50914), width: 3),
+      ),
+    ),
+  );
+
+  // Netflix Light Theme
+  static final ThemeData netflixLightTheme = ThemeData(
+    brightness: Brightness.light,
+    useMaterial3: true,
+    scaffoldBackgroundColor: Colors.white,
+    primaryColor: const Color(0xFFE50914),
+    colorScheme: ColorScheme.light(
+      primary: const Color(0xFFE50914),
+      secondary: const Color(0xFFB20710),
+      surface: Colors.white,
+      onPrimary: Colors.white,
+      onSurface: Colors.grey[800]!,
+      background: Colors.white,
+    ),
+    appBarTheme: AppBarTheme(
+      backgroundColor: Colors.white,
+      foregroundColor: Colors.black,
+      titleTextStyle: GoogleFonts.roboto(
+          color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFFE50914),
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4)),
+      ),
+    ),
+    textTheme: TextTheme(
+      displayLarge: GoogleFonts.robotoCondensed(
+          color: Colors.black, fontWeight: FontWeight.bold),
+      bodyLarge: GoogleFonts.roboto(color: Colors.grey[800]),
+    ),
+  );
+}
 class AppColors {
   static const Color primaryBackground = Color(0xFF0F0F0F); // Very dark grey
   static const Color secondaryBackground =
@@ -26,13 +147,14 @@ class AppColors2 {
   // Secondary colors
   static const Color secondaryColor = Color(0xFF03DAC6);
   static const Color secondaryVariant = Color(0xFF018786);
-
+  static const Color tertiaryText = Color(0xFF8A8A8A);
   // Background colors
     static const Color blackbackground = Color(0xFF000000);
 
   static const Color whitebackground = Color(0xFFF5F5F5);
   static const Color surface = Colors.white;
-
+  static const Color shimmerBase = Color(0xFF2A2A2A); // For shimmer effect
+  static const Color shimmerHighlight = Color(0xFF3C3C3C); // For shimmer effect
   // Error color
   static const Color error = Color(0xFFB00020);
     static const Color error2 = Color.fromARGB(255, 255, 123, 0);
@@ -46,6 +168,12 @@ class AppColors2 {
   static const Color extracolor7 = Color.fromARGB(255, 31, 8, 133);
   static const Color extracolor8 = Color.fromARGB(255, 7, 227, 143);
   static const Color extracolor9 = Color.fromARGB(87, 184, 42, 158);
+    static const Color primaryBackground = Color(0xFF121212); // Dark background
+  static const Color cardBackground = Color(0xFF1E1E1E); // Slightly lighter for cards
+  static const Color accentColor = Colors.deepPurpleAccent; // A vibrant accent
+  static const Color accentColorLight = Color(0xFFBB86FC); // Lighter accent variant
+  static const Color primaryText = Colors.white;
+  static const Color secondaryText = Colors.grey; // For subtitles or less important info
   // Text colors
   static const Color onPrimary = Colors.white;
   static const Color onSecondary = Colors.black;
@@ -53,9 +181,10 @@ class AppColors2 {
   static const Color onSurface = Colors.black;
   static const Color onError = Colors.white;
   static const Color tinytext = Color.fromARGB(221, 191, 188, 188);
-
+  static const Color favoriteActive = Colors.pinkAccent;
+  static const Color watchlistActive = Colors.greenAccent; // Brighter green
   // Additional custom colors
-  static const Color accentColor = Color(0xFFFF4081);
+ // static const Color accentColor = Color(0xFFFF4081);
   static const Color cardColor = Colors.white;
   static const Color dividerColor = Color(0xFFBDBDBD);
 
@@ -85,12 +214,10 @@ class AppTheme {
         secondary: AppColors2.secondaryColor,
         secondaryContainer: AppColors2.secondaryVariant,
         surface: AppColors2.surface,
-        background: AppColors2.whitebackground,
         error: AppColors2.error,
         onPrimary: AppColors2.onPrimary,
         onSecondary: AppColors2.onSecondary,
         onSurface: AppColors2.onSurface,
-        onBackground: AppColors2.onBackground,
         onError: AppColors2.onError,
         brightness: Brightness.light,
       ),
@@ -194,12 +321,10 @@ class AppTheme {
         secondary: AppColors2.secondaryColor,
         secondaryContainer: AppColors2.secondaryVariant,
         surface: Color(0xFF121212),
-        background: Color(0xFF121212),
         error: AppColors2.error,
         onPrimary: AppColors2.onPrimary,
         onSecondary: AppColors2.onSecondary,
         onSurface: Colors.white,
-        onBackground: Colors.white,
         onError: AppColors2.onError,
         brightness: Brightness.dark,
       ),
@@ -297,7 +422,7 @@ class AppTheme {
 
 // Example of how to use the MaterialApp with the theme
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -314,7 +439,7 @@ class MyApp extends StatelessWidget {
 
 // Placeholder for HomePage
 class HomePagetest extends StatelessWidget {
-  const HomePagetest({Key? key}) : super(key: key);
+  const HomePagetest({super.key});
 
   @override
   Widget build(BuildContext context) {

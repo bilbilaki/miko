@@ -1,7 +1,6 @@
 // lib/screens/movie_details_screen.dart
 import 'package:flutter/material.dart';
 import 'package:miko/models/movie.dart'; // Import VideoInfo
-import 'package:miko/showcases/movie_page.dart';
 // Import UserDataService
 import 'package:provider/provider.dart';
 import 'package:miko/providers/movie_provider.dart';
@@ -10,7 +9,6 @@ import 'package:miko/utils/colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 //import 'package:external_app_launcher/external_app_launcher.dart';
-import '../showcases/movie_detail_page.dart';
 
 import 'package:miko/services/user_data_service.dart'; // Import UserDataService
 
@@ -41,7 +39,6 @@ class MovieDetailsScreen extends StatelessWidget {
     // Fetch UserDataService
     final userDataService = Provider.of<UserDataService>(context);
     bool isFavorite = userDataService.isFavoriteMovie(movieId);
-    bool isInWatchlist = userDataService.isOnWatchlistMovie(movieId);
 
     if (movie == null) {
       return Scaffold(
@@ -57,7 +54,9 @@ class MovieDetailsScreen extends StatelessWidget {
     final backdropUrl = movie.getBackdropUrl();
     final posterUrl = movie.getPosterUrl();
     final downloadLinks = movie.getDownloadLinksList();
-
+    bool isInWatchlist = userDataService.isOnWatchlistMovie(movieId);
+    bool isWatched = userDataService.isWatchedEpisode(
+        movieId, movieId, movieId, downloadLinks.toString());
     return Scaffold(
       backgroundColor: AppColors.primaryBackground,
       body: CustomScrollView(
@@ -163,7 +162,7 @@ class MovieDetailsScreen extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(4.0),
                                 ),
                                 child: Text(
-                                  '${movie.voteAverage?.toStringAsFixed(1)}/10', // Display rating
+                                  '${movie.voteAverage.toStringAsFixed(1)}/10', // Display rating
                                   style: const TextStyle(
                                     fontSize: 14.0,
                                     fontWeight: FontWeight.bold,
@@ -286,7 +285,7 @@ class MovieDetailsScreen extends StatelessWidget {
                               Text(
                                   movie.releaseDate != null
                                       ? DateFormat('yyyy')
-                                          .format(movie.releaseDate! as DateTime)
+                                          .format(movie.releaseDate!)
                                       : 'N/A',
                                   style: const TextStyle(
                                       color: AppColors.secondaryText)),
@@ -307,7 +306,7 @@ class MovieDetailsScreen extends StatelessWidget {
                             spacing: 6.0,
                             runSpacing: 4.0,
                             children: movie.genres
-                                !.map((genre) => Chip(
+                                .map((genre) => Chip(
                                       label: Text(genre,
                                           style: const TextStyle(fontSize: 11)),
                                       backgroundColor: AppColors.chipBackground,
@@ -330,7 +329,9 @@ class MovieDetailsScreen extends StatelessWidget {
                     children: [
                       ElevatedButton.icon(
                         icon: const Icon(Icons.play_arrow),
-                        label: const Text('Play'),
+                        label: Text(
+                          isWatched ? 'Played Before' : 'Play',
+                        ),
                         style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.accentColor,
                             foregroundColor: AppColors.primaryText,
@@ -419,7 +420,12 @@ class MovieDetailsScreen extends StatelessWidget {
   }
 
   // --- Function to show Download Link Selection Dialog ---
-  void _showDownloadLinkSelection(BuildContext context, List<String> links) {
+  void _showDownloadLinkSelection(
+      BuildContext context, List<String> links) async {
+    final userDataService =
+        Provider.of<UserDataService>(context, listen: false);
+
+    String xd = '';
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -436,29 +442,31 @@ class MovieDetailsScreen extends StatelessWidget {
             // Try to guess quality from URL (very basic)
             String qualityGuess = "Unknown";
             if (link.contains('1080p')) {
-              qualityGuess = "1080p";
+              qualityGuess = "1080p ";
             } else if (link.contains('720p'))
-              qualityGuess = "720p";
+              qualityGuess = "720p ";
             else if (link.contains('480p'))
-              qualityGuess = "480p";
+              qualityGuess = "480p ";
             else if (link.contains('BluRay'))
-              qualityGuess += " BluRay";
+              qualityGuess += " BluRay ";
             else if (link.contains('HEVC') || link.contains('x265'))
-              qualityGuess += " HEVC";
+              qualityGuess += " HEVC ";
             else if (link.contains('x264')) qualityGuess += " x264";
 
             return SimpleDialogOption(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.pop(dialogContext); // Close the dialog
                 // Navigate to the Video Player Screen
-                 final encodedUrl = Uri.encodeComponent(link);
-    
-                 Navigator.push(
-                   context,
-                   MaterialPageRoute(
-                     builder: (_) => VideoPlayerScreen(videoUrl: link),
-                   ),
-                 );
+                final encodedUrl = Uri.encodeComponent(link);
+                await userDataService
+                  ..toggleIsWatchedLink(
+                      movieId, movieId, movieId, links.toString());
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => VideoPlayerScreen(videoUrl: link),
+                  ),
+                );
               },
               padding:
                   const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
@@ -475,6 +483,7 @@ class MovieDetailsScreen extends StatelessWidget {
       },
     );
   }
+
   void _realDownloadinglink(BuildContext context, List<String> links) {
     showDialog(
       context: context,

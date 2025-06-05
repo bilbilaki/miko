@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html_parser;
-import 'package:html/dom.dart';
 
 class MStreamClickExtractor {
   final String name = "${utf8.decode(base64.decode("bW9mbGl4LQ=="))}${utf8.decode(base64.decode("c3RyZWFtLmNsaWNr"))}";

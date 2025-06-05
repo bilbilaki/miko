@@ -48,8 +48,9 @@ class MovieProvider extends ChangeNotifier {
   }
 
   Future<void> loadMovies() async {
-    if (_status == LoadingStatus.loading || _status == LoadingStatus.loaded)
+    if (_status == LoadingStatus.loading || _status == LoadingStatus.loaded) {
       return; // Prevent multiple loads
+    }
     _searchQuery = '';
     _status = LoadingStatus.loading;
     _errorMessage = null;
@@ -116,6 +117,7 @@ class MovieProvider extends ChangeNotifier {
       return null; // Not found
     }
   }
-      notifyListeners();
+      @override
+  notifyListeners();
 
 }

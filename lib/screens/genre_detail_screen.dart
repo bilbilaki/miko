@@ -28,7 +28,7 @@ class GenreDetailScreen extends StatelessWidget {
     final animeProvider = Provider.of<AnimeProvider>(context, listen: false); // If you have anime
 
     final List<Movie> moviesInGenre = movieProvider.movies
-        .where((m) => m.genres!.any((g) => g.toLowerCase() == genre.toLowerCase()))
+        .where((m) => m.genres.any((g) => g.toLowerCase() == genre.toLowerCase()))
         .toList();
 
     final List<TvSeries> tvSeriesInGenre = tvProvider.seriesForDisplay // Use seriesForDisplay to respect potential sorting/filtering

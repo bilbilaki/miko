@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:miko/showcases/movies_by_keyword_screen.dart';
-import 'movie_model.dart';
+import 'model.dart';
 import 'movie_service.dart';
 import 'person_detail_page.dart';
 
 class MovieDetailPage extends StatefulWidget {
   final Movie movie;
 
-  const MovieDetailPage({Key? key, required this.movie}) : super(key: key);
+  const MovieDetailPage({super.key, required this.movie});
 
   @override
   State<MovieDetailPage> createState() => _MovieDetailPageState();
