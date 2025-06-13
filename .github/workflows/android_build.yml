@@ -1,0 +1,64 @@
+name: Android Build & Release
+
+on:
+  workflow_dispatch:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up OpenJDK 17 (Azul)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter 2.9.x
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '2.9.x'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          api-level: 25
+          arch: arm64-v8a
+          target: default
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build debug APK (arm64)
+        run: flutter build apk --debug --target-platform=android-arm64 --split-per-abi
+
+      - name: Build release APK (arm64)
+        run: flutter build apk --release --target-platform=android-arm64 --split-per-abi
+
+      - name: Upload APKs as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apks
+          path: build/app/outputs/flutter-apk/*.apk
+
+      - name: Set output for APK paths
+        id: apk_paths
+        run: |
+          echo "debug_apk=$(ls build/app/outputs/flutter-apk/app-arm64-v8a-debug.apk)" >> $GITHUB_OUTPUT
+          echo "release_apk=$(ls build/app/outputs/flutter-apk/app-arm64-v8a-release.apk)" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release and upload APKs
+        if: ${{ success() }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-build-${{ github.run_number }}
+          name: Android Build ${{ github.run_number }}
+          files: |
+            build/app/outputs/flutter-apk/app-arm64-v8a-debug.apk
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
