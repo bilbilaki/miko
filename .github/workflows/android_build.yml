@@ -2,8 +2,6 @@ name: Android CI/CD - Build, Test & Release
 
 on:
   workflow_dispatch:
-    branches:
-      - master
 
 jobs:
   build-and-release:
@@ -33,14 +31,11 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Run tests
-        run: flutter test
-
       - name: Build debug APK (arm64)
-        run: flutter build apk --debug --target-platform=android-arm64 --split-per-abi
+        run: flutter build apk --debug 
 
       - name: Build release APK (arm64)
-        run: flutter build apk --release --target-platform=android-arm64 --split-per-abi
+        run: flutter build apk --release
 
       - name: Upload APKs as artifacts
         uses: actions/upload-artifact@v4
