@@ -1,12 +1,10 @@
 // lib/widgets/episode_tile.dart
 import 'package:flutter/material.dart';
 import 'package:miko/models/episode_anime.dart';
-import 'package:miko/models/season_anime.dart';
 import 'package:miko/screens/video_player_screen.dart'; // Your player screen
 import 'package:miko/services/user_data_service.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:provider/provider.dart';
-import 'package:tmdb_flutter/tmdb_flutter.dart';
 
 class AnimeEpisodeTile extends StatelessWidget {
   final EpisodeAnime episode;

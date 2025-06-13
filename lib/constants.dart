@@ -1,6 +1,6 @@
 // TODO Implement this library.
 
-library tmdb_api_constants;
+library;
 import 'package:flutter/foundation.dart';
 // lib/constants.dart
 class AppConstants {

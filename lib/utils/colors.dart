@@ -14,14 +14,12 @@ class AppThemes {
       primary: const Color(0xFFE50914),
       secondary: const Color(0xFFB20710), // Darker Red
       surface: const Color(0xFF1A1A1A),
-      surfaceVariant: const Color(0xFF2D2D2D),
+      surfaceContainerHighest: const Color(0xFF2D2D2D),
       onPrimary: Colors.white,
       onSecondary: Colors.white,
       onSurface: Colors.grey[300]!,
       onSurfaceVariant: Colors.grey[500]!,
       error: const Color(0xFFE50914),
-      background: Colors.black,
-      onBackground: Colors.grey[300]!,
     ),
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.black,
@@ -99,7 +97,6 @@ class AppThemes {
       surface: Colors.white,
       onPrimary: Colors.white,
       onSurface: Colors.grey[800]!,
-      background: Colors.white,
     ),
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.white,

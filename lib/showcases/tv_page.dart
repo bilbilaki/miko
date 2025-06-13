@@ -23,23 +23,39 @@ class _TvShowPageState extends State<TvShowPage> {
   int _totalPages = 1;
   bool _isLoading = false;
   bool _hasError = false;
+  int _currentPage2 = 1;
+  int _totalPages2 = 1;
+  bool _isLoading2 = false;
+  bool _hasError2 = false;
   String _errorMessage = '';
+    String _errorMessage2 = '';
+
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
+    final ScrollController _scrollController2 = ScrollController();
+  final TextEditingController _searchController2 = TextEditingController();
+
   Timer? _debounce;
 
   MultiSearchResponse? _searchResponse;
-  bool _isLoadings = false;
   String? _error;
-  String _currentQuery = '';
-  int _currentPages = 1;
-  bool _isFetchingMore = false;
+    String? _error2;
+
+  final String _currentQuery = '';
+    String _currentQuery2 = '';
+
+  final bool _isFetchingMore = false;
+    bool _isFetchingMore2 = false;
+
   @override
   void initState() {
     super.initState();
     _loadTvShows();
     _scrollController.addListener(_scrollListener);
+    _scrollController2.addListener(_scrollListener2);
     _searchController.addListener(_onSearchChanged);
+        _searchController2.addListener(_onSearchChanged);
+
   }
 
   @override
@@ -60,7 +76,14 @@ class _TvShowPageState extends State<TvShowPage> {
       }
     }
   }
-
+void _scrollListener2() {
+    if (_scrollController2.position.pixels >=
+        _scrollController2.position.maxScrollExtent * 0.8) {
+      if (!_isLoading2 && _currentPage2 < _totalPages2) {
+        _loadMoreTvShows2();
+      }
+    }
+  }
   Future<void> _loadTvShows() async {
     if (_isLoading) return;
 
@@ -84,6 +107,34 @@ class _TvShowPageState extends State<TvShowPage> {
         _isLoading = false;
       });
     }
+  }
+  Future<void> _loadTvShows2() async {
+    if (_isLoading2) return;
+
+    setState(() {
+      _isLoading2 = true;
+      _hasError2 = false;
+    });
+
+    try {
+      final response = await _tmdbService.discoverTvShows(page: _currentPage2);
+
+      setState(() {
+        _tvShows.addAll(response.results);
+        _totalPages2 = response.totalPages;
+        _isLoading2 = false;
+      });
+    } catch (e) {
+      setState(() {
+        _hasError2 = true;
+        _errorMessage2 = e.toString();
+        _isLoading2 = false;
+      });
+    }
+  }
+  Future<void> _loadMoreTvShows2() async {
+    _currentPage2++;
+    await _loadTvShows2();
   }
 
   Future<void> _loadMoreTvShows() async {
@@ -179,8 +230,8 @@ class _TvShowPageState extends State<TvShowPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) {
           // Listen to changes in the search controller and update overlay state
-          _searchController.removeListener(_onSearchChanged);
-          _searchController.addListener(() {
+          _searchController2.removeListener(_onSearchChanged);
+          _searchController2.addListener(() {
             setModalState(() {}); // Rebuild overlay on text change
             _onSearchChanged();
           });
@@ -188,7 +239,7 @@ class _TvShowPageState extends State<TvShowPage> {
             initialChildSize: 0.9,
             minChildSize: 0.5,
             maxChildSize: 0.95,
-            builder: (context, controller) => Container(
+            builder: (context, controller2) => Container(
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
                 borderRadius:
@@ -200,15 +251,15 @@ class _TvShowPageState extends State<TvShowPage> {
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: TextField(
-                      controller: _searchController,
+                      controller: _searchController2,
                       decoration: InputDecoration(
                         hintText: 'Search TV Shows...',
                         prefixIcon: const Icon(Icons.search),
                         suffixIcon: IconButton(
                           icon: const Icon(Icons.clear),
                           onPressed: () {
-                            _searchController.clear();
-                            setModalState(() {});
+                            _searchController2.clear();
+                            setModalState((){});
                           },
                         ),
                         border: OutlineInputBorder(
@@ -236,8 +287,8 @@ class _TvShowPageState extends State<TvShowPage> {
   }
 
   Widget _buildBody() {
-    if (_isLoading &&
-        (_searchResponse == null || _searchResponse!.results.isEmpty)) {
+    if (_isLoading2 )
+       {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -245,22 +296,22 @@ class _TvShowPageState extends State<TvShowPage> {
       return Center(child: Text('Error: $_error'));
     }
 
-    if (_searchResponse == null && _currentQuery.isEmpty) {
+    if (_searchResponse == null) {
       return const Center(child: Text('Start typing to search...'));
     }
 
     if (_searchResponse == null || _searchResponse!.results.isEmpty) {
-      return Center(child: Text('No results found for "$_currentQuery".'));
+      return Center(child: Text('No results found for "$_currentQuery2".'));
     }
 
     final results = _searchResponse!.results;
 
     return ListView.builder(
-      controller: _scrollController,
+      controller: _scrollController2,
       padding: const EdgeInsets.all(8.0),
-      itemCount: results.length + (_isFetchingMore ? 1 : 0),
+      itemCount: results.length + (_isFetchingMore2 ? 1 : 0),
       itemBuilder: (context, index) {
-        if (index == results.length && _isFetchingMore) {
+        if (index == results.length && _isFetchingMore2) {
           return const Center(
               child: Padding(
                   padding: EdgeInsets.all(8.0),
@@ -383,47 +434,47 @@ class _TvShowPageState extends State<TvShowPage> {
   //   }
   // }
 
-  void _onSearchChanged() {
+  void _onSearchChanged() async {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 700), () {
-      if (_searchController.text.trim() != _currentQuery) {
-        _currentQuery = _searchController.text.trim();
-        _currentPages = 1;
+    _debounce = Timer(const Duration(milliseconds: 200), () {
+      if (_searchController2.text != _currentQuery2) {
+        _currentQuery2 = _searchController2.text;
+        _currentPage2 = 1;
         _searchResponse = null;
-        if (_currentQuery.isNotEmpty) {
+        if (_currentQuery2.isNotEmpty) {
           _fetchMultiSearch();
         } else {
           setState(() {
-            _isLoadings = false;
+            _isLoading2 = false;
             _searchResponse = null;
-            _error = null;
+            _error2 = null;
           });
         }
       }
     });
   }
 
-  Future<void> _fetchMultiSearch({bool loadMore = false}) async {
-    if (_currentQuery.isEmpty || _isFetchingMore) return;
+  Future<void> _fetchMultiSearch({bool loadMore2 = false}) async {
+    if (_currentQuery2.isEmpty || _isFetchingMore2) return;
 
     setState(() {
-      if (loadMore) {
-        _isFetchingMore = true;
+      if (loadMore2) {
+        _isFetchingMore2 = true;
       } else {
-        _isLoading = true;
+        _isLoading2 = true;
       }
       _error = null;
     });
 
     try {
       final response = await _movieService.multiSearch(
-        query: _currentQuery,
-        page: _currentPage,
+        query: _currentQuery2,
+        page: _currentPage2,
       );
 
       if (mounted) {
         setState(() {
-          if (loadMore) {
+          if (loadMore2) {
             _searchResponse?.results.addAll(response.results);
             _searchResponse = MultiSearchResponse(
               page: response.page,
@@ -435,10 +486,10 @@ class _TvShowPageState extends State<TvShowPage> {
             _searchResponse = response;
           }
 
-          if (loadMore) {
-            _isFetchingMore = false;
+          if (loadMore2) {
+            _isFetchingMore2 = false;
           } else {
-            _isLoading = false;
+            _isLoading2 = false;
           }
         });
       }
@@ -446,10 +497,10 @@ class _TvShowPageState extends State<TvShowPage> {
       if (mounted) {
         setState(() {
           _error = e.toString();
-          if (loadMore) {
-            _isFetchingMore = false;
+          if (loadMore2) {
+            _isFetchingMore2 = false;
           } else {
-            _isLoading = false;
+            _isLoading2 = false;
           }
         });
       }

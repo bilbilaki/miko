@@ -7,7 +7,7 @@ class EpisodeAnime {
   final int seriesTmdbId;   // TMDB ID of the series this episode belongs to
   final String episodeIdentifier; // e.g., "S01E05" from CSV
   final int seasonNumber;
-  final int episodeNumber;
+  late final int episodeNumber;
   final String? url1080p;
   final String? url720p;
   final String? url540p;
@@ -97,12 +97,12 @@ class EpisodeAnime {
 
     // Validate that we have at least S/E numbers, otherwise skip? Or maybe allow S0E0?
     // For now, we allow S0E0 from the parsing default/error.
-     if (seasonNum == 0 && episodeNum == 0 && episodeId != 'S00E00'){
-       // Log a warning if parsing failed but the ID wasn't literally S00E00
-       if (kDebugMode) {
-          print("Warning: Episode identifier '$episodeId' for '$seriesNameFromCsv' parsed as S0E0.");
-        }
-     }
+    //  if (seasonNum == 0 && episodeNum == 0 && episodeId != 'S00E00'){
+    //    // Log a warning if parsing failed but the ID wasn't literally S00E00
+    //    if (kDebugMode) {
+    //       print("Warning: Episode identifier '$episodeId' for '$seriesNameFromCsv' parsed as S0E0.");
+    //     }
+    //  }
 
      return EpisodeAnime(
        seriesNameCsv: seriesNameFromCsv, // Store the name from CSV for reference

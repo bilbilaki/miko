@@ -42,8 +42,4 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Monarch related
-.monarch/
 
-# Monarch related
-.monarch/

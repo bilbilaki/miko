@@ -186,13 +186,13 @@ class CustomSideDrawer extends StatelessWidget {
                   builder: (_) => MultiSearchPage(), // Pass movie ID
                 ));
           }),
-            _buildDrawerItem(context, icon: Icons.dangerous, title: '',
-              onTap: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => FullScreenGridPage(), // Pass movie ID
-                ));}),
+            //_buildDrawerItem(context, icon: Icons.dangerous, title: '',
+            //  onTap: //() //{
+            // Navigator.push(
+            //     context,
+            //     MaterialPageRoute(
+            //       builder: n //FullScreenGridPage(), // Pass movie ID
+            //     ));}),
         ],
       ),
     );

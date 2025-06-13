@@ -1,123 +1,183 @@
-// main.dart
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:media_kit/media_kit.dart';
-import 'package:media_kit_video/media_kit_video.dart';
-import 'package:miko/screens/video_player_screen.dart';
+// import 'dart:io' show Platform;
+// import 'package:flutter/foundation.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter/services.dart';
+// import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+// import 'package:media_kit/media_kit.dart';
+// import 'package:media_kit_video/media_kit_video.dart';
+// import 'package:miko/screens/video_player_screen.dart';
+// import 'package:miko/widgets/v.dart';
 
-class TileWidget extends StatefulWidget {
-  final String imageUrl;
-  final String videoUrl;
-  final String streamUrl;
-  final int n;
-  const TileWidget(
-      {super.key,
-      required this.imageUrl,
-      required this.videoUrl,
-      required this.streamUrl,
-      required this.n});
+// /// 2) Tile widget
 
-  @override
-  State<TileWidget> createState() => _TileWidgetState();
-}
+// class PosterGridWithPreview extends StatefulWidget {
+//   final List<Map<String, Object>> items;
+//   const PosterGridWithPreview({required this.items, super.key});
 
-class _TileWidgetState extends State<TileWidget> {
-  late final Player player = Player();
-  // Create a [VideoController] instance from `package:media_kit_video`.
-  late final VideoController controller = VideoController(player);
-  bool _hovering = false;
-  bool _initialized = false;
+//   @override
+//   State<PosterGridWithPreview> createState() => _PosterGridWithPreviewState();
+// }
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {});
+// class _PosterGridWithPreviewState extends State<PosterGridWithPreview> {
+//   int? previewingIndex;
+//   late final Player player = Player();
+//   // Create a [VideoController] instance from `package:media_kit_video`.
+//   late final VideoController controller = VideoController(player);
 
-    // Open the video URL.
-    player.open(
-      Media(Uri.decodeComponent(widget.videoUrl)),
-      play: true,
-    );
-    // We delay initialize until first hover to save resources:
-  }
+//   @override
+//   void initState() {
+//     super.initState();
+//     // Move permission check to after widget is fully initialized
+//     WidgetsBinding.instance.addPostFrameCallback((_) {});
 
-  @override
-  void dispose() {
-    player.dispose();
-    super.dispose();
-  }
+//     // Open the video URL.
 
-  Future<void> _initVideo() async {
-    if (!_initialized) {
-      setState(() => _initialized = true);
-    }
-  }
+//     // Add error handling
+//     player.stream.error.listen((error) {
+//       debugPrint('Player error: $error');
+//       // You might want to show a snackbar or dialog here
+//     });
+//   }
 
-  void _onHoverEnter(PointerEnterEvent _) async {
-    _hovering = true;
-    await _initVideo();
-    player.play();
-    setState(() {});
-  }
+//   @override
+//   void dispose() {
+//     _stopAndDispose();
+//     super.dispose();
+//   }
 
-  void _onHoverExit(PointerExitEvent _) {
-    _hovering = false;
-    player.pause();
-    setState(() {});
-    player.dispose();
-    super.dispose();
-  }
+//   void _startPreview(int idx, String videoUrl) async {
+//     if (previewingIndex == idx) return;
+//     _stopAndDispose();
+//     setState(() {
+//       previewingIndex = idx;
+//       player.open(Media(Uri.decodeComponent(videoUrl)),
+//           play: true); // Start playing immediately
+//     });
+//     player!.play();
+//     setState(() {});
+//   }
 
-  void _onTap() {
-     Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => VideoPlayerScreen(videoUrl: widget.streamUrl,), // Pass movie ID
-                ));
-  
-  }
+//   void _stopAndDispose() {
+//     player?.pause();
+//     player?.dispose();
+//     previewingIndex = null;
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: _onHoverEnter,
-      onExit: _onHoverExit,
-      child: GestureDetector(
-        onTap: _onTap,
-        child: Container(
-          color: Colors.grey[900],
-          child: AspectRatio(
-            aspectRatio: 16 / 9,
-            child: Stack(
-              children: [
-                // 1) Default: Image
-                AnimatedOpacity(
-                  opacity: _hovering ? 0 : 1,
-                  duration: const Duration(milliseconds: 200),
-                  child: Image.network(
-                    widget.imageUrl,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: double.infinity,
-                  ),
-                ),
-                // 2) On hover: Video
-                if (_initialized)
-                  AnimatedOpacity(
-                    opacity: _hovering ? 1 : 0,
-                    duration: const Duration(milliseconds: 200),
-                    child: Video(controller: controller,
-                    controls: null,
-                    filterQuality: FilterQuality.high
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+//   bool get _isMobile => !kIsWeb && (Platform.isAndroid || Platform.isIOS);
 
-/// 3) Detail page (when a tile is clicked)
+//   @override
+//   Widget build(BuildContext context) {
+//     return MasonryGridView.count(
+//       crossAxisCount: 3,
+//       mainAxisSpacing: 4,
+//       crossAxisSpacing: 4,
+//       itemCount: widget.items.length,
+//       itemBuilder: (ctx, idx) {
+//         final it = widget.items[idx];
+//         return _GridPosterTile(
+//           n: it['n'] as int,
+//           imageUrl: it['image'] as String,
+//           previewUrl: it['preview'] as String,
+//           streamUrl: it['stream'] as String,
+//           isPreviewing: previewingIndex == idx,
+//           controller: controller,
+//           onHoverStart: () {
+//             if (!_isMobile) _startPreview(idx, it['preview'] as String);
+//           },
+//           onHoverEnd: () {
+//             if (!_isMobile) _stopAndDispose();
+//           },
+//           onTap: () {
+//             if (_isMobile) {
+//               HapticFeedback.mediumImpact();
+//               _startPreview(idx, it['preview'] as String);
+//             } else {
+//               // On desktop, go to player immediately.
+//               Navigator.push(
+//                   context,
+//                   MaterialPageRoute(
+//                     builder: (_) => VideoPlayerScreen(
+//                         videoUrl: it['stream']
+//                             .toString()), // Use it['stream'] as the video URL
+//                   ));
+//             }
+//           },
+//           onTapPoster: () {
+//             Navigator.push(
+//                 context,
+//                 MaterialPageRoute(
+//                   builder: (_) => VideoPlayerScreen(
+//                       videoUrl: it['stream']
+//                           .toString()), // Use it['stream'] as the video URL
+//                 ));
+//           },
+//         );
+//       },
+//     );
+//   }
+// }
+
+// class _GridPosterTile extends StatelessWidget {
+//   final int n;
+//   final String imageUrl;
+//   final String previewUrl;
+//   final String streamUrl;
+//   final bool isPreviewing;
+//   final VideoController controller;
+//   final VoidCallback onHoverStart;
+//   final VoidCallback onHoverEnd;
+//   final VoidCallback onTap;
+//   final VoidCallback onTapPoster;
+
+//   const _GridPosterTile({
+//     required this.n,
+//     required this.imageUrl,
+//     required this.previewUrl,
+//     required this.streamUrl,
+//     required this.isPreviewing,
+//     required this.controller,
+//     required this.onHoverStart,
+//     required this.onHoverEnd,
+//     required this.onTap,
+//     required this.onTapPoster,
+//   });
+
+//   @override
+//   Widget build(BuildContext context) {
+//     Widget poster = GestureDetector(
+//       onTap: onTapPoster,
+//       child: Image.network(
+//         imageUrl,
+//         fit: BoxFit.cover,
+//         width: double.infinity,
+//         height: 170,
+//         errorBuilder: (c, e, s) => Container(
+//           color: Colors.grey[800],
+//           height: 170,
+//         ),
+//       ),
+//     );
+
+//     Widget previewWidget= VideoPlayerDetail( url: previewUrl);
+
+//     Widget tileContent = Stack(
+//       fit: StackFit.passthrough,
+//       alignment: Alignment.center,
+//       children: [
+//         previewWidget,
+//         if (!isPreviewing) const SizedBox(), // For hit test
+//       ],
+//     );
+
+//     return MouseRegion(
+//       onEnter: (_) => onHoverStart(),
+//       onExit: (_) => onHoverEnd(),
+//       child: GestureDetector(
+//         onTap: onTap,
+//         child: tileContent,
+//       ),
+//     );
+//   }
+// }
+
+// /// 2) Tile widget

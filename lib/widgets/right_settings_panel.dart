@@ -1,24 +1,30 @@
 // TODO Implement this library.
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:miko/providers/right_sidebar_provider.dart';
-import 'package:miko/providers/sidebar_provider.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/screens/favorites_screen.dart';
 import 'package:miko/screens/genre_list_screen.dart';
 import 'package:miko/screens/home_screen.dart';
+import 'package:miko/screens/http%20copy.dart';
+import 'package:miko/screens/http.dart';
+
+import 'package:miko/screens/local_screen.dart';
 import 'package:miko/screens/settings_screen.dart';
 import 'package:miko/screens/shorts_screen.dart';
 import 'package:miko/screens/tv_series_grid_screen.dart';
 import 'package:miko/screens/watchlist_screen.dart';
 import 'package:miko/showcases/keyword_search_page.dart';
 import 'package:miko/showcases/movie_page.dart';
+import 'package:miko/showcases/movie_page_copy.dart';
 import 'package:miko/showcases/moviesearchpage.dart';
-import 'package:miko/showcases/multi_search_page.dart';
+import 'package:miko/showcases/tv_page_anime.dart';
 import 'package:miko/showcases/tv_page.dart';
+import 'package:miko/showcases/tv_page_tv.dart';
 import 'package:miko/showcases/tvsearchpage.dart';
 import 'package:miko/utils/colors.dart';
-import 'package:miko/widgets/video_card.dart';
 
 class RightNavigationPanel extends ConsumerWidget {
   final bool isMobileLayout;
@@ -121,55 +127,53 @@ class RightNavigationPanel extends ConsumerWidget {
               _buildNavigationItem(
                 context,
                 ref,
-                icon: Icons.dangerous,
-                title: 'Fullscreen',
+                icon: Icons.file_open_outlined,
+                title: 'File Explorer',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, FullScreenGridPage(), isMobileLayout),
+                    _navigateTo(context, LocalScreen(), isMobileLayout),
               ),
               _buildNavigationItem(
                 context,
                 ref,
-                icon: Icons.javascript,
-                title: 'Browse search',
+                icon: Icons.hdr_on_select_rounded,
+                title: 'Creweler1',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, MultiSearchPage(), isMobileLayout),
+                    _navigateTo(context, CrawlerHomePage(), isMobileLayout),
               ),
               _buildNavigationItem(
                 context,
                 ref,
-                icon: Icons.five_k_plus_rounded,
-                title: 'Browse keywords',
+                icon: Icons.card_membership_sharp,
+                title: 'Tvshow Beta',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, KeywordSearchPage(), isMobileLayout),
+                    _navigateTo(context, TvShowPage1(), isMobileLayout),
               ),
               _buildNavigationItem(
                 context,
                 ref,
-                icon: Icons.question_mark,
-                title: 'Browse movies',
+                icon: Icons.movie_edit,
+                title: 'Movie Beta',
                 showText: showText,
-                onTap: () =>
-                    _navigateTo(context, MovieSearchPage(), isMobileLayout),
+                onTap: () => _navigateTo(context, MoviePage1(), isMobileLayout),
               ),
-              _buildNavigationItem(
-                context,
-                ref,
-                icon: Icons.add,
-                title: 'Browse channels',
-                showText: showText,
-                onTap: () =>
-                    _navigateTo(context, TvSearchPage(), isMobileLayout),
-              ),
+              _buildNavigationItem(context, ref,
+                  icon: Icons.translate_outlined,
+                  title: 'Crewler2',
+                  showText: showText, onTap: () {
+               
+                  _navigateTo(context, CrawlerHomePage1(), isMobileLayout);
+              
+              }),
               _buildNavigationItem(
                 context,
                 ref,
                 icon: Icons.tv_rounded,
-                title: 'Popular TV Shows',
+                title: 'TvShow Beta2',
                 showText: showText,
-                onTap: () => _navigateTo(context, TvShowPage(), isMobileLayout),
+                onTap: () => _navigateTo(context, TvShowPageTV(), isMobileLayout),
               ),
               _buildNavigationItem(
                 context,

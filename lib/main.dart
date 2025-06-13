@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:media_cache_manager/media_cache_manager.dart';
 import 'package:miko/app.dart';
 import 'package:miko/providers/anime_provider.dart';
+import 'package:miko/providers/loca_provider.dart';
 import 'package:miko/providers/settings_provider.dart';
 import 'package:miko/services/user_data_service.dart'; // Import UserDataService
 import 'package:miko/utils/colors.dart';
@@ -10,21 +13,19 @@ import 'package:miko/app_shell.dart';
 import 'package:miko/providers/movie_provider.dart';
 import 'package:miko/providers/tv_series_provider.dart';
 import 'package:media_kit/media_kit.dart';
-import 'router.dart';
-import 'package:tmdb_flutter/tmdb_flutter.dart';
-import 'constants.dart' as c;
 import 'package:lottie/lottie.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as pr;
-Future<void> main() async {
+
+import 'package:sqflite_common_ffi/sqflite_ffi.dart' as ffi;
+
+Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   MediaKit.ensureInitialized();
   await MediaCacheManager.instance.init();
-  // Hive.registerAdapter(MovieAdapter()); // Remove or comment out if this was for the old model
-  TmdbFlutter.init(apiKey: c.AppConstants.tmdbapikey);
-
-  // Initialize Hive and register adapters
-
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    ffi.sqfliteFfiInit();
+  }
   runApp(
     MultiProvider(
       providers: [
@@ -40,19 +41,20 @@ Future<void> main() async {
         ChangeNotifierProvider(
             create: (context) => UserDataService()), // Add UserDataService
 
-        ChangeNotifierProvider(create: (_) => SearchProvider()),
-        ChangeNotifierProvider(create: (_) => TitleDetailsProvider()),
+        ChangeNotifierProvider(create: (_) => LocalProvider()),
       ],
       child: MyApp(), // Use const if MyApp is stateless
     ),
   );
 }
 
+// ignore: must_be_immutable
 class MyApp extends StatelessWidget {
   MyApp({super.key});
   late MovieProvider _movieProvider;
   late TvSeriesProvider _tvProvider;
   late AnimeProvider _animeProvider;
+  late LocalProvider _localProvider;
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +65,7 @@ class MyApp extends StatelessWidget {
       overrides: [
         settingsServiceProvider.overrideWith((ref) => settingsService),
       ],
-      child: 
+      child:
           MaterialApp(theme: AppThemes.netflixDarkTheme, home: SplashScreen()),
     );
   }

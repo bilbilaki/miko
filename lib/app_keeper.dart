@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'providers/settings_provider.dart';
 import 'screens/settings_screen.dart';
 import 'providers/sidebar_provider.dart';
 import 'providers/right_sidebar_provider.dart';
@@ -48,7 +47,7 @@ class _AppKeeperConsumerState extends ConsumerState<AppKeeper>
     final double sidebarWidth = isSidebarCollapsed ? 60.0 : 260.0;
     final double sidebarWidthRight = isRightSidebarCollapsed ? 60.0 : 260.0;
     final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth < 750; // Breakpoint for drawers
+    final isSmallScreen = screenWidth < 1300; // Breakpoint for drawers
 
     if (isSmallScreen) {
       // Mobile/Tablet Layout: Use Drawers with Tabs

@@ -48,19 +48,28 @@ dependencies:
   flutter_staggered_grid_view: ^0.7.0
   media_cache_manager: ^0.3.0
   permission_handler: ^12.0.0+1
-  device_info_plus: ^9.0.2
+  device_info_plus: ^11.4.0
   flutter_cache_manager: ^3.4.1
   url_launcher: ^6.3.1
   iconsax: ^0.0.8
-  tmdb_api: ^2.2.3
-  tmdb_flutter: ^0.1.0
   html: ^0.15.6
   encrypt: ^5.0.3
   logger: ^2.5.0
-  freezed_annotation: ^3.0.0
+  freezed_annotation: ^2.4.1
   flutter_riverpod: ^2.6.1
   google_fonts: ^6.2.1
   lottie: ^3.3.1
+  file_picker: ^10.1.9
+  video_preview_thumbnails: ^0.1.0
+  video_thumbnail: ^0.5.6
+  path: ^1.9.1
+  path_provider: ^2.1.5
+  beautiful_soup_dart: ^0.3.0
+  archive: ^4.0.7
+  xml: ^6.5.0
+  sqflite_common: ^2.5.5
+  sqflite_common_ffi: ^2.3.6
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -70,8 +79,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
-  monarch: ^3.0.0
-  build_runner: ^2.1.11
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

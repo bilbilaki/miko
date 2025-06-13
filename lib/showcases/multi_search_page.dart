@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:miko/showcases/model.dart';
 import 'dart:async';
 import 'movie_service.dart';
-import 'model.dart';
 import 'person_detail_page.dart';
 import 'movie_detail_page.dart';
 import 'tv_detail_page.dart';

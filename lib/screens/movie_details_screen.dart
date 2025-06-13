@@ -425,7 +425,6 @@ class MovieDetailsScreen extends StatelessWidget {
     final userDataService =
         Provider.of<UserDataService>(context, listen: false);
 
-    String xd = '';
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -458,8 +457,8 @@ class MovieDetailsScreen extends StatelessWidget {
                 Navigator.pop(dialogContext); // Close the dialog
                 // Navigate to the Video Player Screen
                 final encodedUrl = Uri.encodeComponent(link);
-                await userDataService
-                  ..toggleIsWatchedLink(
+                userDataService
+                  .toggleIsWatchedLink(
                       movieId, movieId, movieId, links.toString());
                 Navigator.push(
                   context,

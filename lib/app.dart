@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:miko/app_keeper.dart';
 import 'utils/colors.dart';
+
 class Xmiko extends ConsumerWidget {
   // Use ConsumerWidget
-  Xmiko({super.key});
+  const Xmiko({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

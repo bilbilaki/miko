@@ -69,7 +69,7 @@ class _EpisodeDetailPageState extends State<EpisodeDetailPage> {
             return CustomScrollView(
               slivers: [
                 SliverAppBar(
-                  expandedHeight: 250.0,
+                  expandedHeight: 400.0,
                   pinned: true,
                   flexibleSpace: FlexibleSpaceBar(
                     title: Text(

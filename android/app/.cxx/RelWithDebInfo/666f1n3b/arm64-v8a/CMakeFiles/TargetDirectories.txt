@@ -1,2 +1,0 @@
-/home/ns/Documents/xmiko/android/app/.cxx/RelWithDebInfo/666f1n3b/arm64-v8a/CMakeFiles/edit_cache.dir
-/home/ns/Documents/xmiko/android/app/.cxx/RelWithDebInfo/666f1n3b/arm64-v8a/CMakeFiles/rebuild_cache.dir

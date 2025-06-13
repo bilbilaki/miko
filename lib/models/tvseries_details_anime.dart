@@ -79,7 +79,7 @@ class TvSeriesDetailsAnime {
 TvSeriesDetails {
   id: $id,
   name: $name,
-  overview: ${overview.substring(0, overview.length > 50 ? 50 : overview.length)}...,
+  overview: ${overview.substring(0)}...,
   posterPath: $posterPath,
   backdropPath: $backdropPath,
   fullPosterUrl: $fullPosterUrl,

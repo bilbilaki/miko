@@ -178,11 +178,9 @@ class UserDataService extends ChangeNotifier {
         .join(":");
     final List<String> watchedList =
         _prefs?.getStringList(_isWatchedEpisodeKey) ?? [];
-    if (watchedList.contains(watchedKey)) {
-      watchedList.remove(watchedKey);
-    } else {
+
       watchedList.add(watchedKey);
-    }
+    
     await _prefs?.setStringList(_isWatchedEpisodeKey, watchedList);
     notifyListeners();
   }
