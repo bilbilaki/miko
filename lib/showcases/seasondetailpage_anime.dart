@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:miko/showcases/animeepisodedetailpage.dart';
 import 'model.dart';
 import 'movie_service.dart';
-import 'episodedetailpage.dart'; // For navigation
+// For navigation
 
 class SeasonDetailPageAnime extends StatefulWidget {
   final int tvShowId;

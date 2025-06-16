@@ -25,13 +25,13 @@ class AppThemes {
       backgroundColor: Colors.black,
       elevation: 0,
       iconTheme: IconThemeData(color: Colors.grey[300]),
-      titleTextStyle: GoogleFonts.roboto(
+      titleTextStyle: GoogleFonts.nunitoSans(
           color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: const Color(0xFF2D2D2D),
-      hintStyle: GoogleFonts.roboto(color: Colors.grey[600]),
+      hintStyle: GoogleFonts.nunitoSans(color: Colors.grey[600]),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(4),
         borderSide: BorderSide.none,
@@ -49,22 +49,22 @@ class AppThemes {
           borderRadius: BorderRadius.circular(4),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        textStyle: GoogleFonts.roboto(
+        textStyle: GoogleFonts.sofiaSansSemiCondensed(
             fontWeight: FontWeight.bold, fontSize: 16),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: const Color(0xFFE50914),
-        textStyle: GoogleFonts.roboto(fontWeight: FontWeight.bold),
+        textStyle: GoogleFonts.sofiaSansSemiCondensed(fontWeight: FontWeight.bold),
       )
     ),
     textTheme: TextTheme(
       displayLarge: GoogleFonts.robotoCondensed(
           color: Colors.white, fontWeight: FontWeight.bold),
-      titleLarge: GoogleFonts.roboto(
+      titleLarge: GoogleFonts.notoSansMeeteiMayek(
           color: Colors.white, fontWeight: FontWeight.bold),
-      bodyLarge: GoogleFonts.roboto(color: Colors.grey[300]),
+      bodyLarge: GoogleFonts.notoSansMeeteiMayek(color: Colors.grey[300]),
     ),
     cardTheme: CardTheme(
       color: const Color(0xFF1A1A1A),
@@ -113,7 +113,7 @@ class AppThemes {
       ),
     ),
     textTheme: TextTheme(
-      displayLarge: GoogleFonts.robotoCondensed(
+      displayLarge: GoogleFonts.notoSansMeeteiMayek(
           color: Colors.black, fontWeight: FontWeight.bold),
       bodyLarge: GoogleFonts.roboto(color: Colors.grey[800]),
     ),
@@ -418,63 +418,63 @@ class AppTheme {
 }
 
 // Example of how to use the MaterialApp with the theme
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+// class MyApp extends StatelessWidget {
+//   const MyApp({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Awesome App',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system, // Follows system theme
-      debugShowCheckedModeBanner: false,
-      home: const HomePagetest(),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       title: 'Awesome App',
+//       theme: AppTheme.lightTheme,
+//       darkTheme: AppTheme.darkTheme,
+//       themeMode: ThemeMode.system, // Follows system theme
+//       debugShowCheckedModeBanner: false,
+//       home: const HomePagetest(),
+//     );
+//   }
+// }
 
-// Placeholder for HomePage
-class HomePagetest extends StatelessWidget {
-  const HomePagetest({super.key});
+// // Placeholder for HomePage
+// class HomePagetest extends StatelessWidget {
+//   const HomePagetest({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Awesome App'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Welcome to Awesome App!',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {},
-              child: const Text('Primary Button'),
-            ),
-            const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: () {},
-              child: const Text('Outlined Button'),
-            ),
-            const SizedBox(height: 12),
-            TextButton(
-              onPressed: () {},
-              child: const Text('Text Button'),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: AppColors2.secondaryColor,
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text('Awesome App'),
+//       ),
+//       body: Center(
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             Text(
+//               'Welcome to Awesome App!',
+//               style: Theme.of(context).textTheme.headlineMedium,
+//             ),
+//             const SizedBox(height: 20),
+//             ElevatedButton(
+//               onPressed: () {},
+//               child: const Text('Primary Button'),
+//             ),
+//             const SizedBox(height: 12),
+//             OutlinedButton(
+//               onPressed: () {},
+//               child: const Text('Outlined Button'),
+//             ),
+//             const SizedBox(height: 12),
+//             TextButton(
+//               onPressed: () {},
+//               child: const Text('Text Button'),
+//             ),
+//           ],
+//         ),
+//       ),
+//       floatingActionButton: FloatingActionButton(
+//         onPressed: () {},
+//         backgroundColor: AppColors2.secondaryColor,
+//         child: const Icon(Icons.add),
+//       ),
+//     );
+//   }
+// }

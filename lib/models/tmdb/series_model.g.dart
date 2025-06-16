@@ -7,33 +7,35 @@ part of 'series_model.dart';
 // **************************************************************************
 
 _$SeriesImpl _$$SeriesImplFromJson(Map<String, dynamic> json) => _$SeriesImpl(
-  id: (json['id'] as num).toInt(),
-  title: json['title'] as String,
-  status: json['status'] as String? ?? '',
-  releaseDate: json['release_date'] == null
-      ? null
-      : DateTime.parse(json['release_date'] as String),
-  runtime: (json['runtime'] as num?)?.toInt(),
-  overview: json['overview'] as String? ?? '',
-  voteAverage: (json['vote_average'] as num?)?.toDouble() ?? 0.0,
-  voteCount: (json['vote_count'] as num?)?.toInt() ?? 0,
-  genres: json['genres'] == null ? const [] : genresFromJson(json['genres']),
-  keywords: json['keywords'] == null
-      ? const []
-      : keywordsFromJson(json['keywords']),
-  originalName: json['original_name'] as String? ?? '',
-  posterPath: json['poster_path'] as String?,
-  backdropPath: json['backdrop_path'] as String?,
-  popularity: (json['popularity'] as num?)?.toDouble() ?? 0.0,
-  originalLanguage: json['original_language'] as String? ?? '',
-  type: json['type'] as String? ?? '',
-  episodesNumber: (json['episodes_number'] as num?)?.toInt(),
-  seasonsNumber: (json['seasons_number'] as num?)?.toInt(),
-  homepage: json['homepage'] as String?,
-  cast: json['cast'] == null ? const [] : castFromJson(json['cast']),
-  crew: json['crew'] == null ? const [] : crewFromJson(json['crew']),
-  videos: json['videos'] == null ? const [] : videosFromJson(json['videos']),
-);
+      id: (json['id'] as num).toInt(),
+      title: json['title'] as String,
+      status: json['status'] as String? ?? '',
+      releaseDate: json['release_date'] == null
+          ? null
+          : DateTime.parse(json['release_date'] as String),
+      runtime: (json['runtime'] as num?)?.toInt(),
+      overview: json['overview'] as String? ?? '',
+      voteAverage: (json['vote_average'] as num?)?.toDouble() ?? 0.0,
+      voteCount: (json['vote_count'] as num?)?.toInt() ?? 0,
+      genres:
+          json['genres'] == null ? const [] : genresFromJson(json['genres']),
+      keywords: json['keywords'] == null
+          ? const []
+          : keywordsFromJson(json['keywords']),
+      originalName: json['original_name'] as String? ?? '',
+      posterPath: json['poster_path'] as String?,
+      backdropPath: json['backdrop_path'] as String?,
+      popularity: (json['popularity'] as num?)?.toDouble() ?? 0.0,
+      originalLanguage: json['original_language'] as String? ?? '',
+      type: json['type'] as String? ?? '',
+      episodesNumber: (json['episodes_number'] as num?)?.toInt(),
+      seasonsNumber: (json['seasons_number'] as num?)?.toInt(),
+      homepage: json['homepage'] as String?,
+      cast: json['cast'] == null ? const [] : castFromJson(json['cast']),
+      crew: json['crew'] == null ? const [] : crewFromJson(json['crew']),
+      videos:
+          json['videos'] == null ? const [] : videosFromJson(json['videos']),
+    );
 
 Map<String, dynamic> _$$SeriesImplToJson(_$SeriesImpl instance) =>
     <String, dynamic>{

@@ -683,10 +683,10 @@ class _CrawlerHomePageState extends State<CrawlerHomePage> {
   /// This is the Dart version of `save_results`.
   Future<void> _saveResults(String baseName) async {
     _log("💾 Saving results with base name: $baseName");
-  
+
     // Get a directory where we can save files
-    final  dir = await FilePicker.platform.getDirectoryPath();
-        await getApplicationDocumentsDirectory();
+    final dir = await FilePicker.platform.getDirectoryPath();
+    await getApplicationDocumentsDirectory();
     if (dir == null) {
       _log("❌ Could not find a writable directory.");
       return;
@@ -800,21 +800,7 @@ class _CrawlerHomePageState extends State<CrawlerHomePage> {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 1,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Web Crawler & Processor'),
-          bottom: const TabBar(
-            tabs: [
-              Tab(icon: Icon(Icons.cloud_download), text: 'Collect & Process'),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          children: [
-            _buildCrawlerTab(),
-          ],
-        ),
-      ),
+      child: _buildCrawlerTab(),
     );
   }
 

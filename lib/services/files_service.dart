@@ -57,4 +57,14 @@ Future<String> read( fileName) async {
       return 'erroe to reading file or not exist';
     }
   }
+
+Future<Directory> getAppSaveDirectory() async {
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    // Desktop platforms: use application support or documents directory
+    return await getApplicationSupportDirectory();
+  } else {
+    // Mobile platforms: use internal app directory
+    return await getApplicationDocumentsDirectory();
+  }
+}
 }

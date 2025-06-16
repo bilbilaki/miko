@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:miko/providers/movie_provider.dart';
 import 'package:miko/services/user_data_service.dart';
@@ -65,25 +66,19 @@ class _MovieDetailPage1State extends State<MovieDetailPage1> {
         future: _movieDataFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            // Показываем базовую информацию о фильме во время загрузки деталей
             return _buildLoadingView();
           } else if (snapshot.hasError) {
-            // Используем snapshot.error для сообщения об ошибке
             return _buildErrorView(context, snapshot.error.toString());
           } else if (snapshot.hasData) {
             final detailedMovie = snapshot.data!['details'] as Movie;
             final credits = snapshot.data!['credits'] as MovieCredits;
             recommendations = snapshot.data!['recommendations'] as MovieResponse;
 
-            // --- ИЗВЛЕКАЕМ КЛЮЧЕВЫЕ СЛОВА ---
-            // --- EXTRACT KEYWORDS ---
-            // Предполагаем, что detailedMovie (объект Movie) теперь содержит поле keywords
-            // Assumes detailedMovie (Movie object) now contains the keywords field
             _movieKeywords = detailedMovie.keywords;
 
             return _buildDetailView(context, detailedMovie, credits);
           } else {
-            // Не должно произойти, если future завершается без данных и без ошибки
+
             return _buildErrorView(context, 'No data received.');
           }
         },
@@ -154,6 +149,19 @@ class _MovieDetailPage1State extends State<MovieDetailPage1> {
   }
 
   Widget _buildAppBar(BuildContext context, Movie movie) {
+   
+
+    // Fetch UserDataService
+    final userDataService = Provider.of<UserDataService>(context);
+    bool isFavorite = userDataService.isFavoriteMovie(movie.id);
+final movieM = Provider.of<MovieProvider>(context, listen: false)
+        .getMovieById(movie.id);
+    final backdropUrl = movie.fullBackdropPath;
+    final posterUrl = movie.fullPosterPath;
+    final downloadLinks = movieM!.getDownloadLinksList();
+    bool isInWatchlist = userDataService.isOnWatchlistMovie(movie.id);
+    bool isWatched = userDataService.isWatchedEpisode(
+        movie.id, movie.id, movie.id, downloadLinks.toString());
     // ... (ваш существующий _buildAppBar без изменений)
     return SliverAppBar(
       expandedHeight: 250,
@@ -173,37 +181,149 @@ class _MovieDetailPage1State extends State<MovieDetailPage1> {
             ],
           ),
         ),
-        background: Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.network(
-              movie.fullBackdropPath,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: Colors.grey[900],
-                  child: const Center(
-                    child: Icon(Icons.broken_image, size: 50),
-                  ),
-                );
-              },
-            ),
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black54,
-                  ],
-                ),
+        background: Stack(fit: StackFit.expand, children: [
+                        CachedNetworkImage(
+                          imageUrl: backdropUrl,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) =>
+                              Container(color: AppColors.secondaryBackground),
+                          errorWidget: (context, url, error) => Container(
+                              color: const Color.fromARGB(255, 33, 33, 33),
+                              child: posterUrl != null
+                                  ? CachedNetworkImage(
+                                      imageUrl: posterUrl,
+                                      fit: BoxFit.contain) // Fallback to poster
+                                  : const Icon(Icons.movie_outlined,
+                                      size: 100,
+                                      color: AppColors.secondaryText)),
+                        ),
+                        // Add a gradient overlay for better title readability
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.black.withOpacity(0.2),
+                                  AppColors.primaryBackground.withOpacity(0.9),
+                                  AppColors.primaryBackground,
+                                ],
+                                stops: const [
+                                  0.0,
+                                  0.5,
+                                  0.9,
+                                  1.0
+                                ]),
+                          ),
+                        ),
+                        // Add the Positioned widget for favorite, rating, and watchlist
+                        Positioned(
+                          top: 8.0,
+                          right: 8.0,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Favorite
+                              IconButton(
+                                icon: Icon(
+                                  isFavorite
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color: isFavorite ? Colors.red : Colors.white,
+                                  size: 20,
+                                ),
+                                onPressed: () async {
+                                  await userDataService
+                                      .toggleFavoriteMovie(movie.id);
+                                  // Show snackbar feedback
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        isFavorite
+                                            ? 'Removed from Favorites'
+                                            : 'Added to Favorites',
+                                      ),
+                                      duration: const Duration(seconds: 1),
+                                    ),
+                                  );
+                                },
+                                style: IconButton.styleFrom(
+                                  backgroundColor:
+                                      Colors.black.withOpacity(0.5),
+                                  padding: const EdgeInsets.all(4.0),
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              // Rating bubble
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6.0, vertical: 4.0),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(4.0),
+                                ),
+                                child: Text(
+                                  '${movie.voteAverage.toStringAsFixed(1)}/10', // Display rating
+                                  style: const TextStyle(
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primaryText,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              // Watchlist - Movies don't typically have a watchlist concept like TV series episodes
+                              // but we can add a bookmark icon if desired for general tracking.
+                              // For now, let's omit the watchlist icon for movies unless specifically needed.
+                              // If you want it, uncomment and adapt the logic from AnimeDetailsScreen.
+                              IconButton(
+                                icon: Icon(
+                                  isInWatchlist
+                                      ? Icons.bookmark
+                                      : Icons.bookmark_border,
+                                  color: isInWatchlist
+                                      ? Colors.green
+                                      : Colors.white,
+                                  size: 20,
+                                ),
+                                onPressed: () async {
+                                  await userDataService
+                                      .toggleWatchlistMovie(movie.id);
+                                  // Show snackbar feedback
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        isInWatchlist
+                                            ? 'Removed from Watchlist'
+                                            : 'Added to Watchlist',
+                                      ),
+                                      duration: const Duration(seconds: 1),
+                                    ),
+                                  );
+                                },
+                                style: IconButton.styleFrom(
+                                  backgroundColor:
+                                      Colors.black.withOpacity(0.5),
+                                  padding: const EdgeInsets.all(4.0),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      ])
+                  
               ),
-            ),
-          ],
-        ),
-      ),
-    );
+              // Optional: Add subtle border when pinned
+              bottom: PreferredSize(
+                  // Add this code to get bottom border
+                  preferredSize:
+                      const Size.fromHeight(1.0), // Creates the border size
+                  child: Container(
+                    // Creates the border container
+                    color: AppColors.dividerColor.withOpacity(0.5),
+                    height: 1.0,
+                  )));
   }
 
   Widget _buildMovieDetails(BuildContext context, Movie movie, MovieCredits? credits, bool showDetailedInfo) {

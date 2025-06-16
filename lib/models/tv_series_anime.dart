@@ -8,6 +8,7 @@ enum LoadingStatus {
   loading,
   loaded,
   error,
+  notloaded
 }
 
 // Helper function for safe parsing (can be moved to a utility file)

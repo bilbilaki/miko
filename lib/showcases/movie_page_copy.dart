@@ -8,7 +8,6 @@ import 'movie_service.dart';
 import 'movie_detail_page.dart';
 import 'person_detail_page.dart';
 import 'tv_detail_page.dart';
-import '../models/movie.dart' as mmm;
 
 class MoviePage1 extends StatefulWidget {
   const MoviePage1({super.key});

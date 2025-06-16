@@ -32,7 +32,7 @@ class AnimeProvider extends ChangeNotifier {
       {}; // Keyed by TMDB ID for efficient lookup
   List<TvSeriesAnime> _allAnimeSeriesList = []; // Sorted list for display
   List<TvSeriesAnime> _searchResults = [];
-  LoadingStatus _status = LoadingStatus.idle;
+  LoadingStatus _status = LoadingStatus.notloaded;
   String? _errorMessage;
   String _searchQuery = '';
   bool _isInitialized = false;
@@ -63,7 +63,7 @@ class AnimeProvider extends ChangeNotifier {
   }
 
   Future<void> loadAnimeData() async {
-    if (_status == LoadingStatus.loading || _status == LoadingStatus.loaded) {
+    if (_status == LoadingStatus.loading || _status == LoadingStatus.loaded  || _status == LoadingStatus.idle) {
       return;
     }
 
@@ -92,15 +92,15 @@ class AnimeProvider extends ChangeNotifier {
             tempAnimeSeriesMap[animeseries.tmdbId] = animeseries;
             // Store the mapping: case-insensitive name from details CSV to its TMDB ID
             animeseriesnameToTmdbidMap[animeseries.originalName
-                .trim()
+              
                 .toLowerCase()] = animeseries.tmdbId;
             // Also map the potentially different 'series' name if it exists and differs
             if (row.length > 1 &&
                 row[1] != null &&
-                row[1].toString().trim().toLowerCase() !=
+                row[1].toString().toLowerCase() !=
                     animeseries.originalName.trim().toLowerCase()) {
               animeseriesnameToTmdbidMap[
-                  row[1].toString().trim().toLowerCase()] = animeseries.tmdbId;
+                  row[1].toString().toLowerCase()] = animeseries.tmdbId;
             }
           } else {
             if (kDebugMode) {
@@ -133,7 +133,7 @@ class AnimeProvider extends ChangeNotifier {
       for (final row in episodesCsvTable.skip(1)) {
         // Skip header row
         if (row.isNotEmpty && row[0] != null) {
-          final String animeseriesNameFromEpisodeCsv = row[0].toString().trim();
+          final String animeseriesNameFromEpisodeCsv = row[0].toString();
           final String animeseriesNameLower =
               animeseriesNameFromEpisodeCsv.toLowerCase();
 
@@ -238,7 +238,7 @@ class AnimeProvider extends ChangeNotifier {
   }
 
   void searchAnime(String query) {
-    _searchQuery = query.toLowerCase().trim();
+    _searchQuery = query.toLowerCase();
     if (_searchQuery.isEmpty) {
       _searchResults = _allAnimeSeriesList;
     } else {

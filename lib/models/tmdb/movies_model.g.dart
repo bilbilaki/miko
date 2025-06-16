@@ -7,47 +7,47 @@ part of 'movies_model.dart';
 // **************************************************************************
 
 _$MovieImpl _$$MovieImplFromJson(Map<String, dynamic> json) => _$MovieImpl(
-  id: (json['id'] as num).toInt(),
-  title: json['title'] as String,
-  voteAverage: (json['vote_average'] as num?)?.toDouble() ?? 0.0,
-  voteCount: (json['vote_count'] as num?)?.toInt() ?? 0,
-  status: json['status'] as String? ?? '',
-  releaseDate: json['release_date'] == null
-      ? null
-      : DateTime.parse(json['release_date'] as String),
-  revenue: (json['revenue'] as num?)?.toInt(),
-  runtime: (json['runtime'] as num?)?.toInt(),
-  adult: json['adult'] == null ? false : _boolFromJson(json['adult']),
-  backdropPath: json['backdrop_path'] as String?,
-  budget: (json['budget'] as num?)?.toInt(),
-  homepage: json['homepage'] as String?,
-  imdbId: json['imdb_id'] as String?,
-  originalLanguage: json['original_language'] as String? ?? '',
-  originalTitle: json['original_title'] as String? ?? '',
-  overview: json['overview'] as String? ?? '',
-  popularity: (json['popularity'] as num?)?.toDouble() ?? 0.0,
-  posterPath: json['poster_path'] as String?,
-  tagline: json['tagline'] as String?,
-  genres: json['genres'] == null
-      ? const []
-      : _movieGenresFromJson(json['genres']),
-  productionCompanies: json['production_companies'] == null
-      ? const []
-      : _movieProductionCompaniesFromJson(json['production_companies']),
-  productionCountries: json['production_countries'] == null
-      ? const []
-      : _movieProductionCountriesFromJson(json['production_countries']),
-  spokenLanguages: json['spoken_languages'] == null
-      ? const []
-      : _movieSpokenLanguagesFromJson(json['spoken_languages']),
-  keywords: json['keywords'] == null
-      ? const []
-      : _movieKeywordsFromJson(json['keywords']),
-  source: json['source'] as String?,
-  downloadLinks: json['download_links'] == null
-      ? const []
-      : _movieStringListFromJson(json['download_links']),
-);
+      id: (json['id'] as num).toInt(),
+      title: json['title'] as String,
+      voteAverage: (json['vote_average'] as num?)?.toDouble() ?? 0.0,
+      voteCount: (json['vote_count'] as num?)?.toInt() ?? 0,
+      status: json['status'] as String? ?? '',
+      releaseDate: json['release_date'] == null
+          ? null
+          : DateTime.parse(json['release_date'] as String),
+      revenue: (json['revenue'] as num?)?.toInt(),
+      runtime: (json['runtime'] as num?)?.toInt(),
+      adult: json['adult'] == null ? false : _boolFromJson(json['adult']),
+      backdropPath: json['backdrop_path'] as String?,
+      budget: (json['budget'] as num?)?.toInt(),
+      homepage: json['homepage'] as String?,
+      imdbId: json['imdb_id'] as String?,
+      originalLanguage: json['original_language'] as String? ?? '',
+      originalTitle: json['original_title'] as String? ?? '',
+      overview: json['overview'] as String? ?? '',
+      popularity: (json['popularity'] as num?)?.toDouble() ?? 0.0,
+      posterPath: json['poster_path'] as String?,
+      tagline: json['tagline'] as String?,
+      genres: json['genres'] == null
+          ? const []
+          : _movieGenresFromJson(json['genres']),
+      productionCompanies: json['production_companies'] == null
+          ? const []
+          : _movieProductionCompaniesFromJson(json['production_companies']),
+      productionCountries: json['production_countries'] == null
+          ? const []
+          : _movieProductionCountriesFromJson(json['production_countries']),
+      spokenLanguages: json['spoken_languages'] == null
+          ? const []
+          : _movieSpokenLanguagesFromJson(json['spoken_languages']),
+      keywords: json['keywords'] == null
+          ? const []
+          : _movieKeywordsFromJson(json['keywords']),
+      source: json['source'] as String?,
+      downloadLinks: json['download_links'] == null
+          ? const []
+          : _movieStringListFromJson(json['download_links']),
+    );
 
 Map<String, dynamic> _$$MovieImplToJson(_$MovieImpl instance) =>
     <String, dynamic>{
@@ -71,12 +71,10 @@ Map<String, dynamic> _$$MovieImplToJson(_$MovieImpl instance) =>
       'poster_path': instance.posterPath,
       'tagline': instance.tagline,
       'genres': _movieGenresToJson(instance.genres),
-      'production_companies': _movieProductionCompaniesToJson(
-        instance.productionCompanies,
-      ),
-      'production_countries': _movieProductionCountriesToJson(
-        instance.productionCountries,
-      ),
+      'production_companies':
+          _movieProductionCompaniesToJson(instance.productionCompanies),
+      'production_countries':
+          _movieProductionCountriesToJson(instance.productionCountries),
       'spoken_languages': _movieSpokenLanguagesToJson(instance.spokenLanguages),
       'keywords': _movieKeywordsToJson(instance.keywords),
       'source': instance.source,

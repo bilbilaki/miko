@@ -6,7 +6,6 @@ import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/screens/favorites_screen.dart';
 import 'package:miko/screens/genre_list_screen.dart';
 import 'package:miko/screens/home_screen.dart';
-import 'package:miko/screens/http.dart';
 import 'package:miko/screens/settings_screen.dart';
 import 'package:miko/screens/shorts_screen.dart';
 import 'package:miko/screens/tv_series_grid_screen.dart';
@@ -18,7 +17,6 @@ import 'package:miko/showcases/multi_search_page.dart';
 import 'package:miko/showcases/tv_page.dart';
 import 'package:miko/showcases/tvsearchpage.dart';
 import 'package:miko/utils/colors.dart';
-import 'package:miko/widgets/video_card.dart';
 class LeftNavigationPanel extends ConsumerWidget {
   final bool isMobileLayout;
   final bool isCollapsed; // Only relevant for desktop

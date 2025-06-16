@@ -1706,6 +1706,7 @@ class MultiSearchTV extends MultiSearchResult {
   final int voteCount;
   final List<String> originCountry;
   final String? originalLanguage;
+  final bool video;
 
   MultiSearchTV({
     required super.id,
@@ -1723,6 +1724,8 @@ class MultiSearchTV extends MultiSearchResult {
     this.voteCount = 0,
     this.originCountry = const [],
     this.originalLanguage,
+        this.video = false,
+
   });
 
   factory MultiSearchTV.fromJson(Map<String, dynamic> json) {
@@ -1742,6 +1745,8 @@ class MultiSearchTV extends MultiSearchResult {
       voteCount: json['vote_count'] ?? 0,
       originCountry: List<String>.from(json['origin_country'] ?? []),
       originalLanguage: json['original_language'],
+            video: json['video'] ?? false,
+
     );
   }
 }

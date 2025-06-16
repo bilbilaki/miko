@@ -1,7 +1,13 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:miko/showcases/seasondetailpage_anime.dart';
+import 'package:miko/models/season_anime.dart';
+import 'package:miko/providers/anime_provider.dart';
+import 'package:miko/services/user_data_service.dart';
+import 'package:miko/widgets/anime_episodes_tile.dart';
+import 'seasondetailpage_anime.dart';
+import 'package:miko/utils/colors.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'seasondetailpage.dart';
 import 'model.dart';
 import 'movie_service.dart';
 import 'person_detail_page.dart';
@@ -35,6 +41,9 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
     Tab(text: 'SEASONS'),
     Tab(text: 'CAST'),
     Tab(text: 'VIDEOS'),
+    Tab(text: 'List of Episodes'),
+
+
   ];
 
   @override
@@ -63,8 +72,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
         setState(() {
           _detailedTvShow = loadedShow; // Store for use in tabs
           // Initialize futures that need the tvShowId
-          _creditsFuture =
-              _movieService.getTVCredits(tvId: loadedShow.id);
+          _creditsFuture = _movieService.getTVCredits(tvId: loadedShow.id);
           _videosFuture =
               _movieService.getTvShowVideos(tvShowId: loadedShow.id);
         });
@@ -215,6 +223,8 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
   }
 
   Widget _buildDetailView(BuildContext context, TvShow tvShow) {
+    final series =
+        Provider.of<AnimeProvider>(context).getAnimeByTmdbId(tvShow.id);
     return NestedScrollView(
       headerSliverBuilder: (context, innerBoxIsScrolled) {
         return [
@@ -242,13 +252,21 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
           _buildSeasonsTab(context, tvShow),
           _buildCastTab(context, tvShow.id), // Pass ID for fetching
           _buildVideosTab(context, tvShow.id), // Pass ID for fetching
+          _buildSeasonsList(context, series!.seasons, series.tmdbId),
         ],
       ),
     );
   }
 
   Widget _buildAppBar(BuildContext context, TvShow tvShow) {
-    // Your existing _buildAppBar code (no changes needed here)
+    int tvSeriesId = tvShow.id;
+
+    final userDataService = Provider.of<UserDataService>(context);
+    final backdropUrl = tvShow.fullBackdropPath;
+    final posterUrl = tvShow.fullPosterPath;
+    bool isFavorite = userDataService.isFavoriteAnime(tvSeriesId);
+    bool isInWatchlist = userDataService.isOnWatchlistAnime(tvSeriesId);
+
     return SliverAppBar(
       expandedHeight: 250,
       pinned: true,
@@ -269,23 +287,122 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
         background: Stack(
           fit: StackFit.expand,
           children: [
-            Image.network(
-              tvShow.fullBackdropPath,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                  color: Colors.grey[900],
-                  child:
-                      const Center(child: Icon(Icons.broken_image, size: 50))),
-            ),
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black54],
+            // Backdrop Image
+            backdropUrl != null
+                ? CachedNetworkImage(
+                    imageUrl: backdropUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) =>
+                        Container(color: AppColors.secondaryBackground),
+                    errorWidget: (context, url, error) => Container(
+                        color: AppColors.secondaryBackground,
+                        child: const Icon(Icons.broken_image,
+                            color: AppColors.secondaryText, size: 60)),
+                  )
+                : Container(
+                    // Fallback color if no backdrop
+                    color: AppColors.secondaryBackground,
+                    child:
+                        posterUrl != null // Try poster as fallback background
+                            ? CachedNetworkImage(
+                                imageUrl: posterUrl,
+                                fit: BoxFit.contain,
+                                alignment: Alignment.center)
+                            : const Center(
+                                child: Icon(Icons.tv,
+                                    size: 100, color: AppColors.secondaryText)),
                 ),
+            // Gradient overlay for text readability
+
+            Positioned(
+              top: 8.0,
+              right: 8.0,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Favorite
+                  IconButton(
+                    icon: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: isFavorite ? Colors.red : Colors.white,
+                      size: 20,
+                    ),
+                    onPressed: () async {
+                      await userDataService.toggleFavoriteAnime(tvSeriesId);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            isFavorite
+                                ? 'Removed from Favorites'
+                                : 'Added to Favorites',
+                          ),
+                          duration: const Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.black.withOpacity(0.5),
+                      padding: const EdgeInsets.all(4.0),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  // Rating bubble
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 6.0, vertical: 4.0),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(4.0),
+                    ),
+                    child: Text(
+                      '${tvShow.voteAverage.toStringAsFixed(1)} (${tvShow.voteCount})',
+                      style: const TextStyle(
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryText,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  // Watchlist
+                  IconButton(
+                    icon: Icon(
+                      isInWatchlist ? Icons.bookmark : Icons.bookmark_border,
+                      color: isInWatchlist ? Colors.green : Colors.white,
+                      size: 20,
+                    ),
+                    onPressed: () async {
+                      await userDataService.toggleWatchlistAnime(tvSeriesId);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            isInWatchlist
+                                ? 'Removed from Watchlist'
+                                : 'Added to Watchlist',
+                          ),
+                          duration: const Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.black.withOpacity(0.5),
+                      padding: const EdgeInsets.all(4.0),
+                    ),
+                  ),
+                ],
               ),
             ),
+
+            //  DecoratedBox(
+            //   decoration: BoxDecoration(
+            //     gradient: LinearGradient(
+            //       begin: Alignment.topCenter,
+            //       end: Alignment.bottomCenter,
+            //       colors: [Colors.transparent, Colors.black54],
+            //     ),
+            //   ),
+            // ),
+                
             if (tvShow.tagline != null && tvShow.tagline!.isNotEmpty)
               Positioned(
                 bottom: 60, // Adjust if needed based on tab bar height
@@ -698,7 +815,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
       },
     );
   }
-    
+
   // Widget _buildCastList() {
   //   return ListView.builder(
   //     itemCount: _tvCredits?.cast.length ?? 0,
@@ -746,7 +863,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
   //     },
   //   );
   // }
-    
+
   Widget _buildVideosTab(BuildContext context, int tvShowId) {
     _videosFuture ??= _movieService.getTvShowVideos(tvShowId: tvShowId);
     return FutureBuilder<YoutubeVideoForSeries>(
@@ -823,7 +940,55 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
       },
     );
   }
-
+  Widget _buildSeasonsList(BuildContext context, List<SeasonAnime> seasons, id) {
+    final defaultExpansion = seasons.length == 1;
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: seasons.length,
+      itemBuilder: (ctx, i) {
+        final s = seasons[i];
+        return Card(
+          elevation: 1,
+          margin: const EdgeInsets.symmetric(vertical: 6.0),
+          color: AppColors.secondaryBackground.withOpacity(0.4),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: ExpansionTile(
+            key: PageStorageKey('season_${s.seasonNumber}'),
+            title: Text(
+              'Season ${s.seasonNumber}',
+              style: const TextStyle(
+                color: AppColors.primaryText,
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+            ),
+            subtitle: Text(
+              '${s.episodes.length} Episode${s.episodes.length == 1 ? '' : 's'}',
+              style: const TextStyle(
+                color: AppColors.secondaryText,
+                fontSize: 12,
+              ),
+            ),
+            iconColor: AppColors.accentColor,
+            collapsedIconColor: AppColors.secondaryText,
+            initiallyExpanded: defaultExpansion || s.seasonNumber == 1,
+            childrenPadding:
+                const EdgeInsets.only(bottom: 8, left: 4, right: 4),
+            children: ListTile.divideTiles(
+              context: ctx,
+              color: AppColors.dividerColor.withOpacity(0.3),
+              tiles:
+                  s.episodes.map((e) => AnimeEpisodeTile(episode: e, season: s,id: id,)).toList(),
+            ).toList(),
+          ),
+        );
+      },
+    );
+  }
   // Modified _buildEpisodeCard to accept tvShowId for navigation
   Widget _buildEpisodeCard(
       BuildContext context, int tvShowId, Episode episode, bool isNext) {

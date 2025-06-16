@@ -1,29 +1,24 @@
 // TODO Implement this library.
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:miko/providers/right_sidebar_provider.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
+import 'package:miko/screens/csv_editor_screen.dart';
 import 'package:miko/screens/favorites_screen.dart';
 import 'package:miko/screens/genre_list_screen.dart';
 import 'package:miko/screens/home_screen.dart';
 import 'package:miko/screens/http%20copy.dart';
-import 'package:miko/screens/http.dart';
 
 import 'package:miko/screens/local_screen.dart';
 import 'package:miko/screens/settings_screen.dart';
 import 'package:miko/screens/shorts_screen.dart';
 import 'package:miko/screens/tv_series_grid_screen.dart';
 import 'package:miko/screens/watchlist_screen.dart';
-import 'package:miko/showcases/keyword_search_page.dart';
 import 'package:miko/showcases/movie_page.dart';
 import 'package:miko/showcases/movie_page_copy.dart';
-import 'package:miko/showcases/moviesearchpage.dart';
 import 'package:miko/showcases/tv_page_anime.dart';
-import 'package:miko/showcases/tv_page.dart';
 import 'package:miko/showcases/tv_page_tv.dart';
-import 'package:miko/showcases/tvsearchpage.dart';
 import 'package:miko/utils/colors.dart';
 
 class RightNavigationPanel extends ConsumerWidget {
@@ -137,10 +132,10 @@ class RightNavigationPanel extends ConsumerWidget {
                 context,
                 ref,
                 icon: Icons.hdr_on_select_rounded,
-                title: 'Creweler1',
+                title: 'Creweler',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, CrawlerHomePage(), isMobileLayout),
+                    _navigateTo(context, CrawlerHomePage1(), isMobileLayout),
               ),
               _buildNavigationItem(
                 context,
@@ -160,11 +155,11 @@ class RightNavigationPanel extends ConsumerWidget {
                 onTap: () => _navigateTo(context, MoviePage1(), isMobileLayout),
               ),
               _buildNavigationItem(context, ref,
-                  icon: Icons.translate_outlined,
-                  title: 'Crewler2',
+                  icon: Icons.data_object_outlined,
+                  title: 'Csv Editor',
                   showText: showText, onTap: () {
                
-                  _navigateTo(context, CrawlerHomePage1(), isMobileLayout);
+                  _navigateTo(context, CsvEditorScreen(), isMobileLayout);
               
               }),
               _buildNavigationItem(

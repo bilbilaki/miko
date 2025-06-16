@@ -1,9 +1,4 @@
 // main.dart
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:miko/services/user_data_service.dart';
-import 'package:miko/widgets/vt.dart';
-import 'package:provider/provider.dart';
 
 class FullScreenGridPage 
 {

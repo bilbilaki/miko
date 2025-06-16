@@ -4,7 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:csv/csv.dart';
 import '../models/movie.dart';
 
-enum LoadingStatus { idle, loading, loaded, error }
+enum LoadingStatus { idle, loading, loaded, error, notloaded }
 
 class MovieProvider extends ChangeNotifier {
   // --- Singleton Implementation ---
@@ -21,7 +21,7 @@ class MovieProvider extends ChangeNotifier {
 
   List<Movie> _movies = [];
   List<Movie> _searchResults = [];
-  LoadingStatus _status = LoadingStatus.idle;
+  LoadingStatus _status = LoadingStatus.notloaded;
   String? _errorMessage;
   String _searchQuery = '';
   bool _isInitialized = false;
@@ -31,6 +31,8 @@ class MovieProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get isLoading => _status == LoadingStatus.loading;
   bool get hasError => _status == LoadingStatus.error;
+  bool get isIdeling => _status == LoadingStatus.idle;
+  bool get isLooaded => _status == LoadingStatus.loaded;
   String get searchQuery => _searchQuery;
   bool get isInitialized => _isInitialized;
 

@@ -24,11 +24,9 @@ class _MoviePageState extends State<MoviePage> {
   bool _isLoading = false;
   bool _hasError = false;
   String _errorMessage = '';
-    int _currentPage2 = 1;
+    final int _currentPage2 = 1;
   int _totalPages2 = 1;
   bool _isLoading2 = false;
-  bool _hasError2 = false;
-  String _errorMessage2 = '';
   final ScrollController _scrollController = ScrollController();
   final ScrollController _scrollController2 = ScrollController();
 
@@ -41,11 +39,6 @@ class _MoviePageState extends State<MoviePage> {
 
   Timer? _debounce;
   MultiSearchResponse? _searchResponse;
-  final bool _isFetchingMore = false;
-  String? _error;
-  final String _currentQuery = '';
-  final int _searchPage = 1;
-  final int _searchTotalPages = 1;
 bool _isFetchingMore2 = false;
   String? _error2;
   String _currentQuery2 = '';
@@ -59,9 +52,7 @@ bool _isFetchingMore2 = false;
     _searchScrollController.addListener(_searchScrollListener);
         _searchController.addListener(_onSearchChanged);
 
-    _searchScrollController2.addListener(_scrollListener2);
     _searchController2.addListener(_onSearchChanged2);
-     _scrollController2.addListener(_scrollListener2);
   }
 
   @override
@@ -85,14 +76,7 @@ bool _isFetchingMore2 = false;
     }
   }
 
-  void _scrollListener2() {
-    if (_scrollController2.position.pixels >=
-        _scrollController2.position.maxScrollExtent * 0.8) {
-      if (!_isLoading2 && _currentPage2 < _totalPages2) {
-        _loadMoreMovies2();
-      }
-    }
-  }
+ 
   void _searchScrollListener() {
     if (_searchScrollController2.position.pixels >=
         _searchScrollController2.position.maxScrollExtent * 0.8) {
@@ -129,7 +113,6 @@ Future<void> _loadMovies2() async {
     if (_isLoading2) return;
     setState(() {
       _isLoading2 = true;
-      _hasError2 = false;
     });
     try {
       final response =
@@ -141,8 +124,6 @@ Future<void> _loadMovies2() async {
       });
     } catch (e) {
       setState(() {
-        _hasError2 = true;
-        _errorMessage2 = e.toString();
         _isLoading2 = false;
       });
     }
@@ -159,18 +140,7 @@ Future<void> _loadMovies2() async {
     });
     await _loadMovies();
   }
-   Future<void> _loadMoreMovies2() async {
-    _currentPage2++;
-    await _loadMovies2();
-  }
 
-  Future<void> _refreshMovies2() async {
-    setState(() {
-      _movies.clear();
-      _currentPage2 = 1;
-    });
-    await _loadMovies2();
-  }
 
 
   Future<void> _navigateToMovieDetail(Movie movie) async {

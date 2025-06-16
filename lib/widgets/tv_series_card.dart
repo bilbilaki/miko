@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:miko/models/tv_series.dart';
 import 'package:miko/screens/tv_series_details_screen.dart';
+import 'package:miko/showcases/movie_service.dart';
+import 'package:miko/showcases/tv_detail_page_tv.dart';
 //import 'package:miko/screens/tv_series_details_screen.dart'; // Correct screen
 import 'package:miko/utils/colors.dart'; // Assuming AppColors exists
 import 'package:intl/intl.dart'; // For date formatting
 import 'package:miko/services/user_data_service.dart';
-import 'package:provider/provider.dart'; // For accessing UserDataService
+import 'package:provider/provider.dart';
+
+import '../showcases/model.dart' show TvShow; // For accessing UserDataService
 
 class TvSeriesCard extends StatelessWidget {
   final TvSeries series;
@@ -18,8 +22,7 @@ class TvSeriesCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final posterUrl = series.fullPosterUrl; // Use helper from TvSeries model
     final userDataService = Provider.of<UserDataService>(context);
-
-    // Safely get the year
+    final MovieService mmm = MovieService();
     String displayYear = 'N/A';
     if (series.firstAirDate != null) {
       try {
@@ -35,25 +38,33 @@ class TvSeriesCard extends StatelessWidget {
     bool isFavorite = userDataService.isFavoriteTvSeries(series.tmdbId);
     bool isInWatchlist = userDataService.isOnWatchlistTvSeries(series.tmdbId);
 
-    return InkWell(
-      onTap: () {
-        if (series.tmdbId != 0) {
-          Navigator.push(
-           context,
-            MaterialPageRoute(
-              builder: (_) => TvSeriesDetailsScreen(tvSeriesId: series.tmdbId, ),
-          ),
-          );
-          //context.go('/tv/${series.tmdbId}');
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Cannot open series details: Missing ID.'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-        }
-      },
+   return FutureBuilder<TvShow>(
+        future: mmm.tmtm(series.tmdbId),
+        builder: (context, snapshot) {
+          TvShow? nms = snapshot.data;
+          return InkWell(
+              onTap: () {
+                if (nms == null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => TvSeriesDetailsScreen(
+                        tvSeriesId: series.tmdbId,
+                      ), // Pass movie ID
+                    ),
+                  );
+                } else {
+                  // Navigate to Movie Details Screen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          TvShowDetailPageTV(tvShow: nms), // Pass movie ID
+                    ),
+                  );
+                  //context.go('/movie/${movie.id}');
+                }
+              },
       child: Card(
         color: Colors.transparent,
         elevation: 0,
@@ -98,10 +109,10 @@ class TvSeriesCard extends StatelessWidget {
                                 Icons.tv_off_outlined,
                                 color: AppColors.secondaryText,
                                 size: 40,
-                              ),
+                             ),
+                                    ),
                             ),
-                    ),
-                  ),
+                          ),
                   // Positioned buttons on top of the poster
                   Positioned(
                     top: 8.0,
@@ -167,14 +178,14 @@ class TvSeriesCard extends StatelessWidget {
                             backgroundColor:
                                 Colors.black.withOpacity(0.5), // Cute backdrop
                             padding: const EdgeInsets.all(4.0),
+                           ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
             const SizedBox(height: 6.0),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -231,13 +242,13 @@ class TvSeriesCard extends StatelessWidget {
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+                ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ));
+        });
   }
 }

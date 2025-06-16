@@ -1,7 +1,7 @@
 // --- episode_detail_page.dart ---
 import 'package:flutter/material.dart';
 import 'package:miko/models/episode_anime.dart';
-import 'package:miko/models/season_anime.dart';
+import 'package:miko/models/season_anime.dart' as ss;
 import 'package:miko/screens/video_player_screen.dart';
 import 'package:miko/services/user_data_service.dart';
 import 'package:miko/utils/colors.dart' show AppColors, AppColors2;
@@ -10,7 +10,6 @@ import 'model.dart';
 import 'movie_service.dart';
 import 'person_detail_page.dart'; // For navigating to crew/guest star details
 import '../providers/anime_provider.dart';
-import 'package:miko/models/tv_series_anime.dart';
 
 class AnimeEpisodeDetailPage extends StatefulWidget {
   final int tvShowId;
@@ -64,11 +63,11 @@ class _AnimeEpisodeDetailPageState extends State<AnimeEpisodeDetailPage> {
   @override
   Widget build(BuildContext context) {
     final anime = seriesProvider.getAnimeByTmdbId(widget.tvShowId);
-    // final EpisodeAnime episode;
+     
 
-    List<SeasonAnime> seasons = anime!.seasons;
-    final s = seasons[widget.seasonNumber];
-    late final EpisodeAnime episode =
+    List<ss.SeasonAnime> seasons = anime!.seasons;
+    final ss.SeasonAnime s = seasons[widget.seasonNumber];
+    late final EpisodeAnime  episode =
         s.episodes.firstWhere((e) => e.episodeNumber == widget.episodeNumber);
     final availableQualities = episode.getAvailableQualityUrls();
     final userDataService = Provider.of<UserDataService>(context);
