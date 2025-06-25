@@ -626,7 +626,7 @@ class _TvShowPageState extends State<TvShowPageTV> {
     late TvSeriesProvider seriesProvider = TvSeriesProvider();
     final status = seriesProvider.status;
     final userData = Provider.of<UserDataService>(context);
-    final seriesList = seriesProvider.seriesForDisplay;
+    final seriesList = seriesProvider.animeseriesForDisplay;
 
     return GridView.builder(
       controller: _scrollController,

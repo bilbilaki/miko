@@ -2,8 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:media_cache_manager/media_cache_manager.dart';
-import 'package:miko/app.dart';
-import 'package:miko/models/database.dart';
+import 'package:miko/app_keeper.dart';
 import 'package:miko/providers/anime_provider.dart';
 import 'package:miko/providers/loca_provider.dart';
 import 'package:miko/providers/settings_provider.dart';
@@ -12,7 +11,6 @@ import 'package:miko/services/user_data_service.dart'; // Import UserDataService
 import 'package:miko/utils/colors.dart';
 import 'package:miko/utils/csv_parser.dart';
 import 'package:provider/provider.dart';
-import 'package:miko/app_shell.dart';
 import 'package:miko/providers/movie_provider.dart';
 import 'package:miko/providers/tv_series_provider.dart';
 import 'package:media_kit/media_kit.dart';
@@ -20,8 +18,6 @@ import 'package:lottie/lottie.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as pr;
 
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' as ffi;
-late AppDatabase database;
-late MediaDao mediaDao;
 
 Future main() async {
  WidgetsFlutterBinding.ensureInitialized();
@@ -31,14 +27,11 @@ Future main() async {
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     ffi.sqfliteFfiInit();
   }
-    database = AppDatabase();
-  mediaDao = MediaDao(database);
 
   Provider.debugCheckInvalidValueType = null;
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => DrawerState()),
         ChangeNotifierProvider(
             create: (context) =>
                 AnimeProvider()), // Initialize AnimeProvider directly
@@ -105,7 +98,7 @@ class _SplashScreenState extends State<SplashScreen> {
     debugPrint("Navigating to home screen...");
     Navigator.of(
       context,
-    ).pushReplacement(MaterialPageRoute(builder: (context) => Xmiko()));
+    ).pushReplacement(MaterialPageRoute(builder: (context) => AppKeeper()));
   }
 
   @override
@@ -138,3 +131,7 @@ class _SplashScreenState extends State<SplashScreen> {
 //         ));
 //   }
 // }
+
+
+//TODO  build some functions for a little get random sorting item to app 
+//TODO  build functions for get all episodes of series to player and player shoould can play next and pervius episodes without need to close and save that in played item history

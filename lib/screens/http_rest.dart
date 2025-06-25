@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -33,7 +32,6 @@ class _HttpClientPageState extends State<HttpClientPage> {
   File? _selectedFile;
   bool _isLoading = false;
   Map<String, String> _environment = {};
-  static const _kExternalPathKey = 'external_directory_path';
 
   String? _externalPath;
 
@@ -49,7 +47,7 @@ class _HttpClientPageState extends State<HttpClientPage> {
   /// The directory being currently listed (for subfolder navigation)
   String? get currentPath => _currentPath ?? _externalPath;
 
-  final Map<String, Uint8List> _thumbnailCache = {};
+  //final Map<String, Uint8List> _thumbnailCache = {};
 
   // ... (keep your existing loadPath, setPath, refresh, isMovieFile methods)
 
@@ -228,28 +226,7 @@ class _HttpClientPageState extends State<HttpClientPage> {
     }
   }
 
-  Future<void> _refreshList(String? folder) async {
-    _folders = [];
-    _movies = [];
-    Future<void> setPath(String newPath) async {
-      final prefs = await SharedPreferences.getInstance();
-      _externalPath = newPath;
-      await prefs.setString(_kExternalPathKey, newPath);
-      await _refreshList(newPath);
-   
-   String? dirPath = folder ?? _externalPath;
-    if (dirPath == null) return;
-
-    _currentPath = dirPath;
-
-    final dir = Directory(dirPath);
-    if (await dir.exists()) {
-      final entries = dir.listSync();
-      _folders = entries.whereType<Directory>().toList();
-    }
-  }
-    
-  }
+  
 
   // Save downloaded file to storage
   Future<void> _saveFileToStorage(List<int> bytes, String fileName) async {

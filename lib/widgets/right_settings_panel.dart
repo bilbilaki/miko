@@ -2,24 +2,26 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:miko/providers/right_sidebar_provider.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/screens/csv_editor_screen.dart';
-import 'package:miko/screens/favorites_screen.dart';
 import 'package:miko/screens/genre_list_screen.dart';
 import 'package:miko/screens/home_screen.dart';
-import 'package:miko/screens/http%20copy.dart';
+import 'package:miko/screens/http_main.dart';
 
 import 'package:miko/screens/local_screen.dart';
 import 'package:miko/screens/settings_screen.dart';
 import 'package:miko/screens/shorts_screen.dart';
 import 'package:miko/screens/tv_series_grid_screen.dart';
 import 'package:miko/screens/watchlist_screen.dart';
-import 'package:miko/showcases/movie_page.dart';
 import 'package:miko/showcases/movie_page_copy.dart';
 import 'package:miko/showcases/tv_page_anime.dart';
 import 'package:miko/showcases/tv_page_tv.dart';
 import 'package:miko/utils/colors.dart';
+
+import '../chatview/ai_chat_client.dart';
+import '../code_editor/code_editor_ide.dart';
+import '../labs/home_screen.dart';
+import '../providers/settings_provider.dart';
 
 class RightNavigationPanel extends ConsumerWidget {
   final bool isMobileLayout;
@@ -173,10 +175,10 @@ class RightNavigationPanel extends ConsumerWidget {
               _buildNavigationItem(
                 context,
                 ref,
-                icon: Icons.movie_outlined,
-                title: 'Popular Movie',
+                icon: Icons.local_library_outlined,
+                title: 'Lab Showcase',
                 showText: showText,
-                onTap: () => _navigateTo(context, MoviePage(), isMobileLayout),
+                onTap: () => _navigateTo(context, HomeScreenLab(), isMobileLayout),
               ),
               if (showText) _buildSectionHeader('Subscriptions'),
               const Padding(padding: EdgeInsets.fromLTRB(16, 12, 16, 8)),
@@ -184,20 +186,20 @@ class RightNavigationPanel extends ConsumerWidget {
               _buildNavigationItem(
                 context,
                 ref,
-                icon: Icons.playlist_play,
-                title: 'Playlist Player',
+                icon: Icons.code_sharp,
+                title: 'Code Editor Showcase',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, SubscriptionsPage(), isMobileLayout),
+                    _navigateTo(context, CodeEditorIDE(), isMobileLayout),
               ),
               _buildNavigationItem(
                 context,
                 ref,
-                icon: Icons.favorite_border_sharp,
-                title: 'Favorites',
+                icon: Icons.chat_sharp,
+                title: 'Chat Showcase',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, FavoritesScreen(), isMobileLayout),
+                    _navigateTo(context, AIChatClient(), isMobileLayout),
               ),
               _buildNavigationItem(
                 context,

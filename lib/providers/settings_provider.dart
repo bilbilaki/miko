@@ -50,3 +50,5 @@ final settingsServiceProvider = ChangeNotifierProvider<UserDataService>((ref) {
 //   final settingsService = ref.watch(settingsServiceProvider);
 //   return settingsService.defaultPage;
 // });
+final rightSidebarCollapsedProvider = StateProvider<bool>((ref) => false);
+final sidebarCollapsedProvider = StateProvider<bool>((ref) => false);

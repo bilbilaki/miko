@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart'; // For kDebugMode
 import 'package:url_launcher/url_launcher.dart';
-import '../constants.dart' as c;
 import '../showcases/model.dart' as TmdbApiMovieModel;
 
 class VideoInfo {
@@ -344,89 +343,89 @@ Future<void> launchVideo(String key) async {
   }
 }
 
-class TmdbVideo {
-  final String id;
-  final String key;
-  final String name;
-  final String site;
-  final int size;
-  final String type;
-  final String? iso6391;
-  final String? iso31661;
-  final bool official;
-  final DateTime? publishedAt;
+// class TmdbVideo {
+//   final String id;
+//   final String key;
+//   final String name;
+//   final String site;
+//   final int size;
+//   final String type;
+//   final String? iso6391;
+//   final String? iso31661;
+//   final bool official;
+//   final DateTime? publishedAt;
 
-  TmdbVideo({
-    required this.id,
-    required this.key,
-    required this.name,
-    required this.site,
-    required this.size,
-    required this.type,
-    this.iso6391,
-    this.iso31661,
-    this.official = true,
-    this.publishedAt,
-  });
+//   TmdbVideo({
+//     required this.id,
+//     required this.key,
+//     required this.name,
+//     required this.site,
+//     required this.size,
+//     required this.type,
+//     this.iso6391,
+//     this.iso31661,
+//     this.official = true,
+//     this.publishedAt,
+//   });
 
-  factory TmdbVideo.fromCsvRow(List<dynamic> row) {
-    // Helper function for safe parsing
-    T? tryParse<T>(dynamic value, T Function(String) parser) {
-      if (value == null ||
-          value.toString().isEmpty ||
-          value.toString().toLowerCase() == 'nan') {
-        return null;
-      }
-      try {
-        return parser(value.toString());
-      } catch (e) {
-        if (kDebugMode) {
-          print("CSV Parsing Error for value '$value': $e");
-        }
-        return null;
-      }
-    }
+//   factory TmdbVideo.fromCsvRow(List<dynamic> row) {
+//     // Helper function for safe parsing
+//     T? tryParse<T>(dynamic value, T Function(String) parser) {
+//       if (value == null ||
+//           value.toString().isEmpty ||
+//           value.toString().toLowerCase() == 'nan') {
+//         return null;
+//       }
+//       try {
+//         return parser(value.toString());
+//       } catch (e) {
+//         if (kDebugMode) {
+//           print("CSV Parsing Error for value '$value': $e");
+//         }
+//         return null;
+//       }
+//     }
 
-    int? tryParseInt(dynamic value) => tryParse(value, int.parse);
-    double? tryParseDouble(dynamic value) => tryParse(value, double.parse);
-    DateTime? tryParseDate(dynamic value) => tryParse(value, DateTime.parse);
-    bool parseBool(dynamic value) => value.toString().toUpperCase() == 'TRUE';
+//     // int? tryParseInt(dynamic value) => tryParse(value, int.parse);
+//     // double? tryParseDouble(dynamic value) => tryParse(value, double.parse);
+//     // DateTime? tryParseDate(dynamic value) => tryParse(value, DateTime.parse);
+//     // bool parseBool(dynamic value) => value.toString().toUpperCase() == 'TRUE';
 
-    // Helper to split potentially complex string fields (like genres)
-    List<String> splitStringList(dynamic value) {
-      if (value == null ||
-          value.toString().isEmpty ||
-          value.toString().toLowerCase() == 'nan') {
-        return [];
-      }
-      // Handles simple comma separation, might need adjustment
-      // if format is more complex (e.g., JSON string within CSV)
-      return value
-          .toString()
-          .split(',')
-          .map((s) => s.trim())
-          .where((s) => s.isNotEmpty)
-          .toList();
-    }
+//     // // Helper to split potentially complex string fields (like genres)
+//     // List<String> splitStringList(dynamic value) {
+//     //   if (value == null ||
+//     //       value.toString().isEmpty ||
+//     //       value.toString().toLowerCase() == 'nan') {
+//     //     return [];
+//     //   }
+//       // Handles simple comma separation, might need adjustment
+//       // if format is more complex (e.g., JSON string within CSV)
+//   //     return value
+//   //         .toString()
+//   //         .split(',')
+//   //         .map((s) => s.trim())
+//   //         .where((s) => s.isNotEmpty)
+//   //         .toList();
+//   //   }
 
-    return TmdbVideo(
-      id: (row[0]) ?? 0, // Default to 0 if parsing fails
-      name: row[1]?.toString() ?? 'No Title',
-      key: c.AppConstants.tmdbapikey,
-      size: 1080,
-      type: '',
+//   //   return TmdbVideo(
+//   //     id: (row[0]) ?? 0, // Default to 0 if parsing fails
+//   //     name: row[1]?.toString() ?? 'No Title',
+//   //     key: c.AppConstants.tmdbapikey,
+//   //     size: 1080,
+//   //     type: '',
 
-      site: row[11]?.toString() ?? '',
-      official: true,
-    );
-  }
-  List<VideoInfo> parseVideoData() {
-    final List<VideoInfo> results = [];
+//   //     site: row[11]?.toString() ?? '',
+//   //     official: true,
+//   //   );
+//   // }
+//   List<VideoInfo> parseVideoData() {
+//     final List<VideoInfo> results = [];
 
-    return results;
-  }
+//     return results;
+//   }
 
   // Example format: "Trailer: KEY1 | Opening Credits: KEY2 | Clip Name: KEY3"
 
   // Basic type detection from title (customize as needed)
-}
+// }

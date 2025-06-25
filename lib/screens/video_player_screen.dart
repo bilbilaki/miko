@@ -1,18 +1,14 @@
 // lib/screens/video_player_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:media_kit/media_kit.dart'; // Required.
 import 'package:media_kit_video/media_kit_video.dart'; // Required.
 import 'dart:async';
-import 'dart:io'; // Add this import
-import 'package:permission_handler/permission_handler.dart';
-import 'package:device_info_plus/device_info_plus.dart';
-import 'dart:io' show Platform;
+// Add this import
 
 class VideoPlayerScreen extends StatefulWidget {
   final String videoUrl;
-
-  const VideoPlayerScreen({required this.videoUrl, super.key});
+  final List? playlistitem;
+  const VideoPlayerScreen({required this.videoUrl,this.playlistitem, super.key});
 
   @override
   State<VideoPlayerScreen> createState() => VideoPlayerScreenState();
@@ -37,8 +33,7 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
   void initState() {
     super.initState();
     // Move permission check to after widget is fully initialized
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {});
 
     // Open the video URL.
     player.open(Media(Uri.decodeComponent(widget.videoUrl)),
@@ -51,48 +46,7 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
     });
   }
 
-  Future<void> checkPermissions() async {
-    if (await _isAndroid13OrHigher()) {
-      // Video permissions.
-      if (await Permission.videos.isDenied ||
-          await Permission.videos.isPermanentlyDenied) {
-        final state = await Permission.videos.request();
-        if (!state.isGranted) {
-          await SystemNavigator.pop();
-        }
-      }
-      // Audio permissions.
-      if (await Permission.audio.isDenied ||
-          await Permission.audio.isPermanentlyDenied) {
-        final state = await Permission.audio.request();
-        if (!state.isGranted) {
-          await SystemNavigator.pop();
-        }
-      }
-    } else {
-      if (await Permission.storage.isDenied ||
-          await Permission.storage.isPermanentlyDenied) {
-        final state = await Permission.storage.request();
-        if (!state.isGranted) {
-          await SystemNavigator.pop();
-        }
-      }
-    }
-  }
 
-  // Helper method to check Android version
-  Future<bool> _isAndroid13OrHigher() async {
-    // Use dart:io to check platform instead of Theme
-    if (!Platform.isAndroid) {
-      return false;
-    }
-    // Android 13 is API level 33
-    return await DeviceInfoPlugin()
-        .androidInfo
-        .then((info) => info.version.sdkInt >= 33);
-  }
-
-  // Quality settings
   String currentQuality = 'Auto';
   final List<String> qualityOptions = ['Auto', '1080p', '720p', '480p', '360p'];
 
@@ -112,17 +66,12 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
   }
 
   @override
-  void dispose() {
+  void dispose(){
     _hideTimer?.cancel();
-    // Make sure to dispose the [Player] and [VideoController] instances.
-    // IMPORTANT: Dispose the player and controller !!
-    player.dispose();
+
+ player.dispose();
     super.dispose();
   }
-
-  // Subtitle controls
-
-  // PiP toggle
 
   @override
   Widget build(BuildContext context) {

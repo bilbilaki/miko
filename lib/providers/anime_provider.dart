@@ -1,9 +1,9 @@
-// TODO Implement this library.// lib/providers/tv_series_provider.dart
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:csv/csv.dart';
-import '../models/episode_anime.dart';
-import '../models/season_anime.dart';
 import '../models/tv_series_anime.dart';
 
 // Define enum outside the class if not already globally defined
@@ -63,7 +63,9 @@ class AnimeProvider extends ChangeNotifier {
   }
 
   Future<void> loadAnimeData() async {
-    if (_status == LoadingStatus.loading || _status == LoadingStatus.loaded  || _status == LoadingStatus.idle) {
+    if (_status == LoadingStatus.loading ||
+        _status == LoadingStatus.loaded ||
+        _status == LoadingStatus.idle) {
       return;
     }
 
@@ -91,16 +93,15 @@ class AnimeProvider extends ChangeNotifier {
             // Use TMDB ID as the primary key
             tempAnimeSeriesMap[animeseries.tmdbId] = animeseries;
             // Store the mapping: case-insensitive name from details CSV to its TMDB ID
-            animeseriesnameToTmdbidMap[animeseries.originalName
-              
-                .toLowerCase()] = animeseries.tmdbId;
+            animeseriesnameToTmdbidMap[animeseries.originalName.toLowerCase()] =
+                animeseries.tmdbId;
             // Also map the potentially different 'series' name if it exists and differs
             if (row.length > 1 &&
                 row[1] != null &&
                 row[1].toString().toLowerCase() !=
                     animeseries.originalName.trim().toLowerCase()) {
-              animeseriesnameToTmdbidMap[
-                  row[1].toString().toLowerCase()] = animeseries.tmdbId;
+              animeseriesnameToTmdbidMap[row[1].toString().toLowerCase()] =
+                  animeseries.tmdbId;
             }
           } else {
             if (kDebugMode) {
@@ -128,7 +129,7 @@ class AnimeProvider extends ChangeNotifier {
           const CsvToListConverter().convert(episodesRawData);
 
       // Group episodes temporarily by TMDB ID
-      final Map<int, List<EpisodeAnime>> tempEpisodesByTmdbId = {};
+      final Map<int, List<Episode>> tempEpisodesByTmdbId = {};
 
       for (final row in episodesCsvTable.skip(1)) {
         // Skip header row
@@ -143,10 +144,8 @@ class AnimeProvider extends ChangeNotifier {
 
           if (targetTmdbId != null) {
             try {
-              final episode = EpisodeAnime.fromCsvInfo(
-                  animeseriesNameFromEpisodeCsv,
-                  targetTmdbId,
-                  row); // Pass targetTmdbId
+              final episode = Episode.fromCsvInfo(animeseriesNameFromEpisodeCsv,
+                  targetTmdbId, row); // Pass targetTmdbId
               if (!tempEpisodesByTmdbId.containsKey(targetTmdbId)) {
                 tempEpisodesByTmdbId[targetTmdbId] = [];
               }
@@ -188,7 +187,7 @@ class AnimeProvider extends ChangeNotifier {
         });
 
         // Group episodes by season number
-        Map<int, List<EpisodeAnime>> episodesBySeason = {};
+        Map<int, List<Episode>> episodesBySeason = {};
         for (var episode in csvEpisodes) {
           if (!episodesBySeason.containsKey(episode.seasonNumber)) {
             episodesBySeason[episode.seasonNumber] = [];
@@ -197,8 +196,8 @@ class AnimeProvider extends ChangeNotifier {
         }
 
         // Create Season objects and sort them
-        List<SeasonAnime> seasons = episodesBySeason.entries
-            .map((entry) => SeasonAnime(
+        List<Season> seasons = episodesBySeason.entries
+            .map((entry) => Season(
                   seasonNumber: entry.key,
                   episodes: entry.value,
                 ))
@@ -234,9 +233,11 @@ class AnimeProvider extends ChangeNotifier {
       _allAnimeSeriesList = [];
       _searchResults = [];
       _isInitialized = false;
+
     }
   }
 
+  
   void searchAnime(String query) {
     _searchQuery = query.toLowerCase();
     if (_searchQuery.isEmpty) {

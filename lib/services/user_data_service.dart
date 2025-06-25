@@ -1,4 +1,3 @@
-// TODO Implement this library.
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
@@ -61,7 +60,7 @@ class UserDataService extends ChangeNotifier {
   bool _useSecondaryPlayer = false;
   String? _externalDownloadManagerPackage;
   String? _externalPlayerPackage;
-  bool _areyouwantfarsi = false;
+  bool? _areyouwantfarsi= true;
   // Default settings values
   String _externalPlayer = '';
   String _downloadManager = '';
@@ -75,7 +74,7 @@ class UserDataService extends ChangeNotifier {
   bool get useSecondaryPlayer => _useSecondaryPlayer;
   String? get externalDownloadManagerPackage => _externalDownloadManagerPackage;
   String? get externalPlayerPackage => _externalPlayerPackage;
-  bool get areyouwantfarsi => _areyouwantfarsi;
+  bool? get areyouwantfarsi => _areyouwantfarsi;
   // Getters for settings
   String get externalPlayer => _externalPlayer;
   String get downloadManager => _downloadManager;
@@ -112,7 +111,33 @@ class UserDataService extends ChangeNotifier {
 
     notifyListeners(); // Notify listeners once prefs are loaded
   }
+ String _getEpisodeProgressKey(int seriesId, int seasonNumber, int episodeNumber) {
+    return 'progress_${seriesId}_${seasonNumber}_$episodeNumber';
+  }
 
+  /// Saves the playback position (in seconds) for a specific episode.
+  Future<void> saveEpisodeProgress(int seriesId, int seasonNumber, int episodeNumber, Duration position) async {
+    final key = _getEpisodeProgressKey(seriesId, seasonNumber, episodeNumber);
+    await _prefs!.setInt(key, position.inSeconds);
+    // No need to notify listeners for this, it's a background save.
+  }
+
+  /// Retrieves the saved playback position for an episode.
+  /// Returns null if no progress is saved.
+  Future<Duration?> getEpisodeProgress(int seriesId, int seasonNumber, int episodeNumber) async {
+    final key = _getEpisodeProgressKey(seriesId, seasonNumber, episodeNumber);
+    final seconds = _prefs!.getInt(key);
+    if (seconds != null) {
+      return Duration(seconds: seconds);
+    }
+    return null;
+  }
+
+  /// Clears the saved progress for an episode (e.g., after it's fully watched).
+  Future<void> clearEpisodeProgress(int seriesId, int seasonNumber, int episodeNumber) async {
+    final key = _getEpisodeProgressKey(seriesId, seasonNumber, episodeNumber);
+    await _prefs!.remove(key);
+  }
   Future<void> _setString(
     String key,
     String newValue,
@@ -422,7 +447,7 @@ class UserDataService extends ChangeNotifier {
     // Load Player Settings
     _useHardwareDecoder = _prefs?.getBool('useHardwareDecoder') ?? true;
     _useSecondaryPlayer = _prefs?.getBool('useSecondaryPlayer') ?? false;
-    _areyouwantfarsi = _prefs?.getBool('areyouwantfarsi') ?? false;
+    _areyouwantfarsi = _prefs?.getBool('areyouwantfarsi')??true;
 
     // Load External App Packages
     _externalDownloadManagerPackage =

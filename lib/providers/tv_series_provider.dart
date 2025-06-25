@@ -1,72 +1,113 @@
-// TODO Implement this library.// lib/providers/tv_series_provider.dart
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:csv/csv.dart';
-import '../models/episode.dart';
-import '../models/season.dart';
-import '../models/tv_series.dart';
-
-
+import '../models/tv_series_anime.dart';
 
 class TvSeriesProvider extends ChangeNotifier {
   // --- Constants ---
-  static const String _seriesDetailsCsvPath = 'assets/tv_series_details.csv';
+  static const String _animeseriesDetailsCsvPath =
+      'assets/tv_series_details.csv';
   static const String _episodesCsvPath = 'assets/tv_series_link.csv';
 
+  static final TvSeriesProvider _instance = TvSeriesProvider._internal();
+
+  factory TvSeriesProvider() {
+    return _instance;
+  }
+
+  TvSeriesProvider._internal() {
+    // Private constructor that is called only once
+    _initializeData();
+  }
+
+  // --- Constants ---
+
   // --- Private State ---
-  Map<int, TvSeries> _seriesMap = {}; // Keyed by TMDB ID for efficient lookup
-  List<TvSeries> _allSeriesList = []; // Sorted list for display
-  List<TvSeries> _searchResults = [];
+  Map<int, TvSeriesAnime> _animeseriesMap =
+      {}; // Keyed by TMDB ID for efficient lookup
+  List<TvSeriesAnime> _allAnimeSeriesList = []; // Sorted list for display
+  List<TvSeriesAnime> _searchResults = [];
   LoadingStatus _status = LoadingStatus.notloaded;
   String? _errorMessage;
   String _searchQuery = '';
+  bool _isInitialized = false;
 
   // --- Public Getters ---
-  List<TvSeries> get seriesForDisplay =>
-      _searchQuery.isEmpty ? _allSeriesList : _searchResults;
+  List<TvSeriesAnime> get animeseriesForDisplay =>
+      _searchQuery.isEmpty ? _allAnimeSeriesList : _searchResults;
   LoadingStatus get status => _status;
   String? get errorMessage => _errorMessage;
   bool get isLoading => _status == LoadingStatus.loading;
   bool get hasError => _status == LoadingStatus.error;
   String get searchQuery => _searchQuery;
+  bool get isInitialized => _isInitialized;
 
-  TvSeriesProvider() {
-    loadTvSeriesData();
+  // Initialize data only once
+  Future<void> _initializeData() async {
+    if (!_isInitialized) {
+      await loadTvSeriesData();
+      _isInitialized = true;
+    }
   }
+
+  // Ensure data is loaded before accessing
+  Future<void> ensureInitialized() async {
+    if (!_isInitialized) {
+      await _initializeData();
+    }
+  }
+
+
 
   Future<void> loadTvSeriesData() async {
     if (_status == LoadingStatus.loading ||
         _status == LoadingStatus.loaded ||
-        _status == LoadingStatus.idle) return;
+        _status == LoadingStatus.idle) {
+      return;
+    }
 
     _updateStatus(LoadingStatus.loading);
-    _seriesMap.clear();
-    _allSeriesList.clear();
+    _animeseriesMap.clear();
+    _allAnimeSeriesList.clear();
     _searchResults.clear();
 
     try {
       // 1. Load Series Details CSV
-      final detailsRawData = await rootBundle.loadString(_seriesDetailsCsvPath);
+      final detailsRawData =
+          await rootBundle.loadString(_animeseriesDetailsCsvPath);
       List<List<dynamic>> detailsCsvTable =
           const CsvToListConverter().convert(detailsRawData);
 
-      final Map<int, TvSeries> tempSeriesMap = {};
+      final Map<int, TvSeriesAnime> tempAnimeSeriesMap = {};
       // Using a temporary map to store series names -> tmdb_id for linking episodes later
-      final Map<String, int> seriesnameToTmdbidMap = {};
+      final Map<String, int> animeseriesnameToTmdbidMap = {};
 
       for (final row in detailsCsvTable.skip(1)) {
         // Skip header row
         try {
-          final series = TvSeries.fromCsvRow(row);
-          if (series.tmdbId != 0) {
+          final animeseries = TvSeriesAnime.fromCsvRow(row);
+          if (animeseries.tmdbId != 0) {
             // Use TMDB ID as the primary key
-            tempSeriesMap[series.tmdbId] = series;
+            tempAnimeSeriesMap[animeseries.tmdbId] = animeseries;
             // Store the mapping: case-insensitive name from details CSV to its TMDB ID
-            //      seriesnameToTmdbidMap[series.originalName.trim().toLowerCase()] = series.tmdbId;
+            animeseriesnameToTmdbidMap[animeseries.originalName.toLowerCase()] =
+                animeseries.tmdbId;
             // Also map the potentially different 'series' name if it exists and differs
-
-            seriesnameToTmdbidMap[row[1].toString().toLowerCase()] =
-                series.tmdbId;
+            if (row.length > 1 &&
+                row[1] != null &&
+                row[1].toString().toLowerCase() !=
+                    animeseries.originalName.trim().toLowerCase()) {
+              animeseriesnameToTmdbidMap[row[1].toString().toLowerCase()] =
+                  animeseries.tmdbId;
+            }
+          } else {
+            if (kDebugMode) {
+              print(
+                  "Skipping series due to missing or invalid TMDB ID in row: $row");
+            }
           }
         } catch (e, stacktrace) {
           if (kDebugMode) {
@@ -79,7 +120,7 @@ class TvSeriesProvider extends ChangeNotifier {
 
       if (kDebugMode) {
         print(
-            "Loaded ${tempSeriesMap.length} series details. Name mapping count: ${seriesnameToTmdbidMap.length}");
+            "Loaded ${tempAnimeSeriesMap.length} series details. Name mapping count: ${animeseriesnameToTmdbidMap.length}");
       }
 
       // 2. Load Episodes CSV
@@ -92,16 +133,18 @@ class TvSeriesProvider extends ChangeNotifier {
 
       for (final row in episodesCsvTable.skip(1)) {
         // Skip header row
-          final String seriesNameFromEpisodeCsv = row[0].toString();
-          final String seriesNameLower = seriesNameFromEpisodeCsv.toLowerCase();
+        if (row.isNotEmpty && row[0] != null) {
+          final String animeseriesNameFromEpisodeCsv = row[0].toString();
+          final String animeseriesNameLower =
+              animeseriesNameFromEpisodeCsv.toLowerCase();
 
           // *** IMPORTANT JOIN LOGIC ***
           // Attempt to find the TMDB ID using the name from the episode CSV
-          int? targetTmdbId = seriesnameToTmdbidMap[seriesNameLower];
+          int? targetTmdbId = animeseriesnameToTmdbidMap[animeseriesNameLower];
 
           if (targetTmdbId != null) {
             try {
-              final episode = Episode.fromCsvInfo(seriesNameFromEpisodeCsv,
+              final episode = Episode.fromCsvInfo(animeseriesNameFromEpisodeCsv,
                   targetTmdbId, row); // Pass targetTmdbId
               if (!tempEpisodesByTmdbId.containsKey(targetTmdbId)) {
                 tempEpisodesByTmdbId[targetTmdbId] = [];
@@ -110,10 +153,19 @@ class TvSeriesProvider extends ChangeNotifier {
             } catch (e) {
               if (kDebugMode) {
                 print(
-                    "Error parsing episode from row for series '$seriesNameFromEpisodeCsv' (mapped to $targetTmdbId): $row -> $e");
+                    "Error parsing episode from row for series '$animeseriesNameFromEpisodeCsv' (mapped to $targetTmdbId): $row -> $e");
               }
             }
-          } 
+          } else {
+            // If the name wasn't found in the map
+            if (kDebugMode) {
+              // This indicates a mismatch or missing series in the details CSV
+              print(
+                  "Warning: Could not find matching TMDB ID for series name '$animeseriesNameFromEpisodeCsv' from episodes CSV.");
+              // Optionally, try a fallback or log more prominently
+            }
+          }
+        }
       }
 
       if (kDebugMode) {
@@ -121,8 +173,8 @@ class TvSeriesProvider extends ChangeNotifier {
       }
 
       // 3. Combine Details and Episodes
-      for (final tmdbId in tempSeriesMap.keys) {
-        final baseSeries = tempSeriesMap[tmdbId]!;
+      for (final tmdbId in tempAnimeSeriesMap.keys) {
+        final baseSeries = tempAnimeSeriesMap[tmdbId]!;
         final csvEpisodes =
             tempEpisodesByTmdbId[tmdbId] ?? []; // Get episodes for this TMDB ID
 
@@ -154,21 +206,22 @@ class TvSeriesProvider extends ChangeNotifier {
 
         // Create the final TvSeries object with combined data
         final finalSeries = baseSeries.copyWith(seasons: seasons);
-        _seriesMap[tmdbId] = finalSeries; // Add to the final map
+        _animeseriesMap[tmdbId] = finalSeries; // Add to the final map
       }
 
       // Create the sorted list for display
-      _allSeriesList = _seriesMap.values.toList()
+      _allAnimeSeriesList = _animeseriesMap.values.toList()
         ..sort((a, b) => a.name
             .toLowerCase()
             .compareTo(b.name.toLowerCase())); // Case-insensitive sort
 
-    //  _searchResults = _allSeriesList; // Initialize search results
+      _searchResults = _allAnimeSeriesList; // Initialize search results
       _updateStatus(LoadingStatus.loaded);
+      _isInitialized = true;
 
       if (kDebugMode) {
         print(
-            "Successfully loaded and combined data for ${_allSeriesList.length} TV series.");
+            "Successfully loaded and combined data for ${_allAnimeSeriesList.length} TV series.");
       }
     } catch (e, stacktrace) {
       _updateStatus(LoadingStatus.error, "Failed to load TV series data: $e");
@@ -176,18 +229,19 @@ class TvSeriesProvider extends ChangeNotifier {
         print("TV Series Loading Error: $e");
         print(stacktrace);
       }
-      _seriesMap = {};
-      _allSeriesList = [];
+      _animeseriesMap = {};
+      _allAnimeSeriesList = [];
       _searchResults = [];
+      _isInitialized = false;
     }
   }
 
-  void searchTvSeries(String query) {
+  void searchAnime(String query) {
     _searchQuery = query.toLowerCase();
     if (_searchQuery.isEmpty) {
-      _searchResults = _allSeriesList;
+      _searchResults = _allAnimeSeriesList;
     } else {
-      _searchResults = _allSeriesList.where((series) {
+      _searchResults = _allAnimeSeriesList.where((series) {
         // Adjust search logic based on available fields in TvSeries from CSV
         return series.name.toLowerCase().contains(_searchQuery) ||
             series.originalName.toLowerCase().contains(_searchQuery) ||
@@ -203,8 +257,8 @@ class TvSeriesProvider extends ChangeNotifier {
     }
   }
 
-  TvSeries? getTvSeriesByTmdbId(int tmdbId) {
-    return _seriesMap[tmdbId]; // Direct lookup is efficient
+  TvSeriesAnime? getAnimeByTmdbId(int tmdbId) {
+    return _animeseriesMap[tmdbId]; // Direct lookup is efficient
   }
 
   void _updateStatus(LoadingStatus newStatus, [String? message]) {

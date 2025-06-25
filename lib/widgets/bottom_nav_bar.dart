@@ -45,8 +45,8 @@ class BottomNavBar extends StatelessWidget {
         ),
         // Center special button for Shorts
         BottomNavigationBarItem(
-          icon: Icon(Icons.add_circle_outline, size: 32.0),
-          activeIcon: Icon(Icons.add_circle, size: 32.0),
+          icon: Icon(Icons.add_circle_outline),
+          activeIcon: Icon(Icons.add_circle),
           label: 'WatchList',
         ),
         BottomNavigationBarItem(

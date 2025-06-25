@@ -4,12 +4,315 @@ import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
 import '../utils/csv_parser.dart';
 import '../utils/data_analyzer.dart';
-import '../widgets/data_grid.dart';
-import '../widgets/header_selector.dart';
-import '../widgets/pivot_table.dart';
 import '../widgets/statistics_view.dart';
-import '../widgets/toolbar.dart';
 
+class PivotTableWidget extends StatelessWidget {
+  final PivotTableData pivotData;
+
+  const PivotTableWidget({super.key, required this.pivotData});
+
+  List<String> _getUniqueLeftKeys() {
+    return pivotData.pivotData.keys.toList();
+  }
+
+  List<String> _getUniqueTopKeys() {
+    final Set<String> keys = {};
+    for (final topMap in pivotData.pivotData.values) {
+      keys.addAll(topMap.keys);
+    }
+    return keys.toList();
+  }
+
+  // List<List<String>> _parseCompoundKeys(List<String> keys) {
+  //   return keys.map((key) => key.split('|')).toList();
+  // }
+
+  @override
+  Widget build(BuildContext context) {
+    final leftKeys = _getUniqueLeftKeys();
+    final topKeys = _getUniqueTopKeys();
+
+  //  final leftParsedKeys = _parseCompoundKeys(leftKeys);
+   // final topParsedKeys = _parseCompoundKeys(topKeys);
+
+    // Create a unique list of values for each left header dimension
+    // final leftDimensions = List<List<String>>.generate(
+    //   pivotData.leftHeaders.length,
+    //   (i) => leftParsedKeys.map((parts) => parts[i]).toSet().toList(),
+    // );
+
+    // Create a unique list of values for each top header dimension
+    // final topDimensions = List<List<String>>.generate(
+    //   pivotData.topHeaders.length,
+    //   (i) => topParsedKeys.map((parts) => parts[i]).toSet().toList(),
+    // );
+
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${pivotData.dataColumn} - ${pivotData.aggregateFunction}',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 8),
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SingleChildScrollView(
+                child: DataTable(
+                  headingRowColor: WidgetStateProperty.all(Color(0xFF2C3A4F)),
+                  dataRowColor: WidgetStateProperty.all(Color(0xFF323C4F)),
+                  border: TableBorder.all(color: Colors.blueGrey.shade700),
+                  columnSpacing: 0,
+                  columns: [
+                    DataColumn(label: SizedBox(width: 80, child: Text(''))),
+                    ...topKeys.expand((topKey) {
+                      final parts = topKey.split('|');
+                      return [
+                        DataColumn(
+                          label: Container(
+                            width: 80,
+                            alignment: Alignment.center,
+                            child: Text(parts.join(' ')),
+                          ),
+                        ),
+                      ];
+                    }),
+                  ],
+                  rows: leftKeys.map((leftKey) {
+                    final leftParts = leftKey.split('|');
+
+                    return DataRow(
+                      cells: [
+                        DataCell(
+                          SizedBox(
+                            width: 80,
+                            child: Text(leftParts.join(' ')),
+                          ),
+                        ),
+                        ...topKeys.map((topKey) {
+                          final value =
+                              pivotData.pivotData[leftKey]?[topKey] ?? 0.0;
+                          return DataCell(
+                            Container(
+                              width: 80,
+                              alignment: Alignment.center,
+                              child: Text(value.toStringAsFixed(1)),
+                            ),
+                          );
+                        }),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class HeaderSelector extends StatelessWidget {
+  final String title;
+  final List<String> headers;
+  final List<String> selectedHeaders;
+  final Function(List<String>) onHeadersChanged;
+  final bool singleSelect;
+
+  const HeaderSelector({
+    super.key,
+    required this.title,
+    required this.headers,
+    required this.selectedHeaders,
+    required this.onHeadersChanged,
+    this.singleSelect = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(8.0),
+      decoration: BoxDecoration(
+        color: Color(0xFF262F3D),
+        borderRadius: BorderRadius.circular(4.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 8),
+          Wrap(
+            spacing: 4.0,
+            runSpacing: 4.0,
+            children: [
+              ...selectedHeaders.map((header) {
+                return Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(header),
+                      SizedBox(width: 4),
+                      InkWell(
+                        onTap: () {
+                          final newHeaders = List<String>.from(selectedHeaders);
+                          newHeaders.remove(header);
+                          onHeadersChanged(newHeaders);
+                        },
+                        child: Icon(Icons.close, size: 16),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ],
+          ),
+          SizedBox(height: 8),
+          Expanded(
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: headers.length,
+              itemBuilder: (context, index) {
+                final header = headers[index];
+                final isSelected = selectedHeaders.contains(header);
+
+                return CheckboxListTile(
+                  title: Text(header),
+                  value: isSelected,
+                  onChanged: (_) {
+                    List<String> newHeaders;
+                    if (isSelected) {
+                      newHeaders =
+                          selectedHeaders.where((h) => h != header).toList();
+                    } else {
+                      if (singleSelect) {
+                        newHeaders = [header];
+                      } else {
+                        newHeaders = List<String>.from(selectedHeaders)
+                          ..add(header);
+                      }
+                    }
+                    onHeadersChanged(newHeaders);
+                  },
+                  dense: true,
+                  controlAffinity: ListTileControlAffinity.leading,
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class Toolbar extends StatelessWidget {
+  final VoidCallback onRefresh;
+  final VoidCallback onClear;
+  final VoidCallback onSwap;
+
+  const Toolbar(
+      {super.key,
+      required this.onRefresh,
+      required this.onClear,
+      required this.onSwap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Wrap(
+        spacing: 8.0,
+        children: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF373E4E),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            onPressed: onRefresh,
+            child: Text('Refresh Data'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF373E4E),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            onPressed: onClear,
+            child: Text('Clear Data'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF373E4E),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            onPressed: onSwap,
+            child: Text('Swap Left and Top'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class DataGrid extends StatelessWidget {
+  final CsvData csvData;
+
+  const DataGrid({super.key, required this.csvData});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!csvData.hasData) {
+      return Center(child: Text('No data available'));
+    }
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: SingleChildScrollView(
+        child: DataTable(
+          headingRowColor: WidgetStateProperty.all(Color(0xFF2C3A4F)),
+          dataRowColor: WidgetStateProperty.all(Color(0xFF323C4F)),
+          border: TableBorder.all(color: Colors.blueGrey.shade700),
+          columns: csvData.headers.map((header) {
+            return DataColumn(label: Text(header));
+          }).toList(),
+          rows: csvData.rows.map((row) {
+            return DataRow(
+              cells: row.map((cell) {
+                return DataCell(
+                  Text(cell.toString()),
+                  showEditIcon: true,
+                  onTap: () {
+                    // Enable in-place editing
+                  },
+                );
+              }).toList(),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+}
 class CsvEditorScreen extends StatefulWidget {
   const CsvEditorScreen({super.key});
 

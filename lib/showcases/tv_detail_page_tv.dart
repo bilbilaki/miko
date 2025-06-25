@@ -1,13 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:miko/models/tv_series_anime.dart' as ss;
 import 'package:miko/providers/tv_series_provider.dart';
 import 'package:miko/services/user_data_service.dart';
 import 'package:miko/showcases/seasondetailpage_tv.dart';
 import 'package:miko/utils/colors.dart';
-import 'package:miko/widgets/episode_tile.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../models/season.dart' as ss;
+import '../widgets/anime_series_card.dart';
 import 'model.dart';
 import 'movie_service.dart';
 import 'person_detail_page.dart';
@@ -27,7 +27,7 @@ class _TvShowDetailPageTVState extends State<TvShowDetailPageTV>
   final MovieService _movieService = MovieService();
   late Future<Map<String, dynamic>> _tvShowDataFuture;
   // Removed _isLoading, _hasError, _errorMessage as FutureBuilder handles this better for the main load
-
+  final ScrollController _seasonsScrollController = ScrollController();
   late TabController _tabController;
   TvShowResponse? recommendations;
   TvShow? _detailedTvShow; // Store the fully loaded TvShow object
@@ -42,7 +42,6 @@ class _TvShowDetailPageTVState extends State<TvShowDetailPageTV>
     Tab(text: 'CAST'),
     Tab(text: 'VIDEOS'),
     Tab(text: 'List of Episodes'),
-
   ];
 
   @override
@@ -58,6 +57,7 @@ class _TvShowDetailPageTVState extends State<TvShowDetailPageTV>
   void dispose() {
     _tabController.dispose();
     _movieService.dispose();
+    _seasonsScrollController.dispose(); // Dispose the controller
     super.dispose();
   }
 
@@ -71,8 +71,7 @@ class _TvShowDetailPageTVState extends State<TvShowDetailPageTV>
         setState(() {
           _detailedTvShow = loadedShow; // Store for use in tabs
           // Initialize futures that need the tvShowId
-          _creditsFuture =
-              _movieService.getTVCredits(tvId: loadedShow.id);
+          _creditsFuture = _movieService.getTVCredits(tvId: loadedShow.id);
           _videosFuture =
               _movieService.getTvShowVideos(tvShowId: loadedShow.id);
         });
@@ -156,64 +155,81 @@ class _TvShowDetailPageTVState extends State<TvShowDetailPageTV>
       ],
     );
   }
-Widget _buildSeasonsList(BuildContext context, List<ss.Season> seasons, int TvseriesId) {
-    // If there's only one season, maybe don't use ExpansionTile or expand it by default
+
+  Widget _buildSeasonsList(
+      BuildContext context, List<ss.Season> seasons, int TvseriesId) {
     bool defaultExpansion = seasons.length == 1;
 
-    return ListView.builder(
-      shrinkWrap: true, // Essential inside CustomScrollView/SliverList
-      physics: const NeverScrollableScrollPhysics(), // Disable nested scrolling
-      itemCount: seasons.length,
-      itemBuilder: (context, index) {
-        final season = seasons[index];
-        // Use ExpansionTile for collapsable seasons
-        return Card(
-          // Wrap ExpansionTile in a Card for better visual separation
-          elevation: 1,
-          margin: const EdgeInsets.symmetric(vertical: 6.0),
-          color: AppColors.secondaryBackground
-              .withOpacity(0.4), // Slightly transparent background
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          clipBehavior:
-              Clip.antiAlias, // Ensures content respects border radius
-          child: ExpansionTile(
-            key: PageStorageKey(
-                'season_${season.seasonNumber}'), // Maintain expansion state
-            title: Text(
-              'Season ${season.seasonNumber}',
-              style: const TextStyle(
-                  color: AppColors.primaryText,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16),
-            ),
-            subtitle: Text(
-              '${season.episodes.length} Episode${season.episodes.length == 1 ? '' : 's'}',
-              style:
-                  const TextStyle(color: AppColors.secondaryText, fontSize: 12),
-            ),
-            iconColor:
-                AppColors.accentColor, // Use accent color for expand icon
-            collapsedIconColor: AppColors.secondaryText,
-            // Expand first season or if only one season exists
-            initiallyExpanded: defaultExpansion ||
-                season.seasonNumber == 1, // Keep first season expanded usually
-            childrenPadding: const EdgeInsets.only(
-                bottom: 8.0, left: 4, right: 4), // Padding for episode tiles
-            // Remove default dividers and use padding/margin on EpisodeTile instead
-            // children: season.episodes.map((episode) => EpisodeTile(episode: episode)).toList(),
-            children: ListTile.divideTiles(
-              // Add subtle dividers between episodes
-              context: context,
-              color: AppColors.dividerColor.withOpacity(0.3),
-              tiles: season.episodes
-                  .map((episode) => EpisodeTile(episode: episode, season: seasons.toString(),id:TvseriesId ,))
-                  .toList(),
-            ).toList(),
-          ),
-        );
-      },
-    );
+    return SizedBox(
+        height: 500, // Adjust as needed
+        child: ListView.builder(
+          controller: _seasonsScrollController,
+          shrinkWrap: false,
+          physics: const AlwaysScrollableScrollPhysics(),
+          itemCount: seasons.length,
+          itemBuilder: (context, index) {
+            final season = seasons[index];
+
+            // ...existing ExpansionTile code...
+            // Use ExpansionTile for collapsable seasons
+            return Card(
+              // Wrap ExpansionTile in a Card for better visual separation
+              elevation: 1,
+              margin: const EdgeInsets.symmetric(vertical: 6.0),
+              color: AppColors.secondaryBackground
+                  .withOpacity(0.4), // Slightly transparent background
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+              clipBehavior:
+                  Clip.antiAlias, // Ensures content respects border radius
+              child: ExpansionTile(
+                key: PageStorageKey(
+                    'season_${season.seasonNumber}'), // Maintain expansion state
+                title: Text(
+                  'Season ${season.seasonNumber}',
+                  style: const TextStyle(
+                      color: AppColors.primaryText,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16),
+                ),
+                subtitle: Text(
+                  '${season.episodes.length} Episode${season.episodes.length == 1 ? '' : 's'}',
+                  style: const TextStyle(
+                      color: AppColors.secondaryText, fontSize: 12),
+                ),
+                iconColor:
+                    AppColors.accentColor, // Use accent color for expand icon
+                collapsedIconColor: AppColors.secondaryText,
+                // Expand first season or if only one season exists
+                initiallyExpanded: defaultExpansion ||
+                    season.seasonNumber ==
+                        1, // Keep first season expanded usually
+                childrenPadding: const EdgeInsets.only(
+                    bottom: 8.0,
+                    left: 4,
+                    right: 4), // Padding for episode tiles
+                // Remove default dividers and use padding/margin on EpisodeTile instead
+                // children: season.episodes.map((episode) => EpisodeTile(episode: episode)).toList(),
+
+                children: ListTile.divideTiles(
+                  // Add subtle dividers between episodes
+                  context: context,
+                  color: AppColors.dividerColor.withOpacity(0.3),
+                  tiles: season.episodes
+                      .map((episode) => EpisodeTileNew(
+                            seriesname: widget.tvShow.name,
+                            episode: episode,
+                            season: season,
+                            id: TvseriesId,
+                          ))
+                      .toList(),
+                ).toList(),
+              ),
+            );
+          },
+        ));
   }
+
   Widget _buildErrorView(
       BuildContext context, String errorMessage, TvShow basicTvShow) {
     return Stack(
@@ -281,7 +297,7 @@ Widget _buildSeasonsList(BuildContext context, List<ss.Season> seasons, int Tvse
 
   Widget _buildDetailView(BuildContext context, TvShow tvShow) {
     final series =
-        Provider.of<TvSeriesProvider>(context).getTvSeriesByTmdbId(tvShow.id);
+        Provider.of<TvSeriesProvider>(context).getAnimeByTmdbId(tvShow.id);
     return NestedScrollView(
       headerSliverBuilder: (context, innerBoxIsScrolled) {
         return [
@@ -309,15 +325,13 @@ Widget _buildSeasonsList(BuildContext context, List<ss.Season> seasons, int Tvse
           _buildSeasonsTab(context, tvShow),
           _buildCastTab(context, tvShow.id), // Pass ID for fetching
           _buildVideosTab(context, tvShow.id), // Pass ID for fetching
-         _buildSeasonsList(
-                            context, series!.seasons, tvShow.id)
-
+          _buildSeasonsList(context, series!.seasons, tvShow.id)
         ],
       ),
     );
   }
 
-Widget _buildAppBar(BuildContext context, TvShow tvShow) {
+  Widget _buildAppBar(BuildContext context, TvShow tvShow) {
     int tvSeriesId = tvShow.id;
 
     final userDataService = Provider.of<UserDataService>(context);
@@ -347,7 +361,7 @@ Widget _buildAppBar(BuildContext context, TvShow tvShow) {
           fit: StackFit.expand,
           children: [
             // Backdrop Image
-            backdropUrl != null
+            backdropUrl == backdropUrl
                 ? CachedNetworkImage(
                     imageUrl: backdropUrl,
                     fit: BoxFit.cover,
@@ -361,16 +375,16 @@ Widget _buildAppBar(BuildContext context, TvShow tvShow) {
                 : Container(
                     // Fallback color if no backdrop
                     color: AppColors.secondaryBackground,
-                    child:
-                        posterUrl != null // Try poster as fallback background
-                            ? CachedNetworkImage(
-                                imageUrl: posterUrl,
-                                fit: BoxFit.contain,
-                                alignment: Alignment.center)
-                            : const Center(
-                                child: Icon(Icons.tv,
-                                    size: 100, color: AppColors.secondaryText)),
-                ),
+                    child: posterUrl ==
+                            posterUrl // Try poster as fallback background
+                        ? CachedNetworkImage(
+                            imageUrl: posterUrl,
+                            fit: BoxFit.contain,
+                            alignment: Alignment.center)
+                        : const Center(
+                            child: Icon(Icons.tv,
+                                size: 100, color: AppColors.secondaryText)),
+                  ),
             // Gradient overlay for text readability
 
             Positioned(
@@ -461,7 +475,7 @@ Widget _buildAppBar(BuildContext context, TvShow tvShow) {
             //     ),
             //   ),
             // ),
-                
+
             if (tvShow.tagline != null && tvShow.tagline!.isNotEmpty)
               Positioned(
                 bottom: 60, // Adjust if needed based on tab bar height
@@ -874,7 +888,7 @@ Widget _buildAppBar(BuildContext context, TvShow tvShow) {
       },
     );
   }
-    
+
   // Widget _buildCastList() {
   //   return ListView.builder(
   //     itemCount: _tvCredits?.cast.length ?? 0,
@@ -922,7 +936,7 @@ Widget _buildAppBar(BuildContext context, TvShow tvShow) {
   //     },
   //   );
   // }
-    
+
   Widget _buildVideosTab(BuildContext context, int tvShowId) {
     _videosFuture ??= _movieService.getTvShowVideos(tvShowId: tvShowId);
     return FutureBuilder<YoutubeVideoForSeries>(
@@ -1153,32 +1167,39 @@ Widget _buildAppBar(BuildContext context, TvShow tvShow) {
 
   Widget _buildRecommendationsSection(BuildContext context) {
     /* Your existing code */
-    if (recommendations == null || recommendations!.results.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 24.0, bottom: 12.0),
-          child: Text('Recommended Shows',
-              style: Theme.of(context).textTheme.titleLarge),
-        ),
-        SizedBox(
-          height: 230, // Adjusted for better title visibility
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: recommendations!.results.length > 30
-                ? 10
-                : recommendations!.results.length,
-            itemBuilder: (context, index) {
-              final tvShow = recommendations!.results[index];
-              return _buildRecommendationCard(context, tvShow);
-            },
+    final series = Provider.of<TvSeriesProvider>(context)
+        .getAnimeByTmdbId(widget.tvShow.id);
+
+    try {
+      if (recommendations == null || recommendations!.results.isEmpty) {
+        return const SizedBox.shrink();
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 24.0, bottom: 12.0),
+            child: Text('Recommended Shows',
+                style: Theme.of(context).textTheme.titleLarge),
           ),
-        ),
-      ],
-    );
+          SizedBox(
+            height: 230, // Adjusted for better title visibility
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: recommendations!.results.length > 30
+                  ? 10
+                  : recommendations!.results.length,
+              itemBuilder: (context, index) {
+                final tvShow = recommendations!.results[index];
+                return _buildRecommendationCard(context, tvShow);
+              },
+            ),
+          ),
+        ],
+      );
+    } catch (e) {
+      return _buildSeasonsList(context, series!.seasons, series.tmdbId);
+    }
   }
 
   Widget _buildRecommendationCard(BuildContext context, TvShow tvShow) {

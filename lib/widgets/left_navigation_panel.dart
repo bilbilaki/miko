@@ -1,9 +1,6 @@
-// TODO Implement this library.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:miko/providers/sidebar_provider.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
-import 'package:miko/screens/favorites_screen.dart';
 import 'package:miko/screens/genre_list_screen.dart';
 import 'package:miko/screens/home_screen.dart';
 import 'package:miko/screens/settings_screen.dart';
@@ -17,6 +14,8 @@ import 'package:miko/showcases/multi_search_page.dart';
 import 'package:miko/showcases/tv_page.dart';
 import 'package:miko/showcases/tvsearchpage.dart';
 import 'package:miko/utils/colors.dart';
+
+import '../providers/settings_provider.dart';
 class LeftNavigationPanel extends ConsumerWidget {
   final bool isMobileLayout;
   final bool isCollapsed; // Only relevant for desktop
@@ -317,24 +316,4 @@ Widget _buildNavigationItem(
     ),
   );
 }
-  Widget _buildDrawerItem(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      leading: Icon(icon, color: AppColors.iconColor, size: 24),
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: AppColors.primaryText,
-          fontSize: 14,
-        ),
-      ),
-      onTap: onTap,
-      dense: true,
-      visualDensity: VisualDensity.compact,
-    );
-  }
 }

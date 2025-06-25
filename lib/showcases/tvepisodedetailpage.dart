@@ -1,7 +1,6 @@
 // --- episode_detail_page.dart ---
 import 'package:flutter/material.dart';
-import 'package:miko/models/episode.dart' as eps;
-import 'package:miko/models/season.dart' as ses;
+import 'package:miko/models/tv_series_anime.dart' as ses;
 import 'package:miko/screens/video_player_screen.dart';
 import 'package:miko/services/user_data_service.dart';
 import 'package:miko/utils/colors.dart' show AppColors, AppColors2;
@@ -62,18 +61,18 @@ class _TVEpisodeDetailPageState extends State<TVEpisodeDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final anime = seriesProvider.getTvSeriesByTmdbId(widget.tvShowId);
+    final anime = seriesProvider.getAnimeByTmdbId(widget.tvShowId);
     // final EpisodeAnime episode;
 
     List<ses.Season> seasons = anime!.seasons;
     final s = seasons[widget.seasonNumber];
-    late final eps.Episode episode =
+    late final ses.Episode episode =
         s.episodes.firstWhere((e) => e.episodeNumber == widget.episodeNumber);
     final availableQualities = episode.getAvailableQualityUrls();
     final userDataService = Provider.of<UserDataService>(context);
-    final status = seriesProvider.status;
-    seriesProvider.loadTvSeriesData();
-    final seriesList = seriesProvider.seriesForDisplay;
+    // final status = seriesProvider.status;
+    // seriesProvider.loadTvSeriesAnimeData();
+    // final seriesList = seriesProvider.seriesForDisplay;
 
     void playVideo(BuildContext context, String url) async {
       await userDataService.toggleIsWatchedLink(

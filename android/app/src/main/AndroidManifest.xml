@@ -4,7 +4,8 @@ xml_permissions.txt
 <uses-permission android:name="android.permission.ACCESS_ALL_DOWNLOADS" />
 <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
 <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER_ADVANCED" />
-
+<uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
 <uses-permission android:name="android.permission.DOWNLOAD_CACHE_NON_PURGEABLE" />
 <uses-permission android:name="android.permission.INTERNET" />
 <uses-permission android:name="android.permission.INVOKE_CARRIER_SETUP" />
@@ -16,7 +17,8 @@ xml_permissions.txt
 <uses-permission android:name="android.permission.WRITE_SOCIAL_STREAM" />
   <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />  
-    
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     
     
     

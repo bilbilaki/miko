@@ -1,4 +1,3 @@
-// TODO Implement this library.
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -134,7 +133,6 @@ class AppColors {
   static const Color dividerColor = Colors.grey;
 }
 
-// TODO Implement this library.
 
 class AppColors2 {
   // Primary colors

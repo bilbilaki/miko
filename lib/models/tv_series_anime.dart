@@ -1,26 +1,148 @@
 // lib/models/tv_series.dart
 import 'package:flutter/foundation.dart';
 import 'package:miko/models/movie.dart'; // Import VideoInfo if defined there or define here
+import 'package:miko/models/tmdb/series_model.dart';
+import 'package:miko/services/user_data_service.dart';
 import 'package:url_launcher/url_launcher.dart'; // Import url_launcher
-import 'season_anime.dart';
-enum LoadingStatus {
-  idle,
-  loading,
-  loaded,
-  error,
-  notloaded
+
+enum LoadingStatus { idle, loading, loaded, error, notloaded }
+
+class Season {
+  final int seasonNumber;
+  final List<Episode> episodes;
+
+  Season({
+    required this.seasonNumber,
+    required this.episodes,
+  }) {
+    episodes.sort((a, b) => a.episodeNumber.compareTo(b.episodeNumber));
+  }
+}
+
+class Episode {
+  final String seriesNameCsv;
+  final int seriesTmdbId;
+  final String episodeIdentifier;
+  final int seasonNumber;
+  final int episodeNumber;
+  final String? url1080p;
+  final String? url720p;
+  final String? url540p;
+  final String? url480p;
+  final String? dubbedUrl;
+
+  Episode({
+    required this.seriesNameCsv,
+    required this.seriesTmdbId,
+    required this.episodeIdentifier,
+    required this.seasonNumber,
+    required this.episodeNumber,
+    this.url1080p,
+    this.url720p,
+    this.url540p,
+    this.url480p,
+    this.dubbedUrl,
+  });
+
+  // Helper to get available quality URLs (remains the same)
+  Map<String, String> getAvailableQualityUrls() {
+    final Map<String, String> urls = {};
+    if (url1080p != null && url1080p!.isNotEmpty) urls['1080p'] = url1080p!;
+    if (url720p != null && url720p!.isNotEmpty) urls['720p'] = url720p!;
+    if (url540p != null && url540p!.isNotEmpty) urls['540p'] = url540p!;
+    if (dubbedUrl != null && dubbedUrl!.isNotEmpty) urls['dubbed'] = dubbedUrl!;
+    if (url480p != null && url480p!.isNotEmpty) urls['480p'] = url480p!;
+    return urls;
+  }
+
+  // Factory to create from CSV row data (UPDATED indices based on example)
+  // Now requires seriesTmdbId to be passed in
+  factory Episode.fromCsvInfo(
+      String seriesNameFromCsv, int seriesTmdbId, List<dynamic> rowData) {
+    // Helper to safely get data from row, returning null if index out of bounds or value is null/empty
+    String? safeGetString(int index) {
+      if (index >= 0 && index < rowData.length && rowData[index] != null) {
+        final val = rowData[index].toString().trim();
+        return val.isNotEmpty ? val : null;
+      }
+      return null;
+    }
+
+    String episodeId =
+        safeGetString(1) ?? 'S00E00'; // Column 1: Episode Identifier
+    String? url1080 = safeGetString(2)?.nullIfEmpty; // Column 2: 1080p
+    String? url720 = safeGetString(3)?.nullIfEmpty; // Column 3: 720p
+    String? url540 = safeGetString(4)?.nullIfEmpty; // Column 4: 540p
+    String? url480 = safeGetString(5)?.nullIfEmpty; // Column 5: 480p
+    String? dubbed = safeGetString(6)?.nullIfEmpty; // Column 6: Dubbed
+
+    // Parse season and episode numbers from episodeId (format: S01E05)
+    int seasonNum = 0;
+    int episodeNum = 0;
+
+    try {
+      final match = RegExp(r'[Ss](\d+)[Ee](\d+)')
+          .firstMatch(episodeId); // Case-insensitive S/E
+      if (match != null && match.groupCount >= 2) {
+        seasonNum = int.parse(match.group(1)!);
+        episodeNum = int.parse(match.group(2)!);
+      } else {
+        if (kDebugMode) {
+          print(
+              "Could not parse S/E numbers from '$episodeId' for series '$seriesNameFromCsv'. Defaulting to S0/E0.");
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(
+            "Error parsing episode numbers from '$episodeId' for series '$seriesNameFromCsv': $e");
+      }
+      // Keep default S0/E0 on error
+    }
+
+    // Validate that we have at least S/E numbers, otherwise skip? Or maybe allow S0E0?
+    // For now, we allow S0E0 from the parsing default/error.
+    if (seasonNum == 0 && episodeNum == 0 && episodeId != 'S00E00') {
+      // Log a warning if parsing failed but the ID wasn't literally S00E00
+      if (kDebugMode) {
+        print(
+            "Warning: Episode identifier '$episodeId' for '$seriesNameFromCsv' parsed as S0E0.");
+      }
+    }
+
+    return Episode(
+      seriesNameCsv: seriesNameFromCsv,
+      seriesTmdbId: seriesTmdbId,
+      episodeIdentifier: episodeId,
+      seasonNumber: seasonNum,
+      episodeNumber: episodeNum,
+      url1080p: url1080,
+      url720p: url720,
+      url540p: url540,
+      url480p: url480,
+      dubbedUrl: dubbed,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'Episode(seriesCsv: $seriesNameCsv, tmdbId: $seriesTmdbId, id: $episodeIdentifier, S$seasonNumber E$episodeNumber, #Qualities: ${getAvailableQualityUrls().length})';
+  }
 }
 
 // Helper function for safe parsing (can be moved to a utility file)
 T? tryParse<T>(dynamic value, T Function(String) parser) {
-  if (value == null || value.toString().isEmpty || value.toString().toLowerCase() == 'nan' || value.toString().toLowerCase() == 'none') {
+  if (value == null ||
+      value.toString().isEmpty ||
+      value.toString().toLowerCase() == 'nan' ||
+      value.toString().toLowerCase() == 'none') {
     return null;
   }
   try {
     // Handle potential double strings like "6.5" before parsing int
     if (T == int && value is String && value.contains('.')) {
-       final doubleVal = double.tryParse(value);
-       return doubleVal?.toInt() as T?;
+      final doubleVal = double.tryParse(value);
+      return doubleVal?.toInt() as T?;
     }
     return parser(value.toString().trim());
   } catch (e) {
@@ -35,13 +157,16 @@ int? tryParseInt(dynamic value) => tryParse(value, int.parse);
 double? tryParseDouble(dynamic value) => tryParse(value, double.parse);
 DateTime? tryParseDate(dynamic value) => tryParse(value, DateTime.parse);
 bool parseBool(dynamic value) {
-   final lowerVal = value?.toString().toLowerCase();
-   return lowerVal == 'true' || lowerVal == '1';
+  final lowerVal = value?.toString().toLowerCase();
+  return lowerVal == 'true' || lowerVal == '1';
 }
 
 // Helper to split potentially complex string fields
 List<String> splitStringList(dynamic value, {String separator = ','}) {
-  if (value == null || value.toString().isEmpty || value.toString().toLowerCase() == 'nan' || value.toString().toLowerCase() == 'none') return [];
+  if (value == null ||
+      value.toString().isEmpty ||
+      value.toString().toLowerCase() == 'nan' ||
+      value.toString().toLowerCase() == 'none') return [];
   // Handles simple separator splitting, trims whitespace, removes empty strings
   return value
       .toString()
@@ -53,37 +178,39 @@ List<String> splitStringList(dynamic value, {String separator = ','}) {
 
 class TvSeriesAnime {
   // --- Details primarily from CSV ---
-  final int tmdbId;           // Column 0: tmdb_id
-  final String name;           // Column 1: series (often used as display name)
-  final String status;         // Column 2: status
+  final int tmdbId; // Column 0: tmdb_id
+  final String name; // Column 1: series (often used as display name)
+  final String status; // Column 2: status
   final DateTime? firstAirDate; // Column 3: release_date (parsed)
-  final int? runtime;        // Column 4: runtime
-  final String overview;       // Column 5: overview
-  final double voteAverage;    // Column 6: vote_average
-  final int voteCount;        // Column 7: vote_count
-  final List<String> genres;     // Column 8: genres (comma-separated)
-  final List<String> keywords;   // Column 9: keywords (comma-separated)
-  final String originalName;   // Column 10: original_name
-  final String? posterPath;     // Column 11: poster_path
-  final String? backdropPath;   // Column 12: backdrop_path
-  final double popularity;     // Column 13: popularity
+  final int? runtime; // Column 4: runtime
+  final String overview; // Column 5: overview
+  final double voteAverage; // Column 6: vote_average
+  final int voteCount; // Column 7: vote_count
+  final List<String> genres; // Column 8: genres (comma-separated)
+  final List<String> keywords; // Column 9: keywords (comma-separated)
+  final String originalName; // Column 10: original_name
+  final String? posterPath; // Column 11: poster_path
+  final String? backdropPath; // Column 12: backdrop_path
+  final double popularity; // Column 13: popularity
   final String originalLanguage; // Column 14: original_language
-  final String type;           // Column 15: type
+  final String type; // Column 15: type
   final int? numberOfEpisodes; // Column 16: number_of_episodes
-  final int? numberOfSeasons;  // Column 17: number_of_seasons
-  final String? homepage;       // Column 18: homepage
+  final int? numberOfSeasons; // Column 17: number_of_seasons
+  final String? homepage; // Column 18: homepage
   // You might want to parse cast (19), crew (20), videos (21) if needed later
-   final List<String> cast;
-   final List<String> crew;
-   final List<String> videos;
-   final String? rawVideos; 
+  final List<String> cast;
+  final List<String> crew;
+  final List<String> videos;
+  final String? rawVideos;
 
   // --- Data structure for combined data ---
-  final List<SeasonAnime> seasons; // Populated by provider
+  final List<Season> seasons; // Populated by provider
 
   // --- Base URL for images (keep this) ---
-  static const String _imageBaseUrl = 'https://inosdb.worker-inosuke.workers.dev/w500';
-  static const String _backdropBaseUrl = 'https://inosdb.worker-inosuke.workers.dev/w780'; // Use a higher res for backdrop
+  static const String _imageBaseUrl =
+      'https://inosdb.worker-inosuke.workers.dev/w500';
+  static const String _backdropBaseUrl =
+      'https://inosdb.worker-inosuke.workers.dev/w780'; // Use a higher res for backdrop
 
   TvSeriesAnime({
     required this.tmdbId,
@@ -114,135 +241,150 @@ class TvSeriesAnime {
 
   // Helper to get the full poster URL
   String? get fullPosterUrl {
-     if (posterPath == null || posterPath!.isEmpty || posterPath == "nan" || posterPath == "None") return null;
-     final path = posterPath!.startsWith('/') ? posterPath! : '/$posterPath';
-     return '$_imageBaseUrl$path';
+    if (posterPath == null ||
+        posterPath!.isEmpty ||
+        posterPath == "nan" ||
+        posterPath == "None") return null;
+    final path = posterPath!.startsWith('/') ? posterPath! : '/$posterPath';
+    return '$_imageBaseUrl$path';
   }
 
   // Helper to get the full backdrop URL
   String? get fullBackdropUrl {
-     if (backdropPath == null || backdropPath!.isEmpty || backdropPath == "nan" || backdropPath == "None") return null;
-     final path = backdropPath!.startsWith('/') ? backdropPath! : '/$backdropPath';
-     return '$_backdropBaseUrl$path'; // Use higher res backdrop url
+    if (backdropPath == null ||
+        backdropPath!.isEmpty ||
+        backdropPath == "nan" ||
+        backdropPath == "None") return null;
+    final path =
+        backdropPath!.startsWith('/') ? backdropPath! : '/$backdropPath';
+    return '$_backdropBaseUrl$path'; // Use higher res backdrop url
   }
 
   // Factory constructor to create from CSV row data
   factory TvSeriesAnime.fromCsvRow(List<dynamic> row) {
     // Ensure row has enough columns to avoid RangeError
     dynamic safeGet(int index, [dynamic defaultValue]) {
-         return (row.length > index && row[index] != null) ? row[index] : defaultValue;
-     }
+      return (row.length > index && row[index] != null)
+          ? row[index]
+          : defaultValue;
+    }
 
     DateTime? parsedDate = tryParseDate(safeGet(3)); // Column 3: release_date
 
     return TvSeriesAnime(
-        tmdbId: tryParseInt(safeGet(0)) ?? 0, // Column 0: tmdb_id - Default to 0 if invalid
-        name: safeGet(1)?.toString() ?? 'Unknown Series', // Column 1: series
-        status: safeGet(2)?.toString() ?? 'Unknown',   // Column 2: status
-        firstAirDate: parsedDate,                   // Column 3: release_date
-        runtime: tryParseInt(safeGet(4)),          // Column 4: runtime
-        overview: safeGet(5)?.toString() ?? '',       // Column 5: overview
-        voteAverage: tryParseDouble(safeGet(6)) ?? 0.0, // Column 6: vote_average
-        voteCount: tryParseInt(safeGet(7)) ?? 0,      // Column 7: vote_count
-        genres: splitStringList(safeGet(8)),         // Column 8: genres
-        keywords: splitStringList(safeGet(9)),       // Column 9: keywords
-        originalName: safeGet(10)?.toString() ?? 'Unknown Original Name', // Column 10: original_name
-        posterPath: safeGet(11)?.toString(),           // Column 11: poster_path
-        backdropPath: safeGet(12)?.toString(),         // Column 12: backdrop_path
-        popularity: tryParseDouble(safeGet(13)) ?? 0.0, // Column 13: popularity
-        originalLanguage: safeGet(14)?.toString() ?? 'N/A', // Column 14: original_language
-        type: safeGet(15)?.toString() ?? 'Unknown',   // Column 15: type
-        numberOfEpisodes: tryParseInt(safeGet(16)),  // Column 16: number_of_episodes
-        numberOfSeasons: tryParseInt(safeGet(17)),   // Column 17: number_of_seasons
-        homepage: safeGet(18)?.toString(),           // Column 18: homepage
-        cast: splitStringList(safeGet(19), separator: '|'),    // Example if needed
-        crew: splitStringList(safeGet(20), separator: '|'),   // Example if needed
-        videos: splitStringList(safeGet(21), separator: '|'), // Example if needed
-         rawVideos: safeGet(21)?.toString(),
-        seasons: [], // Initially empty, added by provider
-      );
+      tmdbId: tryParseInt(safeGet(0)) ??
+          0, // Column 0: tmdb_id - Default to 0 if invalid
+      name: safeGet(1)?.toString() ?? 'Unknown Series', // Column 1: series
+      status: safeGet(2)?.toString() ?? 'Unknown', // Column 2: status
+      firstAirDate: parsedDate, // Column 3: release_date
+      runtime: tryParseInt(safeGet(4)), // Column 4: runtime
+      overview: safeGet(5)?.toString() ?? '', // Column 5: overview
+      voteAverage: tryParseDouble(safeGet(6)) ?? 0.0, // Column 6: vote_average
+      voteCount: tryParseInt(safeGet(7)) ?? 0, // Column 7: vote_count
+      genres: splitStringList(safeGet(8)), // Column 8: genres
+      keywords: splitStringList(safeGet(9)), // Column 9: keywords
+      originalName: safeGet(10)?.toString() ??
+          'Unknown Original Name', // Column 10: original_name
+      posterPath: safeGet(11)?.toString(), // Column 11: poster_path
+      backdropPath: safeGet(12)?.toString(), // Column 12: backdrop_path
+      popularity: tryParseDouble(safeGet(13)) ?? 0.0, // Column 13: popularity
+      originalLanguage:
+          safeGet(14)?.toString() ?? 'N/A', // Column 14: original_language
+      type: safeGet(15)?.toString() ?? 'Unknown', // Column 15: type
+      numberOfEpisodes:
+          tryParseInt(safeGet(16)), // Column 16: number_of_episodes
+      numberOfSeasons: tryParseInt(safeGet(17)), // Column 17: number_of_seasons
+      homepage: safeGet(18)?.toString(), // Column 18: homepage
+      cast: splitStringList(safeGet(19), separator: '|'), // Example if needed
+      crew: splitStringList(safeGet(20), separator: '|'), // Example if needed
+      videos: splitStringList(safeGet(21), separator: '|'), // Example if needed
+      rawVideos: safeGet(21)?.toString(),
+      seasons: [], // Initially empty, added by provider
+    );
   }
 
   // Method to create a new TvSeries instance by adding seasons to an existing one
   TvSeriesAnime copyWith({
-    List<SeasonAnime>? seasons,
+    List<Season>? seasons,
   }) {
     // Sort seasons by number before assigning
     final sortedSeasons = seasons ?? this.seasons;
     sortedSeasons.sort((a, b) => a.seasonNumber.compareTo(b.seasonNumber));
 
     return TvSeriesAnime(
-        tmdbId: tmdbId,
-        name: name,
-        status: status,
-        firstAirDate: firstAirDate,
-        runtime: runtime,
-        overview: overview,
-        voteAverage: voteAverage,
-        voteCount: voteCount,
-        genres: genres,
-        keywords: keywords,
-        originalName: originalName,
-        posterPath: posterPath,
-        backdropPath: backdropPath,
-        popularity: popularity,
-        originalLanguage: originalLanguage,
-        type: type,
-        numberOfEpisodes: numberOfEpisodes,
-        numberOfSeasons: numberOfSeasons,
-        homepage: homepage,
-        cast: cast,
-        crew: crew,
-        videos: videos,
-        seasons: sortedSeasons, // Use the new or existing sorted list
-      );
+      tmdbId: tmdbId,
+      name: name,
+      status: status,
+      firstAirDate: firstAirDate,
+      runtime: runtime,
+      overview: overview,
+      voteAverage: voteAverage,
+      voteCount: voteCount,
+      genres: genres,
+      keywords: keywords,
+      originalName: originalName,
+      posterPath: posterPath,
+      backdropPath: backdropPath,
+      popularity: popularity,
+      originalLanguage: originalLanguage,
+      type: type,
+      numberOfEpisodes: numberOfEpisodes,
+      numberOfSeasons: numberOfSeasons,
+      homepage: homepage,
+      cast: cast,
+      crew: crew,
+      videos: videos,
+      seasons: sortedSeasons, // Use the new or existing sorted list
+    );
   }
-   List<VideoInfo> parseVideoData() {
-   final List<VideoInfo> results = [];
-   if (rawVideos == null || rawVideos!.trim().isEmpty || rawVideos!.toLowerCase() == 'nan') {
-     return results;
-   }
-   final entries = rawVideos!.split('|');
-   for (String entry in entries) {
-     entry = entry.trim();
-     if (entry.isEmpty) continue;
-     final parts = entry.split(':');
-     if (parts.length >= 2) {
-       String title = parts[0].trim();
-       String key = parts.sublist(1).join(':').trim();
-       String type = "Clip";
-       if (title.toLowerCase().contains('trailer')) type = "Trailer";
-       if (title.toLowerCase().contains('teaser')) type = "Teaser";
-       if (title.toLowerCase().contains('opening')) type = "Opening";
-       if (title.toLowerCase().contains('ending')) type = "Ending";
 
-       if (key.isNotEmpty) {
-         results.add(VideoInfo(title: title, key: key, type: type));
-       }
-     } else {
-       if (kDebugMode) print("Could not parse video entry: $entry");
-     }
-   }
-   return results;
- }
+  List<VideoInfo> parseVideoData() {
+    final List<VideoInfo> results = [];
+    if (rawVideos == null ||
+        rawVideos!.trim().isEmpty ||
+        rawVideos!.toLowerCase() == 'nan') {
+      return results;
+    }
+    final entries = rawVideos!.split('|');
+    for (String entry in entries) {
+      entry = entry.trim();
+      if (entry.isEmpty) continue;
+      final parts = entry.split(':');
+      if (parts.length >= 2) {
+        String title = parts[0].trim();
+        String key = parts.sublist(1).join(':').trim();
+        String type = "Clip";
+        if (title.toLowerCase().contains('trailer')) type = "Trailer";
+        if (title.toLowerCase().contains('teaser')) type = "Teaser";
+        if (title.toLowerCase().contains('opening')) type = "Opening";
+        if (title.toLowerCase().contains('ending')) type = "Ending";
 
- Future<void> launchVideo(String key) async {
-   final Uri youtubeUrl = Uri.parse('https://www.youtube.com/watch?v=$key');
-   final Uri youtubeAppUrl = Uri.parse('youtube://www.youtube.com/watch?v=$key');
+        if (key.isNotEmpty) {
+          results.add(VideoInfo(title: title, key: key, type: type));
+        }
+      } else {
+        if (kDebugMode) print("Could not parse video entry: $entry");
+      }
+    }
+    return results;
+  }
+
+  Future<void> launchVideo(String key) async {
+    final Uri youtubeUrl = Uri.parse('https://www.youtube.com/watch?v=$key');
+    final Uri youtubeAppUrl =
+        Uri.parse('youtube://www.youtube.com/watch?v=$key');
     try {
-     if (await canLaunchUrl(youtubeAppUrl)) {
-       await launchUrl(youtubeAppUrl, mode: LaunchMode.externalApplication);
-     }
-     else if (await canLaunchUrl(youtubeUrl)) {
-       await launchUrl(youtubeUrl, mode: LaunchMode.externalApplication);
-     } else {
+      if (await canLaunchUrl(youtubeAppUrl)) {
+        await launchUrl(youtubeAppUrl, mode: LaunchMode.externalApplication);
+      } else if (await canLaunchUrl(youtubeUrl)) {
+        await launchUrl(youtubeUrl, mode: LaunchMode.externalApplication);
+      } else {
         if (kDebugMode) print("Could not launch YouTube URL for key: $key");
-     }
-   } catch (e) {
-     if (kDebugMode) print("Error launching url: $e");
-   }
- }
-
+      }
+    } catch (e) {
+      if (kDebugMode) print("Error launching url: $e");
+    }
+  }
 
   @override
   String toString() {
@@ -254,20 +396,20 @@ class TvSeriesAnime {
 }
 
 // If you were using a Genre class like this from TMDB:
- class Genre {
-   final int id; // May not be available from CSV
-   final String name;
+class Genre {
+  final int id; // May not be available from CSV
+  final String name;
 
-   Genre({required this.id, required this.name});
+  Genre({required this.id, required this.name});
 
-   // Keep this if you might merge with TMDB data later, otherwise remove
-   factory Genre.fromJson(Map<String, dynamic> json) {
-     return Genre(
-       id: json['id'] as int? ?? 0,
-       name: json['name'] as String? ?? 'Unknown Genre',
-     );
-   }
- }
+  // Keep this if you might merge with TMDB data later, otherwise remove
+  factory Genre.fromJson(Map<String, dynamic> json) {
+    return Genre(
+      id: json['id'] as int? ?? 0,
+      name: json['name'] as String? ?? 'Unknown Genre',
+    );
+  }
+}
 // If you only have genre names (strings) from the CSV, TvSeries can just store List<String> genres.
 // Make sure the TvSeries class uses List<String> genres if you remove the Genre class.
 // (The provided TvSeries.fromCsvRow already assumes List<String>)

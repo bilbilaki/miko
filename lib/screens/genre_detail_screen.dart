@@ -4,12 +4,9 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:miko/models/movie.dart';
 import 'package:miko/providers/anime_provider.dart';
 import 'package:miko/widgets/anime_series_card.dart'; // Assuming you have AnimeCard
-import 'package:miko/widgets/movie_card.dart';
-import 'package:miko/widgets/tv_series_card.dart';
 import 'package:provider/provider.dart';
 //import 'package:miko/models/movie.dart' as movie;
 import 'package:miko/models/tv_series_anime.dart';
-import 'package:miko/models/tv_series.dart';
 import 'package:miko/providers/movie_provider.dart';
 import 'package:miko/providers/tv_series_provider.dart';
 
@@ -31,7 +28,7 @@ class GenreDetailScreen extends StatelessWidget {
         .where((m) => m.genres.any((g) => g.toLowerCase() == genre.toLowerCase()))
         .toList();
 
-    final List<TvSeries> tvSeriesInGenre = tvProvider.seriesForDisplay // Use seriesForDisplay to respect potential sorting/filtering
+    final List<TvSeriesAnime> tvSeriesInGenre = tvProvider.animeseriesForDisplay // Use seriesForDisplay to respect potential sorting/filtering
         .where((s) => s.genres.any((g) => g.toLowerCase() == genre.toLowerCase()))
         .toList();
 
@@ -67,11 +64,13 @@ class GenreDetailScreen extends StatelessWidget {
                   final item = allItemsInGenre[index];
                    if (item is Movie) {
                      return MovieCard(movie: item);
-                   } else if (item is TvSeries) {
-                     return TvSeriesCard(series: item);
-                   } else if (item is TvSeriesAnime) { // Assuming AnimeCard exists
-                     return AnimeSeriesCard(series: item); // Adapt as needed
-                   }
+                   } else if (item is TvSeriesAnime) {
+                     return AnimeSeriesCard(series: item);
+                   } 
+                   
+                   //else if (item is TvSeriesAnime) { // Assuming AnimeCard exists
+                    // return AnimeSeriesCard(series: item); // Adapt as needed
+                  // }
                    return const SizedBox.shrink(); // Should not happen
                 },
               ),

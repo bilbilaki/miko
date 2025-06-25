@@ -1,19 +1,15 @@
 // lib/screens/unisearch_screen.dart
 import 'package:flutter/material.dart';
 import 'package:miko/models/movie.dart' as m;
-import 'package:miko/models/tv_series.dart' as ts;
 import 'package:miko/models/tv_series_anime.dart' as tsa;
-import 'package:miko/widgets/tv_series_card.dart';
 //import 'package:miko/utils/dynamic_background.dart'; // Optional background
 import 'package:provider/provider.dart';
 import 'package:miko/providers/movie_provider.dart';
 import 'package:miko/providers/tv_series_provider.dart';
 import 'package:miko/providers/anime_provider.dart';
 import 'package:miko/utils/colors.dart';
-import 'package:miko/widgets/movie_card.dart';
 import 'package:miko/widgets/anime_series_card.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:go_router/go_router.dart';
 import 'dart:async'; // Import for Timer (debouncing)
 import 'package:miko/services/data_manager.dart'; // Import DataManager
 
@@ -47,7 +43,7 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
     _searchController.text = widget.initialQuery ?? '';
     _currentQuery = widget.initialQuery ?? '';
     _searchController.addListener(_onSearchChanged);
-    
+
     // Properly initialize providers and load data
 
     _initializeProviders();
@@ -104,13 +100,13 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
     });
 
     _movieProvider.searchMovies(query);
-    _tvProvider.searchTvSeries(query);
+    _tvProvider.searchAnime(query);
     _animeProvider.searchAnime(query);
   }
 
   void _clearAllSearches() {
     _movieProvider.searchMovies('');
-    _tvProvider.searchTvSeries('');
+    _tvProvider.searchAnime('');
     _animeProvider.searchAnime('');
   }
 
@@ -122,11 +118,6 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
     _clearAllSearches();
   }
 
-  void _goBack() {
-    _clearAllSearches();
-    context.go('/');
-  }
-
   @override
   Widget build(BuildContext context) {
     final movieProvider = context.watch<MovieProvider>();
@@ -136,7 +127,7 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
     // Combine all results
     final List<dynamic> allResults = [
       ...movieProvider.movies,
-      ...tvProvider.seriesForDisplay,
+      ...tvProvider.animeseriesForDisplay,
       ...animeProvider.animeseriesForDisplay
     ];
 
@@ -150,70 +141,62 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
     // Determine loading state
     final bool isLoading = _isLoading ||
         movieProvider.status == LoadingStatus.loading ||
-        tvProvider.status == ts.LoadingStatus.loading ||
-        animeProvider.status == tsa.LoadingStatus.loading;
+        animeProvider.status == tsa.LoadingStatus.loading ||
+        tvProvider.status == tsa.LoadingStatus.loading;
 
     final bool hasResults = allResults.isNotEmpty;
     final bool hasSearched = _currentQuery.isNotEmpty;
 
-    return PopScope(
-      canPop: false,
-      onPopInvoked: (didPop) {
-        if (!didPop) {
-          _goBack();
-        }
-      },
-      child: Scaffold(
-        backgroundColor: AppColors.primaryBackground,
-        body: SafeArea(
-          child: Column(
-            children: [
-              // Search Bar
-              Container(
-                color: AppColors.secondaryBackground.withOpacity(0.95),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back,
-                          color: AppColors.iconColor),
-                      onPressed: _goBack,
-                    ),
-                    Expanded(
-                      child: TextField(
-                        controller: _searchController,
-                        focusNode: _searchFocusNode,
-                        style: const TextStyle(
-                            color: AppColors.primaryText, fontSize: 18),
-                        cursorColor: AppColors.accentColor,
-                        decoration: InputDecoration(
-                          hintText: 'Search Movies, TV & Anime...',
-                          hintStyle: TextStyle(
-                              color: AppColors.secondaryText.withOpacity(0.7)),
-                          border: InputBorder.none,
-                          suffixIcon: _searchController.text.isNotEmpty
-                              ? IconButton(
-                                  icon: const Icon(Icons.clear,
-                                      color: AppColors.secondaryText),
-                                  onPressed: _clearInputAndSearch,
-                                )
-                              : null,
-                        ),
-                        onSubmitted: (query) =>
-                            _performSearch(query, immediate: true),
+    return Scaffold(
+      backgroundColor: AppColors.primaryBackground,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Search Bar
+            Container(
+              color: AppColors.secondaryBackground.withOpacity(0.95),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back,
+                        color: AppColors.iconColor),
+                    onPressed: dispose,
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      focusNode: _searchFocusNode,
+                      style: const TextStyle(
+                          color: AppColors.primaryText, fontSize: 18),
+                      cursorColor: AppColors.accentColor,
+                      decoration: InputDecoration(
+                        hintText: 'Search Movies, TV & Anime...',
+                        hintStyle: TextStyle(
+                            color: AppColors.secondaryText.withOpacity(0.7)),
+                        border: InputBorder.none,
+                        suffixIcon: _searchController.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear,
+                                    color: AppColors.secondaryText),
+                                onPressed: _clearInputAndSearch,
+                              )
+                            : null,
                       ),
+                      onSubmitted: (query) =>
+                          _performSearch(query, immediate: true),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
 
-              // Results Area
-              Expanded(
-                child: _buildResultsArea(
-                    isLoading, hasSearched, hasResults, allResults),
-              ),
-            ],
-          ),
+            // Results Area
+            Expanded(
+              child: _buildResultsArea(
+                  isLoading, hasSearched, hasResults, allResults),
+            ),
+          ],
         ),
       ),
     );
@@ -263,9 +246,12 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
   Widget _buildItemCard(dynamic item) {
     if (item is m.Movie) {
       return MovieCard(movie: item);
-    } else if (item is ts.TvSeries) {
-      return TvSeriesCard(series: item);
-    } else if (item is tsa.TvSeriesAnime) {
+    }
+
+    // else if (item is ts.TvSeries) {
+    // return TvSeriesCard(series: item);
+    // }
+    else if (item is tsa.TvSeriesAnime) {
       return AnimeSeriesCard(series: item);
     } else {
       return const SizedBox.shrink();
@@ -275,9 +261,11 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
   String _getItemName(dynamic item) {
     if (item is m.Movie) {
       return item.title;
-    } else if (item is tsa.TvSeriesAnime) {
-      return item.name;
-    } else if (item is ts.TvSeries) {
+    }
+    // else if (item is tsa.TvSeriesAnime) {
+    //return item.name;
+    // }
+    else if (item is tsa.TvSeriesAnime) {
       return item.name;
     }
     return '';
