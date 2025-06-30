@@ -1,22 +1,28 @@
+import 'dart:io'; // Import for Platform check
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Import for HapticFeedback
 import 'package:miko/models/tv_series_anime.dart' as ss;
 import 'package:miko/providers/anime_provider.dart';
 import 'package:miko/services/user_data_service.dart';
-import '../widgets/anime_series_card.dart';
+import 'package:miko/showcases/tv_page_grid.dart';
+import '../widgets/anime_series_card.dart'; // Keep if used elsewhere
 import 'seasondetailpage_anime.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'model.dart';
+import 'model.dart' hide Episode;
+import 'model.dart' as m;
 import 'movie_service.dart';
 import 'person_detail_page.dart';
 import 'episodedetailpage.dart';
+import 'package:shimmer/shimmer.dart'; // Import Shimmer
 
 class TvShowDetailPageAnime extends StatefulWidget {
-  final TvShow tvShow;
-
-  const TvShowDetailPageAnime({super.key, required this.tvShow});
+  final tvShow;
+  final typec;
+  const TvShowDetailPageAnime(
+      {super.key, required this.tvShow, required this.typec});
 
   @override
   State<TvShowDetailPageAnime> createState() => _TvShowDetailPageAnimeState();
@@ -27,7 +33,6 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
   final MovieService _movieService = MovieService();
   late Future<Map<String, dynamic>> _tvShowDataFuture;
   final ScrollController _seasonsScrollController = ScrollController();
-  // Removed _isLoading, _hasError, _errorMessage as FutureBuilder handles this better for the main load
 
   late TabController _tabController;
   TvShowResponse? recommendations;
@@ -39,10 +44,10 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
 
   final List<Tab> _tabs = const [
     Tab(text: 'OVERVIEW'),
+    Tab(text: 'List of Episodes'),
     Tab(text: 'SEASONS'),
     Tab(text: 'CAST'),
     Tab(text: 'VIDEOS'),
-    Tab(text: 'List of Episodes'),
   ];
 
   @override
@@ -50,40 +55,36 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
     super.initState();
     _tabController = TabController(length: _tabs.length, vsync: this);
     _loadTvShowBaseDetails();
-    // Initialize futures for tabs that require separate API calls
-    // These will be triggered when the TvShow ID is available
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     _movieService.dispose();
-    _seasonsScrollController.dispose(); // Dispose the controller
+    _seasonsScrollController.dispose();
     super.dispose();
   }
 
   void _loadTvShowBaseDetails() {
     _tvShowDataFuture = _movieService.getTvShowDetailsWithRecommendations(
         tvShowId: widget.tvShow.id);
-    // Once base details are loaded, we can trigger dependent futures
     _tvShowDataFuture.then((data) {
       if (mounted && data['details'] != null) {
         final loadedShow = data['details'] as TvShow;
         setState(() {
-          _detailedTvShow = loadedShow; // Store for use in tabs
-          // Initialize futures that need the tvShowId
+          _detailedTvShow = loadedShow;
           _creditsFuture = _movieService.getTVCredits(tvId: loadedShow.id);
           _videosFuture =
               _movieService.getTvShowVideos(tvShowId: loadedShow.id);
         });
       }
     }).catchError((e) {
-      // Error is handled by FutureBuilder for _tvShowDataFuture
       debugPrint("Error loading base TV Show details: $e");
     });
   }
 
   void _navigateToPersonDetail(int personId, String name, String? profilePath) {
+    if (Platform.isAndroid) HapticFeedback.lightImpact();
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -97,11 +98,14 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
   }
 
   Future<void> _launchUrl(String urlString) async {
+    if (Platform.isAndroid) HapticFeedback.lightImpact();
     final Uri url = Uri.parse(urlString);
     if (!await launchUrl(url)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not launch $urlString')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not launch $urlString')),
+        );
+      }
     }
   }
 
@@ -113,28 +117,23 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting &&
               _detailedTvShow == null) {
-            // Show loading view only if _detailedTvShow is not yet set (initial load)
             return _buildLoadingView(
                 widget.tvShow); // Use initial basic tvShow for loading view
           } else if (snapshot.hasError && _detailedTvShow == null) {
             return _buildErrorView(
-                context, snapshot.error.toString(), widget.tvShow);
+                context, "An unexpected error occurred.", widget.tvShow);
           } else if (snapshot.hasData || _detailedTvShow != null) {
-            // Proceed if we have new data or already loaded _detailedTvShow
             if (snapshot.hasData) {
-              _detailedTvShow = snapshot.data!['details']
-                  as TvShow?; // Update with fresh data
+              _detailedTvShow = snapshot.data!['details'] as TvShow?;
               recommendations =
                   snapshot.data!['recommendations'] as TvShowResponse?;
             }
             if (_detailedTvShow == null) {
-              // Should not happen if logic is correct
               return _buildErrorView(
                   context, "Failed to load show details.", widget.tvShow);
             }
             return _buildDetailView(context, _detailedTvShow!);
           } else {
-            // Fallback, should ideally not be reached if logic is sound
             return _buildErrorView(
                 context, "An unexpected error occurred.", widget.tvShow);
           }
@@ -144,14 +143,14 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
   }
 
   Widget _buildLoadingView(TvShow basicTvShow) {
-    // Pass basic TvShow for the background
     return Stack(
       children: [
-        _buildScaffoldContent(
-            context, basicTvShow, true), // Show basic info blurred
-        Container(
-          color: Colors.black54,
-          child: const Center(child: CircularProgressIndicator()),
+        _buildScaffoldContent(context, basicTvShow, true),
+        Positioned.fill(
+          child: Container(
+            color: Colors.black54,
+            child: const Center(child: CircularProgressIndicator()),
+          ),
         ),
       ],
     );
@@ -161,43 +160,45 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
       BuildContext context, String errorMessage, TvShow basicTvShow) {
     return Stack(
       children: [
-        _buildScaffoldContent(
-            context, basicTvShow, true), // Show basic info blurred
-        Container(
-          color: Colors.black87,
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 60, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text('Error loading TV show details',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(color: Colors.white)),
-                  const SizedBox(height: 8),
-                  Text(errorMessage,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(color: Colors.white70)),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        // Reset detailed show and reload
-                        _detailedTvShow = null;
-                        recommendations = null;
-                        _loadTvShowBaseDetails();
-                      });
-                    },
-                    child: const Text('Try Again'),
-                  ),
-                ],
+        _buildScaffoldContent(context, basicTvShow, true),
+        Positioned.fill(
+          child: Container(
+            color: Colors.black87,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline,
+                        size: 60, color: Colors.red),
+                    const SizedBox(height: 16),
+                    Text('Error loading TV show details',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge
+                            ?.copyWith(color: Colors.white)),
+                    const SizedBox(height: 8),
+                    Text(errorMessage,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(color: Colors.white70)),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (Platform.isAndroid) HapticFeedback.lightImpact();
+                        setState(() {
+                          _detailedTvShow = null;
+                          recommendations = null;
+                          _loadTvShowBaseDetails();
+                        });
+                      },
+                      child: const Text('Try Again'),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -206,232 +207,320 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
     );
   }
 
-  // Helper to build the main scaffold structure, used by loading/error/success states
   Widget _buildScaffoldContent(
       BuildContext context, TvShow tvShow, bool isBackgroundOnly) {
     if (isBackgroundOnly) {
-      // Simplified view for background during loading/error
       return CustomScrollView(
         slivers: [
           _buildAppBar(context, tvShow),
-          SliverToBoxAdapter(child: _buildTvShowHeader(context, tvShow)),
+          SliverToBoxAdapter(
+              child: _buildTvShowHeader(
+                  context, tvShow, true)), // pass true for shimmer
         ],
       );
     }
-    // Full view for when data is loaded
     return _buildDetailView(context, tvShow);
   }
 
   Widget _buildDetailView(BuildContext context, TvShow tvShow) {
-    final series =
-        Provider.of<AnimeProvider>(context).getAnimeByTmdbId(tvShow.id);
-    return NestedScrollView(
-      headerSliverBuilder: (context, innerBoxIsScrolled) {
-        return [
-          _buildAppBar(context, tvShow),
-          SliverToBoxAdapter(child: _buildTvShowHeader(context, tvShow)),
-          SliverPersistentHeader(
-            delegate: _SliverAppBarDelegate(
-              TabBar(
-                controller: _tabController,
-                tabs: _tabs,
-                isScrollable: true, // If many tabs
-                indicatorColor: Theme.of(context).colorScheme.secondary,
-                labelColor: Theme.of(context).colorScheme.secondary,
-                unselectedLabelColor: Colors.grey,
-              ),
-            ),
-            pinned: true,
-          ),
-        ];
+    final series = widget.typec == "anime"
+        ? Provider.of<AnimeProvider>(context).getAnimeByTmdbId(tvShow.id)
+        : Provider.of<TvSeriesProvider>(context).getAnimeByTmdbId(tvShow.id);
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification scrollInfo) {
+        if (Platform.isAndroid && scrollInfo is ScrollUpdateNotification) {
+          // Trigger a subtle haptic feedback on scroll
+          HapticFeedback.selectionClick();
+        }
+        return false;
       },
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildOverviewTab(context, tvShow),
-          _buildSeasonsTab(context, tvShow),
-          _buildCastTab(context, tvShow.id), // Pass ID for fetching
-          _buildVideosTab(context, tvShow.id), // Pass ID for fetching
-          _buildSeasonsList(context, series!.seasons, series.tmdbId),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAppBar(BuildContext context, TvShow tvShow) {
-    int tvSeriesId = tvShow.id;
-
-    final userDataService = Provider.of<UserDataService>(context);
-    final backdropUrl = tvShow.fullBackdropPath;
-    final posterUrl = tvShow.fullPosterPath;
-    bool isFavorite = userDataService.isFavoriteAnime(tvSeriesId);
-    bool isInWatchlist = userDataService.isOnWatchlistAnime(tvSeriesId);
-
-    return SliverAppBar(
-      expandedHeight: 250,
-      pinned: true,
-      flexibleSpace: FlexibleSpaceBar(
-        title: Text(
-          tvShow.name,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            shadows: [
-              Shadow(
-                  blurRadius: 10.0,
-                  color: Colors.black,
-                  offset: Offset(2.0, 2.0)),
-            ],
-          ),
-        ),
-        background: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Backdrop Image
-            backdropUrl == backdropUrl
-                ? CachedNetworkImage(
-                    imageUrl: backdropUrl,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) =>
-                        Container(color: AppColors.secondaryBackground),
-                    errorWidget: (context, url, error) => Container(
-                        color: AppColors.secondaryBackground,
-                        child: const Icon(Icons.broken_image,
-                            color: AppColors.secondaryText, size: 60)),
-                  )
-                : Container(
-                    // Fallback color if no backdrop
-                    color: AppColors.secondaryBackground,
-                    child: posterUrl ==
-                            posterUrl // Try poster as fallback background
-                        ? CachedNetworkImage(
-                            imageUrl: posterUrl,
-                            fit: BoxFit.contain,
-                            alignment: Alignment.center)
-                        : const Center(
-                            child: Icon(Icons.tv,
-                                size: 100, color: AppColors.secondaryText)),
-                  ),
-            // Gradient overlay for text readability
-
-            Positioned(
-              top: 8.0,
-              right: 8.0,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Favorite
-                  IconButton(
-                    icon: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: isFavorite ? Colors.red : Colors.white,
-                      size: 20,
-                    ),
-                    onPressed: () async {
-                      await userDataService.toggleFavoriteAnime(tvSeriesId);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            isFavorite
-                                ? 'Removed from Favorites'
-                                : 'Added to Favorites',
-                          ),
-                          duration: const Duration(seconds: 1),
-                        ),
-                      );
-                    },
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.black.withOpacity(0.5),
-                      padding: const EdgeInsets.all(4.0),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  // Rating bubble
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 6.0, vertical: 4.0),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(4.0),
-                    ),
-                    child: Text(
-                      '${tvShow.voteAverage.toStringAsFixed(1)} (${tvShow.voteCount})',
-                      style: const TextStyle(
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primaryText,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  // Watchlist
-                  IconButton(
-                    icon: Icon(
-                      isInWatchlist ? Icons.bookmark : Icons.bookmark_border,
-                      color: isInWatchlist ? Colors.green : Colors.white,
-                      size: 20,
-                    ),
-                    onPressed: () async {
-                      await userDataService.toggleWatchlistAnime(tvSeriesId);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            isInWatchlist
-                                ? 'Removed from Watchlist'
-                                : 'Added to Watchlist',
-                          ),
-                          duration: const Duration(seconds: 1),
-                        ),
-                      );
-                    },
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.black.withOpacity(0.5),
-                      padding: const EdgeInsets.all(4.0),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            //  DecoratedBox(
-            //   decoration: BoxDecoration(
-            //     gradient: LinearGradient(
-            //       begin: Alignment.topCenter,
-            //       end: Alignment.bottomCenter,
-            //       colors: [Colors.transparent, Colors.black54],
-            //     ),
-            //   ),
-            // ),
-
-            if (tvShow.tagline != null && tvShow.tagline!.isNotEmpty)
-              Positioned(
-                bottom: 60, // Adjust if needed based on tab bar height
-                left: 16,
-                right: 16,
-                child: Text(
-                  '"${tvShow.tagline!}"',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontStyle: FontStyle.italic,
-                    fontSize: 14,
-                    shadows: [
-                      Shadow(
-                          blurRadius: 5.0,
-                          color: Colors.black,
-                          offset: Offset(1.0, 1.0)),
-                    ],
-                  ),
+      child: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            _buildAppBar(context, tvShow),
+            SliverToBoxAdapter(
+                child: _buildTvShowHeader(context, tvShow, false)),
+            SliverPersistentHeader(
+              delegate: _SliverAppBarDelegate(
+                TabBar(
+                  controller: _tabController,
+                  tabs: _tabs,
+                  isScrollable: true,
+                  indicatorColor: Theme.of(context).colorScheme.secondary,
+                  labelColor: Theme.of(context).colorScheme.secondary,
+                  unselectedLabelColor: Colors.grey,
+                  onTap: (index) {
+                    if (Platform.isAndroid) HapticFeedback.lightImpact();
+                  },
                 ),
               ),
+              pinned: true,
+            ),
+          ];
+        },
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            _buildOverviewTab(context, tvShow),
+            (series == null)
+                ? Center(child: Text("No content exist"))
+                : _buildSeasonsList(context, series.seasons, series.tmdbId),
+            _buildSeasonsTab(context, tvShow),
+            _buildCastTab(context, tvShow.id),
+            _buildVideosTab(context, tvShow.id),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTvShowHeader(BuildContext context, TvShow tvShow) {
-    // Your existing _buildTvShowHeader code (no changes needed here)
+  Widget _buildAppBar(BuildContext context, TvShow tvShow) {
+    int tvSeriesId = tvShow.id;
+    final userDataService = Provider.of<UserDataService>(context);
+    final backdropUrl = tvShow.fullBackdropPath;
+    final posterUrl = tvShow.fullPosterPath; // Used as fallback image
+    bool isFavorite = userDataService.isFavoriteAnime(tvSeriesId);
+    bool isInWatchlist = userDataService.isOnWatchlistAnime(tvSeriesId);
+
+    return SliverAppBar(
+        expandedHeight: 600,
+        pinned: true,
+        flexibleSpace: FlexibleSpaceBar(
+          title: Text(tvShow.name,
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
+                // color: Colors.white,
+                letterSpacing: 1.5,
+                height: 1.2,
+                shadows: [
+                  Shadow(
+                    offset: Offset(2, 2),
+                    blurRadius: 8,
+                    color: Colors.black.withOpacity(0.8),
+                  ),
+                  Shadow(
+                    offset: Offset(-1, -1),
+                    blurRadius: 4,
+                    color: Colors.purple.withOpacity(0.3),
+                  ),
+                  Shadow(
+                    offset: Offset(0, 0),
+                    blurRadius: 20,
+                    color: Colors.cyan.withOpacity(0.4),
+                  ),
+                ],
+                foreground: Paint()
+                  ..shader = LinearGradient(
+                    colors: [
+                      Color(0xFFFF6B6B),
+                      Color(0xFF4ECDC4),
+                      Color(0xFF45B7D1),
+                      Color(0xFF96CEB4),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ).createShader(Rect.fromLTWH(0, 0, 300, 100)),
+              )),
+          background: Card(
+            margin: const EdgeInsets.symmetric(vertical: 8.0),
+            clipBehavior: Clip.antiAlias,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Backdrop Image
+                CachedNetworkImage(
+                  imageUrl: backdropUrl,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    color: AppColors.secondaryBackground,
+                    child: Center(
+                      child: Shimmer.fromColors(
+                        baseColor: Colors.grey[800]!,
+                        highlightColor: Colors.grey[700]!,
+                        child: const Icon(Icons.image,
+                            size: 80, color: Colors.white12),
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    color: AppColors.secondaryBackground,
+                    child: posterUrl.isNotEmpty // Try poster as fallback
+                        ? CachedNetworkImage(
+                            imageUrl: posterUrl,
+                            fit: BoxFit.contain,
+                            alignment: Alignment.center,
+                            placeholder: (context, url) => Center(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 1,
+                                color: AppColors.accentColor,
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Center(
+                              child: Icon(
+                                Icons.tv_off_outlined,
+                                color: AppColors.secondaryText,
+                                size: 40,
+                              ),
+                            ),
+                            fadeInDuration: const Duration(milliseconds: 300),
+                            fadeOutDuration: const Duration(milliseconds: 100),
+                          )
+                        : const Center(
+                            child: Icon(Icons.tv_off_outlined,
+                                color: AppColors.secondaryText, size: 40)),
+                  ),
+                  fadeInDuration: const Duration(milliseconds: 300),
+                  fadeOutDuration: const Duration(milliseconds: 100),
+                ),
+                // Gradient overlay for text readability
+                Positioned(
+                  top: 8.0,
+                  right: 8.0,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Favorite
+                      IconButton(
+                        icon: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          color: isFavorite ? Colors.red : Colors.white,
+                          size: 20,
+                        ),
+                        onPressed: () async {
+                          if (Platform.isAndroid) HapticFeedback.lightImpact();
+                          await userDataService.toggleFavoriteAnime(tvSeriesId);
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  isFavorite
+                                      ? 'Removed from Favorites'
+                                      : 'Added to Favorites',
+                                ),
+                                duration: const Duration(seconds: 1),
+                              ),
+                            );
+                          }
+                        },
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.black.withOpacity(0.5),
+                          padding: const EdgeInsets.all(4.0),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      // Rating bubble
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6.0, vertical: 4.0),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
+                        child: Text(
+                          '${tvShow.voteAverage.toStringAsFixed(1)} (${tvShow.voteCount})',
+                          style: const TextStyle(
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primaryText,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      // Watchlist
+                      IconButton(
+                        icon: Icon(
+                          isInWatchlist
+                              ? Icons.bookmark
+                              : Icons.bookmark_border,
+                          color: isInWatchlist ? Colors.green : Colors.white,
+                          size: 20,
+                        ),
+                        onPressed: () async {
+                          if (Platform.isAndroid) HapticFeedback.lightImpact();
+                          await userDataService
+                              .toggleWatchlistAnime(tvSeriesId);
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  isInWatchlist
+                                      ? 'Removed from Watchlist'
+                                      : 'Added to Watchlist',
+                                ),
+                                duration: const Duration(seconds: 1),
+                              ),
+                            );
+                          }
+                        },
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.black.withOpacity(0.5),
+                          padding: const EdgeInsets.all(4.0),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (tvShow.tagline != null && tvShow.tagline!.isNotEmpty)
+                  Positioned(
+                    bottom: 60,
+                    left: 16,
+                    right: 16,
+                    child: Text(
+                      '"${tvShow.tagline!}"',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontStyle: FontStyle.italic,
+                        fontSize: 14,
+                        shadows: [
+                          Shadow(
+                              blurRadius: 5.0,
+                              color: Colors.black,
+                              offset: Offset(1.0, 1.0)),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ));
+  }
+
+  Widget _buildTvShowHeader(
+      BuildContext context, TvShow tvShow, bool showShimmer) {
+    Widget posterWidget = tvShow.fullPosterPath.isNotEmpty
+        ? CachedNetworkImage(
+            imageUrl: tvShow.fullPosterPath,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => showShimmer
+                ? Shimmer.fromColors(
+                    baseColor: Colors.grey[800]!,
+                    highlightColor: Colors.grey[700]!,
+                    child: Container(color: Colors.black),
+                  )
+                : const Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1,
+                      color: AppColors.accentColor,
+                    ),
+                  ),
+            errorWidget: (context, url, error) => const Center(
+              child: Icon(
+                Icons.image_not_supported_outlined,
+                color: AppColors.secondaryText,
+                size: 30,
+              ),
+            ),
+            fadeInDuration: const Duration(milliseconds: 200),
+            fadeOutDuration: const Duration(milliseconds: 100),
+          )
+        : const Center(
+            child: Icon(Icons.tv_off_outlined,
+                color: AppColors.secondaryText, size: 40),
+          );
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
@@ -444,14 +533,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
               child: SizedBox(
                 width: 120,
                 height: 180,
-                child: Image.network(
-                  tvShow.fullPosterPath,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                      color: Colors.grey[800],
-                      child: const Center(
-                          child: Icon(Icons.broken_image, size: 30))),
-                ),
+                child: posterWidget,
               ),
             ),
           ),
@@ -523,7 +605,6 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
   }
 
   Widget _buildOverviewTab(BuildContext context, TvShow tvShow) {
-    // Combines old Overview and parts of old Episodes tab
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -556,7 +637,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
             Text('Created by', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
             SizedBox(
-              height: 150, // Adjusted height
+              height: 150,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: tvShow.createdBy!.length,
@@ -573,16 +654,31 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
                           children: [
                             CircleAvatar(
                               radius: 40,
-                              backgroundImage: creator.profilePath != null
-                                  ? NetworkImage(creator.fullProfilePath)
-                                  : null,
-                              onBackgroundImageError:
-                                  creator.profilePath != null
-                                      ? (_, __) {}
-                                      : null,
-                              child: creator.profilePath == null
-                                  ? const Icon(Icons.person, size: 40)
-                                  : null,
+                              child: creator.profilePath != null
+                                  ? CachedNetworkImage(
+                                      imageUrl: creator.fullProfilePath,
+                                      fit: BoxFit.cover,
+                                      width: 80,
+                                      height: 80,
+                                      imageBuilder: (context, imageProvider) =>
+                                          CircleAvatar(
+                                              backgroundImage: imageProvider,
+                                              radius: 40),
+                                      placeholder: (context, url) =>
+                                          CircularProgressIndicator(
+                                              strokeWidth: 1,
+                                              color: AppColors.accentColor),
+                                      errorWidget: (context, url, error) =>
+                                          Icon(Icons.person,
+                                              size: 40,
+                                              color: AppColors.secondaryText),
+                                      fadeInDuration:
+                                          const Duration(milliseconds: 300),
+                                      fadeOutDuration:
+                                          const Duration(milliseconds: 100),
+                                    )
+                                  : const Icon(Icons.person,
+                                      size: 40, color: AppColors.secondaryText),
                             ),
                             const SizedBox(height: 8),
                             Text(creator.name,
@@ -622,7 +718,46 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
           if (tvShow.networks != null && tvShow.networks!.isNotEmpty) ...[
             Text('Networks', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
-            SizedBox(/* ... Your network display code ... */),
+            // TODO: Add actual network display code here if needed
+            SizedBox(
+              height: 150, // Example height
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: tvShow.networks!.length,
+                itemBuilder: (context, index) {
+                  final network = tvShow.networks![index];
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 12.0),
+                    child: SizedBox(
+                      width: 250, // Adjust width as needed
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (network.logoPath != null)
+                            CachedNetworkImage(
+                              imageUrl:
+                                  'https://image.tmdb.org/t/p/h60${network.logoPath}',
+                              height: 100,
+                              fit: BoxFit.contain,
+                              placeholder: (context, url) => Shimmer.fromColors(
+                                baseColor: Colors.grey[800]!,
+                                highlightColor: Colors.grey[700]!,
+                                child:
+                                    Container(color: Colors.black, height: 30),
+                              ),
+                              errorWidget: (context, url, error) =>
+                                  Icon(Icons.tv, color: Colors.grey[600]),
+                            )
+                          else
+                            Text(network.name,
+                                style: TextStyle(color: Colors.white70)),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
             const SizedBox(height: 24),
           ],
 
@@ -632,8 +767,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
             Row(
-              mainAxisAlignment:
-                  MainAxisAlignment.spaceAround, // Better spacing
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 if (tvShow.numberOfSeasons != null)
                   Expanded(
@@ -657,7 +791,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
             const SizedBox(height: 24),
           ],
 
-          _buildRecommendationsSection(context),
+          _buildRecommendationsSection(context, tvShow),
         ],
       ),
     );
@@ -682,6 +816,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: () {
+              if (Platform.isAndroid) HapticFeedback.lightImpact();
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -689,8 +824,9 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
                     tvShowId: tvShow.id,
                     seasonNumber: season.seasonNumber,
                     seasonName: season.name,
-                    posterPath: season.posterPath, // Pass poster for app bar
+                    posterPath: season.posterPath,
                     movieService: _movieService,
+                    typec: widget.typec,
                   ),
                 ),
               );
@@ -699,14 +835,25 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
-                  width: 100,
-                  height: 150,
-                  child: Image.network(
-                    season.fullPosterPath,
+                  width: 200,
+                  height: 300,
+                  child: CachedNetworkImage(
+                    imageUrl: season.fullPosterPath,
                     fit: BoxFit.cover,
-                    errorBuilder: (c, e, s) => Container(
-                        color: Colors.grey[800],
-                        child: const Center(child: Icon(Icons.broken_image))),
+                    placeholder: (context, url) => Shimmer.fromColors(
+                      baseColor: Colors.grey[800]!,
+                      highlightColor: Colors.grey[700]!,
+                      child: Container(color: Colors.black),
+                    ),
+                    errorWidget: (context, url, error) => const Center(
+                      child: Icon(
+                        Icons.image_not_supported_outlined,
+                        color: AppColors.secondaryText,
+                        size: 30,
+                      ),
+                    ),
+                    fadeInDuration: const Duration(milliseconds: 300),
+                    fadeOutDuration: const Duration(milliseconds: 100),
                   ),
                 ),
                 Expanded(
@@ -720,26 +867,26 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
                                 fontWeight: FontWeight.bold, fontSize: 16)),
                         const SizedBox(height: 4),
                         Text(
-                            '${season.episodeCount} episodes • Air Date: ${season.formattedAirDate}',
+                            '${season.episodeCount} episodes \u2022 Air Date: ${season.formattedAirDate}',
                             style: TextStyle(
                                 color: Colors.grey[400], fontSize: 14)),
                         if (season.voteAverage > 0) ...[
                           const SizedBox(height: 4),
                           Row(children: [
                             const Icon(Icons.star,
-                                color: Colors.amber, size: 16),
+                                color: Colors.amber, size: 20),
                             const SizedBox(width: 4),
                             Text(season.voteAverage.toStringAsFixed(1),
-                                style: const TextStyle(fontSize: 14)),
+                                style: const TextStyle(fontSize: 16)),
                           ]),
                         ],
                         const SizedBox(height: 8),
                         if (season.overview != null &&
                             season.overview!.isNotEmpty)
                           Text(season.overview!,
-                              maxLines: 3,
+                              maxLines: 4,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 14)),
+                              style: const TextStyle(fontSize: 15)),
                       ],
                     ),
                   ),
@@ -758,12 +905,45 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
       future: _creditsFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return GridView.builder(
+            padding: const EdgeInsets.all(16),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              childAspectRatio: 0.6,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+            ),
+            itemCount: 9, // Show a few shimmer items
+            itemBuilder: (context, index) {
+              return Shimmer.fromColors(
+                baseColor: Colors.grey[800]!,
+                highlightColor: Colors.grey[700]!,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(color: Colors.black),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                        width: double.infinity,
+                        height: 10,
+                        color: Colors.black),
+                    const SizedBox(height: 4),
+                    Container(
+                        width: double.infinity, height: 8, color: Colors.black),
+                  ],
+                ),
+              );
+            },
+          );
         } else if (snapshot.hasError) {
           return Center(child: Text('Error loading cast: ${snapshot.error}'));
         } else if (snapshot.hasData && snapshot.data!.cast.isNotEmpty) {
           final cast = snapshot.data!.cast
-            ..sort((a, b) => a.order.compareTo(b.order)); // Sort by order
+            ..sort((a, b) => a.order.compareTo(b.order));
           return GridView.builder(
             padding: const EdgeInsets.all(16),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -783,28 +963,39 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
                     Expanded(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          member.profileImageUrl,
+                        child: CachedNetworkImage(
+                          imageUrl: member.profileImageUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (c, e, s) => Container(
-                              color: Colors.grey[800],
-                              child: const Center(child: Icon(Icons.person))),
+                          placeholder: (context, url) => Shimmer.fromColors(
+                            baseColor: Colors.grey[800]!,
+                            highlightColor: Colors.grey[700]!,
+                            child: Container(color: Colors.black),
+                          ),
+                          errorWidget: (context, url, error) => const Center(
+                            child: Icon(
+                              Icons.person,
+                              color: AppColors.secondaryText,
+                              size: 30,
+                            ),
+                          ),
+                          fadeInDuration: const Duration(milliseconds: 200),
+                          fadeOutDuration: const Duration(milliseconds: 100),
                         ),
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(member.name,
                         textAlign: TextAlign.center,
-                        maxLines: 2,
+                        maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 12)),
+                            fontWeight: FontWeight.bold, fontSize: 16)),
                     Text(member.character,
                         textAlign: TextAlign.center,
-                        maxLines: 2,
+                        maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                         style:
-                            TextStyle(fontSize: 10, color: Colors.grey[400])),
+                            TextStyle(fontSize: 14, color: Colors.grey[400])),
                   ],
                 ),
               );
@@ -817,61 +1008,48 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
     );
   }
 
-  // Widget _buildCastList() {
-  //   return ListView.builder(
-  //     itemCount: _tvCredits?.cast.length ?? 0,
-  //     itemBuilder: (context, index) {
-  //       final cast = _tvCredits!.cast[index];
-  //       return ListTile(
-  //         leading: cast.profileImageUrl.isNotEmpty
-  //             ? CircleAvatar(
-  //                 backgroundImage: NetworkImage(cast.profileImageUrl),
-  //               )
-  //             : CircleAvatar(child: Icon(Icons.person)),
-  //         title: Text(cast.name),
-  //         subtitle: Column(
-  //           crossAxisAlignment: CrossAxisAlignment.start,
-  //           children: [
-  //             Text('Character: ${cast.character}'),
-  //             Text('Gender: ${cast.genderString}'),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
-  // Widget _buildCrewList() {
-  //   return ListView.builder(
-  //     itemCount: _tvCredits?.crew.length ?? 0,
-  //     itemBuilder: (context, index) {
-  //       final crew = _tvCredits!.crew[index];
-  //       return ListTile(
-  //         leading: crew.profileImageUrl.isNotEmpty
-  //             ? CircleAvatar(
-  //                 backgroundImage: NetworkImage(crew.profileImageUrl),
-  //               )
-  //             : CircleAvatar(child: Icon(Icons.person)),
-  //         title: Text(crew.name),
-  //         subtitle: Column(
-  //           crossAxisAlignment: CrossAxisAlignment.start,
-  //           children: [
-  //             Text('Department: ${crew.department}'),
-  //             Text('Job: ${crew.job}'),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
   Widget _buildVideosTab(BuildContext context, int tvShowId) {
     _videosFuture ??= _movieService.getTvShowVideos(tvShowId: tvShowId);
     return FutureBuilder<YoutubeVideoForSeries>(
       future: _videosFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: 3, // Show a few shimmer items
+            itemBuilder: (context, index) {
+              return Card(
+                margin: const EdgeInsets.only(bottom: 16),
+                clipBehavior: Clip.antiAlias,
+                child: Shimmer.fromColors(
+                  baseColor: Colors.grey[800]!,
+                  highlightColor: Colors.grey[700]!,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                          height: 500,
+                          width: double.infinity,
+                          color: Colors.black),
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Container(
+                            height: 16,
+                            width: double.infinity,
+                            color: Colors.black),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: 12.0, right: 12.0, bottom: 12.0),
+                        child: Container(
+                            height: 12, width: 100, color: Colors.black),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
         } else if (snapshot.hasError) {
           return Center(child: Text('Error loading videos: ${snapshot.error}'));
         } else if (snapshot.hasData && snapshot.data!.results.isNotEmpty) {
@@ -900,17 +1078,26 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
                       Stack(
                         alignment: Alignment.center,
                         children: [
-                          Image.network(
-                            thumbnailUrl,
+                          CachedNetworkImage(
+                            imageUrl: thumbnailUrl,
                             fit: BoxFit.cover,
                             width: double.infinity,
-                            height: 180,
-                            errorBuilder: (c, e, s) => Container(
-                                height: 180,
-                                color: Colors.grey[800],
-                                child: const Center(
-                                    child: Icon(Icons.play_circle_fill,
-                                        size: 50))),
+                            height: 500,
+                            placeholder: (context, url) => Shimmer.fromColors(
+                              baseColor: Colors.grey[800]!,
+                              highlightColor: Colors.grey[700]!,
+                              child: Container(color: Colors.black),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              height: 500,
+                              color: Colors.grey[800],
+                              child: const Center(
+                                child: Icon(Icons.play_circle_fill,
+                                    size: 50, color: AppColors.secondaryText),
+                              ),
+                            ),
+                            fadeInDuration: const Duration(milliseconds: 200),
+                            fadeOutDuration: const Duration(milliseconds: 100),
                           ),
                           Icon(Icons.play_circle_fill,
                               color: Colors.white.withOpacity(0.8), size: 60),
@@ -947,77 +1134,76 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
     bool defaultExpansion = seasons.length == 1;
 
     return SizedBox(
-        height: 500, // Adjust as needed
-        child: ListView.builder(
-          controller: _seasonsScrollController,
-          shrinkWrap: false,
-          physics: const AlwaysScrollableScrollPhysics(),
-          itemCount: seasons.length,
-          itemBuilder: (context, index) {
-            final season = seasons[index];
+      height: 700, // Adjust as needed
+      child: ListView.builder(
+        controller: _seasonsScrollController,
+        shrinkWrap: false,
+        physics: const AlwaysScrollableScrollPhysics(),
+        itemCount: seasons.length,
+        itemBuilder: (context, index) {
+          final season = seasons[index];
 
-            // ...existing ExpansionTile code...
-            // Use ExpansionTile for collapsable seasons
-            return Card(
-              // Wrap ExpansionTile in a Card for better visual separation
-              elevation: 1,
-              margin: const EdgeInsets.symmetric(vertical: 6.0),
-              color: AppColors.secondaryBackground
-                  .withOpacity(0.4), // Slightly transparent background
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
-              clipBehavior:
-                  Clip.antiAlias, // Ensures content respects border radius
-              child: ExpansionTile(
-                key: PageStorageKey(
-                    'season_${season.seasonNumber}'), // Maintain expansion state
-                title: Text(
-                  'Season ${season.seasonNumber}',
-                  style: const TextStyle(
-                      color: AppColors.primaryText,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16),
-                ),
-                subtitle: Text(
-                  '${season.episodes.length} Episode${season.episodes.length == 1 ? '' : 's'}',
-                  style: const TextStyle(
-                      color: AppColors.secondaryText, fontSize: 12),
-                ),
-                iconColor:
-                    AppColors.accentColor, // Use accent color for expand icon
-                collapsedIconColor: AppColors.secondaryText,
-                // Expand first season or if only one season exists
-                initiallyExpanded: defaultExpansion ||
-                    season.seasonNumber ==
-                        1, // Keep first season expanded usually
-                childrenPadding: const EdgeInsets.only(
-                    bottom: 8.0,
-                    left: 4,
-                    right: 4), // Padding for episode tiles
-                // Remove default dividers and use padding/margin on EpisodeTile instead
-                // children: season.episodes.map((episode) => EpisodeTile(episode: episode)).toList(),
-
-                children: ListTile.divideTiles(
-                  // Add subtle dividers between episodes
-                  context: context,
-                  color: AppColors.dividerColor.withOpacity(0.3),
-                  tiles: season.episodes
-                      .map((episode) => EpisodeTileNew(
-                            seriesname: widget.tvShow.name,
-                            episode: episode,
-                            season: season,
-                            id: TvseriesId,
-                          ))
-                      .toList(),
-                ).toList(),
+          // ...existing ExpansionTile code...
+          // Use ExpansionTile for collapsable seasons
+          return Card(
+            // Wrap ExpansionTile in a Card for better visual separation
+            elevation: 1,
+            margin: const EdgeInsets.symmetric(vertical: 6.0),
+            color: AppColors.secondaryBackground
+                .withOpacity(0.4), // Slightly transparent background
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            clipBehavior:
+                Clip.antiAlias, // Ensures content respects border radius
+            child: ExpansionTile(
+              key: PageStorageKey(
+                  'season_${season.seasonNumber}'), // Maintain expansion state
+              title: Text(
+                'Season ${season.seasonNumber}',
+                style: const TextStyle(
+                    color: AppColors.primaryText,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16),
               ),
-            );
-          },
-        ));
+              subtitle: Text(
+                '${season.episodes.length} Episode${season.episodes.length == 1 ? '' : 's'}',
+                style: const TextStyle(
+                    color: AppColors.secondaryText, fontSize: 12),
+              ),
+              iconColor:
+                  AppColors.accentColor, // Use accent color for expand icon
+              collapsedIconColor: AppColors.secondaryText,
+              // Expand first season or if only one season exists
+              initiallyExpanded: defaultExpansion ||
+                  season.seasonNumber ==
+                      1, // Keep first season expanded usually
+              childrenPadding: const EdgeInsets.only(
+                  bottom: 8.0, left: 4, right: 4), // Padding for episode tiles
+              // Remove default dividers and use padding/margin on EpisodeTile instead
+              // children: season.episodes.map((episode) => EpisodeTile(episode: episode)).toList(),
+
+              children: ListTile.divideTiles(
+                // Add subtle dividers between episodes
+                context: context,
+                color: AppColors.dividerColor.withOpacity(0.3),
+                tiles: season.episodes
+                    .map((episode) => EpisodeTileNew(
+                          seriesname: widget.tvShow.name,
+                          episode: episode,
+                          season: season,
+                          id: TvseriesId,
+                        ))
+                    .toList(),
+              ).toList(),
+            ),
+          );
+        },
+      ),
+    );
   }
-  // Modified _buildEpisodeCard to accept tvShowId for navigation
+
   Widget _buildEpisodeCard(
-      BuildContext context, int tvShowId, Episode episode, bool isNext) {
+      BuildContext context, int tvShowId, m.Episode episode, bool isNext) {
     return Card(
       color: isNext
           ? Theme.of(context).colorScheme.secondary.withOpacity(0.1)
@@ -1025,14 +1211,15 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
+          if (Platform.isAndroid) HapticFeedback.lightImpact();
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => EpisodeDetailPage(
-                tvShowId: tvShowId, // Use the passed tvShowId
+                tvShowId: tvShowId,
                 seasonNumber: episode.seasonNumber,
                 episodeNumber: episode.episodeNumber,
-                episodeName: episode.name, // Pass name for AppBar
+                episodeName: episode.name,
                 movieService: _movieService,
               ),
             ),
@@ -1053,13 +1240,29 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
                           : Colors.grey[700],
                       borderRadius: BorderRadius.circular(4)),
                   child: Text(
-                      'S${episode.seasonNumber} | E${episode.episodeNumber}',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 12)),
+                    'S${episode.seasonNumber} | E${episode.episodeNumber}',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 12),
+                  ),
                 ),
                 const SizedBox(width: 8),
                 if (episode.episodeType != 'standard')
-                  Container(/* ... your episode type chip ... */)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _getEpisodeTypeColor(episode.episodeType),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      episode.episodeType.replaceAll('_', ' ').toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
               ]),
               const SizedBox(height: 12),
               Text(episode.name,
@@ -1083,21 +1286,36 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
               const SizedBox(height: 12),
               if (episode.stillPath != null)
                 ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      episode.fullStillPath,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: 150,
-                      errorBuilder: (c, e, s) => Container(
-                          height: 150,
-                          color: Colors.grey[800],
-                          child: const Center(child: Icon(Icons.broken_image))),
-                    )),
+                  borderRadius: BorderRadius.circular(8),
+                  child: CachedNetworkImage(
+                    imageUrl: episode.fullStillPath,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: 500,
+                    placeholder: (context, url) => Shimmer.fromColors(
+                      baseColor: Colors.grey[800]!,
+                      highlightColor: Colors.grey[700]!,
+                      child: Container(color: Colors.black),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      height: 500,
+                      color: Colors.grey[800],
+                      child: const Center(
+                        child: Icon(
+                          Icons.image_not_supported_outlined,
+                          color: AppColors.secondaryText,
+                          size: 30,
+                        ),
+                      ),
+                    ),
+                    fadeInDuration: const Duration(milliseconds: 300),
+                    fadeOutDuration: const Duration(milliseconds: 100),
+                  ),
+                ),
               const SizedBox(height: 12),
               Text(episode.overview,
                   style: const TextStyle(fontSize: 14),
-                  maxLines: 4,
+                  maxLines: 6,
                   overflow: TextOverflow.ellipsis),
             ],
           ),
@@ -1108,7 +1326,6 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
 
   Widget _buildStatCard(
       BuildContext context, String title, String value, IconData icon) {
-    // Your existing _buildStatCard code
     return Card(
       color: Colors.grey[850],
       child: Padding(
@@ -1118,10 +1335,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
             Icon(icon,
                 size: 30, color: Theme.of(context).colorScheme.secondary),
             const SizedBox(height: 8),
-            Text(title,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleSmall), // titleSmall for less emphasis
+            Text(title, style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 4),
             Text(value,
                 style: Theme.of(context)
@@ -1135,7 +1349,6 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
   }
 
   Color _getStatusColor(String status) {
-    /* Your existing code */
     switch (status) {
       case 'Returning Series':
         return Colors.green;
@@ -1153,7 +1366,6 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
   }
 
   Color _getEpisodeTypeColor(String episodeType) {
-    /* Your existing code */
     switch (episodeType) {
       case 'finale':
         return Colors.red.shade700;
@@ -1166,9 +1378,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
     }
   }
 
-//TODO creating extra page to show a list of recommend item and smilry item
-  Widget _buildRecommendationsSection(BuildContext context) {
-    /* Your existing code */
+  Widget _buildRecommendationsSection(BuildContext context, tvshowitemm) {
     if (recommendations == null || recommendations!.results.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -1180,11 +1390,23 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
           child: Text('Recommended Shows',
               style: Theme.of(context).textTheme.titleLarge),
         ),
+        TextButton(
+          onPressed: () {
+            if (Platform.isAndroid) HapticFeedback.lightImpact();
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      TvPageGrid(response: "recommend", itemm: tvshowitemm)),
+            );
+          },
+          child: Text("Show All Recommends"),
+        ),
         SizedBox(
-          height: 230, // Adjusted for better title visibility
+          height: 230,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: recommendations!.results.length > 30
+            itemCount: recommendations!.results.length > 15
                 ? 10
                 : recommendations!.results.length,
             itemBuilder: (context, index) {
@@ -1197,16 +1419,15 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
     );
   }
 
-//TODO check if recommend item in local database exist  navigate to page fr local database
   Widget _buildRecommendationCard(BuildContext context, TvShow tvShow) {
-    /* Your existing code */
     return GestureDetector(
       onTap: () {
+        if (Platform.isAndroid) HapticFeedback.lightImpact();
         Navigator.pushReplacement(
-          // Use pushReplacement if you want to replace the current detail page
           context,
           MaterialPageRoute(
-              builder: (context) => TvShowDetailPageAnime(tvShow: tvShow)),
+              builder: (context) =>
+                  TvShowDetailPageAnime(tvShow: tvShow, typec: widget.typec)),
         );
       },
       child: Container(
@@ -1216,21 +1437,36 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Hero(
-              tag: 'tv-recommendation-${tvShow.id}', // Unique tag
+              tag: 'tv-recommendation-${tvShow.id}',
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Stack(
                   children: [
-                    Image.network(
-                      tvShow.fullPosterPath,
+                    CachedNetworkImage(
+                      imageUrl: tvShow.fullPosterPath,
                       height: 170,
                       width: 130,
                       fit: BoxFit.cover,
-                      errorBuilder: (c, e, s) => Container(
-                          height: 170,
-                          width: 130,
-                          color: Colors.grey[800],
-                          child: const Center(child: Icon(Icons.tv))),
+                      placeholder: (context, url) => Shimmer.fromColors(
+                        baseColor: Colors.grey[800]!,
+                        highlightColor: Colors.grey[700]!,
+                        child: Container(
+                            color: Colors.black, height: 170, width: 130),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        height: 170,
+                        width: 130,
+                        color: Colors.grey[800],
+                        child: const Center(
+                          child: Icon(
+                            Icons.tv_off_outlined,
+                            color: AppColors.secondaryText,
+                            size: 30,
+                          ),
+                        ),
+                      ),
+                      fadeInDuration: const Duration(milliseconds: 300),
+                      fadeOutDuration: const Duration(milliseconds: 100),
                     ),
                     if (tvShow.voteAverage > 0)
                       Positioned(
@@ -1276,7 +1512,6 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
   }
 
   Color _getRatingColor(double rating) {
-    /* Your existing code */
     if (rating >= 7.5) return Colors.green.shade700;
     if (rating >= 5.0) return Colors.orange.shade700;
     if (rating > 0) return Colors.red.shade700;
@@ -1285,7 +1520,6 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
 }
 
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  // Your existing _SliverAppBarDelegate code
   final TabBar _tabBar;
   _SliverAppBarDelegate(this._tabBar);
   @override
@@ -1296,10 +1530,123 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        child: _tabBar); // Use theme color
+        color: Theme.of(context).scaffoldBackgroundColor, child: _tabBar);
   }
 
   @override
   bool shouldRebuild(_SliverAppBarDelegate oldDelegate) => false;
 }
+
+// Assuming EpisodeTileNew is defined elsewhere and might need haptic feedback on its own InkWell/GestureDector
+// If not provided, you should add a tap callback to it inside buildSeasonsList
+// Example of how EpisodeTileNew might look (simplified):
+// class EpisodeTileNew extends StatelessWidget {
+//   final String seriesname;
+//   final Episode episode;
+//   final ss.Season season;
+//   final int id;
+//   final VoidCallback? onTap; // Add this callback for haptic feedback
+
+//   const EpisodeTileNew({
+//     Key? key,
+//     required this.seriesname,
+//     required this.episode,
+//     required this.season,
+//     required this.id,
+//     this.onTap, // Initialize it
+//   }) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return InkWell(
+//       onTap: () {
+//         onTap?.call(); // Call the passed onTap callback
+//         // Add navigation logic here if needed
+//         Navigator.push(
+//           context,
+//           MaterialPageRoute(
+//             builder: (context) => EpisodeDetailPage(
+//               tvShowId: id,
+//               seasonNumber: episode.seasonNumber,
+//               episodeNumber: episode.episodeNumber,
+//               episodeName: episode.name,
+//               // Pass movieService if needed
+//               movieService:
+//                   MovieService(), // Assuming MovieService can be instantiated
+//             ),
+//           ),
+//         );
+//       },
+//       child: Padding(
+//         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+//         child: Row(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             SizedBox(
+//               width: 100,
+//               height: 70,
+//               child: ClipRRect(
+//                 borderRadius: BorderRadius.circular(4),
+//                 child: CachedNetworkImage(
+//                   imageUrl: episode.fullStillPath,
+//                   fit: BoxFit.cover,
+//                   placeholder: (context, url) => Shimmer.fromColors(
+//                     baseColor: Colors.grey[800]!,
+//                     highlightColor: Colors.grey[700]!,
+//                     child: Container(color: Colors.black),
+//                   ),
+//                   errorWidget: (context, url, error) => const Center(
+//                     child: Icon(
+//                       Icons.movie,
+//                       color: AppColors.secondaryText,
+//                       size: 20,
+//                     ),
+//                   ),
+//                   fadeInDuration: const Duration(milliseconds: 300),
+//                   fadeOutDuration: const Duration(milliseconds: 100),
+//                 ),
+//               ),
+//             ),
+//             const SizedBox(width: 12),
+//             Expanded(
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   Text(
+//                     'E${episode.episodeNumber}: ${episode.name}',
+//                     style: const TextStyle(
+//                         fontWeight: FontWeight.bold, fontSize: 13),
+//                     maxLines: 2,
+//                     overflow: TextOverflow.ellipsis,
+//                   ),
+//                   const SizedBox(height: 4),
+//                   Text(
+//                     'Air date: ${episode.formattedAirDate}',
+//                     style: TextStyle(fontSize: 11, color: Colors.grey[400]),
+//                   ),
+//                   if (episode.runtime != null)
+//                     Text(
+//                       'Runtime: ${episode.formattedRuntime}',
+//                       style: TextStyle(fontSize: 11, color: Colors.grey[400]),
+//                     ),
+//                   const SizedBox(height: 4),
+//                   if (episode.voteAverage > 0)
+//                     Row(
+//                       children: [
+//                         const Icon(Icons.star, color: Colors.amber, size: 12),
+//                         const SizedBox(width: 4),
+//                         Text(
+//                           episode.voteAverage.toStringAsFixed(1),
+//                           style: const TextStyle(fontSize: 11),
+//                         ),
+//                       ],
+//                     ),
+//                 ],
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }

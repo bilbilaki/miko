@@ -860,7 +860,7 @@ class _LocalScreenState extends State<LocalScreen> {
     final oldName = p.basename(file.path);
     final String? newName = await _showInputDialog(
       'Rename File',
-      'Enter new name for "${oldName}":',
+      'Enter new name for "$oldName":',
       oldName, // Pre-fill with current name
     );
     if (newName != null && newName.isNotEmpty && newName != oldName) {
@@ -878,7 +878,7 @@ class _LocalScreenState extends State<LocalScreen> {
     final oldName = p.basename(folder.path);
     final String? newName = await _showInputDialog(
       'Rename Folder',
-      'Enter new name for "${oldName}":',
+      'Enter new name for "$oldName":',
       oldName, // Pre-fill with current name
     );
     if (newName != null && newName.isNotEmpty && newName != oldName) {
@@ -936,7 +936,7 @@ class _LocalScreenState extends State<LocalScreen> {
 
                 final bool? confirmed = await _showConfirmationDialog(
                   'Confirm Batch Rename',
-                  'Are you sure you want to batch rename all files in \n"${targetPath}"?\nThis action cannot be easily undone.',
+                  'Are you sure you want to batch rename all files in \n"$targetPath"?\nThis action cannot be easily undone.',
                 );
 
                 if (confirmed == true) {

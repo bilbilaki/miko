@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
-import 'package:miko/screens/genre_list_screen.dart';
-import 'package:miko/screens/home_screen.dart';
+import 'package:miko/screens/genre_detail_screen.dart';
 import 'package:miko/screens/settings_screen.dart';
 import 'package:miko/screens/shorts_screen.dart';
-import 'package:miko/screens/tv_series_grid_screen.dart';
 import 'package:miko/screens/watchlist_screen.dart';
 import 'package:miko/showcases/keyword_search_page.dart';
 import 'package:miko/showcases/movie_page.dart';
 import 'package:miko/showcases/moviesearchpage.dart';
 import 'package:miko/showcases/multi_search_page.dart';
-import 'package:miko/showcases/tv_page.dart';
 import 'package:miko/showcases/tvsearchpage.dart';
 import 'package:miko/utils/colors.dart';
 
@@ -122,7 +119,7 @@ class LeftNavigationPanel extends ConsumerWidget {
         icon: Icons.movie_creation, 
         title: 'Movies',
         showText: showText,
-        onTap: () => _navigateTo(context, HomeScreen(), isMobileLayout),
+        onTap: () => _navigateTo(context, AnimeGridScreen(typec: "movie",), isMobileLayout),
       ),
       _buildNavigationItem(
         context,
@@ -130,7 +127,7 @@ class LeftNavigationPanel extends ConsumerWidget {
         icon: Icons.live_tv_rounded,
         title: 'TV Series',
         showText: showText,
-        onTap: () => _navigateTo(context, TvSeriesGridScreen(), isMobileLayout),
+        onTap: () => _navigateTo(context, AnimeGridScreen(typec: "tvseries"), isMobileLayout),
       ),
                   _buildNavigationItem(
             context,
@@ -139,7 +136,7 @@ class LeftNavigationPanel extends ConsumerWidget {
             title: 'Anime',
                     showText: showText,
 
-            onTap: () => _navigateTo(context, AnimeGridScreen() ,isMobileLayout),
+            onTap: () => _navigateTo(context, AnimeGridScreen(typec: "anime") ,isMobileLayout),
           ),
           _buildNavigationItem(
             context,
@@ -215,7 +212,7 @@ class LeftNavigationPanel extends ConsumerWidget {
  icon: Icons.tv_rounded,
  title: 'Popular TV Shows',
  showText: showText,
- onTap: () => _navigateTo(context, TvShowPage(), isMobileLayout),
+ onTap: () => _navigateTo(context, TvSearchPage(), isMobileLayout),
 ),
 
 _buildNavigationItem(

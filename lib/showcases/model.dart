@@ -140,8 +140,8 @@ class TvShow {
       : 'https://inosdb.worker-inosuke.workers.dev/w500$posterPath';
 
   String get fullBackdropPath => backdropPath != null
-      ? 'https://inosdb.worker-inosuke.workers.dev/w500$backdropPath'
-      : 'https://inosdb.worker-inosuke.workers.dev/w500$backdropPath';
+      ? 'https://inosdb.worker-inosuke.workers.dev/w780$backdropPath'
+      : 'https://inosdb.worker-inosuke.workers.dev/w780$backdropPath';
 
   String get year {
     if (firstAirDate == null || firstAirDate!.isEmpty) {
@@ -1530,6 +1530,7 @@ class Movie {
       status: json['status'],
       tagline: json['tagline'],
       hasDetails: hasDetails,
+      keywords: parsedKeywords
     );
   }
 
@@ -1612,7 +1613,7 @@ class SearchResponse {
               ?.map((movieJson) => Movie.fromJson(movieJson))
               .toList() ??
           [],
-      totalPages: json['total_pages'] ?? 0,
+      totalPages: json['total_pages'] ?? 1,
       totalResults: json['total_results'] ?? 0,
     );
   }

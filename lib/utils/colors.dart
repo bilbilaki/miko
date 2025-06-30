@@ -270,11 +270,41 @@ class AppTheme {
         thickness: 1,
       ),
       textTheme: TextTheme(
-        displayLarge: TextStyle(
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-          color: AppColors2.onBackground,
-        ),
+        displayLarge:TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w900,
+               // color: Colors.white,
+                letterSpacing: 1.5,
+                height: 1.2,
+                shadows:  [
+                  Shadow(
+                    offset: Offset(2, 2),
+                    blurRadius: 8,
+                    color: Colors.black.withOpacity(0.8),
+                  ),
+                  Shadow(
+                    offset: Offset(-1, -1),
+                    blurRadius: 4,
+                    color: Colors.purple.withOpacity(0.3),
+                  ),
+                  Shadow(
+                    offset: Offset(0, 0),
+                    blurRadius: 20,
+                    color: Colors.cyan.withOpacity(0.4),
+                  ),
+                ],
+                foreground: Paint()
+                  ..shader = LinearGradient(
+                    colors: [
+                      Color(0xFFFF6B6B),
+                      Color(0xFF4ECDC4),
+                      Color(0xFF45B7D1),
+                      Color(0xFF96CEB4),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ).createShader(Rect.fromLTWH(0, 0, 300, 100)),
+              ),
         displayMedium: TextStyle(
           fontSize: 28,
           fontWeight: FontWeight.bold,
@@ -303,6 +333,7 @@ class AppTheme {
           fontSize: 14,
           color: AppColors2.onBackground,
         ),
+        
       ),
     );
   }

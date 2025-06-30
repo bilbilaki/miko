@@ -1,11 +1,11 @@
 // multi_search_page.dart
 import 'package:flutter/material.dart';
 import 'package:miko/showcases/model.dart';
+import 'package:miko/showcases/movie_detail_page_copy.dart';
+import 'package:miko/showcases/tv_detail_page_anime.dart';
 import 'dart:async';
 import 'movie_service.dart';
 import 'person_detail_page.dart';
-import 'movie_detail_page.dart';
-import 'tv_detail_page.dart';
 
 class MultiSearchPage extends StatefulWidget {
   const MultiSearchPage({super.key});
@@ -81,7 +81,7 @@ class _MultiSearchPageState extends State<MultiSearchPage> {
         query: _currentQuery,
         page: _currentPage,
       );
-      
+
       if (mounted) {
         setState(() {
           if (loadMore) {
@@ -95,7 +95,7 @@ class _MultiSearchPageState extends State<MultiSearchPage> {
           } else {
             _searchResponse = response;
           }
-          
+
           if (loadMore) {
             _isFetchingMore = false;
           } else {
@@ -118,10 +118,11 @@ class _MultiSearchPageState extends State<MultiSearchPage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 && 
-    !_isFetchingMore &&
-    _searchResponse != null &&
-    _currentPage < _searchResponse!.totalPages) {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        !_isFetchingMore &&
+        _searchResponse != null &&
+        _currentPage < _searchResponse!.totalPages) {
       _currentPage++;
       _fetchMultiSearch(loadMore: true);
     }
@@ -140,7 +141,16 @@ class _MultiSearchPageState extends State<MultiSearchPage> {
                   title: result.name,
                   originalTitle: result.originalName,
                   posterPath: result.posterPath,
-                  backdropPath: result.backdropPath, adult: result.adult, genreIds: result.genreIds, originalLanguage: result.originalLanguage.toString(), overview: result.overview.toString(), popularity: result.popularity, voteAverage: result.voteAverage, voteCount: result.voteCount, releaseDate: result.releaseDate.toString(), video: result.video,
+                  backdropPath: result.backdropPath,
+                  adult: result.adult,
+                  genreIds: result.genreIds,
+                  originalLanguage: result.originalLanguage.toString(),
+                  overview: result.overview.toString(),
+                  popularity: result.popularity,
+                  voteAverage: result.voteAverage,
+                  voteCount: result.voteCount,
+                  releaseDate: result.releaseDate.toString(),
+                  video: result.video,
                   // Add other necessary fields from the multi search result
                 ),
               ),
@@ -153,15 +163,24 @@ class _MultiSearchPageState extends State<MultiSearchPage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => TvShowDetailPage(
+              builder: (context) => TvShowDetailPageAnime(
                 tvShow: TvShow(
                   id: result.id,
                   name: result.name,
                   originalName: result.originalName,
                   posterPath: result.posterPath,
-                  backdropPath: result.backdropPath, adult: result.adult, genreIds: result.genreIds, originCountry: result.originCountry, originalLanguage: result.originalLanguage.toString(), overview: result.overview.toString(), popularity: result.popularity, voteAverage: result.voteAverage, voteCount: result.voteCount,
+                  backdropPath: result.backdropPath,
+                  adult: result.adult,
+                  genreIds: result.genreIds,
+                  originCountry: result.originCountry,
+                  originalLanguage: result.originalLanguage.toString(),
+                  overview: result.overview.toString(),
+                  popularity: result.popularity,
+                  voteAverage: result.voteAverage,
+                  voteCount: result.voteCount,
                   // Add other necessary fields from the multi search result
                 ),
+                typec:"tvseries"
               ),
             ),
           );
@@ -173,10 +192,9 @@ class _MultiSearchPageState extends State<MultiSearchPage> {
             context,
             MaterialPageRoute(
               builder: (context) => PersonDetailPage(
-                personId: result.id,
-                initialName: result.name,
-                initialProfilePath: result.profilePath
-              ),
+                  personId: result.id,
+                  initialName: result.name,
+                  initialProfilePath: result.profilePath),
             ),
           );
         }
@@ -219,18 +237,19 @@ class _MultiSearchPageState extends State<MultiSearchPage> {
   }
 
   Widget _buildBody() {
-    if (_isLoading && (_searchResponse == null || _searchResponse!.results.isEmpty)) {
+    if (_isLoading &&
+        (_searchResponse == null || _searchResponse!.results.isEmpty)) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     if (_error != null) {
       return Center(child: Text('Error: $_error'));
     }
-    
+
     if (_searchResponse == null && _currentQuery.isEmpty) {
       return const Center(child: Text('Start typing to search...'));
     }
-    
+
     if (_searchResponse == null || _searchResponse!.results.isEmpty) {
       return Center(child: Text('No results found for "$_currentQuery".'));
     }
@@ -244,20 +263,19 @@ class _MultiSearchPageState extends State<MultiSearchPage> {
       itemBuilder: (context, index) {
         if (index == results.length && _isFetchingMore) {
           return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(8.0), 
-              child: CircularProgressIndicator()
-            )
-          );
+              child: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: CircularProgressIndicator()));
         }
-        
+
         final result = results[index];
         return _buildMultiSearchResultCard(context, result);
       },
     );
   }
 
-  Widget _buildMultiSearchResultCard(BuildContext context, MultiSearchResult result) {
+  Widget _buildMultiSearchResultCard(
+      BuildContext context, MultiSearchResult result) {
     String? imagePath;
     String title = '';
     String subtitle = '';
@@ -299,20 +317,16 @@ class _MultiSearchPageState extends State<MultiSearchPage> {
               width: 100,
               height: 150,
               child: Image.network(
-                posterUrl, 
+                posterUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (c,e,s) => Container(
-                  color: Colors.grey[700], 
-                  child: Center(
-                    child: Icon(
-                      result.mediaType == MediaType.movie 
-                        ? Icons.movie_outlined 
-                        : result.mediaType == MediaType.tv 
-                          ? Icons.tv_outlined 
-                          : Icons.person_outline
-                    )
-                  )
-                ),
+                errorBuilder: (c, e, s) => Container(
+                    color: Colors.grey[700],
+                    child: Center(
+                        child: Icon(result.mediaType == MediaType.movie
+                            ? Icons.movie_outlined
+                            : result.mediaType == MediaType.tv
+                                ? Icons.tv_outlined
+                                : Icons.person_outline))),
               ),
             ),
             Expanded(
@@ -321,21 +335,20 @@ class _MultiSearchPageState extends State<MultiSearchPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title, 
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)
-                    ),
-                    Text(
-                      subtitle, 
-                      style: Theme.of(context).textTheme.bodySmall
-                    ),
+                    Text(title,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold)),
+                    Text(subtitle,
+                        style: Theme.of(context).textTheme.bodySmall),
                     const SizedBox(height: 8),
                     Text(
-                      result.mediaType == MediaType.movie 
-                        ? (result as MultiSearchMovie).overview ?? ''
-                        : result.mediaType == MediaType.tv 
-                          ? (result as MultiSearchTV).overview ?? ''
-                          : '',
+                      result.mediaType == MediaType.movie
+                          ? (result as MultiSearchMovie).overview ?? ''
+                          : result.mediaType == MediaType.tv
+                              ? (result as MultiSearchTV).overview ?? ''
+                              : '',
                       style: Theme.of(context).textTheme.bodySmall,
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,

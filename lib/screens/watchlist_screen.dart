@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:miko/models/movie.dart';
 import 'package:miko/widgets/anime_series_card.dart';
 import 'package:provider/provider.dart';
 import 'package:miko/models/tv_series_anime.dart';
-import 'package:miko/providers/movie_provider.dart';
-import 'package:miko/providers/tv_series_provider.dart';
 import 'package:miko/providers/anime_provider.dart';
 import 'package:miko/services/user_data_service.dart';
 import 'package:miko/utils/colors.dart';
@@ -17,24 +14,24 @@ class WatchlistScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final userData = Provider.of<UserDataService>(context);
     final movieProvider = Provider.of<MovieProvider>(context, listen: false);
-    final tvProvider = Provider.of<TvSeriesProvider>(context, listen: false);
+ //   final tvProvider = Provider.of<TvSeriesProvider>(context, listen: false);
     final animeProvider = Provider.of<AnimeProvider>(context, listen: false);
     final watchlistMovies = userData.watchlistMovieIds
         .map((id) => movieProvider.getMovieById(id))
         .whereType<Movie>()
         .toList();
 
-    final watchlistTvSeries = userData.watchlistTvSeriesIds
-        .map((id) => tvProvider.getAnimeByTmdbId(id))
-        .whereType<TvSeriesAnime>()
-        .toList();
+    // final watchlistTvSeries = userData.watchlistTvSeriesIds
+    //     .map((id) => tvProvider.getAnimeByTmdbId(id))
+    //     .whereType<TvSeriesAnime>()
+    //     .toList();
 
        final watchlistAnime = userData.watchlistAnimeIds
         .map((id) => animeProvider.getAnimeByTmdbId(id))
         .whereType<TvSeriesAnime>() // Filter out nulls if movie not found
         .toList();
 
-    final allWatchlist = [...watchlistMovies, ...watchlistTvSeries, ...watchlistAnime];
+    final allWatchlist = [...watchlistMovies,/* ...watchlistTvSeries,*/ ...watchlistAnime];
      allWatchlist.sort((a, b) { // Optional sort
     String nameA;
     if (a is Movie) {
@@ -81,14 +78,14 @@ class WatchlistScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 final item = allWatchlist[index];
                 if (item is Movie) {
-return MovieCard(movie: item);
+return MovieCard(movie: item, typec: "movie",);
                 }
                 else if (item is TvSeriesAnime) {
-                  return AnimeSeriesCard(series: item);
+                  return AnimeSeriesCard(series: item, typec: "anime",);
                 } 
-                //else if (item is TvSeriesAnime) {
-//return TvSeriesCard(series: item);
-  //              }
+                else if (item is TvSeriesAnime) {
+return AnimeSeriesCard(series: item, typec:"tvseries");
+               }
                 return const SizedBox.shrink(); // Should not happen
               },
             ),
@@ -103,7 +100,7 @@ class FavoritesScreen extends StatelessWidget {
     final userData = Provider.of<UserDataService>(context);
     final movieProvider = Provider.of<MovieProvider>(context,
         listen: false); // don't listen if list is static
-    final tvProvider = Provider.of<TvSeriesProvider>(context, listen: false);
+  //  final tvProvider = Provider.of<TvSeriesProvider>(context, listen: false);
     final animeProvider = Provider.of<AnimeProvider>(context, listen: false);
 
     // Get favorite items
@@ -116,15 +113,15 @@ class FavoritesScreen extends StatelessWidget {
         .whereType<TvSeriesAnime>() // Filter out nulls if movie not found
         .toList();
 
-    final favoriteTvSeries = userData.favoriteTvSeriesIds
-        .map((id) => tvProvider.getAnimeByTmdbId(id))
-        .whereType<TvSeriesAnime>() // Filter out nulls
-        .toList();
+    // final favoriteTvSeries = userData.favoriteTvSeriesIds
+    //     .map((id) => tvProvider.getAnimeByTmdbId(id))
+    //     .whereType<TvSeriesAnime>() // Filter out nulls
+    //     .toList();
 
     // Combine and sort (optional, e.g., alphabetically)
     final allFavorites = [
       ...favoriteMovies,
-      ...favoriteTvSeries,
+     // ...favoriteTvSeries,
       ...favoriteAnime
     ];
     allFavorites.sort((a, b) {
@@ -174,14 +171,14 @@ class FavoritesScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 final item = allFavorites[index];
                 if (item is Movie) {
-                  return MovieCard(movie: item);
+                  return MovieCard(movie: item, typec: "movie");
                 } else if (item is TvSeriesAnime) {
-                  return AnimeSeriesCard(series: item);
+                  return AnimeSeriesCard(series: item, typec: "anime",);
                 }
 
-                // else if (item is TvSeriesAnime) {
-                //   return TvSeriesCard(series: item);
-                // }
+                else if (item is TvSeriesAnime) {
+                  return AnimeSeriesCard(series: item,typec: "tvseires",);
+                }
                 return const SizedBox.shrink(); // Should not happen
               },
             ),

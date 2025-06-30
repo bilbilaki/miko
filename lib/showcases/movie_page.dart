@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:miko/showcases/movie_detail_page_copy.dart';
+import 'package:miko/showcases/tv_detail_page_anime.dart';
 //import '../widgets/search_overlay.dart';
 import 'model.dart';
 import 'movie_service.dart';
-import 'movie_detail_page.dart';
 import 'person_detail_page.dart';
-import 'tv_detail_page.dart';
 
 class MoviePage extends StatefulWidget {
   const MoviePage({super.key});
@@ -24,22 +24,20 @@ class _MoviePageState extends State<MoviePage> {
   bool _isLoading = false;
   bool _hasError = false;
   String _errorMessage = '';
-    final int _currentPage2 = 1;
-  int _totalPages2 = 1;
   bool _isLoading2 = false;
   final ScrollController _scrollController = ScrollController();
   final ScrollController _scrollController2 = ScrollController();
 
   // Search fields
   final TextEditingController _searchController = TextEditingController();
-    final TextEditingController _searchController2 = TextEditingController();
+  final TextEditingController _searchController2 = TextEditingController();
 
   final ScrollController _searchScrollController = ScrollController();
-    final ScrollController _searchScrollController2 = ScrollController();
+  final ScrollController _searchScrollController2 = ScrollController();
 
   Timer? _debounce;
   MultiSearchResponse? _searchResponse;
-bool _isFetchingMore2 = false;
+  bool _isFetchingMore2 = false;
   String? _error2;
   String _currentQuery2 = '';
   int _searchPage2 = 1;
@@ -50,7 +48,7 @@ bool _isFetchingMore2 = false;
     _loadMovies();
     _scrollController.addListener(_scrollListener);
     _searchScrollController.addListener(_searchScrollListener);
-        _searchController.addListener(_onSearchChanged);
+    _searchController.addListener(_onSearchChanged);
 
     _searchController2.addListener(_onSearchChanged2);
   }
@@ -61,7 +59,7 @@ bool _isFetchingMore2 = false;
     _searchScrollController.dispose();
     _movieService.dispose();
     _searchController.removeListener(_onSearchChanged);
-     _searchController2.removeListener(_onSearchChanged2);
+    _searchController2.removeListener(_onSearchChanged2);
     _searchController2.dispose();
     _debounce?.cancel();
     super.dispose();
@@ -76,7 +74,6 @@ bool _isFetchingMore2 = false;
     }
   }
 
- 
   void _searchScrollListener() {
     if (_searchScrollController2.position.pixels >=
         _searchScrollController2.position.maxScrollExtent * 0.8) {
@@ -94,8 +91,7 @@ bool _isFetchingMore2 = false;
       _hasError = false;
     });
     try {
-      final response =
-          await _tmdbService.discoverMovies(page: _currentPage);
+      final response = await _tmdbService.discoverMovies(page: _currentPage);
       setState(() {
         _movies.addAll(response.results);
         _totalPages = response.totalPages;
@@ -109,25 +105,7 @@ bool _isFetchingMore2 = false;
       });
     }
   }
-Future<void> _loadMovies2() async {
-    if (_isLoading2) return;
-    setState(() {
-      _isLoading2 = true;
-    });
-    try {
-      final response =
-          await _tmdbService.discoverMovies(page: _currentPage2);
-      setState(() {
-        _movies.addAll(response.results);
-        _totalPages2 = response.totalPages;
-        _isLoading2 = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading2 = false;
-      });
-    }
-  }
+
   Future<void> _loadMoreMovies() async {
     _currentPage++;
     await _loadMovies();
@@ -140,8 +118,6 @@ Future<void> _loadMovies2() async {
     });
     await _loadMovies();
   }
-
-
 
   Future<void> _navigateToMovieDetail(Movie movie) async {
     await Navigator.push(
@@ -176,7 +152,8 @@ Future<void> _loadMovies2() async {
       }
     });
   }
- void _onSearchChanged2() async{
+
+  void _onSearchChanged2() async {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 200), () {
       final query = _searchController2.text;
@@ -200,6 +177,7 @@ Future<void> _loadMovies2() async {
       }
     });
   }
+
   Future<void> _fetchMultiSearch({bool loadMore = false}) async {
     if (_currentQuery2.isEmpty || _isFetchingMore2) return;
     setState(() {
@@ -285,7 +263,7 @@ Future<void> _loadMovies2() async {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => TvShowDetailPage(
+              builder: (context) => TvShowDetailPageAnime(
                 tvShow: TvShow(
                   id: result.id,
                   name: result.name,
@@ -302,6 +280,7 @@ Future<void> _loadMovies2() async {
                   voteCount: result.voteCount,
                   // Add other necessary fields from the multi search result
                 ),
+                typec:"tvseries"
               ),
             ),
           );
@@ -323,7 +302,6 @@ Future<void> _loadMovies2() async {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -344,7 +322,7 @@ Future<void> _loadMovies2() async {
                   onRefresh: _refreshMovies,
                   child: _buildMovieGrid(),
                 ),
-         Positioned(
+          Positioned(
             bottom: 0,
             left: 0,
             right: 0,
@@ -382,7 +360,7 @@ Future<void> _loadMovies2() async {
     );
   }
 
-  void _showSearchOverlay() async{
+  void _showSearchOverlay() async {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -419,16 +397,16 @@ Future<void> _loadMovies2() async {
                         prefixIcon: const Icon(Icons.search),
                         suffixIcon: IconButton(
                           icon: const Icon(Icons.clear),
-                          onPressed: () async{
+                          onPressed: () async {
                             _searchController2.clear();
-                            setModalState((){});
+                            setModalState(() {});
                           },
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
                       ),
-                      onChanged: (value) async{
+                      onChanged: (value) async {
                         setModalState(() {});
                         _onSearchChanged();
                       },
@@ -447,9 +425,9 @@ Future<void> _loadMovies2() async {
       ),
     );
   }
-Widget _buildBody() {
-    if (_isLoading2 )
-       {
+
+  Widget _buildBody() {
+    if (_isLoading2) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -573,6 +551,7 @@ Widget _buildBody() {
       ),
     );
   }
+
   Widget _buildErrorWidget() {
     return Center(
       child: Column(
@@ -638,8 +617,8 @@ Widget _buildBody() {
                   fit: StackFit.expand,
                   children: [
                     ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(12)),
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(12)),
                       child: Image.network(
                         movie.fullPosterPath,
                         fit: BoxFit.cover,
@@ -648,8 +627,7 @@ Widget _buildBody() {
                           return Center(
                             child: CircularProgressIndicator(
                               value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress
-                                          .cumulativeBytesLoaded /
+                                  ? loadingProgress.cumulativeBytesLoaded /
                                       loadingProgress.expectedTotalBytes!
                                   : null,
                             ),

@@ -3,7 +3,78 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:path_provider/path_provider.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path/path.dart' as p;
 
+class FileService {
+  Future<File?> pickFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: [
+        'txt',
+        'csv',
+        'json',
+        'log',
+        'md',
+        'yaml',
+        'xml',
+        'html'
+      ], // Add more as needed
+    );
+
+    if (result != null && result.files.single.path != null) {
+      return File(result.files.single.path!);
+    }
+    return null;
+  }
+
+  Future<String> readFileContent(File file) async {
+    try {
+      return await file.readAsString();
+    } catch (e) {
+      print('Error reading file: $e');
+      return '';
+    }
+  }
+
+  Future<File?> saveFile(String fileName, String content) async {
+    try {
+      // Get the application documents directory
+      final String directory = (await getApplicationDocumentsDirectory()).path;
+      final String filePath = p.join(directory, fileName);
+      final File file = File(filePath);
+
+      // Ensure the directory exists. If not, create it.
+      if (!await Directory(directory).exists()) {
+        await Directory(directory).create(recursive: true);
+      }
+
+      await file.writeAsString(content);
+      print('File saved to: $filePath');
+      return file;
+    } catch (e) {
+      print('Error saving file: $e');
+      return null;
+    }
+  }
+
+  // For platform-specific saving to user-chosen directory, you'd likely use
+  // packages like `path_provider` to get external storage directories
+  // and then potentially `permission_handler` to request write access,
+  // or use a package like `file_saver` for a more abstract way to save.
+  // Example with file_saver:
+  /*
+  Future<bool> saveFileToUserDirectory(String fileName, String content) async {
+    try {
+      await FileSaver.instance.saveFile(fileName: fileName, bytes: utf8.encode(content), mimeType: MimeType.TEXT);
+      return true;
+    } catch (e) {
+      print('Error saving file to user directory: $e');
+      return false;
+    }
+  }
+  */
+}
 class FilesService {
 // ···
   Future<String> get localPath async {

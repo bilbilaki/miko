@@ -1,17 +1,13 @@
 // lib/screens/unisearch_screen.dart
 import 'package:flutter/material.dart';
-import 'package:miko/models/movie.dart' as m;
 import 'package:miko/models/tv_series_anime.dart' as tsa;
 //import 'package:miko/utils/dynamic_background.dart'; // Optional background
 import 'package:provider/provider.dart';
-import 'package:miko/providers/movie_provider.dart';
-import 'package:miko/providers/tv_series_provider.dart';
 import 'package:miko/providers/anime_provider.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:miko/widgets/anime_series_card.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'dart:async'; // Import for Timer (debouncing)
-import 'package:miko/services/data_manager.dart'; // Import DataManager
 
 // Assuming LoadingStatus enum exists in one of the providers or a common place
 // If not, define it: enum LoadingStatus { initial, loading, loaded, error }
@@ -28,7 +24,7 @@ class UnifiedSearchScreen extends StatefulWidget {
 class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
-  final DataManager _dataManager = DataManager();
+  //final DataManager _dataManager = DataManager();
   Timer? _debounce;
   String _currentQuery = '';
   bool _isLoading = true;
@@ -67,7 +63,7 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
       _isLoading = true;
     });
 
-    await _dataManager.ensureDataLoaded();
+  //  await _dataManager.ensureDataLoaded();
 
     if (mounted) {
       setState(() {
@@ -126,7 +122,7 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
 
     // Combine all results
     final List<dynamic> allResults = [
-      ...movieProvider.movies,
+      ...movieProvider.animeseriesForDisplay,
       ...tvProvider.animeseriesForDisplay,
       ...animeProvider.animeseriesForDisplay
     ];
@@ -140,7 +136,7 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
 
     // Determine loading state
     final bool isLoading = _isLoading ||
-        movieProvider.status == LoadingStatus.loading ||
+        movieProvider.status == tsa.LoadingStatus.loading ||
         animeProvider.status == tsa.LoadingStatus.loading ||
         tvProvider.status == tsa.LoadingStatus.loading;
 
@@ -244,22 +240,22 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
   }
 
   Widget _buildItemCard(dynamic item) {
-    if (item is m.Movie) {
-      return MovieCard(movie: item);
+    if (item is tsa.Movie) {
+      return MovieCard(movie: item,typec: "movie",);
     }
 
     // else if (item is ts.TvSeries) {
     // return TvSeriesCard(series: item);
     // }
     else if (item is tsa.TvSeriesAnime) {
-      return AnimeSeriesCard(series: item);
+      return AnimeSeriesCard(series: item,typec: "anime",);
     } else {
       return const SizedBox.shrink();
     }
   }
 
   String _getItemName(dynamic item) {
-    if (item is m.Movie) {
+    if (item is tsa.Movie) {
       return item.title;
     }
     // else if (item is tsa.TvSeriesAnime) {

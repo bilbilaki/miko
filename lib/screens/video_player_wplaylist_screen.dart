@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
@@ -9,7 +8,6 @@ import 'package:miko/services/user_data_service.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:provider/provider.dart';
 
-import '../widgets/anime_series_card.dart';
 
 // Third Party Packages
 
@@ -58,9 +56,9 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
   bool isFullScreen = false;
   bool isMuted = false;
   bool isPiPEnabled = false;
-  final String _selectedQuality = 'Auto'; // To track user's quality choice
-  final bool _isChangingQuality =
-      false; // To prevent issues during quality switch
+ // final String _selectedQuality = 'Auto'; // To track user's quality choice
+  //final bool _isChangingQuality =
+   //   false; // To prevent issues during quality switch
   Timer? _progressSaveTimer; // Timer to periodically save progress
   final ScrollController _seasonsScrollController = ScrollController();
 
@@ -641,8 +639,8 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
                 IconButton(
                     icon: const Icon(Icons.skip_next,
                         color: Color.fromARGB(255, 97, 166, 251), size: 28),
-                    onPressed: () {
-                      nimdispose;
+                    onPressed: () async {
+                      nimdispose();
                       playEpisode(currentIndex++);
                     }),
                 // IconButton(

@@ -36,8 +36,8 @@ class _HttpClientPageState extends State<HttpClientPage> {
   String? _externalPath;
 
   String? _currentPath; // Track the path currently listing
-  List<Directory> _folders = [];
-  List<File> _movies = [];
+  final List<Directory> _folders = [];
+  final List<File> _movies = [];
 
   String? get externalPath => _externalPath;
 

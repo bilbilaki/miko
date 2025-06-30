@@ -249,7 +249,7 @@ class VideoPostCard extends StatelessWidget {
               // Channel icon
               const CircleAvatar(
                 radius: 20,
-                backgroundImage: AssetImage('assets/backdrop_127532.jpg'),
+                backgroundImage: AssetImage('assets/1.jpg'),
               ),
               const SizedBox(width: 12),
               // Video info

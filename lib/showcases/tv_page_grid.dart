@@ -1,51 +1,49 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:miko/showcases/movie_detail_page.dart';
+import 'package:miko/models/tmdb/tmdb_m.dart' as rrr;
+import 'package:miko/showcases/movie_detail_page_copy.dart';
 import 'package:miko/showcases/person_detail_page.dart';
+import 'package:miko/showcases/tv_detail_page_anime.dart';
 import 'model.dart';
 import 'movie_service.dart';
-import 'tv_detail_page.dart';
+import '../providers/anime_provider.dart';
 
-class TvShowPage extends StatefulWidget {
-  const TvShowPage({super.key});
+class TvPageGrid extends StatefulWidget {
+  final response;
+  final itemm;
+  const TvPageGrid({super.key, this.response, this.itemm});
 
   @override
-  State<TvShowPage> createState() => _TvShowPageState();
+  State<TvPageGrid> createState() => _TvPageGridState();
 }
 
-class _TvShowPageState extends State<TvShowPage> {
+class _TvPageGridState extends State<TvPageGrid> {
   final MovieService _movieService = MovieService();
   final TmdbApiService _tmdbService = TmdbApiService();
 
-  final List<TvShow> _tvShows = [];
+  final List<rrr.TvShowResult> _tvShows = [];
   int _currentPage = 1;
   int _totalPages = 1;
   bool _isLoading = false;
   bool _hasError = false;
   int _currentPage2 = 1;
-  int _totalPages2 = 1;
+  final int _totalPages2 = 1;
   bool _isLoading2 = false;
-  bool _hasError2 = false;
   String _errorMessage = '';
-    String _errorMessage2 = '';
-
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
-    final ScrollController _scrollController2 = ScrollController();
+  final ScrollController _scrollController2 = ScrollController();
   final TextEditingController _searchController2 = TextEditingController();
 
   Timer? _debounce;
 
   MultiSearchResponse? _searchResponse;
   String? _error;
-    String? _error2;
 
-  final String _currentQuery = '';
-    String _currentQuery2 = '';
+  String _currentQuery2 = '';
 
-  final bool _isFetchingMore = false;
-    bool _isFetchingMore2 = false;
+  bool _isFetchingMore2 = false;
 
   @override
   void initState() {
@@ -54,8 +52,7 @@ class _TvShowPageState extends State<TvShowPage> {
     _scrollController.addListener(_scrollListener);
     _scrollController2.addListener(_scrollListener2);
     _searchController.addListener(_onSearchChanged);
-        _searchController2.addListener(_onSearchChanged);
-
+    _searchController2.addListener(_onSearchChanged);
   }
 
   @override
@@ -76,7 +73,8 @@ class _TvShowPageState extends State<TvShowPage> {
       }
     }
   }
-void _scrollListener2() {
+
+  void _scrollListener2() {
     if (_scrollController2.position.pixels >=
         _scrollController2.position.maxScrollExtent * 0.8) {
       if (!_isLoading2 && _currentPage2 < _totalPages2) {
@@ -84,6 +82,7 @@ void _scrollListener2() {
       }
     }
   }
+
   Future<void> _loadTvShows() async {
     if (_isLoading) return;
 
@@ -93,13 +92,18 @@ void _scrollListener2() {
     });
 
     try {
-      final response = await _tmdbService.discoverTvShows(page: _currentPage);
+      if (widget.response == "recommend") {
+        final id = widget.itemm.id;
 
-      setState(() {
-        _tvShows.addAll(response.results);
-        _totalPages = response.totalPages;
-        _isLoading = false;
-      });
+        final res = await _tmdbService.getTvSeriesRecommendations(id,
+            page: _currentPage);
+
+        setState(() {
+          _tvShows.addAll(res.results);
+          _totalPages = res.totalPages;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       setState(() {
         _hasError = true;
@@ -108,30 +112,37 @@ void _scrollListener2() {
       });
     }
   }
+
   Future<void> _loadTvShows2() async {
-    if (_isLoading2) return;
+    if (_isLoading) return;
 
     setState(() {
-      _isLoading2 = true;
-      _hasError2 = false;
+      _isLoading = true;
+      _hasError = false;
     });
 
     try {
-      final response = await _tmdbService.discoverTvShows(page: _currentPage2);
+      if (widget.response == "recommend") {
+        final id = widget.itemm.id;
 
-      setState(() {
-        _tvShows.addAll(response.results);
-        _totalPages2 = response.totalPages;
-        _isLoading2 = false;
-      });
+        final res = await _tmdbService.getTvSeriesRecommendations(id,
+            page: _currentPage);
+
+        setState(() {
+          _tvShows.addAll(res.results);
+          _totalPages = res.totalPages;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       setState(() {
-        _hasError2 = true;
-        _errorMessage2 = e.toString();
-        _isLoading2 = false;
+        _hasError = true;
+        _errorMessage = e.toString();
+        _isLoading = false;
       });
     }
   }
+
   Future<void> _loadMoreTvShows2() async {
     _currentPage2++;
     await _loadTvShows2();
@@ -150,11 +161,14 @@ void _scrollListener2() {
     await _loadTvShows();
   }
 
-  Future<void> _navigateToTvShowDetail(TvShow tvShow) async {
+  Future<void> _navigateToTvShowDetail(tvShow) async {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => TvShowDetailPage(tvShow: tvShow),
+        builder: (context) => TvShowDetailPageAnime(
+          tvShow: tvShow,
+          typec: "tvseries",
+        ),
       ),
     );
   }
@@ -259,7 +273,7 @@ void _scrollListener2() {
                           icon: const Icon(Icons.clear),
                           onPressed: () {
                             _searchController2.clear();
-                            setModalState((){});
+                            setModalState(() {});
                           },
                         ),
                         border: OutlineInputBorder(
@@ -287,8 +301,7 @@ void _scrollListener2() {
   }
 
   Widget _buildBody() {
-    if (_isLoading2 )
-       {
+    if (_isLoading2) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -447,7 +460,6 @@ void _scrollListener2() {
           setState(() {
             _isLoading2 = false;
             _searchResponse = null;
-            _error2 = null;
           });
         }
       }
@@ -553,7 +565,7 @@ void _scrollListener2() {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => TvShowDetailPage(
+              builder: (context) => TvShowDetailPageAnime(
                 tvShow: TvShow(
                   id: result.id,
                   name: result.name,
@@ -570,6 +582,7 @@ void _scrollListener2() {
                   voteCount: result.voteCount,
                   // Add other necessary fields from the multi search result
                 ),
+                typec: "tvseries",
               ),
             ),
           );
@@ -619,6 +632,9 @@ void _scrollListener2() {
   }
 
   Widget _buildTvShowGrid() {
+    late AnimeProvider seriesProvider = AnimeProvider();
+    final seriesList = seriesProvider.animeseriesForDisplay;
+
     return GridView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.all(8),
@@ -628,14 +644,34 @@ void _scrollListener2() {
         crossAxisSpacing: 6,
         mainAxisSpacing: 6,
       ),
-      itemCount: _tvShows.length + (_isLoading && _tvShows.isNotEmpty ? 2 : 0),
+      itemCount:
+          seriesList.length + (_isLoading && seriesList.isNotEmpty ? 2 : 0),
       itemBuilder: (context, index) {
         if (index >= _tvShows.length) {
           return const Center(child: CircularProgressIndicator());
         }
-
         final tvShow = _tvShows[index];
-        return _buildTvShowCard(tvShow);
+
+        Future<TvShow> tvToTv(tvShow) async {
+          tvShow = await _movieService.getTvShowDetails(
+              tvShowId: seriesList[index].tmdbId);
+          return tvShow;
+        }
+
+        return FutureBuilder<TvShow>(
+          future: tvToTv(tvShow),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: \\${snapshot.error}'));
+            } else if (snapshot.hasData) {
+              return _buildTvShowCard(snapshot.data!);
+            } else {
+              return const SizedBox.shrink();
+            }
+          },
+        );
       },
     );
   }

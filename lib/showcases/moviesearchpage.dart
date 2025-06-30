@@ -1,9 +1,9 @@
 // movie_search_page.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:miko/showcases/movie_detail_page_copy.dart';
 import 'model.dart'; // Assuming you have a similar model structure
 import 'movie_service.dart';
-import 'movie_detail_page.dart';
 
 class MovieSearchPage extends StatefulWidget {
   const MovieSearchPage({super.key});
@@ -80,7 +80,7 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
         query: _currentQuery,
         page: _currentPage,
       );
-      
+
       if (mounted) {
         setState(() {
           if (loadMore) {
@@ -94,7 +94,7 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
           } else {
             _searchResponse = response;
           }
-          
+
           if (loadMore) {
             _isFetchingMore = false;
           } else {
@@ -115,9 +115,10 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
       }
     }
   }
-  
+
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 && 
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
         !_isFetchingMore &&
         _searchResponse != null &&
         _currentPage < _searchResponse!.totalPages) {
@@ -161,18 +162,19 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
   }
 
   Widget _buildBody() {
-    if (_isLoading && (_searchResponse == null || _searchResponse!.results.isEmpty)) {
+    if (_isLoading &&
+        (_searchResponse == null || _searchResponse!.results.isEmpty)) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     if (_error != null) {
       return Center(child: Text('Error: $_error'));
     }
-    
+
     if (_searchResponse == null && _currentQuery.isEmpty) {
       return const Center(child: Text('Start typing to search for movies.'));
     }
-    
+
     if (_searchResponse == null || _searchResponse!.results.isEmpty) {
       return Center(child: Text('No results found for "$_currentQuery".'));
     }
@@ -186,13 +188,11 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
       itemBuilder: (context, index) {
         if (index == results.length && _isFetchingMore) {
           return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(8.0), 
-              child: CircularProgressIndicator()
-            )
-          );
+              child: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: CircularProgressIndicator()));
         }
-        
+
         final movie = results[index];
         return _buildMovieResultCard(context, movie);
       },
@@ -201,8 +201,8 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
 
   Widget _buildMovieResultCard(BuildContext context, Movie movie) {
     final String posterUrl = movie.posterPath != null
-      ? 'https://inosdb.worker-inosuke.workers.dev/w500${movie.posterPath}'
-      : 'https://inosdb.worker-inosuke.workers.dev/w500${movie.posterPath}';
+        ? 'https://inosdb.worker-inosuke.workers.dev/w500${movie.posterPath}'
+        : 'https://inosdb.worker-inosuke.workers.dev/w500${movie.posterPath}';
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -212,8 +212,7 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => MovieDetailPage(movie: movie)
-            ),
+                builder: (context) => MovieDetailPage(movie: movie)),
           );
         },
         child: Row(
@@ -223,12 +222,11 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
               width: 100,
               height: 150,
               child: Image.network(
-                posterUrl, 
+                posterUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (c,e,s) => Container(
-                  color: Colors.grey[700], 
-                  child: const Center(child: Icon(Icons.movie_outlined))
-                ),
+                errorBuilder: (c, e, s) => Container(
+                    color: Colors.grey[700],
+                    child: const Center(child: Icon(Icons.movie_outlined))),
               ),
             ),
             Expanded(
@@ -237,32 +235,28 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      movie.title, 
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)
-                    ),
+                    Text(movie.title,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold)),
                     if (movie.releaseDate.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: Text(
-                          'Released: ${movie.releaseDate}', 
-                          style: Theme.of(context).textTheme.bodySmall
-                        ),
+                        child: Text('Released: ${movie.releaseDate}',
+                            style: Theme.of(context).textTheme.bodySmall),
                       ),
                     if (movie.voteAverage > 0)
-                      Row(
-                        children: [
-                          const Icon(Icons.star, color: Colors.amber, size: 16),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${movie.voteAverage.toStringAsFixed(1)} (${movie.voteCount})', 
-                            style: Theme.of(context).textTheme.bodySmall
-                          ),
-                        ]
-                      ),
+                      Row(children: [
+                        const Icon(Icons.star, color: Colors.amber, size: 16),
+                        const SizedBox(width: 4),
+                        Text(
+                            '${movie.voteAverage.toStringAsFixed(1)} (${movie.voteCount})',
+                            style: Theme.of(context).textTheme.bodySmall),
+                      ]),
                     const SizedBox(height: 8),
                     Text(
-                      movie.overview ?? '',
+                      movie.overview,
                       style: Theme.of(context).textTheme.bodySmall,
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,

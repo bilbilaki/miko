@@ -1,7 +1,8 @@
 // lib/widgets/tv_series_card.dart
+
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:miko/models/tv_series_anime.dart';
+import 'package:miko/models/tv_series_anime.dart' as og;
 import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/showcases/movie_service.dart';
 import 'package:miko/showcases/tv_detail_page_anime.dart';
@@ -11,8 +12,6 @@ import 'package:intl/intl.dart'; // For date formatting
 import 'package:miko/services/user_data_service.dart';
 //import 'package:myapp/screens/settings_screen.dart';
 import 'package:provider/provider.dart';
-import '../models/movie.dart' as og;
-import '../screens/home_screen.dart';
 import '../showcases/model.dart'; // For accessing UserDataService
 import 'package:miko/showcases/model.dart' as mmd;
 import 'package:miko/showcases/movie_detail_page_copy.dart';
@@ -155,8 +154,8 @@ class EpisodeTileNew extends StatelessWidget {
 
 class MovieCard extends StatelessWidget {
   final og.Movie movie;
-
-  const MovieCard({required this.movie, super.key});
+  final typec;
+  const MovieCard({required this.typec, required this.movie, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -178,8 +177,10 @@ class MovieCard extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) =>
-                        MovieDetailsScreen(movieId: movie.id), // Pass movie ID
+                    builder: (_) => MovieDetailsScreen(
+                      movieId: movie.id,
+                      typec: "movie",
+                    ), // Pass movie ID
                   ),
                 );
               } else {
@@ -188,7 +189,7 @@ class MovieCard extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (_) =>
-                        MovieDetailPage1(movie: nms), // Pass movie ID
+                        MovieDetailPage(movie: nms), // Pass movie ID
                   ),
                 );
                 //context.go('/movie/${movie.id}');
@@ -403,9 +404,9 @@ class MovieCard extends StatelessWidget {
 }
 
 class AnimeSeriesCard extends StatelessWidget {
-  final TvSeriesAnime series;
-
-  const AnimeSeriesCard({required this.series, super.key});
+  final og.TvSeriesAnime series;
+  final String typec;
+  const AnimeSeriesCard({required this.series, required this.typec, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -439,6 +440,7 @@ class AnimeSeriesCard extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (_) => AnimeDetailsScreen(
+                        typec: typec,
                         tvSeriesId: series.tmdbId,
                       ), // Pass movie ID
                     ),
@@ -448,8 +450,8 @@ class AnimeSeriesCard extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) =>
-                          TvShowDetailPageAnime(tvShow: nms), // Pass movie ID
+                      builder: (_) => TvShowDetailPageAnime(
+                          tvShow: nms, typec: typec), // Pass movie ID
                     ),
                   );
                   //context.go('/movie/${movie.id}');

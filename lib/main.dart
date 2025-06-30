@@ -4,15 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:media_cache_manager/media_cache_manager.dart';
 import 'package:miko/app_keeper.dart';
 import 'package:miko/providers/anime_provider.dart';
+import 'package:miko/providers/csv_detail_process_provider.dart';
 import 'package:miko/providers/loca_provider.dart';
 import 'package:miko/providers/settings_provider.dart';
-import 'package:miko/screens/csv_editor_screen.dart';
 import 'package:miko/services/user_data_service.dart'; // Import UserDataService
 import 'package:miko/utils/colors.dart';
-import 'package:miko/utils/csv_parser.dart';
 import 'package:provider/provider.dart';
-import 'package:miko/providers/movie_provider.dart';
-import 'package:miko/providers/tv_series_provider.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as pr;
@@ -20,7 +17,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' as pr;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' as ffi;
 
 Future main() async {
- WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
 
  MediaKit.ensureInitialized();
   await MediaCacheManager.instance.init();
@@ -28,7 +25,6 @@ Future main() async {
     ffi.sqfliteFfiInit();
   }
 
-  Provider.debugCheckInvalidValueType = null;
   runApp(
     MultiProvider(
       providers: [
@@ -42,12 +38,11 @@ Future main() async {
 
         ChangeNotifierProvider(
             create: (context) => UserDataService()), // Add UserDataService
-
         ChangeNotifierProvider(create: (_) => LocalProvider()),
-        ChangeNotifierProvider(
-  create: (_) => CsvData(),
-  child: CsvEditorScreen(),
-)
+        ChangeNotifierProvider(create: (_) => 
+ProcessingProvider()),
+ChangeNotifierProvider(create: (_) => TextToolProvider()),
+      
       ],
       child: MyApp(), // Use const if MyApp is stateless
     ),
@@ -58,12 +53,11 @@ Future main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-
   @override
   Widget build(BuildContext context) {
     Provider.of<MovieProvider>(context, listen: false);
     Provider.of<TvSeriesProvider>(context, listen: false);
-   Provider.of<AnimeProvider>(context, listen: false);
+    Provider.of<AnimeProvider>(context, listen: false);
     return pr.ProviderScope(
       overrides: [
         settingsServiceProvider.overrideWith((ref) => settingsService),
@@ -75,7 +69,7 @@ class MyApp extends StatelessWidget {
 }
 
 class SplashScreen extends StatefulWidget {
-   const SplashScreen({super.key});
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -92,7 +86,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _navigateToHome() async {
     debugPrint("Waiting for 5 seconds before navigation...");
-    await Future.delayed( Duration(seconds: 5));
+    await Future.delayed(Duration(seconds: 5));
     if (!mounted) return;
 
     debugPrint("Navigating to home screen...");

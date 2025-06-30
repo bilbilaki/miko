@@ -1,14 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:miko/services/user_data_service.dart';
-import 'package:miko/showcases/movie_detail_page.dart';
+import 'package:miko/showcases/movie_detail_page_copy.dart';
 import 'package:miko/showcases/person_detail_page.dart';
 import 'package:miko/showcases/tv_detail_page_anime.dart';
-import 'package:provider/provider.dart';
 import 'model.dart';
 import 'movie_service.dart';
-import 'tv_detail_page.dart';
 import '../providers/anime_provider.dart';
 
 class TvShowPage1 extends StatefulWidget {
@@ -30,9 +27,7 @@ class _TvShowPageState extends State<TvShowPage1> {
   int _currentPage2 = 1;
   int _totalPages2 = 1;
   bool _isLoading2 = false;
-  bool _hasError2 = false;
   String _errorMessage = '';
-  String _errorMessage2 = '';
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController2 = ScrollController();
@@ -42,12 +37,9 @@ class _TvShowPageState extends State<TvShowPage1> {
 
   MultiSearchResponse? _searchResponse;
   String? _error;
-  String? _error2;
 
-  final String _currentQuery = '';
   String _currentQuery2 = '';
 
-  final bool _isFetchingMore = false;
   bool _isFetchingMore2 = false;
 
   @override
@@ -118,7 +110,6 @@ class _TvShowPageState extends State<TvShowPage1> {
 
     setState(() {
       _isLoading2 = true;
-      _hasError2 = false;
     });
 
     try {
@@ -131,8 +122,6 @@ class _TvShowPageState extends State<TvShowPage1> {
       });
     } catch (e) {
       setState(() {
-        _hasError2 = true;
-        _errorMessage2 = e.toString();
         _isLoading2 = false;
       });
     }
@@ -160,7 +149,10 @@ class _TvShowPageState extends State<TvShowPage1> {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => TvShowDetailPageAnime(tvShow: tvShow),
+        builder: (context) => TvShowDetailPageAnime(
+          tvShow: tvShow,
+          typec: "tvseries",
+        ),
       ),
     );
   }
@@ -452,7 +444,6 @@ class _TvShowPageState extends State<TvShowPage1> {
           setState(() {
             _isLoading2 = false;
             _searchResponse = null;
-            _error2 = null;
           });
         }
       }
@@ -558,7 +549,7 @@ class _TvShowPageState extends State<TvShowPage1> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => TvShowDetailPage(
+              builder: (context) => TvShowDetailPageAnime(
                 tvShow: TvShow(
                   id: result.id,
                   name: result.name,
@@ -575,6 +566,7 @@ class _TvShowPageState extends State<TvShowPage1> {
                   voteCount: result.voteCount,
                   // Add other necessary fields from the multi search result
                 ),
+                typec: "tvseries",
               ),
             ),
           );
@@ -625,9 +617,7 @@ class _TvShowPageState extends State<TvShowPage1> {
 
   Widget _buildTvShowGrid() {
     late AnimeProvider seriesProvider = AnimeProvider();
-    final status = seriesProvider.status;
-    final userData = Provider.of<UserDataService>(context);
-    seriesProvider.loadAnimeData();
+
     final seriesList = seriesProvider.animeseriesForDisplay;
 
     return GridView.builder(

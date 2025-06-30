@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'model.dart';
 import 'movie_service.dart';
 
@@ -21,7 +24,6 @@ class PersonDetailPage extends StatefulWidget {
 class _PersonDetailPageState extends State<PersonDetailPage> {
   final MovieService _movieService = MovieService();
   late Future<Person> _personDetailsFuture;
-  bool _isLoading = false;
   bool _hasError = false;
   String _errorMessage = '';
 
@@ -43,21 +45,24 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
     _personDetailsFuture.then((_) {
       if (mounted) {
         setState(() {
-          _isLoading = false;
           _hasError = false;
         });
       }
     }).catchError((error) {
       if (mounted) {
         setState(() {
-          _isLoading = false;
           _hasError = true;
           _errorMessage = error.toString();
         });
       }
     });
   }
-
+void _performHapticFeedback() {
+    if (Platform.isAndroid) {
+      // Provides a subtle vibration
+      HapticFeedback.lightImpact;
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -126,7 +131,6 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
                 ElevatedButton(
                   onPressed: () {
                     setState(() {
-                      _isLoading = true;
                       _hasError = false;
                     });
                     _loadPersonDetails();
@@ -145,7 +149,7 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
     return CustomScrollView(
       slivers: [
         SliverAppBar(
-          expandedHeight: 200,
+          expandedHeight: 700,
           pinned: true,
           flexibleSpace: FlexibleSpaceBar(
             title: Text(

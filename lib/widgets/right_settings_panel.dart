@@ -2,25 +2,17 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:miko/screens/anime_grid_screen.dart';
-import 'package:miko/screens/csv_editor_screen.dart';
-import 'package:miko/screens/genre_list_screen.dart';
-import 'package:miko/screens/home_screen.dart';
 import 'package:miko/screens/http_main.dart';
 
 import 'package:miko/screens/local_screen.dart';
-import 'package:miko/screens/settings_screen.dart';
-import 'package:miko/screens/shorts_screen.dart';
-import 'package:miko/screens/tv_series_grid_screen.dart';
-import 'package:miko/screens/watchlist_screen.dart';
+import 'package:miko/screens/nethttp.dart';
+import 'package:miko/screens/nethttp2.dart';
+import 'package:miko/screens/test_http.dart';
+import 'package:miko/screens/tmdb_datails_process.dart';
 import 'package:miko/showcases/movie_page_copy.dart';
 import 'package:miko/showcases/tv_page_anime.dart';
-import 'package:miko/showcases/tv_page_tv.dart';
 import 'package:miko/utils/colors.dart';
 
-import '../chatview/ai_chat_client.dart';
-import '../code_editor/code_editor_ide.dart';
-import '../labs/home_screen.dart';
 import '../providers/settings_provider.dart';
 
 class RightNavigationPanel extends ConsumerWidget {
@@ -161,7 +153,7 @@ class RightNavigationPanel extends ConsumerWidget {
                   title: 'Csv Editor',
                   showText: showText, onTap: () {
                
-                  _navigateTo(context, CsvEditorScreen(), isMobileLayout);
+                  _navigateTo(context, TvShowPage1(), isMobileLayout);
               
               }),
               _buildNavigationItem(
@@ -170,7 +162,7 @@ class RightNavigationPanel extends ConsumerWidget {
                 icon: Icons.tv_rounded,
                 title: 'TvShow Beta2',
                 showText: showText,
-                onTap: () => _navigateTo(context, TvShowPageTV(), isMobileLayout),
+                onTap: () => _navigateTo(context, TvShowPage1(), isMobileLayout),
               ),
               _buildNavigationItem(
                 context,
@@ -178,7 +170,7 @@ class RightNavigationPanel extends ConsumerWidget {
                 icon: Icons.local_library_outlined,
                 title: 'Lab Showcase',
                 showText: showText,
-                onTap: () => _navigateTo(context, HomeScreenLab(), isMobileLayout),
+                onTap: () => _navigateTo(context, TvShowPage1(), isMobileLayout),
               ),
               if (showText) _buildSectionHeader('Subscriptions'),
               const Padding(padding: EdgeInsets.fromLTRB(16, 12, 16, 8)),
@@ -190,7 +182,7 @@ class RightNavigationPanel extends ConsumerWidget {
                 title: 'Code Editor Showcase',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, CodeEditorIDE(), isMobileLayout),
+                    _navigateTo(context, TvShowPage1(), isMobileLayout),
               ),
               _buildNavigationItem(
                 context,
@@ -199,16 +191,16 @@ class RightNavigationPanel extends ConsumerWidget {
                 title: 'Chat Showcase',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, AIChatClient(), isMobileLayout),
+                    _navigateTo(context, CrawlerHomePage4(), isMobileLayout),
               ),
               _buildNavigationItem(
                 context,
                 ref,
                 icon: Icons.watch_later_outlined,
-                title: 'Watchlist',
+                title: 'NewCrewler',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, WatchlistScreen(), isMobileLayout),
+                    _navigateTo(context, CrawlerHomePage2(), isMobileLayout),
               ),
               _buildNavigationItem(
                 context,
@@ -217,7 +209,7 @@ class RightNavigationPanel extends ConsumerWidget {
                 title: 'Settings',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, SettingsScreen(), isMobileLayout),
+                    _navigateTo(context, CrawlerHomePage4(), isMobileLayout),
               ),
               _buildNavigationItem(
                 context,
@@ -226,7 +218,7 @@ class RightNavigationPanel extends ConsumerWidget {
                 title: 'Subscription',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, SubscriptionsPage(), isMobileLayout),
+                    _navigateTo(context, CrawlerHomePage4(), isMobileLayout),
               ),
               const Divider(color: AppColors.dividerColor, height: 1),
               _buildNavigationItem(
@@ -236,7 +228,7 @@ class RightNavigationPanel extends ConsumerWidget {
                 title: 'Genres',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, GenreListScreen(), isMobileLayout),
+                    _navigateTo(context, CrawlerHomePage3(), isMobileLayout),
               ),
               _buildNavigationItem(
                 context,
@@ -245,7 +237,7 @@ class RightNavigationPanel extends ConsumerWidget {
                 title: 'Anime',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, AnimeGridScreen(), isMobileLayout),
+                    _navigateTo(context, CrawlerHomePage4(),isMobileLayout),
               ),
               _buildNavigationItem(
                 context,
@@ -254,7 +246,7 @@ class RightNavigationPanel extends ConsumerWidget {
                 title: 'TV Series',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, TvSeriesGridScreen(), isMobileLayout),
+                    _navigateTo(context, CrawlerHomePage4(), isMobileLayout),
               ),
               _buildNavigationItem(
                 context,
@@ -262,7 +254,7 @@ class RightNavigationPanel extends ConsumerWidget {
                 icon: Icons.movie_creation,
                 title: 'Movies',
                 showText: showText,
-                onTap: () => _navigateTo(context, HomeScreen(), isMobileLayout),
+                onTap: () => _navigateTo(context, TmdbDatailsProcess(), isMobileLayout),
               ),
             ],
           ),

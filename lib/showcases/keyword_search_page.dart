@@ -1,9 +1,9 @@
 // keyword_search_page.dart
 import 'package:flutter/material.dart';
+import 'package:miko/showcases/movie_detail_page_copy.dart';
 import 'dart:async';
 import 'movie_service.dart';
 import 'model.dart';
-import 'movie_detail_page.dart';
 
 class KeywordSearchPage extends StatefulWidget {
   const KeywordSearchPage({super.key});
@@ -79,7 +79,7 @@ class _KeywordSearchPageState extends State<KeywordSearchPage> {
         query: _currentQuery,
         page: _currentPage,
       );
-      
+
       if (mounted) {
         setState(() {
           if (loadMore) {
@@ -93,7 +93,7 @@ class _KeywordSearchPageState extends State<KeywordSearchPage> {
           } else {
             _keywordSearchResponse = response;
           }
-          
+
           if (loadMore) {
             _isFetchingMore = false;
           } else {
@@ -116,10 +116,11 @@ class _KeywordSearchPageState extends State<KeywordSearchPage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 && 
-    !_isFetchingMore &&
-    _keywordSearchResponse != null &&
-    _currentPage < _keywordSearchResponse!.totalPages) {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        !_isFetchingMore &&
+        _keywordSearchResponse != null &&
+        _currentPage < _keywordSearchResponse!.totalPages) {
       _currentPage++;
       _fetchKeywords(loadMore: true);
     }
@@ -171,19 +172,22 @@ class _KeywordSearchPageState extends State<KeywordSearchPage> {
   }
 
   Widget _buildBody() {
-    if (_isLoading && (_keywordSearchResponse == null || _keywordSearchResponse!.results.isEmpty)) {
+    if (_isLoading &&
+        (_keywordSearchResponse == null ||
+            _keywordSearchResponse!.results.isEmpty)) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     if (_error != null) {
       return Center(child: Text('Error: $_error'));
     }
-    
+
     if (_keywordSearchResponse == null && _currentQuery.isEmpty) {
       return const Center(child: Text('Start typing to search keywords...'));
     }
-    
-    if (_keywordSearchResponse == null || _keywordSearchResponse!.results.isEmpty) {
+
+    if (_keywordSearchResponse == null ||
+        _keywordSearchResponse!.results.isEmpty) {
       return Center(child: Text('No keywords found for "$_currentQuery".'));
     }
 
@@ -196,13 +200,11 @@ class _KeywordSearchPageState extends State<KeywordSearchPage> {
       itemBuilder: (context, index) {
         if (index == keywords.length && _isFetchingMore) {
           return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(8.0), 
-              child: CircularProgressIndicator()
-            )
-          );
+              child: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: CircularProgressIndicator()));
         }
-        
+
         final keyword = keywords[index];
         return _buildKeywordCard(context, keyword);
       },
@@ -265,7 +267,7 @@ class _KeywordMoviesPageState extends State<KeywordMoviesPage> {
         keywordId: widget.keyword.id,
         page: _currentPage,
       );
-      
+
       if (mounted) {
         setState(() {
           if (loadMore) {
@@ -280,7 +282,7 @@ class _KeywordMoviesPageState extends State<KeywordMoviesPage> {
           } else {
             _keywordMoviesResponse = response;
           }
-          
+
           if (loadMore) {
             _isFetchingMore = false;
           } else {
@@ -303,10 +305,11 @@ class _KeywordMoviesPageState extends State<KeywordMoviesPage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 && 
-    !_isFetchingMore &&
-    _keywordMoviesResponse != null &&
-    _currentPage < _keywordMoviesResponse!.totalPages) {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        !_isFetchingMore &&
+        _keywordMoviesResponse != null &&
+        _currentPage < _keywordMoviesResponse!.totalPages) {
       _currentPage++;
       _fetchKeywordMovies(loadMore: true);
     }
@@ -323,15 +326,18 @@ class _KeywordMoviesPageState extends State<KeywordMoviesPage> {
   }
 
   Widget _buildBody() {
-    if (_isLoading && (_keywordMoviesResponse == null || _keywordMoviesResponse!.results.isEmpty)) {
+    if (_isLoading &&
+        (_keywordMoviesResponse == null ||
+            _keywordMoviesResponse!.results.isEmpty)) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     if (_error != null) {
       return Center(child: Text('Error: $_error'));
     }
-    
-    if (_keywordMoviesResponse == null || _keywordMoviesResponse!.results.isEmpty) {
+
+    if (_keywordMoviesResponse == null ||
+        _keywordMoviesResponse!.results.isEmpty) {
       return const Center(child: Text('No movies found for this keyword.'));
     }
 
@@ -344,13 +350,11 @@ class _KeywordMoviesPageState extends State<KeywordMoviesPage> {
       itemBuilder: (context, index) {
         if (index == movies.length && _isFetchingMore) {
           return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(8.0), 
-              child: CircularProgressIndicator()
-            )
-          );
+              child: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: CircularProgressIndicator()));
         }
-        
+
         final movie = movies[index];
         return _buildMovieCard(context, movie);
       },
@@ -381,12 +385,11 @@ class _KeywordMoviesPageState extends State<KeywordMoviesPage> {
               width: 100,
               height: 150,
               child: Image.network(
-                posterUrl, 
+                posterUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (c,e,s) => Container(
-                  color: Colors.grey[700], 
-                  child: const Center(child: Icon(Icons.movie_outlined))
-                ),
+                errorBuilder: (c, e, s) => Container(
+                    color: Colors.grey[700],
+                    child: const Center(child: Icon(Icons.movie_outlined))),
               ),
             ),
             Expanded(
@@ -395,29 +398,25 @@ class _KeywordMoviesPageState extends State<KeywordMoviesPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      movie.title, 
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)
-                    ),
+                    Text(movie.title,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold)),
                     if (movie.releaseDate.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: Text(
-                          'Released: ${movie.releaseDate}', 
-                          style: Theme.of(context).textTheme.bodySmall
-                        ),
+                        child: Text('Released: ${movie.releaseDate}',
+                            style: Theme.of(context).textTheme.bodySmall),
                       ),
                     if (movie.voteAverage > 0)
-                      Row(
-                        children: [
-                          const Icon(Icons.star, color: Colors.amber, size: 16),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${movie.voteAverage.toStringAsFixed(1)} (${movie.voteCount})', 
-                            style: Theme.of(context).textTheme.bodySmall
-                          ),
-                        ]
-                      ),
+                      Row(children: [
+                        const Icon(Icons.star, color: Colors.amber, size: 16),
+                        const SizedBox(width: 4),
+                        Text(
+                            '${movie.voteAverage.toStringAsFixed(1)} (${movie.voteCount})',
+                            style: Theme.of(context).textTheme.bodySmall),
+                      ]),
                     const SizedBox(height: 8),
                     Text(
                       movie.overview ?? '',

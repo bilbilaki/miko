@@ -16,6 +16,7 @@ class AnimeEpisodeDetailPage extends StatefulWidget {
   final int episodeNumber;
   final String episodeName; // For AppBar title
   final MovieService movieService;
+  final typec;
 
   const AnimeEpisodeDetailPage({
     super.key,
@@ -24,6 +25,7 @@ class AnimeEpisodeDetailPage extends StatefulWidget {
     required this.episodeNumber,
     required this.episodeName,
     required this.movieService,
+    required this.typec,
   });
 
   @override
@@ -62,15 +64,14 @@ class _AnimeEpisodeDetailPageState extends State<AnimeEpisodeDetailPage> {
   @override
   Widget build(BuildContext context) {
     final anime = seriesProvider.getAnimeByTmdbId(widget.tvShowId);
-     
 
     List<ss.Season> seasons = anime!.seasons;
     final ss.Season s = seasons[widget.seasonNumber];
-    late final ss.Episode  episode =
+    late final ss.Episode episode =
         s.episodes.firstWhere((e) => e.episodeNumber == widget.episodeNumber);
     final availableQualities = episode.getAvailableQualityUrls();
     final userDataService = Provider.of<UserDataService>(context);
- 
+
     void playVideo(BuildContext context, String url) async {
       await userDataService.toggleIsWatchedLink(
           widget.tvShowId,
@@ -79,7 +80,7 @@ class _AnimeEpisodeDetailPageState extends State<AnimeEpisodeDetailPage> {
           availableQualities.toString());
 
       // URL encode the video URL to make it safe for use in the path
-      final encodedUrl = Uri.encodeComponent(url);
+      //   final encodedUrl = Uri.encodeComponent(url);
       Navigator.push(
           context,
           MaterialPageRoute(

@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:miko/providers/movie_provider.dart' as mm;
+import 'package:miko/providers/anime_provider.dart' as mm;
 import 'package:miko/showcases/movie_detail_page_copy.dart';
+import 'package:miko/showcases/tv_detail_page_anime.dart';
 //import '../widgets/search_overlay.dart';
 import 'model.dart' as mmmm;
 import 'movie_service.dart';
-import 'movie_detail_page.dart';
 import 'person_detail_page.dart';
-import 'tv_detail_page.dart';
 
 class MoviePage1 extends StatefulWidget {
   const MoviePage1({super.key});
@@ -29,8 +28,6 @@ class _MoviePageState extends State<MoviePage1> {
   int _currentPage2 = 1;
   int _totalPages2 = 1;
   bool _isLoading2 = false;
-  bool _hasError2 = false;
-  String _errorMessage2 = '';
   final ScrollController _scrollController = ScrollController();
   final ScrollController _scrollController2 = ScrollController();
 
@@ -43,11 +40,6 @@ class _MoviePageState extends State<MoviePage1> {
 
   Timer? _debounce;
   mmmm.MultiSearchResponse? _searchResponse;
-  final bool _isFetchingMore = false;
-  String? _error;
-  final String _currentQuery = '';
-  final int _searchPage = 1;
-  final int _searchTotalPages = 1;
   bool _isFetchingMore2 = false;
   String? _error2;
   String _currentQuery2 = '';
@@ -132,7 +124,6 @@ class _MoviePageState extends State<MoviePage1> {
     if (_isLoading2) return;
     setState(() {
       _isLoading2 = true;
-      _hasError2 = false;
     });
     try {
       final response = await _tmdbService.discoverMovies(page: _currentPage2);
@@ -143,8 +134,6 @@ class _MoviePageState extends State<MoviePage1> {
       });
     } catch (e) {
       setState(() {
-        _hasError2 = true;
-        _errorMessage2 = e.toString();
         _isLoading2 = false;
       });
     }
@@ -168,19 +157,11 @@ class _MoviePageState extends State<MoviePage1> {
     await _loadMovies2();
   }
 
-  Future<void> _refreshMovies2() async {
-    setState(() {
-      _movies.clear();
-      _currentPage2 = 1;
-    });
-    await _loadMovies2();
-  }
-
   Future<void> _navigateToMovieDetail(mmmm.Movie movie) async {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => MovieDetailPage1(movie: movie),
+        builder: (context) => MovieDetailPage(movie: movie),
       ),
     );
   }
@@ -320,7 +301,7 @@ class _MoviePageState extends State<MoviePage1> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => TvShowDetailPage(
+              builder: (context) => TvShowDetailPageAnime(
                 tvShow: mmmm.TvShow(
                   id: result.id,
                   name: result.name,
@@ -337,7 +318,9 @@ class _MoviePageState extends State<MoviePage1> {
                   voteCount: result.voteCount,
                   // Add other necessary fields from the multi search result
                 ),
+                typec: "tvseries",
               ),
+              
             ),
           );
         }
@@ -637,7 +620,7 @@ class _MoviePageState extends State<MoviePage1> {
 
   Widget _buildMovieGrid() {
     mm.MovieProvider movieProvider = mm.MovieProvider();
-    final listmovies = movieProvider.movies;
+    final listmovies = movieProvider.animeseriesForDisplay;
     return GridView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.all(16),
@@ -663,9 +646,9 @@ class _MoviePageState extends State<MoviePage1> {
         }
 
         final mmovie = movieToMovie(movie);
-       // return _buildMovieCard(mmovie);
-         return FutureBuilder<mmmm.Movie> (
-           future: movieToMovie(mmovie),
+        // return _buildMovieCard(mmovie);
+        return FutureBuilder<mmmm.Movie>(
+          future: movieToMovie(mmovie),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());

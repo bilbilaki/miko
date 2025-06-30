@@ -11,6 +11,7 @@ class SeasonDetailPageAnime extends StatefulWidget {
   final String seasonName;
   final String? posterPath;
   final MovieService movieService;
+  final typec;
 
   const SeasonDetailPageAnime({
     super.key,
@@ -19,6 +20,7 @@ class SeasonDetailPageAnime extends StatefulWidget {
     required this.seasonName,
     this.posterPath,
     required this.movieService,
+    required this.typec,
   });
 
   @override
@@ -50,22 +52,37 @@ class _SeasonDetailPageAnimeState extends State<SeasonDetailPageAnime> {
             expandedHeight: 400.0,
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(
-              title: Text(widget.seasonName, style: const TextStyle(shadows: [Shadow(blurRadius: 5, color: Colors.black)])),
+              title: Text(widget.seasonName,
+                  style: const TextStyle(
+                      shadows: [Shadow(blurRadius: 5, color: Colors.black)])),
               background: widget.posterPath != null
-                  ? Image.network(fullPosterPath, fit: BoxFit.cover,
-                      errorBuilder: (c,e,s) => Container(color: Colors.grey[800], child: Center(child: Icon(Icons.broken_image, color: Colors.white54, size: 50))))
-                  : Container(color: Colors.grey[800], child: Center(child: Icon(Icons.tv_outlined, color: Colors.white54, size: 80))),
+                  ? Image.network(fullPosterPath,
+                      fit: BoxFit.cover,
+                      errorBuilder: (c, e, s) => Container(
+                          color: Colors.grey[800],
+                          child: Center(
+                              child: Icon(Icons.broken_image,
+                                  color: Colors.white54, size: 50))))
+                  : Container(
+                      color: Colors.grey[800],
+                      child: Center(
+                          child: Icon(Icons.tv_outlined,
+                              color: Colors.white54, size: 80))),
             ),
           ),
           FutureBuilder<SeasonDetails>(
             future: _seasonDetailsFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const SliverFillRemaining(child: Center(child: CircularProgressIndicator()));
+                return const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator()));
               } else if (snapshot.hasError) {
-                return SliverFillRemaining(child: Center(child: Text('Error: ${snapshot.error}')));
-              } else if (snapshot.hasData && snapshot.data!.episodes.isNotEmpty) {
-                final episodes = snapshot.data!.episodes..sort((a,b) => a.episodeNumber.compareTo(b.episodeNumber));
+                return SliverFillRemaining(
+                    child: Center(child: Text('Error: ${snapshot.error}')));
+              } else if (snapshot.hasData &&
+                  snapshot.data!.episodes.isNotEmpty) {
+                final episodes = snapshot.data!.episodes
+                  ..sort((a, b) => a.episodeNumber.compareTo(b.episodeNumber));
                 return SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
@@ -76,7 +93,9 @@ class _SeasonDetailPageAnimeState extends State<SeasonDetailPageAnime> {
                   ),
                 );
               } else {
-                return const SliverFillRemaining(child: Center(child: Text('No episodes found for this season.')));
+                return const SliverFillRemaining(
+                    child: Center(
+                        child: Text('No episodes found for this season.')));
               }
             },
           ),
@@ -95,11 +114,13 @@ class _SeasonDetailPageAnimeState extends State<SeasonDetailPageAnime> {
             context,
             MaterialPageRoute(
               builder: (context) => AnimeEpisodeDetailPage(
-                tvShowId: widget.tvShowId, // or episode.showId if available and correct
+                tvShowId: widget
+                    .tvShowId, // or episode.showId if available and correct
                 seasonNumber: episode.seasonNumber,
                 episodeNumber: episode.episodeNumber,
                 episodeName: episode.name,
                 movieService: widget.movieService,
+                typec: widget.typec,
               ),
             ),
           );
@@ -117,7 +138,12 @@ class _SeasonDetailPageAnimeState extends State<SeasonDetailPageAnime> {
                     width: 120,
                     height: 67.5, // 16:9 aspect ratio
                     fit: BoxFit.cover,
-                    errorBuilder: (c,e,s) => Container(width: 120, height: 67.5, color: Colors.grey[700], child: const Center(child: Icon(Icons.hide_image_outlined))),
+                    errorBuilder: (c, e, s) => Container(
+                        width: 120,
+                        height: 67.5,
+                        color: Colors.grey[700],
+                        child: const Center(
+                            child: Icon(Icons.hide_image_outlined))),
                   ),
                 ),
               if (episode.stillPath != null) const SizedBox(width: 12),
@@ -127,7 +153,8 @@ class _SeasonDetailPageAnimeState extends State<SeasonDetailPageAnime> {
                   children: [
                     Text(
                       'E${episode.episodeNumber}: ${episode.name}',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -137,12 +164,14 @@ class _SeasonDetailPageAnimeState extends State<SeasonDetailPageAnime> {
                       style: TextStyle(fontSize: 12, color: Colors.grey[400]),
                     ),
                     if (episode.voteAverage > 0) ...[
-                        const SizedBox(height: 4),
-                        Row(children: [
-                            const Icon(Icons.star_border, color: Colors.amber, size: 14),
-                            const SizedBox(width: 4),
-                            Text(episode.voteAverage.toStringAsFixed(1), style: const TextStyle(fontSize: 12)),
-                        ]),
+                      const SizedBox(height: 4),
+                      Row(children: [
+                        const Icon(Icons.star_border,
+                            color: Colors.amber, size: 14),
+                        const SizedBox(width: 4),
+                        Text(episode.voteAverage.toStringAsFixed(1),
+                            style: const TextStyle(fontSize: 12)),
+                      ]),
                     ],
                     const SizedBox(height: 6),
                     if (episode.overview.isNotEmpty)

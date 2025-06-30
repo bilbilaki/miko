@@ -1,9 +1,9 @@
 // --- tv_search_page.dart ---
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:miko/showcases/tv_detail_page_anime.dart';
 import 'model.dart'; // For TVSearchResponse and TVSearchResult
 import 'movie_service.dart'; // Your service
-import 'tv_detail_page.dart'; // To navigate to details
 
 class TvSearchPage extends StatefulWidget {
   const TvSearchPage({super.key});
@@ -222,7 +222,7 @@ class _TvSearchPageState extends State<TvSearchPage> {
           );
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => TvShowDetailPage(tvShow: basicTvShow)),
+            MaterialPageRoute(builder: (context) => TvShowDetailPageAnime(tvShow: basicTvShow,typec: "tvseries",)),
           );
         },
         child: Row(

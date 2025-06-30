@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'model.dart'; 
+import 'package:miko/showcases/movie_detail_page_copy.dart';
+import 'model.dart';
 import 'movie_service.dart';
-import 'movie_detail_page.dart';
 
 class MoviesByKeywordScreen extends StatefulWidget {
   final int keywordId;
@@ -25,7 +25,8 @@ class _MoviesByKeywordScreenState extends State<MoviesByKeywordScreen> {
   @override
   void initState() {
     super.initState();
-    _moviesFuture = widget.movieService.getMoviesByKeyword(keywordId: widget.keywordId);
+    _moviesFuture =
+        widget.movieService.getMoviesByKeyword(keywordId: widget.keywordId);
   }
 
   @override
@@ -101,7 +102,8 @@ class _MoviesByKeywordScreenState extends State<MoviesByKeywordScreen> {
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       color: Colors.grey[800],
-                      child: const Center(child: Icon(Icons.movie, color: Colors.white54)),
+                      child: const Center(
+                          child: Icon(Icons.movie, color: Colors.white54)),
                     );
                   },
                 ),
@@ -124,7 +126,9 @@ class _MoviesByKeywordScreenState extends State<MoviesByKeywordScreen> {
                   const SizedBox(height: 4),
                   if (movie.releaseDate.isNotEmpty)
                     Text(
-                      movie.releaseDate.length > 4 ? movie.releaseDate.substring(0, 4) : movie.releaseDate,
+                      movie.releaseDate.length > 4
+                          ? movie.releaseDate.substring(0, 4)
+                          : movie.releaseDate,
                       style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
                 ],
