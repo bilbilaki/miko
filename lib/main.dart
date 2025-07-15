@@ -1,12 +1,12 @@
-import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:media_cache_manager/media_cache_manager.dart';
 import 'package:miko/app_keeper.dart';
 import 'package:miko/providers/anime_provider.dart';
 import 'package:miko/providers/csv_detail_process_provider.dart';
-import 'package:miko/providers/loca_provider.dart';
+import 'package:miko/providers/local_provider.dart';
 import 'package:miko/providers/settings_provider.dart';
+
+import 'package:miko/services/ai_chat_service.dart';
 import 'package:miko/services/user_data_service.dart'; // Import UserDataService
 import 'package:miko/utils/colors.dart';
 import 'package:provider/provider.dart';
@@ -16,14 +16,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' as pr;
 
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' as ffi;
 
-Future main() async {
+// This function must be a top-level function.
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
  MediaKit.ensureInitialized();
-  await MediaCacheManager.instance.init();
-  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+  // Register all your adapters
+  // IMPORTANT: Call this before the app runs
     ffi.sqfliteFfiInit();
-  }
+
+     
+  
 
   runApp(
     MultiProvider(
@@ -42,6 +45,7 @@ Future main() async {
         ChangeNotifierProvider(create: (_) => 
 ProcessingProvider()),
 ChangeNotifierProvider(create: (_) => TextToolProvider()),
+ChangeNotifierProvider(create: (_) => AIChatService()),
       
       ],
       child: MyApp(), // Use const if MyApp is stateless
@@ -49,18 +53,21 @@ ChangeNotifierProvider(create: (_) => TextToolProvider()),
   );
 }
 
+
 // ignore: must_be_immutable
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+
     Provider.of<MovieProvider>(context, listen: false);
     Provider.of<TvSeriesProvider>(context, listen: false);
     Provider.of<AnimeProvider>(context, listen: false);
     return pr.ProviderScope(
       overrides: [
         settingsServiceProvider.overrideWith((ref) => settingsService),
+
       ],
       child:
           MaterialApp(theme: AppThemes.netflixDarkTheme, home: SplashScreen()),

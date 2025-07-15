@@ -312,11 +312,6 @@ class TextToolProvider extends ChangeNotifier {
     try {
       // 1. Get Save Path
       String? outputDir = await FilePicker.platform.getDirectoryPath();
-      if (outputDir == null) {
-        isProcessing = false;
-        notifyListeners();
-        return "Save cancelled by user.";
-      }
       final originalFileName = pickedFile!.path.split(Platform.pathSeparator).last;
       final newFileName = 'processed_$originalFileName';
       final savePath = '$outputDir${Platform.pathSeparator}$newFileName';

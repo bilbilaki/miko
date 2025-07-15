@@ -5,7 +5,36 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as p;
+import 'dart:convert';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 
+class FileUtils {
+  static Future<String?> pickImageAndConvertToBase64() async {
+    final picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      final bytes = await image.readAsBytes();
+      return 'data:image/${image.name.split('.').last};base64,${base64Encode(bytes)}'; // Add data URI prefix
+    }
+    return null;
+  }
+
+  static Future<Map<String, String>?> pickAudioAndConvertToBase64() async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.audio);
+    if (result != null && result.files.single.path != null) {
+      final file = File(result.files.single.path!);
+      final bytes = await file.readAsBytes();
+      final String format = result.files.single.extension ?? 'wav'; // Default to wav if no extension
+      return {
+        'data': base64Encode(bytes),
+        'format': format,
+      };
+    }
+    return null;
+  }
+}
 class FileService {
   Future<File?> pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(

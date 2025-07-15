@@ -65,7 +65,7 @@ class AppThemes {
           color: Colors.white, fontWeight: FontWeight.bold),
       bodyLarge: GoogleFonts.notoSansMeeteiMayek(color: Colors.grey[300]),
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: const Color(0xFF1A1A1A),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(4)),
@@ -75,7 +75,7 @@ class AppThemes {
       selectedItemColor: Colors.white,
       unselectedItemColor: Colors.grey[600],
     ),
-    tabBarTheme: TabBarTheme(
+    tabBarTheme: TabBarThemeData(
       labelColor: Colors.white,
       unselectedLabelColor: Colors.grey[600],
       indicator: const UnderlineTabIndicator(

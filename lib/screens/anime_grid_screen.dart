@@ -16,6 +16,7 @@ import 'package:miko/showcases/movie_detail_page_copy.dart';
 import 'package:miko/showcases/movie_service.dart' as mo;
 import 'package:miko/showcases/person_detail_page.dart';
  import 'package:miko/showcases/tv_detail_page_anime.dart';
+import 'package:miko/utils/utils.dart';
 //import 'package:miko/showcases/tv_detail_page_anime.dart';
 import 'package:miko/widgets/anime_series_card.dart';
 import 'package:provider/provider.dart';
@@ -37,12 +38,7 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
   late double? gridCrossAxisCount = 3.0; // Default grid size
 
   // Haptic feedback function
-  void _triggerVibration() {
-    if (Platform.isAndroid) {
-      HapticFeedback.lightImpact();
-    }
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -52,22 +48,22 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
           onNotification: (ScrollNotification notification) {
             if (Platform.isAndroid) {
               if (notification is ScrollStartNotification) {
-                _triggerVibration(); // Vibrate when scroll starts
+                triggerVibration(); // Vibrate when scroll starts
               }
             }
             return false; // Continue to bubble up the notification
           },
           child: GestureDetector(
             // Added GestureDetector for general touch/drag vibration
-            onTapDown: (_) => _triggerVibration(), // Vibrate on touch/tap down
-            onPanDown: (_) => _triggerVibration(), // Vibrate on pan/drag down
+            onTapDown: (_) => triggerVibration(), // Vibrate on touch/tap down
+            onPanDown: (_) => triggerVibration(), // Vibrate on pan/drag down
             child: Stack(
               children: [
                 if (widget.typec == "movie")
                   Consumer<MovieProvider>(
                     builder: (context, movieProvider, child) {
                       return _buildBody0(context, movieProvider, widget.typec,
-                          _triggerVibration);
+                          triggerVibration);
                     },
                   )
                 else if (widget.typec == "anime")
@@ -75,14 +71,14 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
                       builder: (context, seriesProvider, child) {
                     // Optional: Keep DynamicBackground if desired
                     return _buildBody0(context, seriesProvider, widget.typec,
-                        _triggerVibration);
+                        triggerVibration);
                   })
                 else if (widget.typec == "tvseries")
                   Consumer<TvSeriesProvider>(
                       builder: (context, seriesProvider, child) {
                     // Optional: Keep DynamicBackground if desired
                     return _buildBody0(context, seriesProvider, widget.typec,
-                        _triggerVibration);
+                        triggerVibration);
                   }),
                 Positioned(
                   bottom: 0,
@@ -90,7 +86,7 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
                   right: 0,
                   child: GestureDetector(
                     onTap: () {
-                      _triggerVibration(); // Vibrate on search bar tap
+                      triggerVibration(); // Vibrate on search bar tap
                       _showSearchOverlay();
                     },
                     child: Container(
@@ -252,7 +248,7 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
   }
 
   void _navigateToDetailPage(MultiSearchResult result) {
-    if (Platform.isAndroid) _triggerVibration(); // Vibrate on navigation
+    if (Platform.isAndroid) triggerVibration(); // Vibrate on navigation
     switch (result.mediaType) {
       case MediaType.movie:
         if (result is MultiSearchMovie) {
@@ -364,7 +360,7 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
                         suffixIcon: IconButton(
                           icon: const Icon(Icons.clear),
                           onPressed: () async {
-                            _triggerVibration(); // Vibrate on clear
+                            triggerVibration(); // Vibrate on clear
                             _searchController2.clear();
                             setModalState(() {});
                           },
@@ -374,7 +370,7 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
                         ),
                       ),
                       onChanged: (value) async {
-                        _triggerVibration(); // Vibrate on typing
+                        triggerVibration(); // Vibrate on typing
                         setModalState(() {});
                         _onSearchChanged2();
                       },
@@ -474,7 +470,7 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
         }
 
         final result = results[index];
-        return _buildMultiSearchResultCard(context, result, _triggerVibration);
+        return _buildMultiSearchResultCard(context, result, triggerVibration);
       },
     );
   }
@@ -684,7 +680,7 @@ class AnimeDetailsScreen extends StatelessWidget {
   final ScrollController _seasonsScrollController = ScrollController();
 
   // Haptic feedback function instance for this class
-  void _triggerVibration() {
+  void triggerVibration() {
     if (Platform.isAndroid) {
       HapticFeedback.lightImpact();
     }
@@ -739,7 +735,7 @@ class AnimeDetailsScreen extends StatelessWidget {
         onNotification: (ScrollNotification notification) {
           if (Platform.isAndroid) {
             if (notification is ScrollStartNotification) {
-              _triggerVibration(); // Vibrate when scroll starts
+              triggerVibration(); // Vibrate when scroll starts
             }
           }
           return false; // Continue to bubble up the notification
@@ -847,7 +843,7 @@ class AnimeDetailsScreen extends StatelessWidget {
                               size: 20,
                             ),
                             onPressed: () async {
-                              _triggerVibration(); // Vibrate on favorite tap
+                              triggerVibration(); // Vibrate on favorite tap
                               await userDataService
                                   .toggleFavoriteAnime(series.tmdbId);
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -896,7 +892,7 @@ class AnimeDetailsScreen extends StatelessWidget {
                               size: 20,
                             ),
                             onPressed: () {
-                              _triggerVibration(); // Vibrate on watchlist tap
+                              triggerVibration(); // Vibrate on watchlist tap
                               userDataService
                                   .toggleWatchlistAnime(series.tmdbId);
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -1166,7 +1162,7 @@ class AnimeDetailsScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16.0, vertical: 0),
                       child: _buildSeasonsList(context, series.seasons,
-                          series.tmdbId, series.name, _triggerVibration),
+                          series.tmdbId, series.name, triggerVibration),
                     ),
 
                   const SizedBox(height: 40),
@@ -1297,6 +1293,7 @@ class MovieDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Find the movie using the provider
     final movie = Provider.of<MovieProvider>(context, listen: false)
+    
         .getMovieById(movieId);
 
     // Fetch UserDataService

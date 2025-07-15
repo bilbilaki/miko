@@ -6,7 +6,7 @@ import 'package:miko/screens/settings_screen.dart';
 import 'package:miko/screens/shorts_screen.dart';
 import 'package:miko/screens/watchlist_screen.dart';
 import 'package:miko/showcases/keyword_search_page.dart';
-import 'package:miko/showcases/movie_page.dart';
+import 'package:miko/showcases/movie_page_copy.dart';
 import 'package:miko/showcases/moviesearchpage.dart';
 import 'package:miko/showcases/multi_search_page.dart';
 import 'package:miko/showcases/tvsearchpage.dart';
@@ -203,7 +203,7 @@ class LeftNavigationPanel extends ConsumerWidget {
         icon: Icons.movie_outlined,
         title: 'Popular Movie',
         showText: showText,
-        onTap: () => _navigateTo(context, MoviePage(), isMobileLayout),
+        onTap: () => _navigateTo(context, MoviePage1(), isMobileLayout),
       ),                  
                      
                 _buildNavigationItem(

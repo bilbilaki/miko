@@ -133,9 +133,9 @@ class SettingsScreen extends StatelessWidget {
           // const Divider(color: AppColors.dividerColor),
 
           // External Apps Settings (Example using TextFields)
-      //    Padding(
-        //    padding:
-         //       const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          //    Padding(
+          //    padding:
+          //       const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           //  child:                   _buildImportOrSetData()),
           //     crossAxisAlignment: CrossAxisAlignment.start,
           //     children: [
@@ -175,7 +175,6 @@ class SettingsScreen extends StatelessWidget {
           //       ),
           //                       const SizedBox(height: 12),
 
-
           //       TextField(
           //         controller: TextEditingController(
           //             text: userDataService.downloadManager),
@@ -202,9 +201,9 @@ class SettingsScreen extends StatelessWidget {
           //       ),
           //     ],
           //   ),
-          
+
           // const Divider(color: AppColors.dividerColor),
-        
+
           // Storage (Placeholder)
           ListTile(
             leading:
@@ -388,7 +387,7 @@ extension StringExtension on String {
 //   } else {
 //     // User cancelled path selection when no path was previously set.
 //     // Optionally, show a message or keep the app in an empty state.
-//     _showSnackBar('No folder selected. Please select a folder to start.');
+//     showSnackBar('No folder selected. Please select a folder to start.');
 //   }
 //   if (type == "archive") {
 //     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -429,11 +428,11 @@ extension StringExtension on String {
 //     }
 //     await userDataService.setCustoombaseurl(newExterFileDir.toString());
 //     _log("Data Directoory Successfully Saved at App Settings");
-    
+
 //   }
 // }
 
-void _showSnackBar(String message) {
+void showSnackBar(String message) {
   SnackBar(
     content: Text(message),
     duration: const Duration(seconds: 3), // Show for 3 seconds

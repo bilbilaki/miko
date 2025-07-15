@@ -2,6 +2,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:miko/providers/anime_provider.dart';
+import 'package:miko/utils/utils.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -492,8 +493,8 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
     final mmovie = Provider.of<MovieProvider>(context, listen: false)
         .getMovieById(widget.movie.id);
     final userDataService = Provider.of<UserDataService>(context);
-    final downloadLinks =
-        (mmovie != null) ? mmovie.getDownloadLinksList() : "no Link Exist";
+        final downloadLinks = mmovie!.getDownloadLinksList();
+
     bool isWatched = userDataService.isWatchedEpisode(widget.movie.id,
         widget.movie.id, widget.movie.id, downloadLinks.toString());
 
@@ -655,7 +656,8 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                         onPressed: () {
                           _performHapticFeedback();
                           _showDownloadLinkSelection(
-                              context, [downloadLinks.toString()]);
+                              context, downloadLinks);
+                          //   downloadLinks.toString());
                         },
                       )
                     : SizedBox(height: 4),
@@ -1262,7 +1264,11 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                       icon: const Icon(Icons.language),
                       label: const Text('Official Website'),
                       onPressed: () {
-                        _performHapticFeedback();
+                        // TODO: Launch URL (would need url_launcher package)
+                        // import 'package:url_launcher/url_launcher.dart';
+                        // if (await canLaunchUrl(Uri.parse(movie.homepage!))) {
+                        //   await launchUrl(Uri.parse(movie.homepage!));
+                        // }
                       },
                     ),
                   if (movie.imdbId != null)
@@ -1270,7 +1276,11 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                       icon: const Icon(Icons.movie),
                       label: const Text('IMDb'),
                       onPressed: () {
-                        _performHapticFeedback();
+                        // TODO: Launch IMDb URL
+                        // final imdbUrl = 'https://www.imdb.com/title/${movie.imdbId}/';
+                        // if (await canLaunchUrl(Uri.parse(imdbUrl))) {
+                        //   await launchUrl(Uri.parse(imdbUrl));
+                        // }
                       },
                     ),
                 ],
@@ -1283,7 +1293,6 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
       ),
     );
   }
-
   void _showDownloadLinkSelection(
       BuildContext context, List<String> links) async {
     final userDataService =
@@ -1302,27 +1311,26 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           children: links.map((link) {
+            // Try to guess quality from URL (very basic)
             String qualityGuess = "Unknown";
             if (link.contains('1080p')) {
               qualityGuess = "1080p ";
-            } else if (link.contains('720p')) {
+            } else if (link.contains('720p'))
               qualityGuess = "720p ";
-            } else if (link.contains('480p')) {
+            else if (link.contains('480p'))
               qualityGuess = "480p ";
-            } else if (link.contains('BluRay')) {
+            else if (link.contains('BluRay'))
               qualityGuess += " BluRay ";
-            } else if (link.contains('HEVC') || link.contains('x265')) {
+            else if (link.contains('HEVC') || link.contains('x265'))
               qualityGuess += " HEVC ";
-            } else if (link.contains('x264')) {
-              qualityGuess += " x264";
-            }
+            else if (link.contains('x264')) qualityGuess += " x264";
 
             return SimpleDialogOption(
               onPressed: () async {
-                _performHapticFeedback();
+                tVmedium(); // Haptic feedback on dialog option tap
                 Navigator.pop(dialogContext); // Close the dialog
-                userDataService.toggleIsWatchedLink(widget.movie.id,
-                    widget.movie.id, widget.movie.id, links.toString());
+                userDataService.toggleIsWatchedLink(
+                    widget.movie.id, widget.movie.id,widget.movie.id, links.toString());
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -1333,7 +1341,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
               padding:
                   const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
               child: Text(
-                '$qualityGuess - ${Uri.parse(link).host}',
+                '$qualityGuess - ${Uri.parse(link).host}', // Show quality guess and domain
                 style:
                     const TextStyle(color: AppColors.primaryText, fontSize: 14),
                 maxLines: 2,
@@ -1345,6 +1353,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
       },
     );
   }
+
 
   Widget _buildKeywordsSection(BuildContext context, List<Keyword> keywords) {
     return Column(

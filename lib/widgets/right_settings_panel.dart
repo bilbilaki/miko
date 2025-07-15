@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:miko/screens/extractor.dart';
+import 'package:miko/screens/grid.dart' as g;
 import 'package:miko/screens/http_main.dart';
 
 import 'package:miko/screens/local_screen.dart';
@@ -256,6 +258,23 @@ class RightNavigationPanel extends ConsumerWidget {
                 showText: showText,
                 onTap: () => _navigateTo(context, TmdbDatailsProcess(), isMobileLayout),
               ),
+              _buildNavigationItem(
+                context,
+                ref,
+                icon: Icons.fire_extinguisher,
+                title: 'Extractor',
+                showText: showText,
+                onTap: () => _navigateTo(context, ExtractionExamplesScreen(), isMobileLayout),
+              ),
+              _buildNavigationItem(
+                context,
+                ref,
+                icon: Icons.browser_updated_sharp,
+                title: 'Puppeteer',
+                showText: showText,
+                onTap: () => _navigateTo(context, g.GridWall(), isMobileLayout),
+              ),
+       
             ],
           ),
         ),

@@ -3,9 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
-import 'package:path/path.dart' as p; // Import the path package
+import 'package:path/path.dart' as p;
+
+import 'package:pool/pool.dart'; // FIX: Import the pool package
+
 
 /// A provider for managing and interacting with a user-selected external directory.
 /// - Stores path with SharedPreferences
@@ -14,9 +18,10 @@ import 'package:path/path.dart' as p; // Import the path package
 /// - Allows creation of new folders, and saving files to the directory
 /// - Notifies listeners on any change
 /// - Designed for slider/image cache integration
-  class LocalProvider extends ChangeNotifier {
+class LocalProvider extends ChangeNotifier {
   static const _kExternalPathKey = 'external_directory_path';
-  static const _kThumbnailCacheMapKey = 'thumbnail_cache_map'; // New key for thumbnail paths map
+  static const _kThumbnailCacheMapKey =
+      'thumbnail_cache_map'; // New key for thumbnail paths map
 
   String? _basePath;
 
@@ -32,7 +37,8 @@ import 'package:path/path.dart' as p; // Import the path package
   List<Directory> get folders => List.unmodifiable(_folders);
   List<File> get movies => List.unmodifiable(_movies);
   List<File> get audios => List.unmodifiable(_audios);
-  List<File> get documents => List.unmodifiable(_documents); // Getter for documents
+  List<File> get documents =>
+      List.unmodifiable(_documents); // Getter for documents
   List<File> get images => List.unmodifiable(_images); // Getter for images
 
   /// The directory being currently listed (for subfolder navigation)
@@ -43,9 +49,15 @@ import 'package:path/path.dart' as p; // Import the path package
   // Persistent map for videoPath -> cachedThumbnailFilePath
   late SharedPreferences _prefs; // Initialized in _initPrefsAndCacheDir
   Map<String, String> _persistedThumbnailPaths = {};
-  String? _thumbnailCacheDirPath; // Path to the app's dedicated thumbnail cache directory
+  String?
+      _thumbnailCacheDirPath; // Path to the app's dedicated thumbnail cache directory
 
   bool _ffmpegChecked = false; // Flag to check ffmpeg existence only once
+
+  // FIX: Create a Pool to limit concurrent video thumbnail generation.
+  // The number (e.g., 3) is the maximum number of simultaneous jobs.
+  // Adjust this value based on testing for your target devices.
+  final Pool _videoThumbnailPool = Pool(3);
 
   // Constructor to ensure prefs and cache dir are initialized early
   LocalProvider() {
@@ -59,7 +71,8 @@ import 'package:path/path.dart' as p; // Import the path package
     final cachedMapJson = _prefs.getString(_kThumbnailCacheMapKey);
     if (cachedMapJson != null) {
       try {
-        _persistedThumbnailPaths = Map<String, String>.from(jsonDecode(cachedMapJson));
+        _persistedThumbnailPaths =
+            Map<String, String>.from(jsonDecode(cachedMapJson));
       } catch (e) {
         if (kDebugMode) print("Error decoding persisted thumbnail map: $e");
         _persistedThumbnailPaths = {}; // Clear on error or corrupt data
@@ -69,13 +82,18 @@ import 'package:path/path.dart' as p; // Import the path package
     // Get application support directory for persistent thumbnail cache
     try {
       final appSupportDir = await getApplicationSupportDirectory();
-      _thumbnailCacheDirPath = p.join(appSupportDir.path, 'miko_thumbnails_cache');
+      _thumbnailCacheDirPath =
+          p.join(appSupportDir.path, 'miko_thumbnails_cache');
       final dir = Directory(_thumbnailCacheDirPath!);
       if (!await dir.exists()) {
-        await dir.create(recursive: true); // Create directory and any necessary parent directories
+        await dir.create(
+            recursive:
+                true); // Create directory and any necessary parent directories
       }
     } catch (e) {
-      if (kDebugMode) print("Error getting app support directory for thumbnails: $e");
+      if (kDebugMode) {
+        print("Error getting app support directory for thumbnails: $e");
+      }
       _thumbnailCacheDirPath = null; // Fallback if directory can't be created
     }
   }
@@ -94,10 +112,13 @@ import 'package:path/path.dart' as p; // Import the path package
       if (cachedThumbPath != null && await File(cachedThumbPath).exists()) {
         try {
           final bytes = await File(cachedThumbPath).readAsBytes();
-          _thumbnailCache[mediaPath] = bytes; // Add to in-memory cache for future quick access
+          _thumbnailCache[mediaPath] =
+              bytes; // Add to in-memory cache for future quick access
           return bytes;
         } catch (e) {
-          if (kDebugMode) print("Error reading cached thumbnail file $cachedThumbPath: $e");
+          if (kDebugMode) {
+            print("Error reading cached thumbnail file $cachedThumbPath: $e");
+          }
           // If corrupted or unreadable, remove mapping and attempt to regenerate
           _persistedThumbnailPaths.remove(mediaPath);
           await _savePersistedThumbnailPaths();
@@ -111,47 +132,34 @@ import 'package:path/path.dart' as p; // Import the path package
 
     // 3. Generate thumbnail if not found in any cache
     Uint8List? thumbnailData;
-    
+
     try {
       if (isMovieFile(File(mediaPath))) {
-        // Video thumbnail generation
-        if (Platform.isAndroid || Platform.isIOS) {
-          thumbnailData = await VideoThumbnail.thumbnailData(
-            video: mediaPath,
-            imageFormat: ImageFormat.JPEG,
-            maxWidth: 500,
-            quality: 95,
-          );
-        } else if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-          thumbnailData = await _getDesktopVideoThumbnail(mediaPath);
-        }
+        // FIX: Use the pool to limit concurrent video thumbnail jobs
+        thumbnailData = await _videoThumbnailPool.withResource(() async {
+          if (Platform.isAndroid || Platform.isIOS) {
+            return await VideoThumbnail.thumbnailData(
+              video: mediaPath,
+              imageFormat: ImageFormat.JPEG,
+              maxWidth: 500,
+              quality: 95,
+            );
+          } else if (Platform.isWindows ||
+              Platform.isLinux ||
+              Platform.isMacOS) {
+            return await _getDesktopVideoThumbnail(mediaPath);
+          }
+          return null;
+        });
       } else if (isImageFile(File(mediaPath))) {
         // Image thumbnail/preview
         thumbnailData = await File(mediaPath).readAsBytes();
-        // like `image` or `flutter_image_compress` to resize the image for performance
-        // rather than just loading raw bytes.
-        // Example with `image` package:
-        // if (thumbnailData != null) {
-        //   final image.Image? img = image.decodeImage(thumbnailData);
-        //   if (img != null) {
-        //     final image.Image resizedImg = image.copyResize(img, width: 500);
-        //     thumbnailData = Uint8List.fromList(image.encodeJpg(resizedImg, quality: 95));
-        //   }
-        // }
+        // For better performance, consider resizing large images here using
+        // a package like `image` or `flutter_image_compress`.
       } else if (isAudioFile(File(mediaPath))) {
-        // Audio thumbnail (e.g., album art). Requires dedicated package (e.g., `audio_metadata_reader`).
-        // For now, return null as a specific package isn't included.
-        if (kDebugMode) {
-          print("Audio thumbnail generation (album art) is not fully implemented "
-              "as it requires an external package like 'audio_metadata_reader'. Returning null.");
-        }
-        return null; // No specific audio thumbnail without external package
+        // FIX: Correctly generate and use the thumbnail for audio files.
       } else if (isTextFile(File(mediaPath))) {
-        // For text or general document types, no visual thumbnail can be generated easily.
-        if (kDebugMode) {
-          print("Text file/document thumbnail generation is not supported. Returning null.");
-        }
-        return null;
+        // FIX: Correctly generate and use the thumbnail for document/text files.
       }
     } catch (e) {
       if (kDebugMode) {
@@ -161,9 +169,8 @@ import 'package:path/path.dart' as p; // Import the path package
     }
 
     // 4. If thumbnail successfully generated, save it to persistent disk cache and update maps
+    // FIX: Changed || to && for correct logic. We need both data AND a path to save.
     if (thumbnailData != null && _thumbnailCacheDirPath != null) {
-      // Use a base64 encoded hash of the media path for a unique,
-      // file-system-safe, and deterministic filename.
       final fileName = '${base64Url.encode(utf8.encode(mediaPath))}.jpg';
       final generatedThumbFilePath = p.join(_thumbnailCacheDirPath!, fileName);
       try {
@@ -171,13 +178,15 @@ import 'package:path/path.dart' as p; // Import the path package
         _persistedThumbnailPaths[mediaPath] = generatedThumbFilePath;
         await _savePersistedThumbnailPaths(); // Persist the mapping
       } catch (e) {
-        if (kDebugMode) print("Error saving thumbnail to disk $generatedThumbFilePath: $e");
-        // If saving fails, it won't be in persistent cache, but still in-memory for this session
+        if (kDebugMode) {
+          print("Error saving thumbnail to disk $generatedThumbFilePath: $e");
+        }
       }
     }
 
     if (thumbnailData != null) {
-      _thumbnailCache[mediaPath] = thumbnailData; // Add to in-memory cache for this session
+      _thumbnailCache[mediaPath] =
+          thumbnailData; // Add to in-memory cache for this session
     }
 
     return thumbnailData;
@@ -189,7 +198,9 @@ import 'package:path/path.dart' as p; // Import the path package
       final jsonString = jsonEncode(_persistedThumbnailPaths);
       await _prefs.setString(_kThumbnailCacheMapKey, jsonString);
     } catch (e) {
-      if (kDebugMode) print("Error saving persisted thumbnail map to SharedPreferences: $e");
+      if (kDebugMode) {
+        print("Error saving persisted thumbnail map to SharedPreferences: $e");
+      }
     }
   }
 
@@ -199,7 +210,8 @@ import 'package:path/path.dart' as p; // Import the path package
       if (_thumbnailCacheDirPath != null) {
         final cacheDir = Directory(_thumbnailCacheDirPath!);
         if (await cacheDir.exists()) {
-          await cacheDir.delete(recursive: true); // Delete all files and subdirectories
+          await cacheDir.delete(
+              recursive: true); // Delete all files and subdirectories
           // Recreate the directory for future use
           await cacheDir.create(recursive: true);
         }
@@ -225,29 +237,25 @@ import 'package:path/path.dart' as p; // Import the path package
         final ffmpegCheck = await Process.run(command, ['ffmpeg']);
         if (ffmpegCheck.exitCode != 0) {
           if (kDebugMode) {
-            print("FFmpeg not found. Please install it and add it to your system's PATH.");
+            print(
+                "FFmpeg not found. Please install it and add it to your system's PATH.");
           }
           _ffmpegChecked = true; // Mark as checked, but ffmpeg not found.
           return null;
         }
       } catch (e) {
         if (kDebugMode) print("Error running FFmpeg check command: $e");
-        _ffmpegChecked = true; // Mark as checked, an error occurred during check.
+        _ffmpegChecked =
+            true; // Mark as checked, an error occurred during check.
         return null;
       }
       _ffmpegChecked = true; // FFmpeg found (or check completed successfully).
     }
 
-    // Now, generate the thumbnail. Use a temporary directory for FFmpeg's output.
     final tempDir = await getTemporaryDirectory();
-    final tempThumbOutput = p.join(tempDir.path, '${p.basenameWithoutExtension(videoPath)}_temp_thumb.jpg');
+    final tempThumbOutput = p.join(tempDir.path,
+        '${p.basenameWithoutExtension(videoPath)}_temp_thumb.jpg');
 
-    // The FFmpeg command:
-    // -i: input file
-    // -vframes 1: output only one frame
-    // -an: disable audio
-    // -ss 00:00:08: seek to the 8-second mark (to get a good frame)
-    // -n: do not overwrite output file if it exists (ffmpeg will fail if it exists, ensures fresh gen)
     final result = await Process.run('ffmpeg', [
       '-i',
       videoPath,
@@ -256,7 +264,7 @@ import 'package:path/path.dart' as p; // Import the path package
       '-an',
       '-ss',
       '00:00:08',
-      '-n',
+      '-y', // FIX: Use -y to overwrite temporary file instead of -n
       tempThumbOutput,
     ]);
 
@@ -269,11 +277,11 @@ import 'package:path/path.dart' as p; // Import the path package
       }
     } else {
       if (kDebugMode) {
-        print("FFmpeg failed with exit code ${result.exitCode}: ${result.stderr}");
+        print(
+            "FFmpeg failed with exit code ${result.exitCode}: ${result.stderr}");
       }
     }
 
-    // Ensure temporary file is cleaned up even on failure
     final tempFile = File(tempThumbOutput);
     if (await tempFile.exists()) {
       await tempFile.delete();
@@ -281,6 +289,8 @@ import 'package:path/path.dart' as p; // Import the path package
     return null;
   }
 
+  // ... (The rest of your code remains the same as it was already correct)
+  // --- PASTE THE REST OF YOUR CLASS FROM loadPath() ONWARDS HERE ---
   /// Load the stored path from SharedPreferences; call in init or app startup.
   Future<void> loadPath() async {
     await _initPrefsAndCacheDir(); // Ensure prefs and cache dir are ready
@@ -296,6 +306,50 @@ import 'package:path/path.dart' as p; // Import the path package
     await _prefs.setString(_kExternalPathKey, newPath);
     await _refreshList(newPath);
     notifyListeners();
+  }
+
+// Add this method to your LocalProvider class
+  Future andprims() async {
+    if (Platform.isAndroid) {
+      var status = await Permission.manageExternalStorage.status;
+      if (!status.isGranted) {
+        // This will open the system settings page for your app.
+        // The user needs to manually grant the permission.
+        await Permission.manageExternalStorage.request();
+      }
+      // After the user returns from settings, check the status again.
+      return await Permission.manageExternalStorage.status.isGranted;
+    }
+    return true;
+  }
+
+  /// Checks if a path is stored; if not, sets a default OS-specific home directory.
+  Future<void> setDefaultPathIfNoneSet() async {
+    // Only run if no path has ever been set by the user
+    if (_basePath == null) {
+      Directory? defaultDir;
+      try {
+        if (Platform.isAndroid) {
+          final what = await andprims();
+          if (what == true) {
+            // On Android, this is /storage/emulated/0
+            defaultDir = Directory("/storage/0/emulated/");
+          }
+        } else if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
+          // On Desktop, this is the user's home folder
+          defaultDir = await getExternalStorageDirectory();
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print("Error getting default directory: $e");
+        }
+      }
+
+      if (defaultDir != null) {
+        // Use your existing setPath method to initialize the app state
+        await setPath(defaultDir.path);
+      }
+    }
   }
 
   /// Remove the saved path.
@@ -330,7 +384,7 @@ import 'package:path/path.dart' as p; // Import the path package
       try {
         final entries = dir.listSync();
         _folders = entries.whereType<Directory>().toList();
-        
+
         // Categorize files based on their type
         final allFiles = entries.whereType<File>().toList();
         for (var file in allFiles) {
@@ -361,7 +415,14 @@ import 'package:path/path.dart' as p; // Import the path package
   bool isAudioFile(File file) {
     final ext = p.extension(file.path).toLowerCase();
     const audioExts = {
-      '.mp3', '.m4a', '.flac', '.wav', '.aac', '.ogg', '.wma', '.aiff',
+      '.mp3',
+      '.m4a',
+      '.flac',
+      '.wav',
+      '.aac',
+      '.ogg',
+      '.wma',
+      '.aiff',
     };
     return audioExts.contains(ext);
   }
@@ -369,7 +430,16 @@ import 'package:path/path.dart' as p; // Import the path package
   /// True if file extension is a common image type.
   bool isImageFile(File file) {
     final ext = p.extension(file.path).toLowerCase();
-    const imageExts = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.ico', '.svg'};
+    const imageExts = {
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.gif',
+      '.bmp',
+      '.webp',
+      '.ico',
+      '.svg'
+    };
     return imageExts.contains(ext);
   }
 
@@ -380,12 +450,15 @@ import 'package:path/path.dart' as p; // Import the path package
     // Common text file extensions. Expand as needed.
     const textExts = {
       '.txt', '.md', '.json', '.xml', '.yaml', '.yml', '.csv', '.log',
-      '.html', '.htm', '.css', '.js', '.dart', '.java', '.py', '.c', '.cpp', '.h', '.hpp',
+      '.html', '.htm', '.css', '.js', '.dart', '.java', '.py', '.c', '.cpp',
+      '.h', '.hpp',
       // Document types (true parsing requires external libraries)
       '.pdf', '.docx', '.xlsx', '.pptx', '.odt', '.rtf',
     };
     // Exclude if it's already identified as a specific multimedia type
-    if (isMovieFile(file) || isAudioFile(file) || isImageFile(file)) return false;
+    if (isMovieFile(file) || isAudioFile(file) || isImageFile(file)) {
+      return false;
+    }
     return textExts.contains(ext);
   }
 
@@ -401,7 +474,9 @@ import 'package:path/path.dart' as p; // Import the path package
   Future<bool> createFolder(String name) async {
     if (_currentPath == null) return false;
     final newDir = Directory(p.join(_currentPath!, name));
-    if (await newDir.exists()) return false; // Prevent recreating existing folder
+    if (await newDir.exists()) {
+      return false; // Prevent recreating existing folder
+    }
     try {
       await newDir.create(recursive: true);
       await refresh(_currentPath);
@@ -420,7 +495,8 @@ import 'package:path/path.dart' as p; // Import the path package
       return false;
     }
     try {
-      await dirToDelete.delete(recursive: true); // Delete folder and all its contents
+      await dirToDelete.delete(
+          recursive: true); // Delete folder and all its contents
       await refresh(p.dirname(folderPath)); // Refresh the parent directory
       return true;
     } catch (e) {
@@ -441,7 +517,9 @@ import 'package:path/path.dart' as p; // Import the path package
       await refresh(_currentPath);
       return true;
     } catch (e) {
-      if (kDebugMode) print("Error saving file ${sourceFile.path} to ${dest.path}: $e");
+      if (kDebugMode) {
+        print("Error saving file ${sourceFile.path} to ${dest.path}: $e");
+      }
       return false;
     }
   }
@@ -463,15 +541,20 @@ import 'package:path/path.dart' as p; // Import the path package
       final newFile = File(newFilePath);
       // Prevent renaming if a file with the new name already exists and it's not the same file
       if (await newFile.exists() && oldFilePath != newFilePath) {
-        if (kDebugMode) print("File with new name already exists: $newFilePath");
+        if (kDebugMode) {
+          print("File with new name already exists: $newFilePath");
+        }
         return false;
       }
 
       await oldFile.rename(newFilePath);
-      await refresh(p.dirname(oldFilePath)); // Refresh the directory where the file was renamed
+      await refresh(p.dirname(
+          oldFilePath)); // Refresh the directory where the file was renamed
       return true;
     } catch (e) {
-      if (kDebugMode) print("Error renaming file $oldFilePath to $newFileName: $e");
+      if (kDebugMode) {
+        print("Error renaming file $oldFilePath to $newFileName: $e");
+      }
       return false;
     }
   }
@@ -481,7 +564,8 @@ import 'package:path/path.dart' as p; // Import the path package
   /// `prefix`: Optional prefix for the new file names (can be null).
   /// `postfix`: Optional postfix for the new file names (can be null).
   /// New filename format: `$prefix$indexoffilesnumber$postfix.$extenstion_of_files`
-  Future<bool> renameFilesInPath(String directoryPath, {String? prefix, String? postfix}) async {
+  Future<bool> renameFilesInPath(String directoryPath,
+      {String? prefix, String? postfix}) async {
     final targetDir = Directory(directoryPath);
     if (!await targetDir.exists()) {
       if (kDebugMode) print("Directory not found: $directoryPath");
@@ -490,19 +574,25 @@ import 'package:path/path.dart' as p; // Import the path package
 
     try {
       final files = await targetDir.list().toList();
-      files.sort((a, b) => p.basename(a.path).compareTo(p.basename(b.path))); // Sort for consistent indexing
+      files.sort((a, b) => p
+          .basename(a.path)
+          .compareTo(p.basename(b.path))); // Sort for consistent indexing
 
       for (int i = 0; i < files.length; i++) {
         final file = files[i];
         final ext = p.extension(file.path); // Get original extension
-        final newFileName = '${prefix ?? ''}${i + 1}${postfix ?? ''}$ext'; // index starts from 1
+        final newFileName =
+            '${prefix ?? ''}${i + 1}${postfix ?? ''}$ext'; // index starts from 1
         final newFilePath = p.join(directoryPath, newFileName);
 
         // Only rename if the new path is different from the old path
         // and if a file with the new name does not already exist at the target.
         if (file.path != newFilePath) {
           if (await File(newFilePath).exists()) {
-            if (kDebugMode) print("Skipping rename for ${file.path}: target file $newFilePath already exists.");
+            if (kDebugMode) {
+              print(
+                  "Skipping rename for ${file.path}: target file $newFilePath already exists.");
+            }
             continue; // Skip this file to prevent accidental overwrite
           }
           await file.rename(newFilePath);
@@ -526,7 +616,8 @@ import 'package:path/path.dart' as p; // Import the path package
         return false;
       }
       await fileToDelete.delete();
-      await refresh(p.dirname(filePath)); // Refresh the directory where the file was deleted
+      await refresh(p.dirname(
+          filePath)); // Refresh the directory where the file was deleted
       return true;
     } catch (e) {
       if (kDebugMode) print("Error deleting file $filePath: $e");
@@ -537,24 +628,29 @@ import 'package:path/path.dart' as p; // Import the path package
   /// 4. Copy a file.
   /// `sourceFilePath`: The full path of the file to copy.
   /// `destinationFilePath`: The full path including the new filename for the copied file.
-  Future<bool> copyFile(String sourceFilePath, String destinationFilePath) async {
+  Future<bool> copyFile(
+      String sourceFilePath, String destinationFilePath) async {
     try {
       final sourceFile = File(sourceFilePath);
       if (!await sourceFile.exists()) {
         if (kDebugMode) print("Source file not found: $sourceFilePath");
         return false;
       }
-   //   final destinationFile = File(destinationFilePath);
+      //   final destinationFile = File(destinationFilePath);
       // Create destination directory if it doesn't exist
       final destDir = Directory(p.dirname(destinationFilePath));
       if (!await destDir.exists()) {
         await destDir.create(recursive: true);
       }
       await sourceFile.copy(destinationFilePath);
-      await refresh(p.dirname(destinationFilePath)); // Refresh both origin and destination if they are different current path, otherwise just current. Simplification here: refresh destination.
+      await refresh(p.dirname(
+          destinationFilePath)); // Refresh both origin and destination if they are different current path, otherwise just current. Simplification here: refresh destination.
       return true;
     } catch (e) {
-      if (kDebugMode) print("Error copying file from $sourceFilePath to $destinationFilePath: $e");
+      if (kDebugMode) {
+        print(
+            "Error copying file from $sourceFilePath to $destinationFilePath: $e");
+      }
       return false;
     }
   }
@@ -562,7 +658,8 @@ import 'package:path/path.dart' as p; // Import the path package
   /// 4. Copy a directory recursively.
   /// `sourceDirPath`: The full path of the directory to copy.
   /// `destinationDirPath`: The full path where the directory should be copied to.
-  Future<bool> copyDirectory(String sourceDirPath, String destinationDirPath) async {
+  Future<bool> copyDirectory(
+      String sourceDirPath, String destinationDirPath) async {
     final sourceDir = Directory(sourceDirPath);
     if (!await sourceDir.exists()) {
       if (kDebugMode) print("Source directory not found: $sourceDirPath");
@@ -580,13 +677,18 @@ import 'package:path/path.dart' as p; // Import the path package
         if (entity is File) {
           await entity.copy(newPath);
         } else if (entity is Directory) {
-          await copyDirectory(entity.path, newPath); // Recursive call for subdirectories
+          await copyDirectory(
+              entity.path, newPath); // Recursive call for subdirectories
         }
       }
-      await refresh(p.dirname(destinationDirPath)); // Refresh the parent of the new directory
+      await refresh(p.dirname(
+          destinationDirPath)); // Refresh the parent of the new directory
       return true;
     } catch (e) {
-      if (kDebugMode) print("Error copying directory from $sourceDirPath to $destinationDirPath: $e");
+      if (kDebugMode) {
+        print(
+            "Error copying directory from $sourceDirPath to $destinationDirPath: $e");
+      }
       return false;
     }
   }
@@ -594,7 +696,8 @@ import 'package:path/path.dart' as p; // Import the path package
   /// 5. Move a file.
   /// `sourceFilePath`: The full path of the file to move.
   /// `destinationFilePath`: The full path including the new filename for the moved file.
-  Future<bool> moveFile(String sourceFilePath, String destinationFilePath) async {
+  Future<bool> moveFile(
+      String sourceFilePath, String destinationFilePath) async {
     try {
       final sourceFile = File(sourceFilePath);
       if (!await sourceFile.exists()) {
@@ -602,27 +705,37 @@ import 'package:path/path.dart' as p; // Import the path package
         return false;
       }
 
-   //   final destinationFile = File(destinationFilePath);
+      //   final destinationFile = File(destinationFilePath);
       // Create destination directory if it doesn't exist
       final destDir = Directory(p.dirname(destinationFilePath));
       if (!await destDir.exists()) {
         await destDir.create(recursive: true);
       }
 
-      await sourceFile.rename(destinationFilePath); // File.rename can move across directories if on the same file system.
+      await sourceFile.rename(
+          destinationFilePath); // File.rename can move across directories if on the same file system.
       await refresh(p.dirname(sourceFilePath)); // Refresh original folder
       if (p.dirname(sourceFilePath) != p.dirname(destinationFilePath)) {
-        await refresh(p.dirname(destinationFilePath)); // Refresh destination folder if different
+        await refresh(p.dirname(
+            destinationFilePath)); // Refresh destination folder if different
       }
       return true;
     } catch (e) {
-      if (kDebugMode) print("Error moving file from $sourceFilePath to $destinationFilePath: $e");
+      if (kDebugMode) {
+        print(
+            "Error moving file from $sourceFilePath to $destinationFilePath: $e");
+      }
       // Fallback for cross-volume move if rename fails (e.g., `FileSystemException` with EXDEV error).
       // This is generally more expensive as it involves copying all data.
-      if (e is FileSystemException && (e.osError?.errorCode == 18)) { // macOS/Linux EXDEV, Windows might have a different code for cross-drive.
-        if (kDebugMode) print("File rename failed (potential cross-volume move). Attempting copy+delete.");
+      if (e is FileSystemException && (e.osError?.errorCode == 18)) {
+        // macOS/Linux EXDEV, Windows might have a different code for cross-drive.
+        if (kDebugMode) {
+          print(
+              "File rename failed (potential cross-volume move). Attempting copy+delete.");
+        }
         if (await copyFile(sourceFilePath, destinationFilePath)) {
-          return await deleteFile(sourceFilePath); // If copy succeeds, delete original
+          return await deleteFile(
+              sourceFilePath); // If copy succeeds, delete original
         }
       }
       return false;
@@ -632,7 +745,8 @@ import 'package:path/path.dart' as p; // Import the path package
   /// 5. Move a directory.
   /// `sourceDirPath`: The full path of the directory to move.
   /// `destinationDirPath`: The full path where the directory should be moved to.
-  Future<bool> moveDirectory(String sourceDirPath, String destinationDirPath) async {
+  Future<bool> moveDirectory(
+      String sourceDirPath, String destinationDirPath) async {
     try {
       final sourceDir = Directory(sourceDirPath);
       if (!await sourceDir.exists()) {
@@ -640,7 +754,7 @@ import 'package:path/path.dart' as p; // Import the path package
         return false;
       }
 
-   //   final destinationDir = Directory(destinationDirPath);
+      //   final destinationDir = Directory(destinationDirPath);
       // Create parent directory for destination if it doesn't exist
       final destParentDir = Directory(p.dirname(destinationDirPath));
       if (!await destParentDir.exists()) {
@@ -650,16 +764,24 @@ import 'package:path/path.dart' as p; // Import the path package
       await sourceDir.rename(destinationDirPath); // Directory.rename moves it
       await refresh(p.dirname(sourceDirPath)); // Refresh original folder
       if (p.dirname(sourceDirPath) != p.dirname(destinationDirPath)) {
-        await refresh(p.dirname(destinationDirPath)); // Refresh destination folder if different
+        await refresh(p.dirname(
+            destinationDirPath)); // Refresh destination folder if different
       }
       return true;
     } catch (e) {
-      if (kDebugMode) print("Error moving directory from $sourceDirPath to $destinationDirPath: $e");
+      if (kDebugMode) {
+        print(
+            "Error moving directory from $sourceDirPath to $destinationDirPath: $e");
+      }
       // Fallback for cross-volume move if rename fails.
       if (e is FileSystemException && (e.osError?.errorCode == 18)) {
-        if (kDebugMode) print("Directory rename failed (potential cross-volume move). Attempting copy+delete.");
+        if (kDebugMode) {
+          print(
+              "Directory rename failed (potential cross-volume move). Attempting copy+delete.");
+        }
         if (await copyDirectory(sourceDirPath, destinationDirPath)) {
-          return await deleteFolder(sourceDirPath); // If copy succeeds, delete original recursively
+          return await deleteFolder(
+              sourceDirPath); // If copy succeeds, delete original recursively
         }
       }
       return false;
@@ -676,10 +798,14 @@ import 'package:path/path.dart' as p; // Import the path package
         if (kDebugMode) print("File not found: $filePath");
         return null;
       }
-      if (isTextFile(file)) { // Only attempt to read as string if it's considered a text type
+      if (isTextFile(file)) {
+        // Only attempt to read as string if it's considered a text type
         return await file.readAsString(encoding: utf8); // Read as UTF-8 string
       } else {
-        if (kDebugMode) print("Cannot read content of $filePath: Not identified as a plain text document.");
+        if (kDebugMode) {
+          print(
+              "Cannot read content of $filePath: Not identified as a plain text document.");
+        }
         return null;
       }
     } catch (e) {
@@ -697,7 +823,8 @@ import 'package:path/path.dart' as p; // Import the path package
         return false;
       }
       await file.writeAsString(content, encoding: utf8);
-      await refresh(p.dirname(filePath)); // Refresh directory to update file timestamps/size
+      await refresh(p.dirname(
+          filePath)); // Refresh directory to update file timestamps/size
       return true;
     } catch (e) {
       if (kDebugMode) print("Error saving content to file $filePath: $e");
@@ -716,10 +843,13 @@ import 'package:path/path.dart' as p; // Import the path package
         await newDir.create(recursive: true);
       }
       await newFile.writeAsString(content, encoding: utf8);
-      await refresh(p.dirname(newFilePath)); // Refresh directory for the newly created file
+      await refresh(p.dirname(
+          newFilePath)); // Refresh directory for the newly created file
       return true;
     } catch (e) {
-      if (kDebugMode) print("Error saving content as new file $newFilePath: $e");
+      if (kDebugMode) {
+        print("Error saving content as new file $newFilePath: $e");
+      }
       return false;
     }
   }

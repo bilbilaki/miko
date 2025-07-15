@@ -1,15 +1,19 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:miko/widgets/alienswapbutton.dart';
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:swipe_image_gallery/swipe_image_gallery.dart';
 
 import '../app_keeper.dart';
-import '../providers/loca_provider.dart';
-
-
+import '../providers/local_provider.dart';
+import '../widgets/photoeditor.dart';
+import 'video_player2.dart';
+import 'package:audioplayers/audioplayers.dart';
+// ...
+final player = AudioPlayer();
 // Enums for managing UI states
 class ComponentLibraryDrawer extends StatelessWidget {
   const ComponentLibraryDrawer({super.key});
@@ -46,16 +50,17 @@ class ComponentBrowserDrawer extends StatelessWidget {
 }
 
 enum ViewMode { grid, list }
+
 enum SortMode { name, date, type }
 
 class LocalScreen extends StatefulWidget {
   const LocalScreen({super.key});
 
   @override
-  State<LocalScreen> createState() => _LocalScreenState();
+  State<LocalScreen> createState() => LocalScreenState();
 }
 
-class _LocalScreenState extends State<LocalScreen> {
+class LocalScreenState extends State<LocalScreen> {
   // `currentFolderPath` keeps track of the subfolder the user is currently viewing.
   // If null, it means the user is at the root of the `externalPath`.
   String? currentFolderPath;
@@ -74,7 +79,10 @@ class _LocalScreenState extends State<LocalScreen> {
   }
 
   Future<void> _initialize() async {
+      final localProvider = LocalProvider();
     final provider = Provider.of<LocalProvider>(context, listen: false);
+      await localProvider.setDefaultPathIfNoneSet(); 
+
     // Determine a sensible default grid size based on platform
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       _gridCrossAxisCount = 4.0;
@@ -98,7 +106,7 @@ class _LocalScreenState extends State<LocalScreen> {
     } else {
       // User cancelled path selection when no path was previously set.
       // Optionally, show a message or keep the app in an empty state.
-      _showSnackBar('No folder selected. Please select a folder to start.');
+      showSnackBar('No folder selected. Please select a folder to start.');
     }
   }
 
@@ -125,7 +133,7 @@ class _LocalScreenState extends State<LocalScreen> {
 
     // If currently at the very root (currentFolderPath is null or matches rootPath), can't go higher
     if (currentFolderPath == null || p.equals(currentFolderPath!, rootPath)) {
-      _showSnackBar('Already at the root directory.');
+      showSnackBar('Already at the root directory.');
       return;
     }
 
@@ -135,7 +143,8 @@ class _LocalScreenState extends State<LocalScreen> {
     // Use path package for reliable comparison: if parent is the root, go to root view
     if (p.equals(parentDir.path, rootPath)) {
       setState(() {
-        currentFolderPath = null; // Reset to null to signify viewing the root externalPath
+        currentFolderPath =
+            null; // Reset to null to signify viewing the root externalPath
       });
       provider.refresh(rootPath); // Refresh with root path
     } else {
@@ -162,19 +171,26 @@ class _LocalScreenState extends State<LocalScreen> {
           comparison = a.name.toLowerCase().compareTo(b.name.toLowerCase());
           break;
         case SortMode.date:
-        // For date, newer comes first if descending, older comes first if ascending
-          comparison = b.entity.statSync().modified.compareTo(a.entity.statSync().modified);
+          // For date, newer comes first if descending, older comes first if ascending
+          comparison = b.entity
+              .statSync()
+              .modified
+              .compareTo(a.entity.statSync().modified);
           break;
         case SortMode.type:
-        // Sort folders first, then files by type, then by name
+          // Sort folders first, then files by type, then by name
           if (a.isFolder && !b.isFolder) {
             comparison = -1; // 'a' (folder) comes before 'b' (file)
           } else if (!a.isFolder && b.isFolder) {
             comparison = 1; // 'a' (file) comes after 'b' (folder)
           } else {
             // Both are files or both are folders; sort by file extension then by name
-            String typeA = a.isFolder ? 'folder' : p.extension(a.entity.path).toLowerCase();
-            String typeB = b.isFolder ? 'folder' : p.extension(b.entity.path).toLowerCase();
+            String typeA = a.isFolder
+                ? 'folder'
+                : p.extension(a.entity.path).toLowerCase();
+            String typeB = b.isFolder
+                ? 'folder'
+                : p.extension(b.entity.path).toLowerCase();
             comparison = typeA.compareTo(typeB);
             if (comparison == 0) {
               comparison = a.name.toLowerCase().compareTo(b.name.toLowerCase());
@@ -182,7 +198,9 @@ class _LocalScreenState extends State<LocalScreen> {
           }
           break;
       }
-      return _sortAscending ? comparison : -comparison; // Apply ascending/descending order
+      return _sortAscending
+          ? comparison
+          : -comparison; // Apply ascending/descending order
     });
 
     return items;
@@ -253,21 +271,32 @@ class _LocalScreenState extends State<LocalScreen> {
           appBar: AppBar(
             title: Text(currentDirName, overflow: TextOverflow.ellipsis),
             // Show back button if not at the root of the external path
-            leading: (currentFolderPath != null && !p.equals(currentFolderPath!, provider.externalPath!)) ||
-                    (currentFolderPath == null && provider.externalPath != null && Directory(provider.externalPath!).parent.path != provider.externalPath!)
-                ? IconButton(icon: const Icon(Icons.arrow_back), onPressed: _goUp)
+            leading: (currentFolderPath != null &&
+                        !p.equals(
+                            currentFolderPath!, provider.externalPath!)) ||
+                    (currentFolderPath == null &&
+                        provider.externalPath != null &&
+                        Directory(provider.externalPath!).parent.path !=
+                            provider.externalPath!)
+                ? IconButton(
+                    icon: const Icon(Icons.arrow_back), onPressed: _goUp)
                 : null,
-                flexibleSpace: IconButton(icon: const Icon(Icons.home_sharp), onPressed: () {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) =>  AppKeeper()),
-    );
-  }),
+            flexibleSpace: IconButton(
+                icon: const Icon(Icons.home_sharp),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => AppKeeper()),
+                  );
+                }),
             actions: [
               // --- View Mode Toggle ---
               IconButton(
-                icon: Icon(_viewMode == ViewMode.grid ? Icons.view_list : Icons.grid_view),
+                icon: Icon(_viewMode == ViewMode.grid
+                    ? Icons.view_list
+                    : Icons.grid_view),
                 tooltip: "Toggle View",
-                onPressed: () => setState(() => _viewMode = _viewMode == ViewMode.grid ? ViewMode.list : ViewMode.grid),
+                onPressed: () => setState(() => _viewMode =
+                    _viewMode == ViewMode.grid ? ViewMode.list : ViewMode.grid),
               ),
               // --- Size Adjustment Button (only shown in grid view) ---
               if (_viewMode == ViewMode.grid)
@@ -293,9 +322,12 @@ class _LocalScreenState extends State<LocalScreen> {
                   }
                 },
                 itemBuilder: (context) => const [
-                  PopupMenuItem(value: SortMode.type, child: Text("Sort by Type")),
-                  PopupMenuItem(value: SortMode.name, child: Text("Sort by Name")),
-                  PopupMenuItem(value: SortMode.date, child: Text("Sort by Date")),
+                  PopupMenuItem(
+                      value: SortMode.type, child: Text("Sort by Type")),
+                  PopupMenuItem(
+                      value: SortMode.name, child: Text("Sort by Name")),
+                  PopupMenuItem(
+                      value: SortMode.date, child: Text("Sort by Date")),
                 ],
               ),
               // --- Change Root Folder Button ---
@@ -321,16 +353,16 @@ class _LocalScreenState extends State<LocalScreen> {
                 icon: const Icon(Icons.delete_sweep),
                 tooltip: "Clear All Thumbnail Cache",
                 onPressed: () async {
-                  final confirmed = await _showConfirmationDialog(
+                  final confirmed = await showConfirmationDialog(
                     'Clear Cache',
                     'Are you sure you want to clear all generated thumbnail cache files?',
                   );
                   if (confirmed == true) {
                     final success = await provider.clearAllThumbnailsCache();
                     if (success) {
-                      _showSnackBar('Thumbnail cache cleared successfully.');
+                      showSnackBar('Thumbnail cache cleared successfully.');
                     } else {
-                      _showSnackBar('Failed to clear thumbnail cache.');
+                      showSnackBar('Failed to clear thumbnail cache.');
                     }
                   }
                 },
@@ -365,7 +397,8 @@ class _LocalScreenState extends State<LocalScreen> {
       padding: const EdgeInsets.all(16.0),
       itemCount: items.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: _gridCrossAxisCount.toInt(), // Uses the adjustable column count
+        crossAxisCount:
+            _gridCrossAxisCount.toInt(), // Uses the adjustable column count
         mainAxisSpacing: 16,
         crossAxisSpacing: 16,
         childAspectRatio: aspectRatio, // Dynamic aspect ratio
@@ -387,8 +420,10 @@ class _LocalScreenState extends State<LocalScreen> {
       itemBuilder: (context, index) {
         final item = items[index];
         return item.isFolder
-            ? _buildFolderListItem(item.entity as Directory) // Build a folder list item
-            : _buildFileListItem(item.entity as File); // Build a generic file list item
+            ? _buildFolderListItem(
+                item.entity as Directory) // Build a folder list item
+            : _buildFileListItem(
+                item.entity as File); // Build a generic file list item
       },
     );
   }
@@ -419,7 +454,8 @@ class _LocalScreenState extends State<LocalScreen> {
   Widget _buildFolderTile(Directory folder) {
     return InkWell(
       onTap: () => _openFolder(folder.path), // Tapping opens the folder
-      onLongPress: () => _showFolderContextMenu(folder), // Long press shows context menu
+      onLongPress: () =>
+          _showFolderContextMenu(folder), // Long press shows context menu
       borderRadius: BorderRadius.circular(12),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -447,7 +483,8 @@ class _LocalScreenState extends State<LocalScreen> {
     final provider = Provider.of<LocalProvider>(context, listen: false);
     return InkWell(
       onTap: () => _handleFileTap(file, provider), // Tap for opening/viewing
-      onLongPress: () => _showFileContextMenu(file), // Long press for context menu
+      onLongPress: () =>
+          _showFileContextMenu(file), // Long press for context menu
       borderRadius: BorderRadius.circular(12),
       child: Card(
         clipBehavior: Clip.antiAlias,
@@ -458,7 +495,8 @@ class _LocalScreenState extends State<LocalScreen> {
           children: [
             Expanded(
               flex: 3,
-              child: _buildThumbnailOrIcon(file, provider), // Re-usable thumbnail/icon widget
+              child: _buildThumbnailOrIcon(
+                  file, provider), // Re-usable thumbnail/icon widget
             ),
             Expanded(
               flex: 2,
@@ -466,7 +504,8 @@ class _LocalScreenState extends State<LocalScreen> {
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
                   p.basename(file.path), // Display only the filename
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 13),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -486,7 +525,8 @@ class _LocalScreenState extends State<LocalScreen> {
       child: ListTile(
         leading: const Icon(Icons.folder, color: Colors.amber, size: 40),
         title: Text(p.basename(folder.path)), // Display folder name
-        subtitle: Text("Modified: ${folder.statSync().modified.toLocal().toString().split('.')[0]}"), // Display modification date
+        subtitle: Text(
+            "Modified: ${folder.statSync().modified.toLocal().toString().split('.')[0]}"), // Display modification date
         onTap: () => _openFolder(folder.path),
         onLongPress: () => _showFolderContextMenu(folder),
       ),
@@ -502,7 +542,8 @@ class _LocalScreenState extends State<LocalScreen> {
         leading: SizedBox(
           width: 80,
           height: 50,
-          child: _buildThumbnailOrIcon(file, provider), // Re-usable thumbnail/icon widget
+          child: _buildThumbnailOrIcon(
+              file, provider), // Re-usable thumbnail/icon widget
         ),
         title: Text(
           p.basename(file.path), // Display filename
@@ -542,8 +583,10 @@ class _LocalScreenState extends State<LocalScreen> {
     }
 
     // Only attempt to get thumbnail for media files that support it in LocalProvider
-    bool canGetThumbnail = provider.isMovieFile(file) || provider.isImageFile(file);
-
+    bool canGetThumbnail = provider.isMovieFile(file) ||
+        provider.isImageFile(file) ||
+        provider.isAudioFile(file) ||
+        provider.isTextFile(file);
     if (!canGetThumbnail) {
       // If thumbnail cannot/should not be generated, just show the default icon
       return Container(
@@ -559,14 +602,16 @@ class _LocalScreenState extends State<LocalScreen> {
       future: provider.getThumbnail(file.path),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(strokeWidth: 2.0));
+          return const Center(
+              child: CircularProgressIndicator(strokeWidth: 2.0));
         }
         if (snapshot.hasData && snapshot.data != null) {
           // If thumbnail data is available, display it
           return Image.memory(
             snapshot.data!,
             fit: BoxFit.cover,
-            gaplessPlayback: true, // Prevents flicker on hot reload/state change
+            gaplessPlayback:
+                true, // Prevents flicker on hot reload/state change
             errorBuilder: (context, error, stackTrace) {
               // Fallback if image data cannot be decoded or displayed
               return Container(
@@ -595,67 +640,77 @@ class _LocalScreenState extends State<LocalScreen> {
     try {
       if (provider.isMovieFile(file)) {
         // For movies: Try to open with VLC (assuming it's in system PATH)
-        await Process.run('vlc', [file.path]);
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) => VideoPlayerScreen(pathlocal: file.path)));
       } else if (provider.isImageFile(file)) {
         // For images: Show in a simple dialog viewer
         _showImageDialog(file);
       } else if (provider.isAudioFile(file)) {
-        // For audio: Try to open with default system audio player
-        if (Platform.isWindows) {
-          await Process.run('cmd', ['/c', 'start', '', file.path], runInShell: true);
-        } else if (Platform.isLinux) {
-          await Process.run('xdg-open', [file.path]);
-        } else if (Platform.isMacOS) {
-          await Process.run('open', [file.path]);
-        } else {
-          _showSnackBar('No default audio player configured for this platform.');
-        }
+        final bytes = await file.readAsBytes(); // file is a File object
+await player.play(BytesSource(bytes));
+
+      
       } else if (provider.isTextFile(file)) {
         // For text files: Open content for viewing/editing
         _showDocumentContentDialog(file, provider);
       } else {
-        _showSnackBar('No specific handler for this file type.');
+        showSnackBar('No specific handler for this file type.');
       }
     } catch (e) {
-      _showSnackBar('Could not open file: ${p.basename(file.path)} - $e');
+      showSnackBar('Could not open file: ${p.basename(file.path)} - $e');
       if (kDebugMode) print('Error opening file: $e');
     }
   }
 
   // 6. Process Photo: Show image in a dialog
   void _showImageDialog(File imageFile) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(p.basename(imageFile.path)),
-        content: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.7, // Limit max height
-            maxWidth: MediaQuery.of(context).size.width * 0.7, // Limit max width
-          ),
-          child: Image.file(imageFile, fit: BoxFit.contain), // Display image, fitting within bounds
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
-          ),
-        ],
+    SwipeImageGallery(context: context, children: [
+      Image.file(imageFile, fit: BoxFit.contain),
+      Photoeditor(
+        imageFile,
+        currentFolderPath,
       ),
-    );
+     
+      
+    ]).show();
+    // showDialog(
+    //   context: context,
+    //   builder: (context) => AlertDialog(
+    //     title: Text(p.basename(imageFile.path)),
+    //     content: ConstrainedBox(
+    //       constraints: BoxConstraints(
+    //         maxHeight: MediaQuery.of(context).size.height * 0.7, // Limit max height
+    //         maxWidth: MediaQuery.of(context).size.width * 0.7, // Limit max width
+    //       ),
+    //       child:  // Display image, fitting within bounds
+    //     ),
+    //     actions: [
+    //       TextButton(
+    //         onPressed: () => Navigator.of(context).pop(),
+    //         child: const Text('Close'),
+    //       ),
+    //     ],
+    //   ),
+    // );
   }
 
   // 8. Process and Parse Content of Documents to view/edit
-  Future<void> _showDocumentContentDialog(File documentFile, LocalProvider provider) async {
+  Future<void> _showDocumentContentDialog(
+      File documentFile, LocalProvider provider) async {
     // Attempt to read content from the file
-    String? initialContent = await provider.getDocumentContent(documentFile.path);
+    String? initialContent =
+        await provider.getDocumentContent(documentFile.path);
 
     if (initialContent == null) {
-      _showSnackBar('Failed to read document content. It might be a binary or unsupported file type.');
+      showSnackBar(
+          'Failed to read document content. It might be a binary or unsupported file type.');
       return;
     }
 
-    TextEditingController contentController = TextEditingController(text: initialContent);
+    TextEditingController contentController =
+        TextEditingController(text: initialContent);
 
     // Show a dialog to view/edit the document content
     showDialog(
@@ -664,8 +719,10 @@ class _LocalScreenState extends State<LocalScreen> {
         return AlertDialog(
           title: Text('Edit: ${p.basename(documentFile.path)}'),
           content: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.8, // Make content wider
-            height: MediaQuery.of(context).size.height * 0.6, // Make content taller
+            width:
+                MediaQuery.of(context).size.width * 0.8, // Make content wider
+            height:
+                MediaQuery.of(context).size.height * 0.6, // Make content taller
             child: TextField(
               controller: contentController,
               maxLines: null, // Allow unlimited lines
@@ -685,12 +742,13 @@ class _LocalScreenState extends State<LocalScreen> {
               onPressed: () async {
                 final String newContent = contentController.text;
                 // Save changes to the original file
-                final bool success = await provider.saveDocumentContent(documentFile.path, newContent);
+                final bool success = await provider.saveDocumentContent(
+                    documentFile.path, newContent);
                 if (success) {
-                  _showSnackBar('File saved successfully.');
+                  showSnackBar('File saved successfully.');
                   Navigator.of(context).pop(); // Close dialog on success
                 } else {
-                  _showSnackBar('Failed to save file.');
+                  showSnackBar('Failed to save file.');
                 }
               },
               child: const Text('Save'),
@@ -704,14 +762,16 @@ class _LocalScreenState extends State<LocalScreen> {
                   p.basename(documentFile.path), // Pre-fill with current name
                 );
                 if (newFileName != null && newFileName.isNotEmpty) {
-                  final String newFilePath = p.join(p.dirname(documentFile.path), newFileName);
+                  final String newFilePath =
+                      p.join(p.dirname(documentFile.path), newFileName);
                   // Save content to a new file
-                  final bool success = await provider.saveDocumentContentAs(newFilePath, contentController.text);
+                  final bool success = await provider.saveDocumentContentAs(
+                      newFilePath, contentController.text);
                   if (success) {
-                    _showSnackBar('File saved as $newFileName successfully.');
+                    showSnackBar('File saved as $newFileName successfully.');
                     Navigator.of(context).pop(); // Close dialog on success
                   } else {
-                    _showSnackBar('Failed to save file as $newFileName.');
+                    showSnackBar('Failed to save file as $newFileName.');
                   }
                 }
               },
@@ -730,14 +790,16 @@ class _LocalScreenState extends State<LocalScreen> {
     showModalBottomSheet(
       context: context,
       builder: (context) {
-        final provider = Provider.of<LocalProvider>(context, listen: false); // Provider not listening here
+        final provider = Provider.of<LocalProvider>(context,
+            listen: false); // Provider not listening here
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min, // Wrap content height
             children: <Widget>[
               // Header displaying file name
               ListTile(
-                title: Text(p.basename(file.path), style: const TextStyle(fontWeight: FontWeight.bold)),
+                title: Text(p.basename(file.path),
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
                 subtitle: Text(file.path),
               ),
               const Divider(),
@@ -754,7 +816,7 @@ class _LocalScreenState extends State<LocalScreen> {
                 title: const Text('Copy'),
                 onTap: () {
                   Navigator.pop(context);
-                  _copyFile(file, provider); // Call copy logic
+                  copyFile(file, provider); // Call copy logic
                 },
               ),
               ListTile(
@@ -780,7 +842,8 @@ class _LocalScreenState extends State<LocalScreen> {
                   title: const Text('Edit Content'),
                   onTap: () {
                     Navigator.pop(context);
-                    _showDocumentContentDialog(file, provider); // Open document editor
+                    _showDocumentContentDialog(
+                        file, provider); // Open document editor
                   },
                 ),
             ],
@@ -802,7 +865,8 @@ class _LocalScreenState extends State<LocalScreen> {
             children: <Widget>[
               // Header displaying folder name
               ListTile(
-                title: Text(p.basename(folder.path), style: const TextStyle(fontWeight: FontWeight.bold)),
+                title: Text(p.basename(folder.path),
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
                 subtitle: Text(folder.path),
               ),
               const Divider(),
@@ -843,7 +907,8 @@ class _LocalScreenState extends State<LocalScreen> {
                 title: const Text('Create New Folder Here'),
                 onTap: () {
                   Navigator.pop(context);
-                  _createNewFolder(folder, provider); // Call new folder creation logic
+                  _createNewFolder(
+                      folder, provider); // Call new folder creation logic
                 },
               ),
             ],
@@ -866,9 +931,9 @@ class _LocalScreenState extends State<LocalScreen> {
     if (newName != null && newName.isNotEmpty && newName != oldName) {
       final bool success = await provider.renameFile(file.path, newName);
       if (success) {
-        _showSnackBar('File renamed to "$newName"');
+        showSnackBar('File renamed to "$newName"');
       } else {
-        _showSnackBar('Failed to rename file.');
+        showSnackBar('Failed to rename file.');
       }
     }
   }
@@ -886,9 +951,9 @@ class _LocalScreenState extends State<LocalScreen> {
       final newPath = p.join(p.dirname(folder.path), newName);
       final bool success = await provider.moveDirectory(folder.path, newPath);
       if (success) {
-        _showSnackBar('Folder renamed to "$newName"');
+        showSnackBar('Folder renamed to "$newName"');
       } else {
-        _showSnackBar('Failed to rename folder.');
+        showSnackBar('Failed to rename folder.');
       }
     }
   }
@@ -908,14 +973,17 @@ class _LocalScreenState extends State<LocalScreen> {
             children: [
               TextField(
                 controller: prefixController,
-                decoration: const InputDecoration(labelText: 'Prefix (optional)'),
+                decoration:
+                    const InputDecoration(labelText: 'Prefix (optional)'),
               ),
               TextField(
                 controller: postfixController,
-                decoration: const InputDecoration(labelText: 'Postfix (optional)'),
+                decoration:
+                    const InputDecoration(labelText: 'Postfix (optional)'),
               ),
               const SizedBox(height: 10),
-              const Text('Files will be renamed as: prefix + index + postfix + .extension'),
+              const Text(
+                  'Files will be renamed as: prefix + index + postfix + .extension'),
               const Text('Example: photo_1.jpg, photo_2.jpg'),
             ],
           ),
@@ -928,13 +996,14 @@ class _LocalScreenState extends State<LocalScreen> {
               onPressed: () async {
                 Navigator.pop(context); // Close dialog first
                 // Use currentFolderPath for batch rename target
-                final String targetPath = currentFolderPath ?? provider.externalPath!;
+                final String targetPath =
+                    currentFolderPath ?? provider.externalPath!;
                 if (targetPath.isEmpty) {
-                  _showSnackBar('No directory selected for batch rename.');
+                  showSnackBar('No directory selected for batch rename.');
                   return;
                 }
 
-                final bool? confirmed = await _showConfirmationDialog(
+                final bool? confirmed = await showConfirmationDialog(
                   'Confirm Batch Rename',
                   'Are you sure you want to batch rename all files in \n"$targetPath"?\nThis action cannot be easily undone.',
                 );
@@ -942,13 +1011,17 @@ class _LocalScreenState extends State<LocalScreen> {
                 if (confirmed == true) {
                   final bool success = await provider.renameFilesInPath(
                     targetPath,
-                    prefix: prefixController.text.isEmpty ? null : prefixController.text,
-                    postfix: postfixController.text.isEmpty ? null : postfixController.text,
+                    prefix: prefixController.text.isEmpty
+                        ? null
+                        : prefixController.text,
+                    postfix: postfixController.text.isEmpty
+                        ? null
+                        : postfixController.text,
                   );
                   if (success) {
-                    _showSnackBar('Batch rename completed.');
+                    showSnackBar('Batch rename completed.');
                   } else {
-                    _showSnackBar('Batch rename failed.');
+                    showSnackBar('Batch rename failed.');
                   }
                 }
               },
@@ -964,36 +1037,37 @@ class _LocalScreenState extends State<LocalScreen> {
 
   /// Handles deleting a single file after confirmation.
   Future<void> _deleteFile(File file, LocalProvider provider) async {
-    final confirmed = await _showConfirmationDialog(
+    final confirmed = await showConfirmationDialog(
       'Delete File',
       'Are you sure you want to delete "${p.basename(file.path)}"? This cannot be undone.',
     );
     if (confirmed == true) {
       final bool success = await provider.deleteFile(file.path);
       if (success) {
-        _showSnackBar('File deleted successfully.');
+        showSnackBar('File deleted successfully.');
       } else {
-        _showSnackBar('Failed to delete file.');
+        showSnackBar('Failed to delete file.');
       }
     }
   }
 
   /// Handles deleting a folder after confirmation.
   Future<void> _deleteFolder(Directory folder, LocalProvider provider) async {
-    final confirmed = await _showConfirmationDialog(
+    final confirmed = await showConfirmationDialog(
       'Delete Folder',
       'Are you sure you want to delete folder "${p.basename(folder.path)}"? All its contents will be lost. This cannot be undone.',
     );
     if (confirmed == true) {
       final bool success = await provider.deleteFolder(folder.path);
       if (success) {
-        _showSnackBar('Folder deleted successfully.');
+        showSnackBar('Folder deleted successfully.');
         // If the deleted folder was the current view, navigate up
-        if (p.equals(folder.path, currentFolderPath ?? provider.externalPath!)) {
+        if (p.equals(
+            folder.path, currentFolderPath ?? provider.externalPath!)) {
           _goUp();
         }
       } else {
-        _showSnackBar('Failed to delete folder.');
+        showSnackBar('Failed to delete folder.');
       }
     }
   }
@@ -1001,8 +1075,8 @@ class _LocalScreenState extends State<LocalScreen> {
   // --- NEW: Copy Operations ---
 
   /// Handles copying a file to a new location selected by the user.
-  Future<void> _copyFile(File file, LocalProvider provider) async {
-    final String? destinationPath = await _showPathSelectionDialog(
+  Future<void> copyFile(File file, LocalProvider provider) async {
+    final String? destinationPath = await showPathSelectionDialog(
       'Copy "${p.basename(file.path)}" to',
       currentFolderPath, // Suggest current folder as initial destination
     );
@@ -1010,10 +1084,10 @@ class _LocalScreenState extends State<LocalScreen> {
       final newFilePath = p.join(destinationPath, p.basename(file.path));
       // Check if file exists at destination
       if (await File(newFilePath).exists()) {
-        final overwriteConfirmed = await _showConfirmationDialog(
-            'File Exists', 'A file with the same name already exists in the destination. Overwrite?');
+        final overwriteConfirmed = await showConfirmationDialog('File Exists',
+            'A file with the same name already exists in the destination. Overwrite?');
         if (overwriteConfirmed != true) {
-          _showSnackBar('Copy cancelled: File already exists.');
+          showSnackBar('Copy cancelled: File already exists.');
           return;
         }
         await File(newFilePath).delete(); // Delete existing file before copying
@@ -1021,16 +1095,16 @@ class _LocalScreenState extends State<LocalScreen> {
 
       final bool success = await provider.copyFile(file.path, newFilePath);
       if (success) {
-        _showSnackBar('File copied successfully.');
+        showSnackBar('File copied successfully.');
       } else {
-        _showSnackBar('Failed to copy file.');
+        showSnackBar('Failed to copy file.');
       }
     }
   }
 
   /// Handles copying a folder to a new location selected by the user.
   Future<void> _copyFolder(Directory folder, LocalProvider provider) async {
-    final String? destinationPath = await _showPathSelectionDialog(
+    final String? destinationPath = await showPathSelectionDialog(
       'Copy folder "${p.basename(folder.path)}" to',
       currentFolderPath, // Suggest current folder as initial destination
     );
@@ -1038,19 +1112,21 @@ class _LocalScreenState extends State<LocalScreen> {
       final newDirPath = p.join(destinationPath, p.basename(folder.path));
       // Check if folder exists at destination
       if (await Directory(newDirPath).exists()) {
-        final overwriteConfirmed = await _showConfirmationDialog(
-            'Folder Exists', 'A folder with the same name already exists in the destination. Overwrite (merge/replace contents)?');
+        final overwriteConfirmed = await showConfirmationDialog('Folder Exists',
+            'A folder with the same name already exists in the destination. Overwrite (merge/replace contents)?');
         if (overwriteConfirmed != true) {
-          _showSnackBar('Copy cancelled: Folder already exists.');
+          showSnackBar('Copy cancelled: Folder already exists.');
           return;
         }
-        await Directory(newDirPath).delete(recursive: true); // Delete existing folder recursively
+        await Directory(newDirPath)
+            .delete(recursive: true); // Delete existing folder recursively
       }
-      final bool success = await provider.copyDirectory(folder.path, newDirPath);
+      final bool success =
+          await provider.copyDirectory(folder.path, newDirPath);
       if (success) {
-        _showSnackBar('Folder copied successfully.');
+        showSnackBar('Folder copied successfully.');
       } else {
-        _showSnackBar('Failed to copy folder.');
+        showSnackBar('Failed to copy folder.');
       }
     }
   }
@@ -1059,7 +1135,7 @@ class _LocalScreenState extends State<LocalScreen> {
 
   /// Handles moving a file to a new location selected by the user.
   Future<void> _moveFile(File file, LocalProvider provider) async {
-    final String? destinationPath = await _showPathSelectionDialog(
+    final String? destinationPath = await showPathSelectionDialog(
       'Move "${p.basename(file.path)}" to',
       currentFolderPath, // Suggest current folder as initial destination
     );
@@ -1067,26 +1143,26 @@ class _LocalScreenState extends State<LocalScreen> {
       final newFilePath = p.join(destinationPath, p.basename(file.path));
       // Check if file exists at destination
       if (await File(newFilePath).exists()) {
-        final overwriteConfirmed = await _showConfirmationDialog(
-            'File Exists', 'A file with the same name already exists in the destination. Overwrite?');
+        final overwriteConfirmed = await showConfirmationDialog('File Exists',
+            'A file with the same name already exists in the destination. Overwrite?');
         if (overwriteConfirmed != true) {
-          _showSnackBar('Move cancelled: File already exists.');
+          showSnackBar('Move cancelled: File already exists.');
           return;
         }
         await File(newFilePath).delete(); // Delete existing file before moving
       }
       final bool success = await provider.moveFile(file.path, newFilePath);
       if (success) {
-        _showSnackBar('File moved successfully.');
+        showSnackBar('File moved successfully.');
       } else {
-        _showSnackBar('Failed to move file.');
+        showSnackBar('Failed to move file.');
       }
     }
   }
 
   /// Handles moving a folder to a new location selected by the user.
   Future<void> _moveFolder(Directory folder, LocalProvider provider) async {
-    final String? destinationPath = await _showPathSelectionDialog(
+    final String? destinationPath = await showPathSelectionDialog(
       'Move folder "${p.basename(folder.path)}" to',
       currentFolderPath, // Suggest current folder as initial destination
     );
@@ -1094,29 +1170,33 @@ class _LocalScreenState extends State<LocalScreen> {
       final newDirPath = p.join(destinationPath, p.basename(folder.path));
       // Check if folder exists at destination
       if (await Directory(newDirPath).exists()) {
-        final overwriteConfirmed = await _showConfirmationDialog(
-            'Folder Exists', 'A folder with the same name already exists in the destination. Overwrite (merge/replace contents)?');
+        final overwriteConfirmed = await showConfirmationDialog('Folder Exists',
+            'A folder with the same name already exists in the destination. Overwrite (merge/replace contents)?');
         if (overwriteConfirmed != true) {
-          _showSnackBar('Move cancelled: Folder already exists.');
+          showSnackBar('Move cancelled: Folder already exists.');
           return;
         }
-        await Directory(newDirPath).delete(recursive: true); // Delete existing folder recursively
+        await Directory(newDirPath)
+            .delete(recursive: true); // Delete existing folder recursively
       }
-      final bool success = await provider.moveDirectory(folder.path, newDirPath);
+      final bool success =
+          await provider.moveDirectory(folder.path, newDirPath);
       if (success) {
-        _showSnackBar('Folder moved successfully.');
+        showSnackBar('Folder moved successfully.');
         // If the moved folder was the current view, navigate up
-        if (p.equals(folder.path, currentFolderPath ?? provider.externalPath!)) {
+        if (p.equals(
+            folder.path, currentFolderPath ?? provider.externalPath!)) {
           _goUp();
         }
       } else {
-        _showSnackBar('Failed to move folder.');
+        showSnackBar('Failed to move folder.');
       }
     }
   }
 
   /// Handles creating a new folder in the specified parent folder.
-  Future<void> _createNewFolder(Directory parentFolder, LocalProvider provider) async {
+  Future<void> _createNewFolder(
+      Directory parentFolder, LocalProvider provider) async {
     final String? folderName = await _showInputDialog(
       'Create New Folder',
       'Enter new folder name (e.g., New folder):',
@@ -1134,11 +1214,13 @@ class _LocalScreenState extends State<LocalScreen> {
       // If NOT updated, you might need:
       // final bool success = await Directory(p.join(currentFolderPath ?? provider.externalPath!, folderName)).create(recursive:true).then((_) => true).catchError((_) => false);
       // OR pass the FULL PATH to the provider method if it takes a full path:
-      final bool success = await provider.createFolder(fullNewFolderPath); // Assuming updated provider method
+      final bool success = await provider
+          .createFolder(fullNewFolderPath); // Assuming updated provider method
       if (success) {
-        _showSnackBar('Folder "$folderName" created.');
+        showSnackBar('Folder "$folderName" created.');
       } else {
-        _showSnackBar('Failed to create folder. It might already exist or permissions are an issue.');
+        showSnackBar(
+            'Failed to create folder. It might already exist or permissions are an issue.');
       }
     }
   }
@@ -1146,8 +1228,10 @@ class _LocalScreenState extends State<LocalScreen> {
   // --- Generic Dialog Helpers ---
 
   /// Shows a general input dialog and returns the entered string.
-  Future<String?> _showInputDialog(String title, String message, [String? initialValue]) async {
-    final TextEditingController controller = TextEditingController(text: initialValue);
+  Future<String?> _showInputDialog(String title, String message,
+      [String? initialValue]) async {
+    final TextEditingController controller =
+        TextEditingController(text: initialValue);
     return showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
@@ -1156,15 +1240,18 @@ class _LocalScreenState extends State<LocalScreen> {
           controller: controller,
           decoration: InputDecoration(hintText: message),
           autofocus: true, // Automatically focus the text field
-          onSubmitted: (value) => Navigator.of(context).pop(value), // Submit on Enter key
+          onSubmitted: (value) =>
+              Navigator.of(context).pop(value), // Submit on Enter key
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(), // Pop with null on Cancel
+            onPressed: () =>
+                Navigator.of(context).pop(), // Pop with null on Cancel
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(controller.text), // Pop with text on OK
+            onPressed: () => Navigator.of(context)
+                .pop(controller.text), // Pop with text on OK
             child: const Text('OK'),
           ),
         ],
@@ -1173,7 +1260,7 @@ class _LocalScreenState extends State<LocalScreen> {
   }
 
   /// Shows a confirmation dialog and returns true if confirmed, false otherwise.
-  Future<bool?> _showConfirmationDialog(String title, String message) async {
+  Future<bool?> showConfirmationDialog(String title, String message) async {
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -1194,13 +1281,16 @@ class _LocalScreenState extends State<LocalScreen> {
   }
 
   /// Shows a dialog to select a path, optionally with a file picker button.
-  Future<String?> _showPathSelectionDialog(String title, String? initialPath) async {
-    final TextEditingController controller = TextEditingController(text: initialPath ?? p.current);
+  Future<String?> showPathSelectionDialog(
+      String title, String? initialPath) async {
+    final TextEditingController controller =
+        TextEditingController(text: initialPath ?? p.current);
 
     return showDialog<String>(
       context: context,
       builder: (context) {
-        return StatefulBuilder( // Use StatefulBuilder for changes within the dialog
+        return StatefulBuilder(
+          // Use StatefulBuilder for changes within the dialog
           builder: (context, setStateInDialog) {
             return AlertDialog(
               title: Text(title),
@@ -1209,17 +1299,21 @@ class _LocalScreenState extends State<LocalScreen> {
                 children: [
                   TextField(
                     controller: controller,
-                    decoration: const InputDecoration(labelText: 'Destination Path'),
-                    readOnly: true, // Make it read-only to force using the browse button
+                    decoration:
+                        const InputDecoration(labelText: 'Destination Path'),
+                    readOnly:
+                        true, // Make it read-only to force using the browse button
                   ),
                   const SizedBox(height: 10),
                   ElevatedButton.icon(
                     icon: const Icon(Icons.folder_open),
                     label: const Text('Browse'),
                     onPressed: () async {
-                      final selectedDirectory = await FilePicker.platform.getDirectoryPath();
+                      final selectedDirectory =
+                          await FilePicker.platform.getDirectoryPath();
                       if (selectedDirectory != null) {
-                        setStateInDialog(() { // Update dialog's state
+                        setStateInDialog(() {
+                          // Update dialog's state
                           controller.text = selectedDirectory;
                         });
                       }
@@ -1229,16 +1323,19 @@ class _LocalScreenState extends State<LocalScreen> {
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(), // Pop with null on Cancel
+                  onPressed: () =>
+                      Navigator.of(context).pop(), // Pop with null on Cancel
                   child: const Text('Cancel'),
                 ),
                 ElevatedButton(
                   onPressed: () async {
                     // Validate if the chosen path exists before returning
                     if (await Directory(controller.text).exists()) {
-                      Navigator.of(context).pop(controller.text); // Return the selected path
+                      Navigator.of(context)
+                          .pop(controller.text); // Return the selected path
                     } else {
-                      _showSnackBar('Invalid or non-existent path. Please select a valid directory.');
+                      showSnackBar(
+                          'Invalid or non-existent path. Please select a valid directory.');
                     }
                   },
                   child: const Text('Select'),
@@ -1252,8 +1349,10 @@ class _LocalScreenState extends State<LocalScreen> {
   }
 
   /// Displays a SnackBar message at the bottom of the screen.
-  void _showSnackBar(String message) {
-    if (!mounted) return; // Ensure widget is still mounted before showing SnackBar
+  void showSnackBar(String message) {
+    if (!mounted) {
+      return; // Ensure widget is still mounted before showing SnackBar
+    }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),

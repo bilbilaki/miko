@@ -995,13 +995,8 @@ class _CrawlerHomePage3State extends State<CrawlerHomePage3> {
         fileName: '${_fileNameController.text}_fixed.csv',
       );
 
-      if (outputPath == null) {
-        _log("... Task cancelled. No output file selected.");
-        return;
-      }
-
       final newCsv = const ListToCsvConverter().convert(csvTable);
-      await File(outputPath).writeAsString(newCsv);
+      await File(outputPath!).writeAsString(newCsv);
       _log("... ✅ Successfully processed and saved to: $outputPath");
 
       _showSimpleDialog(
