@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:miko/models/tv_series_anime.dart' as ss;
+import 'package:miko/providers/ui_providers.dart';
 import 'package:miko/services/user_data_service.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:provider/provider.dart';
@@ -90,6 +91,8 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   void initState() {
     super.initState();
+    Provider.of<FloatingButtonVisibilityNotifier>(context, listen: false).hide();
+
     currentIndex = widget.initialIndex;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {});
@@ -288,6 +291,8 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   void dispose() {
     _progressSaveTimer?.cancel();
+        Provider.of<FloatingButtonVisibilityNotifier>(context, listen: false).show();
+
     _savePlaybackProgress(); // Save one last time on exit
     player.dispose();
     super.dispose();

@@ -4,12 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:miko/screens/extractor.dart';
 import 'package:miko/screens/grid.dart' as g;
-import 'package:miko/screens/http_main.dart';
 
 import 'package:miko/screens/local_screen.dart';
-import 'package:miko/screens/nethttp.dart';
-import 'package:miko/screens/nethttp2.dart';
-import 'package:miko/screens/test_http.dart';
 import 'package:miko/screens/tmdb_datails_process.dart';
 import 'package:miko/showcases/movie_page_copy.dart';
 import 'package:miko/showcases/tv_page_anime.dart';
@@ -131,7 +127,7 @@ class RightNavigationPanel extends ConsumerWidget {
                 title: 'Creweler',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, CrawlerHomePage1(), isMobileLayout),
+                    _navigateTo(context, TmdbDatailsProcess(), isMobileLayout),
               ),
               _buildNavigationItem(
                 context,
@@ -193,7 +189,7 @@ class RightNavigationPanel extends ConsumerWidget {
                 title: 'Chat Showcase',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, CrawlerHomePage4(), isMobileLayout),
+                    _navigateTo(context, TmdbDatailsProcess(), isMobileLayout),
               ),
               _buildNavigationItem(
                 context,
@@ -202,7 +198,7 @@ class RightNavigationPanel extends ConsumerWidget {
                 title: 'NewCrewler',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, CrawlerHomePage2(), isMobileLayout),
+                    _navigateTo(context, TmdbDatailsProcess(), isMobileLayout),
               ),
               _buildNavigationItem(
                 context,
@@ -211,7 +207,7 @@ class RightNavigationPanel extends ConsumerWidget {
                 title: 'Settings',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, CrawlerHomePage4(), isMobileLayout),
+                    _navigateTo(context, TmdbDatailsProcess(), isMobileLayout),
               ),
               _buildNavigationItem(
                 context,
@@ -220,7 +216,7 @@ class RightNavigationPanel extends ConsumerWidget {
                 title: 'Subscription',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, CrawlerHomePage4(), isMobileLayout),
+                    _navigateTo(context, TmdbDatailsProcess(), isMobileLayout),
               ),
               const Divider(color: AppColors.dividerColor, height: 1),
               _buildNavigationItem(
@@ -230,7 +226,7 @@ class RightNavigationPanel extends ConsumerWidget {
                 title: 'Genres',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, CrawlerHomePage3(), isMobileLayout),
+                    _navigateTo(context, TmdbDatailsProcess(), isMobileLayout),
               ),
               _buildNavigationItem(
                 context,
@@ -239,7 +235,7 @@ class RightNavigationPanel extends ConsumerWidget {
                 title: 'Anime',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, CrawlerHomePage4(),isMobileLayout),
+                    _navigateTo(context, TmdbDatailsProcess(),isMobileLayout),
               ),
               _buildNavigationItem(
                 context,
@@ -248,7 +244,7 @@ class RightNavigationPanel extends ConsumerWidget {
                 title: 'TV Series',
                 showText: showText,
                 onTap: () =>
-                    _navigateTo(context, CrawlerHomePage4(), isMobileLayout),
+                    _navigateTo(context, TmdbDatailsProcess(), isMobileLayout),
               ),
               _buildNavigationItem(
                 context,

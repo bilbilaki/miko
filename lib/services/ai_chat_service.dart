@@ -12,7 +12,7 @@ abstract class OpenAIServiceBase {
   late final OpenAIClient client;
 
   OpenAIServiceBase() {
-    final apiKey = "gsk_GB";
+    final apiKey = "";
     client = OpenAIClient(
       apiKey: apiKey,
       baseUrl: 'https://api.groq.com/openai/v1',
@@ -310,13 +310,14 @@ class OpenAIMultiModalService extends OpenAIServiceBase {
   }
 }
 
+
 Future<Map<String, dynamic>> _getCurrentWeather(String location) async {
   try {
-    final String ddgResult = await performWebSearch(location);
+    final Map<String, dynamic> ddgResult = await performWebSearch(location);
     debugPrint("Received DuckDuckGo result");
-    
-    final Map<String, dynamic> weatherData = json.decode(ddgResult);
-    return weatherData;
+
+    // Optionally decode if the result is still in raw JSON, but it's already structured
+    return ddgResult;
   } on FormatException catch (e) {
     debugPrint("JSON decoding failed: $e");
     return {'error': 'Failed to parse weather data'};
@@ -325,6 +326,7 @@ Future<Map<String, dynamic>> _getCurrentWeather(String location) async {
     return {'error': 'Failed to fetch weather data'};
   }
 }
+
 
 class OpenAIToolCallingService extends OpenAIServiceBase {
   final FunctionObject _weatherFunction = const FunctionObject(
@@ -389,7 +391,7 @@ class OpenAIToolCallingService extends OpenAIServiceBase {
         if (toolCall.function.name == _weatherFunction.name) {
           final arguments =
               json.decode(toolCall.function.arguments) as Map<String, dynamic>;
-          final functionResult = _getCurrentWeather(
+          final functionResult = await _getCurrentWeather(
             arguments['query'] as String,
           );
 
@@ -491,7 +493,7 @@ class OpenAIToolCallingService extends OpenAIServiceBase {
           assistantToolCallMessage != null) {
         if (functionName == _weatherFunction.name) {
           yield '\n\n-- Calling tool: $_weatherFunction.name(${jsonEncode(functionArguments)}) --\n\n';
-          final functionResult = _getCurrentWeather(
+          final functionResult = await _getCurrentWeather(
             functionArguments['query'] as String,
           );
 
@@ -702,7 +704,7 @@ class OpenAIStructuredOutputService extends OpenAIServiceBase {
 
 class AIChatService extends ChangeNotifier {
   static const String _openAIApiKey =
-      "gsk_GB";
+      "";
   final List<ChatCompletionMessage> _messages = [];
   String _currentResponse = "Hello! Ask me anything.";
   bool _isLoading = false;
@@ -840,7 +842,7 @@ class AIChatService extends ChangeNotifier {
 
                 _messages.add(ChatCompletionMessage.tool(
                   toolCallId: toolCall.id,
-                  content: toolResult,
+                  content: toolResult.toString(),
                 ));
                 debugPrint("Added tool result to _messages");
               } catch (e) {

@@ -205,9 +205,9 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
           final OpenAIMultiModalService multiModalService = _currentService as OpenAIMultiModalService;
           final String? audioBase64 = await multiModalService.generateAudioResponse(prompt);
           if (audioBase64 != null) {
-            state = state.copyWith(response: state.response + '\n\n-- Audio Response Generated --');
+            state = state.copyWith(response: '${state.response}\n\n-- Audio Response Generated --');
             _audioPlayerService.playBase64Audio(audioBase64, 'wav'); // Assuming WAV, adjust if different
-            state = state.copyWith(response: state.response + '\n(Playing audio...)');
+            state = state.copyWith(response: '${state.response}\n(Playing audio...)');
           }
         }
       }

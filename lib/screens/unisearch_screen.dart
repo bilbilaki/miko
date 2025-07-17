@@ -27,7 +27,7 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
   //final DataManager _dataManager = DataManager();
   Timer? _debounce;
   String _currentQuery = '';
-  bool _isLoading = true;
+  bool _isLoading = false;
 
   late MovieProvider _movieProvider;
   late TvSeriesProvider _tvProvider;
@@ -63,7 +63,7 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
       _isLoading = true;
     });
 
-  //  await _dataManager.ensureDataLoaded();
+    //  await _dataManager.ensureDataLoaded();
 
     if (mounted) {
       setState(() {
@@ -75,7 +75,6 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
   @override
   void dispose() {
     // Clear search state when leaving the screen
-    _clearAllSearches();
     super.dispose();
   }
 
@@ -109,6 +108,7 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
   void _clearInputAndSearch() {
     setState(() {
       _currentQuery = '';
+      _isLoading = false;
     });
     _searchController.clear();
     _clearAllSearches();
@@ -241,14 +241,20 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
 
   Widget _buildItemCard(dynamic item) {
     if (item is tsa.Movie) {
-      return MovieCard(movie: item,typec: "movie",);
+      return MovieCard(
+        movie: item,
+        typec: "movie",
+      );
     }
 
     // else if (item is ts.TvSeries) {
     // return TvSeriesCard(series: item);
     // }
     else if (item is tsa.TvSeriesAnime) {
-      return AnimeSeriesCard(series: item,typec: "anime",);
+      return AnimeSeriesCard(
+        series: item,
+        typec: "anime",
+      );
     } else {
       return const SizedBox.shrink();
     }

@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
+import 'package:miko/widgets/Typing_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:miko/providers/ai_chat_provider.dart'; // Import the new provider
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class AiChatDialog extends ConsumerStatefulWidget {
   const AiChatDialog({super.key});
@@ -15,7 +17,14 @@ class AiChatDialog extends ConsumerStatefulWidget {
 
 class _AiChatDialogState extends ConsumerState<AiChatDialog> {
   final TextEditingController _textEditingController = TextEditingController();
+bool _isLoading = false;
+bool _isThinkingExpanded = false; // To control the expansion of the thinking box
+String _thinkingText = ''; // Holds only the text inside <think> tags
+String _finalAnswerText = ''; // Holds the final response text
 
+// Phase State
+bool _isThinking = false; // Is the model currently in a <think> block?
+bool _isFinished = false; // Has the entire response stream completed?
   @override
   void dispose() {
     _textEditingController.dispose();
@@ -28,6 +37,10 @@ class _AiChatDialogState extends ConsumerState<AiChatDialog> {
         RegExp(r'https?://[^\s/$.?#].[^\s]*', caseSensitive: false);
     final List<TextSpan> textSpans = [];
     int lastMatchEnd = 0;
+    
+
+      // Replace the found tags with an empty string and trim whitespace.
+  
 
     for (final match in urlRegex.allMatches(text)) {
       if (match.start > lastMatchEnd) {
@@ -64,16 +77,18 @@ class _AiChatDialogState extends ConsumerState<AiChatDialog> {
     if (lastMatchEnd < text.length) {
       textSpans.add(TextSpan(text: text.substring(lastMatchEnd)));
     }
-    return GptMarkdown(
-      '''
-${(text.substring(lastMatchEnd))}   
- ''',
-      style: const TextStyle(
-        color: Colors.red,
-
+    return SingleChildScrollView(
+      child: MarkdownBody(
+        data: text, // The string from your AI model
+        selectable: true, // Allows users to copy text
+        styleSheet: MarkdownStyleSheet(
+          // Optional: Customize the look
+          p: TextStyle(color: Colors.white, fontSize: 16),
+          h1: TextStyle(color: Colors.blueAccent, fontSize: 24),
+          listBullet: TextStyle(color: Colors.white),
+          // ... add more styles for h2, code blocks, etc.
+        ),
       ),
-              followLinkColor: true,
-
     );
     // return SelectableText.rich(
     //   TextSpan(
@@ -236,7 +251,11 @@ ${(text.substring(lastMatchEnd))}
                   child: ElevatedButton(
                     onPressed: chatState.isLoading
                         ? null
-                        : () => chatNotifier.sendMessage(stream: false),
+                        : () {
+                            chatNotifier.sendMessage(stream: false);
+                            _textEditingController.clear();
+                            chatNotifier.updatePromptInput('');
+                          },
                     child: const Text('Send'),
                   ),
                 ),
@@ -245,7 +264,11 @@ ${(text.substring(lastMatchEnd))}
                   child: ElevatedButton(
                     onPressed: chatState.isLoading
                         ? null
-                        : () => chatNotifier.sendMessage(stream: true),
+                        : () {
+                            chatNotifier.sendMessage(stream: true);
+                                            _textEditingController.clear();
+                  chatNotifier.updatePromptInput('');
+                          },
                     child: const Text('Stream'),
                   ),
                 ),
@@ -289,4 +312,57 @@ ${(text.substring(lastMatchEnd))}
       ],
     );
   }
+  // In _AiChatDialogState, add this helper method:
+Widget _buildThinkingBox() {
+  return InkWell(
+    onTap: () {
+      setState(() {
+        _isThinkingExpanded = !_isThinkingExpanded;
+      });
+    },
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: _isThinkingExpanded ? Colors.grey.shade800 : Colors.grey.shade900,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade700),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Row
+          Row(
+            children: [
+              Icon(Icons.psychology, color: Colors.tealAccent, size: 20),
+              const SizedBox(width: 8),
+              const Text("AI is thinking"),
+              if (_isLoading) const TypingIndicator(), // Show animated dots
+              const Spacer(),
+              Icon(
+                _isThinkingExpanded ? Icons.expand_less : Icons.expand_more,
+                color: Colors.grey.shade400,
+              ),
+            ],
+          ),
+          // Expandable Content
+          if (_isThinkingExpanded)
+            Padding(
+              padding: const EdgeInsets.only(top: 12.0),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 150), // Prevent it from getting too big
+                child: SingleChildScrollView(
+                  child: MarkdownBody(
+                    data: _thinkingText.isEmpty ? "..." : _thinkingText,
+                    styleSheet: MarkdownStyleSheet(p: const TextStyle(color: Colors.grey)),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    ),
+  );
+}
 }

@@ -1,6 +1,6 @@
 // keyword_search_page.dart
 import 'package:flutter/material.dart';
-import 'package:miko/showcases/movie_detail_page_copy.dart';
+import 'package:miko/showcases/movie_detail_page.dart';
 import 'dart:async';
 import 'movie_service.dart';
 import 'model.dart';

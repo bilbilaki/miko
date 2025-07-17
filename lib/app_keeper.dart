@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:miko/providers/ui_providers.dart';
 // Removed unused imports:
 // import 'dart:typed_data';
 // import 'package:flutter/gestures.dart';
@@ -7,7 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import 'package:miko/services/audio_player_service.dart';
 // import 'package:miko/services/files_service.dart';
 // import 'package:url_launcher/url_launcher.dart';
-// import 'package:provider/provider.dart' as pp; // <-- Remove this line
+ import 'package:provider/provider.dart' as pp; // <-- Remove this line
 // import 'package:image_picker/image_picker.dart';
 
 import 'package:miko/widgets/alienswapbutton.dart';
@@ -173,8 +174,12 @@ class _AppKeeperConsumerState extends ConsumerState<AppKeeper>
                 ),
               ),
               body: CenterContentPanel(isMobileLayout: isSmallScreen),
-              floatingActionButton: AlienFloatSwapMenu(
-                onOpenEditor: () {
+              floatingActionButton: pp.Consumer<FloatingButtonVisibilityNotifier>(
+    builder: (context, visibilityNotifier, child) {
+      // Conditionally return the button or an empty container
+      return visibilityNotifier.isVisible ?
+ AlienFloatSwapMenu(
+                OnAskAi: () {
                   // Now simply show the new AiChatDialog widget
                   showDialog(
                     context: context,
@@ -193,11 +198,11 @@ class _AppKeeperConsumerState extends ConsumerState<AppKeeper>
                 onClose: () => print("Close"),
                 onSave: () => print("Save"),
                 onSearch: () => print("Search"),
-                onNew: () => print("New"), // Consistent naming
-                onUndo: () => print("Undo"), // Consistent naming
-                onRedo: () => print("Redo"), // Consistent naming
-              ))
-          : Scaffold(
+                // onNew: () => print("New"), // Consistent naming
+                // onUndo: () => print("Undo"), // Consistent naming
+                // onRedo: () => print("Redo"), // Consistent naming
+ ):SizedBox.shrink();})):
+           Scaffold(
               // Removed commented out AppBar block
               body: Row(
                 children: [
@@ -273,11 +278,20 @@ class _AppKeeperConsumerState extends ConsumerState<AppKeeper>
                   ),
                 ],
               ),
-              floatingActionButton: AlienFloatSwapMenu(
-                onOpenEditor: () {
+              floatingActionButton: pp.Consumer<FloatingButtonVisibilityNotifier>(
+    builder: (context, visibilityNotifier, child) {
+      // Conditionally return the button or an empty container
+      return visibilityNotifier.isVisible ?
+ AlienFloatSwapMenu(
+                OnAskAi: () {
+                  // Now simply show the new AiChatDialog widget
                   showDialog(
                     context: context,
                     builder: (ctx) {
+                      // It is critical to wrap the dialog with ProviderScope
+                      // if the dialog (or its children) will consume Riverpod providers,
+                      // and it's being shown outside of the main widget tree's ProviderScope.
+                      // ProviderScope.containerOf(context) ensures it uses the existing Riverpod container.
                       return ProviderScope(
                         parent: ProviderScope.containerOf(context),
                         child: const AiChatDialog(),
@@ -285,13 +299,13 @@ class _AppKeeperConsumerState extends ConsumerState<AppKeeper>
                     },
                   );
                 },
-                onClose: () {}, // Empty function as per original (was print("Close"))
+                onClose: () => print("Close"),
                 onSave: () => print("Save"),
                 onSearch: () => print("Search"),
-                onNew: () => print("New"),
-                onUndo: () => print("Undo"),
-                onRedo: () => print("Redo"),
-              ),
+                // onNew: () => print("New"), // Consistent naming
+                // onUndo: () => print("Undo"), // Consistent naming
+                // onRedo: () => print("Redo"), // Consistent naming
+ ):SizedBox.shrink();})
             ),
     );
   }

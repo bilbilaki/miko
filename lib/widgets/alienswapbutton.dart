@@ -2,23 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:miko/utils/utils.dart';
 
 class AlienFloatSwapMenu extends StatefulWidget {
-  final Function onOpenEditor;
+  final Function OnAskAi;
   final Function onClose;
   final Function onSave;
   final Function onSearch;
-  final Function onNew;   // New function for 'New' button
-  final Function onUndo;  // New function for 'Undo' button
-  final Function onRedo;  // New function for 'Redo' button
+  // final Function onNew;   // New function for 'New' button
+  // final Function onUndo;  // New function for 'Undo' button
+  // final Function onRedo;  // New function for 'Redo' button
 
   const AlienFloatSwapMenu({
     super.key,
-    required this.onOpenEditor,
+    required this.OnAskAi,
     required this.onClose,
     required this.onSave,
     required this.onSearch,
-    required this.onNew,   // Must be provided
-    required this.onUndo,  // Must be provided
-    required this.onRedo,  // Must be provided
+    // required this.onNew,   // Must be provided
+    // required this.onUndo,  // Must be provided
+    // required this.onRedo,  // Must be provided
   });
 
   @override
@@ -31,24 +31,24 @@ class _AlienFloatSwapMenuState extends State<AlienFloatSwapMenu> {
 
   // Added new positions for 'New', 'Undo', and 'Redo' buttons
   final Map<String, Offset> actions = {
-    "Open": Offset(-50, -180),
+    "Ask AI": Offset(-50, -180),
     "Save": Offset(-140, -110),
     "Close": Offset(-150, 0),
     "Search": Offset(-250, 10),
-    "New": Offset(100, -150),   // Top-right quadrant
-    "Undo": Offset(-100, 150),  // Bottom-left quadrant
-    "Redo": Offset(150, 100),   // Bottom-right quadrant
+    // "New": Offset(100, -150),   // Top-right quadrant
+    // "Undo": Offset(-100, 150),  // Bottom-left quadrant
+    // "Redo": Offset(150, 100),   // Bottom-right quadrant
   };
 
   // Added visibility states for the new buttons
   final Map<String, bool> visibility = {
-    "Open": false,
+    "Ask AI": false,
     "Save": false,
     "Close": false,
     "Search": false,
-    "New": false,
-    "Undo": false,
-    "Redo": false,
+    // "New": false,
+    // "Undo": false,
+    // "Redo": false,
   };
 
   final double targetRadius = 80;
@@ -56,8 +56,8 @@ class _AlienFloatSwapMenuState extends State<AlienFloatSwapMenu> {
   // Extended the handleAction method to include the new buttons
   void handleAction(String action) {
     switch (action) {
-      case "Open":
-        widget.onOpenEditor();
+      case "Ask AI":
+        widget.OnAskAi();
         break;
       case "Save":
         widget.onSave();
@@ -68,15 +68,15 @@ class _AlienFloatSwapMenuState extends State<AlienFloatSwapMenu> {
       case "Search":
         widget.onSearch();
         break;
-      case "New":
-        widget.onNew();
-        break;
-      case "Undo":
-        widget.onUndo();
-        break;
-      case "Redo":
-        widget.onRedo();
-        break;
+      // case "New":
+      //   widget.onNew();
+      //   break;
+      // case "Undo":
+      //   widget.onUndo();
+      //   break;
+      // case "Redo":
+      //   widget.onRedo();
+      //   break;
     }
   }
   // Helper method to get an icon based on action name

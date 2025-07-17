@@ -5,6 +5,7 @@ import 'package:miko/providers/anime_provider.dart';
 import 'package:miko/providers/csv_detail_process_provider.dart';
 import 'package:miko/providers/local_provider.dart';
 import 'package:miko/providers/settings_provider.dart';
+import 'package:miko/providers/ui_providers.dart' show FloatingButtonVisibilityNotifier;
 
 import 'package:miko/services/ai_chat_service.dart';
 import 'package:miko/services/user_data_service.dart'; // Import UserDataService
@@ -46,6 +47,8 @@ Future<void> main() async {
 ProcessingProvider()),
 ChangeNotifierProvider(create: (_) => TextToolProvider()),
 ChangeNotifierProvider(create: (_) => AIChatService()),
+ChangeNotifierProvider(
+      create: (context) => FloatingButtonVisibilityNotifier()),
       
       ],
       child: MyApp(), // Use const if MyApp is stateless

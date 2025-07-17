@@ -153,7 +153,7 @@ class EpisodeTileNew extends StatelessWidget {
 }
 
 class MovieCard extends StatelessWidget {
-  final  movie;
+  final og.Movie movie;
   final typec;
   const MovieCard({required this.typec, required this.movie, super.key});
 

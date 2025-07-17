@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:media_kit/media_kit.dart'; // Required.
 import 'package:media_kit_video/media_kit_video.dart'; // Required.
+import 'package:miko/providers/ui_providers.dart';
 import 'dart:async';
 import 'dart:io'; // Add this import
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io' show Platform;
+
+import 'package:provider/provider.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final String pathlocal;
@@ -35,6 +38,8 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   void initState() {
     super.initState();
+    Provider.of<FloatingButtonVisibilityNotifier>(context, listen: false).hide();
+
     // Move permission check to after widget is fully initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {});
 
@@ -98,6 +103,8 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   void dispose() {
     _hideTimer?.cancel();
+        Provider.of<FloatingButtonVisibilityNotifier>(context, listen: false).show();
+
     player.dispose();
     super.dispose();
   }

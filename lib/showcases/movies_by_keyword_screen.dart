@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:miko/showcases/movie_detail_page_copy.dart';
+import 'package:miko/showcases/movie_detail_page.dart';
 import 'model.dart';
 import 'movie_service.dart';
 

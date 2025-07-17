@@ -77,8 +77,16 @@ class WatchlistScreen extends StatelessWidget {
               itemCount: allWatchlist.length,
               itemBuilder: (context, index) {
                 final item = allWatchlist[index];
+                if (item is Movie) {
 return MovieCard(movie: item, typec: "movie",);
-                              return const SizedBox.shrink(); // Should not happen
+                }
+                else if (item is TvSeriesAnime) {
+                  return AnimeSeriesCard(series: item, typec: "anime",);
+                } 
+                else if (item is TvSeriesAnime) {
+return AnimeSeriesCard(series: item, typec:"tvseries");
+               }
+                return const SizedBox.shrink(); // Should not happen
               },
             ),
     );
@@ -162,8 +170,16 @@ class FavoritesScreen extends StatelessWidget {
               itemCount: allFavorites.length,
               itemBuilder: (context, index) {
                 final item = allFavorites[index];
-                return MovieCard(movie: item, typec: "movie");
-                              return const SizedBox.shrink(); // Should not happen
+                if (item is Movie) {
+                  return MovieCard(movie: item, typec: "movie");
+                } else if (item is TvSeriesAnime) {
+                  return AnimeSeriesCard(series: item, typec: "anime",);
+                }
+
+                else if (item is TvSeriesAnime) {
+                  return AnimeSeriesCard(series: item,typec: "tvseires",);
+                }
+                return const SizedBox.shrink(); // Should not happen
               },
             ),
     );
