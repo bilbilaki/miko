@@ -2,21 +2,13 @@
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:miko/showcases/model.dart';
+import '../showcases/movie_service.dart';
 
-// IMPORTANT: Replace with your actual OpenAI API Key
-// For production, use environment variables or a secure backend.
 const String openAIApiKey =
     'aa-Ag0FkYecrGW214FK0YV8XFMwyVnadVUT1wZt3R1Q360lAOwa';
-
-/// Performs a web search using the experimental OpenAI Web Search Preview API.
-///
-/// This function acts as a wrapper around the special OpenAI web search endpoint,
-/// which is distinct from the standard chat completions API.
-///
-/// Returns the text content of the search result.
-///
-///
-///
+final MovieService _movieService = MovieService();
+final TmdbApiService _tmdbService = TmdbApiService();
 
 Future<Map<String, dynamic>> performWebSearch(String query) async {
   final url = Uri.https('api.duckduckgo.com', '/', {
@@ -41,8 +33,57 @@ Future<Map<String, dynamic>> performWebSearch(String query) async {
   } else {
     throw Exception('DuckDuckGo request failed: ${response.statusCode}');
   }
+}
 
+Future<Map<String, dynamic>> getMovieRecommendationsToolWrapper(
+    {required int movieId,
+    int? page,
+    String? language,
+    required bool isMovie}) async {
+  if (isMovie) {
+    final MovieResponse movieResponse =
+        await _movieService.getMovieRecommendations(
+      movieId: movieId,
+      page: page ?? 1,
+      language: language ?? 'en-US',
+    );
 
+    final simplifiedResults = movieResponse.results.map((movie) {
+      return {
+        'id': movie.id,
+        'title': movie.title,
+        'overview': movie.overview,
+        'release_date': movie.releaseDate,
+        'vote_average': movie.voteAverage,
+      };
+    }).toList();
+
+    return {
+      "source_movie_id": movieId,
+      "page": movieResponse.page,
+      "total_pages": movieResponse.totalPages,
+      "recommendations": simplifiedResults,
+    };
+  }else {
+  final  TvShowResponse tvResponse = await  _movieService.getTvShowRecommendations(
+     tvShowId: movieId, page :page??1,language:language?? 'en-US'); 
+     final simplifiedResults = tvResponse.results.map((movie) {
+      return {
+        'id': movie.id,
+        'title': movie.name,
+        'overview': movie.overview,
+        'release_date': movie.firstAirDate,
+        'vote_average': movie.voteAverage,
+      };
+    }).toList();
+ return {
+      "source_movie_id": movieId,
+      "page": tvResponse.page,
+      "total_pages": tvResponse.totalPages,
+      "recommendations": simplifiedResults,
+    };
+  }
+}
 
 // Future<String> performWebSearch(String query) async {
 //   print('Tool Called: performWebSearch with query: "$query"');
@@ -96,4 +137,3 @@ Future<Map<String, dynamic>> performWebSearch(String query) async {
 //     print('Exception during web search API call: $e');
 //     return 'An unexpected error occurred during web search: $e';
 //   }
-}

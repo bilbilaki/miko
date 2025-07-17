@@ -3,7 +3,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:miko/tools/openai_websearch.dart';
+import 'package:miko/configs/ai_config_etc.dart';
+import 'package:miko/tools/function_tools.dart';
+import 'package:miko/tools/json_tools.dart';
+import 'package:miko/tools/tool_call_performers.dart';
 import 'package:openai_dart/openai_dart.dart';
 
 //import 'dart:convert';
@@ -12,7 +15,7 @@ abstract class OpenAIServiceBase {
   late final OpenAIClient client;
 
   OpenAIServiceBase() {
-    final apiKey = "";
+    final apiKey = groqapi;
     client = OpenAIClient(
       apiKey: apiKey,
       baseUrl: 'https://api.groq.com/openai/v1',
@@ -41,22 +44,15 @@ class OpenAITextChatService extends OpenAIServiceBase {
       String? base64Audio,
       String? audioFormat}) async {
     final chatMessages = <ChatCompletionMessage>[
-      ChatCompletionMessage.system(
-        content:
-            "You are a helpful assistant that can search for instant answers using the 'web_search' tool. "
-            "When using the tool, always present any found URLs clearly to the user, indicating they can click it. "
-            "If no specific instant answer is found, state that politely. "
-            "Avoid using the tool for real-time information like current weather or stock prices, as it only provides static instant answers.",
-      ),
+      ChatCompletionMessage.system(content: systemcontent),
       ChatCompletionMessage.user(
           content: ChatCompletionUserMessageContent.string(prompt)),
     ];
 
     final request = CreateChatCompletionRequest(
-      model: ChatCompletionModel.modelId(
-          'qwen/qwen3-32b'), // Or other appropriate model
+      model: ChatCompletionModel.modelId(modelid), // Or other appropriate model
       messages: chatMessages,
-      temperature: 0.7,
+      temperature: tmp,
     );
 
     try {
@@ -84,21 +80,15 @@ class OpenAITextChatService extends OpenAIServiceBase {
     }
     // ... (add other parts for audio etc. as you did before) ...
     final chatMessages = <ChatCompletionMessage>[
-      ChatCompletionMessage.system(
-        content:
-            "You are a helpful assistant that can search for instant answers using the 'web_search' tool. "
-            "When using the tool, always present any found URLs clearly to the user, indicating they can click it. "
-            "If no specific instant answer is found, state that politely. "
-            "Avoid using the tool for real-time information like current weather or stock prices, as it only provides static instant answers.",
-      ),
+      ChatCompletionMessage.system(content: systemcontent),
       ChatCompletionMessage.user(
           content: ChatCompletionUserMessageContent.parts(parts)),
     ];
 
     final request = CreateChatCompletionRequest(
-      model: ChatCompletionModel.modelId('qwen/qwen3-32b'),
+      model: ChatCompletionModel.modelId(modelid),
       messages: chatMessages,
-      temperature: 0.7,
+      temperature: tmp,
     );
 
     try {
@@ -169,22 +159,16 @@ class OpenAIMultiModalService extends OpenAIServiceBase {
     }
 
     final chatMessages = <ChatCompletionMessage>[
-      ChatCompletionMessage.system(
-        content:
-            "You are a helpful assistant that can search for instant answers using the 'web_search' tool. "
-            "When using the tool, always present any found URLs clearly to the user, indicating they can click it. "
-            "If no specific instant answer is found, state that politely. "
-            "Avoid using the tool for real-time information like current weather or stock prices, as it only provides static instant answers.",
-      ),
+      ChatCompletionMessage.system(content: systemcontent),
       ChatCompletionMessage.user(
           content: ChatCompletionUserMessageContent.parts(parts)),
     ];
 
     final request = CreateChatCompletionRequest(
       model: ChatCompletionModel.modelId(
-          'qwen/qwen3-32b'), // qwen/qwen3-32b supports multimodal input
+          modelid), // qwen/qwen3-32b supports multimodal input
       messages: chatMessages,
-      temperature: 0.7,
+      temperature: tmp,
     );
 
     try {
@@ -233,21 +217,15 @@ class OpenAIMultiModalService extends OpenAIServiceBase {
     }
 
     final chatMessages = <ChatCompletionMessage>[
-      ChatCompletionMessage.system(
-        content:
-            "You are a helpful assistant that can search for instant answers using the 'web_search' tool. "
-            "When using the tool, always present any found URLs clearly to the user, indicating they can click it. "
-            "If no specific instant answer is found, state that politely. "
-            "Avoid using the tool for real-time information like current weather or stock prices, as it only provides static instant answers.",
-      ),
+      ChatCompletionMessage.system(content: systemcontent),
       ChatCompletionMessage.user(
           content: ChatCompletionUserMessageContent.parts(parts)),
     ];
 
     final request = CreateChatCompletionRequest(
-      model: ChatCompletionModel.modelId('qwen/qwen3-32b'),
+      model: ChatCompletionModel.modelId(modelid),
       messages: chatMessages,
-      temperature: 0.7,
+      temperature: tmp,
     );
 
     try {
@@ -287,7 +265,7 @@ class OpenAIMultiModalService extends OpenAIServiceBase {
       // The documentation suggests gpt4oAudioPreview, but qwen/qwen3-32b might also work for some cases.
       // If you specifically need audio output, you might need to use `qwen/qwen3-32b-audio-preview` if `qwen/qwen3-32b` doesn't natively return it.
       // However, the example shows "gpt4oAudioPreview" used with modalities.
-      model: ChatCompletionModel.modelId("playai-tts-arabic"),
+      model: ChatCompletionModel.modelId(ttsmodelid),
       modalities: [ChatCompletionModality.text, ChatCompletionModality.audio],
       audio: ChatCompletionAudioOptions(
         voice: ChatCompletionAudioVoice.alloy,
@@ -310,47 +288,7 @@ class OpenAIMultiModalService extends OpenAIServiceBase {
   }
 }
 
-
-Future<Map<String, dynamic>> _getCurrentWeather(String location) async {
-  try {
-    final Map<String, dynamic> ddgResult = await performWebSearch(location);
-    debugPrint("Received DuckDuckGo result");
-
-    // Optionally decode if the result is still in raw JSON, but it's already structured
-    return ddgResult;
-  } on FormatException catch (e) {
-    debugPrint("JSON decoding failed: $e");
-    return {'error': 'Failed to parse weather data'};
-  } catch (e) {
-    debugPrint("Error getting weather data: $e");
-    return {'error': 'Failed to fetch weather data'};
-  }
-}
-
-
 class OpenAIToolCallingService extends OpenAIServiceBase {
-  final FunctionObject _weatherFunction = const FunctionObject(
-    name: 'performWebSearch',
-    description:
-        'Perform a web search to find current information or answer questions requiring up-to-date data. Provide the exact search query.',
-    parameters: {
-      'type': 'object',
-      'properties': {
-        'query': {
-          'type': 'string',
-          'description':
-              'The search query for which to retrieve instant answers.',
-        },
-      },
-      'required': ['query'],
-    },
-  );
-
-  ChatCompletionTool get _weatherTool => ChatCompletionTool(
-        type: ChatCompletionToolType.function,
-        function: _weatherFunction,
-      );
-
   @override
   Future<String> getResponse(String prompt,
       {String? imageUrl,
@@ -358,13 +296,7 @@ class OpenAIToolCallingService extends OpenAIServiceBase {
       String? base64Audio,
       String? audioFormat}) async {
     List<ChatCompletionMessage> messages = [
-      ChatCompletionMessage.system(
-        content:
-            "You are a helpful assistant that can search for instant answers using the 'web_search' tool. "
-            "When using the tool, always present any found URLs clearly to the user, indicating they can click it. "
-            "If no specific instant answer is found, state that politely. "
-            "Avoid using the tool for real-time information like current weather or stock prices, as it only provides static instant answers.",
-      ),
+      ChatCompletionMessage.system(content: systemcontent),
       ChatCompletionMessage.user(
           content: ChatCompletionUserMessageContent.string(prompt)),
     ];
@@ -374,9 +306,9 @@ class OpenAIToolCallingService extends OpenAIServiceBase {
       final res1 = await client.createChatCompletion(
         request: CreateChatCompletionRequest(
           model: ChatCompletionModel.modelId(
-              'qwen/qwen3-32b'), // Models like qwen/qwen3-32b support tool calling
+              modelid), // Models like qwen/qwen3-32b support tool calling
           messages: messages,
-          tools: [_weatherTool],
+          tools: [weatherTool, movieRecommendTool],
           toolChoice: ChatCompletionToolChoiceOption.mode(
               ChatCompletionToolChoiceMode.auto), // Let model decide
         ),
@@ -388,10 +320,10 @@ class OpenAIToolCallingService extends OpenAIServiceBase {
       if (message1.toolCalls != null && message1.toolCalls!.isNotEmpty) {
         // Model wants to call a tool
         final toolCall = message1.toolCalls!.first;
-        if (toolCall.function.name == _weatherFunction.name) {
+        if (toolCall.function.name == weatherFunction.name) {
           final arguments =
               json.decode(toolCall.function.arguments) as Map<String, dynamic>;
-          final functionResult = await _getCurrentWeather(
+          final functionResult = await webSearchToolCall(
             arguments['query'] as String,
           );
 
@@ -404,15 +336,47 @@ class OpenAIToolCallingService extends OpenAIServiceBase {
 
           final res2 = await client.createChatCompletion(
             request: CreateChatCompletionRequest(
-              model: ChatCompletionModel.modelId('qwen/qwen3-32b'),
+              model: ChatCompletionModel.modelId(modelid),
               messages: messages,
               tools: [
-                _weatherTool
+                weatherTool
               ], // Include tools again if model might call another
             ),
           );
           return res2.choices.first.message.content ??
               'No content received after tool call.';
+        } else if (toolCall.function.name == movieRecommendFunction.name) {
+         // yield '\n\n-- Calling tool: ${movieRecommendFunction.name}(${jsonEncode(functionArguments)}) --\n\n';
+           final arguments = json.decode(toolCall.function.arguments) as Map<String, dynamic>;
+
+          // Call our wrapper function with the arguments provided by the AI
+          final functionResult = await getRecommendsToolCall(
+             arguments['name'] as String,
+             arguments['page'] as int?, // Handle optional params
+             arguments['language'] as String?,
+             arguments['isMovie'] as bool
+          );
+
+          // Step 2: Send the result of the function call back to the AI
+          messages.add(message1
+              as ChatCompletionMessage); // Add the AI's tool_calls message
+          messages.add(ChatCompletionMessage.tool(
+            toolCallId: toolCall.id,
+            content: json.encode(functionResult), // Provide the tool's output
+          ));
+
+ final res2 = await client.createChatCompletion(
+            request: CreateChatCompletionRequest(
+              model: ChatCompletionModel.modelId(modelid),
+              messages: messages,
+              tools: [
+                movieRecommendTool
+              ], // Include tools again if model might call another
+            ),
+          );
+          return res2.choices.first.message.content ??
+              'No content received after tool call.';
+          
         } else {
           return 'Model requested an unknown tool: ${toolCall.function.name}';
         }
@@ -432,13 +396,7 @@ class OpenAIToolCallingService extends OpenAIServiceBase {
       String? base64Audio,
       String? audioFormat}) async* {
     List<ChatCompletionMessage> messages = [
-      ChatCompletionMessage.system(
-        content:
-            "You are a helpful assistant that can search for instant answers using the 'web_search' tool. "
-            "When using the tool, always present any found URLs clearly to the user, indicating they can click it. "
-            "If no specific instant answer is found, state that politely. "
-            "Avoid using the tool for real-time information like current weather or stock prices, as it only provides static instant answers.",
-      ),
+      ChatCompletionMessage.system(content: systemcontent),
       ChatCompletionMessage.user(
           content: ChatCompletionUserMessageContent.string(prompt)),
     ];
@@ -447,9 +405,9 @@ class OpenAIToolCallingService extends OpenAIServiceBase {
       // Step 1: Initial stream request
       final stream1 = client.createChatCompletionStream(
         request: CreateChatCompletionRequest(
-          model: ChatCompletionModel.modelId('qwen/qwen3-32b'),
+          model: ChatCompletionModel.modelId(modelid),
           messages: messages,
-          tools: [_weatherTool],
+          tools: [weatherTool, movieRecommendTool],
           toolChoice: ChatCompletionToolChoiceOption.mode(
               ChatCompletionToolChoiceMode.auto),
         ),
@@ -491,9 +449,9 @@ class OpenAIToolCallingService extends OpenAIServiceBase {
           functionArguments != null &&
           toolCallId != null &&
           assistantToolCallMessage != null) {
-        if (functionName == _weatherFunction.name) {
-          yield '\n\n-- Calling tool: $_weatherFunction.name(${jsonEncode(functionArguments)}) --\n\n';
-          final functionResult = await _getCurrentWeather(
+        if (functionName == weatherFunction.name) {
+          yield '\n\n-- Calling tool: ${weatherFunction.name}(${jsonEncode(functionArguments)}) --\n\n';
+          final functionResult = await webSearchToolCall(
             functionArguments['query'] as String,
           );
 
@@ -507,12 +465,44 @@ class OpenAIToolCallingService extends OpenAIServiceBase {
 
           final stream2 = client.createChatCompletionStream(
             request: CreateChatCompletionRequest(
-              model: ChatCompletionModel.modelId('qwen/qwen3-32b'),
+              model: ChatCompletionModel.modelId(modelid),
               messages: messages,
-              tools: [_weatherTool],
+              tools: [movieRecommendTool],
             ),
           );
 
+          await for (final res in stream2) {
+            yield res.choices.first.delta!.content ?? '';
+          }
+        } else if (functionName == movieRecommendFunction.name) {
+          yield '\n\n-- Calling tool: ${movieRecommendFunction.name}(${jsonEncode(functionArguments)}) --\n\n';
+          // final arguments = json.decode(functionArguments) as Map<String, dynamic>;
+
+          // Call our wrapper function with the arguments provided by the AI
+          final functionResult = await getRecommendsToolCall(
+           functionArguments['name'] as String,
+             functionArguments['page'] as int?, // Handle optional params
+           functionArguments['language'] as String?,
+           functionArguments['isMovie'] as bool
+          );
+
+          // Step 2: Send the result of the function call back to the AI
+          messages.add(assistantToolCallMessage
+              as ChatCompletionMessage); // Add the AI's tool_calls message
+          messages.add(ChatCompletionMessage.tool(
+            toolCallId: toolCallId,
+            content: json.encode(functionResult), // Provide the tool's output
+          ));
+
+          final stream2 = client.createChatCompletionStream(
+            request: CreateChatCompletionRequest(
+              model: ChatCompletionModel.modelId(modelid),
+              messages: messages,
+              tools: [movieRecommendTool],
+            ),
+          );
+
+          // The AI now has the context and the data to give a final, user-friendly answer
           await for (final res in stream2) {
             yield res.choices.first.delta!.content ?? '';
           }
@@ -541,7 +531,7 @@ class OpenAIToolCallingService extends OpenAIServiceBase {
       // The documentation suggests gpt4oAudioPreview, but qwen/qwen3-32b might also work for some cases.
       // If you specifically need audio output, you might need to use `qwen/qwen3-32b-audio-preview` if `qwen/qwen3-32b` doesn't natively return it.
       // However, the example shows "gpt4oAudioPreview" used with modalities.
-      model: ChatCompletionModel.modelId("playai-tts-arabic"),
+      model: ChatCompletionModel.modelId(ttsmodelid),
       modalities: [ChatCompletionModality.text, ChatCompletionModality.audio],
       audio: ChatCompletionAudioOptions(
         voice: ChatCompletionAudioVoice.alloy,
@@ -572,13 +562,7 @@ class OpenAIStructuredOutputService extends OpenAIServiceBase {
       String? base64Audio,
       String? audioFormat}) async {
     final chatMessages = <ChatCompletionMessage>[
-      ChatCompletionMessage.system(
-        content:
-            "You are a helpful assistant that can search for instant answers using the 'web_search' tool. "
-            "When using the tool, always present any found URLs clearly to the user, indicating they can click it. "
-            "If no specific instant answer is found, state that politely. "
-            "Avoid using the tool for real-time information like current weather or stock prices, as it only provides static instant answers.",
-      ),
+      ChatCompletionMessage.system(content: systemcontent),
       ChatCompletionMessage.user(
           content: ChatCompletionUserMessageContent.string(prompt)),
     ];
@@ -587,7 +571,7 @@ class OpenAIStructuredOutputService extends OpenAIServiceBase {
       final res = await client.createChatCompletion(
         request: CreateChatCompletionRequest(
           model: ChatCompletionModel.modelId(
-              'qwen/qwen3-32b'), // Or a similar model that supports Structured Outputs
+              modelid), // Or a similar model that supports Structured Outputs
           messages: chatMessages,
           temperature: 0,
           responseFormat: ResponseFormat.jsonSchema(
@@ -647,7 +631,7 @@ class OpenAIStructuredOutputService extends OpenAIServiceBase {
     try {
       final stream = client.createChatCompletionStream(
         request: CreateChatCompletionRequest(
-          model: ChatCompletionModel.modelId('qwen/qwen3-32b'),
+          model: ChatCompletionModel.modelId(modelid),
           messages: chatMessages,
           temperature: 0,
           responseFormat: ResponseFormat.jsonSchema(
@@ -704,7 +688,7 @@ class OpenAIStructuredOutputService extends OpenAIServiceBase {
 
 class AIChatService extends ChangeNotifier {
   static const String _openAIApiKey =
-      "";
+groqapi;
   final List<ChatCompletionMessage> _messages = [];
   String _currentResponse = "Hello! Ask me anything.";
   bool _isLoading = false;
@@ -723,13 +707,7 @@ class AIChatService extends ChangeNotifier {
       baseUrl: 'https://api.groq.com/openai/v1',
     );
     _messages.add(
-      ChatCompletionMessage.system(
-        content:
-            "You are a helpful assistant that can search for instant answers using the 'web_search' tool. "
-            "When using the tool, always present any found URLs clearly to the user, indicating they can click it. "
-            "If no specific instant answer is found, state that politely. "
-            "Avoid using the tool for real-time information like current weather or stock prices, as it only provides static instant answers.",
-      ),
+      ChatCompletionMessage.system(content: systemcontent),
     );
     print("OpenAI Client initialized successfully.");
   }
@@ -806,7 +784,7 @@ class AIChatService extends ChangeNotifier {
             "Entering while loop with requiresToolCall=$requiresToolCall");
 
         final request = CreateChatCompletionRequest(
-          model: ChatCompletionModel.modelId('qwen/qwen3-32b'),
+          model: ChatCompletionModel.modelId(modelid),
           messages: _messages,
           tools: [_duckDuckGoTool, _imageprocess],
         );
@@ -886,13 +864,7 @@ class AIChatService extends ChangeNotifier {
   void resetChat() {
     _messages.clear();
     _messages.add(
-      ChatCompletionMessage.system(
-        content:
-            "You are a helpful assistant that can search for instant answers using the 'web_search' tool. "
-            "When using the tool, always present any found URLs clearly to the user, indicating they can click it. "
-            "If no specific instant answer is found, state that politely. "
-            "Avoid using the tool for real-time information like current weather or stock prices, as it only provides static instant answers.",
-      ),
+      ChatCompletionMessage.system(content: systemcontent),
     );
     _currentResponse = "Hello! Ask me anything.";
     _isLoading = false;

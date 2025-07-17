@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:miko/configs/ai_config_etc.dart';
 import 'package:miko/models/csv_process/detail_tmdb.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -10,7 +11,7 @@ import 'package:tmdb_api/tmdb_api.dart';
 
 class ProcessingProvider extends ChangeNotifier {
   // State variables
-  String _apiKey = "607e40af5bb66576f6fd7252d5529e24"; // User can override
+  String _apiKey = tmdbapiv3; // User can override
   List<String> _seriesToProcess = [];
   final List<MediaData> _results = [];
   final Set<String> _processedNames = {}; // Replaces the log file
