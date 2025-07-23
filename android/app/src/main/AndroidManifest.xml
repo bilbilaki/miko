@@ -4,7 +4,6 @@ xml_permissions.txt
 <uses-permission android:name="android.permission.INTERNET" />
 <uses-permission android:name="android.permission.STORAGE_INTERNAL" />
 <uses-permission android:name="android.permission.VIBRATE" />
-<uses-permission android:name="android.permission.WAKE_LOCK" />
 <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" />
   <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -30,6 +29,13 @@ xml_permissions.txt
     <uses-permission android:name="android.permission.CAMERA" />
         <uses-permission android:name="android.permission.INSTALL_SHORTCUT" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+          
+<uses-permission android:name="android.permission.WAKE_LOCK"/>
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+<!-- For Android 13 (API 33) and above, you need this to show the notification -->
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
+    
 
     
     <application

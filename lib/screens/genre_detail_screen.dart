@@ -2,13 +2,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:miko/providers/anime_provider.dart';
+import 'package:miko/utils/utils.dart';
 import 'package:miko/widgets/anime_series_card.dart'; // Assuming you have AnimeCard
 import 'package:provider/provider.dart';
 //import 'package:miko/models/movie.dart' as movie;
 import 'package:miko/models/tv_series_anime.dart';
 
 import 'package:miko/utils/colors.dart';
-
 
 class GenreDetailScreen extends StatelessWidget {
   final String genre;
@@ -20,58 +20,75 @@ class GenreDetailScreen extends StatelessWidget {
     // Get items matching the genre
     final movieProvider = Provider.of<MovieProvider>(context, listen: false);
     final tvProvider = Provider.of<TvSeriesProvider>(context, listen: false);
-    final animeProvider = Provider.of<AnimeProvider>(context, listen: false); // If you have anime
+    final animeProvider =
+        Provider.of<AnimeProvider>(context, listen: false); // If you have anime
 
     final List<Movie> moviesInGenre = movieProvider.animeseriesForDisplay
-        .where((m) => m.genres.any((g) => g.toLowerCase() == genre.toLowerCase()))
+        .where(
+            (m) => m.genres.any((g) => g.toLowerCase() == genre.toLowerCase()))
         .toList();
 
-    final List<TvSeriesAnime> tvSeriesInGenre = tvProvider.animeseriesForDisplay // Use seriesForDisplay to respect potential sorting/filtering
-        .where((s) => s.genres.any((g) => g.toLowerCase() == genre.toLowerCase()))
+    final List<TvSeriesAnime> tvSeriesInGenre = tvProvider
+        .animeseriesForDisplay // Use seriesForDisplay to respect potential sorting/filtering
+        .where(
+            (s) => s.genres.any((g) => g.toLowerCase() == genre.toLowerCase()))
         .toList();
 
-    final List<TvSeriesAnime> animeInGenre = animeProvider.animeseriesForDisplay // Adjust for your Anime model/provider
-        .where((a) => a.genres.any((g) => g.toLowerCase() == genre.toLowerCase()))
+    final List<TvSeriesAnime> animeInGenre = animeProvider
+        .animeseriesForDisplay // Adjust for your Anime model/provider
+        .where(
+            (a) => a.genres.any((g) => g.toLowerCase() == genre.toLowerCase()))
         .toList();
 
     // Combine all items
-    final List<dynamic> allItemsInGenre = [...moviesInGenre, ...tvSeriesInGenre, ...animeInGenre];
+    final List<dynamic> allItemsInGenre = [
+      ...moviesInGenre,
+      ...tvSeriesInGenre,
+      ...animeInGenre
+    ];
     allItemsInGenre.shuffle(); // Optional: Mix movies and TV shows
 
-
     return Scaffold(
-       backgroundColor: AppColors.primaryBackground,
-       appBar: AppBar(
-         title: Text(genre, style: TextStyle(color: AppColors.primaryText)),
-         backgroundColor: const Color.fromARGB(255, 62, 27, 90),
-       ),
-       body: allItemsInGenre.isEmpty
-           ? Center(
-               child: Text(
-                 'No items found for the genre "$genre".',
-                 style: const TextStyle(color: Color.fromARGB(255, 230, 225, 225)),
-               ),
-             )
-            : MasonryGridView.count( // Use MasonryGrid for mixed content might look odd, consider separate lists or tabs
-                padding: const EdgeInsets.all(8.0),
-                crossAxisCount: 3,
-                mainAxisSpacing: 8.0,
-                crossAxisSpacing: 8.0,
-                itemCount: allItemsInGenre.length,
-                itemBuilder: (context, index) {
-                  final item = allItemsInGenre[index];
-                   if (item is Movie) {
-                     return MovieCard(movie: item, typec: "movie",);
-                   } else if (item is TvSeriesAnime) {
-                     return AnimeSeriesCard(series: item, typec: "anime",);
-                   } 
-                   
-                   else if (item is TvSeriesAnime) { // Assuming AnimeCard exists
-                     return AnimeSeriesCard(series: item,typec: "tvseries"); // Adapt as needed
-                   }
-                   return const SizedBox.shrink(); // Should not happen
-                },
+      backgroundColor: AppColors.primaryBackground,
+      appBar: AppBar(
+        title: Text(genre, style: TextStyle(color: AppColors.primaryText)),
+        backgroundColor: const Color.fromARGB(255, 62, 27, 90),
+      ),
+      body: allItemsInGenre.isEmpty
+          ? Center(
+              child: Text(
+                'No items found for the genre "$genre".',
+                style:
+                    const TextStyle(color: Color.fromARGB(255, 230, 225, 225)),
               ),
+            )
+          : MasonryGridView.count(
+              // Use MasonryGrid for mixed content might look odd, consider separate lists or tabs
+              padding: const EdgeInsets.all(8.0),
+              crossAxisCount: 3,
+              mainAxisSpacing: 8.0,
+              crossAxisSpacing: 8.0,
+              itemCount: allItemsInGenre.length,
+              itemBuilder: (context, index) {
+                final item = allItemsInGenre[index];
+                if (item is Movie) {
+                  return MovieCard(
+                    movie: item,
+                    typec: "movie",
+                  );
+                } else if (item is TvSeriesAnime) {
+                  return AnimeSeriesCard(
+                    series: item,
+                    typec: "anime",
+                  );
+                } else if (item is TvSeriesAnime) {
+                  // Assuming AnimeCard exists
+                  return AnimeSeriesCard(
+                      series: item, typec: "tvseries"); // Adapt as needed
+                }
+                return const SizedBox.shrink(); // Should not happen
+              },
+            ),
     );
   }
 }
@@ -135,10 +152,6 @@ class GenreListScreen extends StatelessWidget {
       // ... etc.
     };
 
-// In BoxDecoration:
-
-    // ... colorFilter if needed
-
     return Scaffold(
       backgroundColor: AppColors.primaryBackground,
       // No AppBar needed if it's part of AppShell's IndexedStack
@@ -156,7 +169,7 @@ class GenreListScreen extends StatelessWidget {
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2, // Or 3
                     childAspectRatio:
-                        3 / 1, // Adjust aspect ratio for genre chips/cards
+                        2 / 2, // Adjust aspect ratio for genre chips/cards
                     crossAxisSpacing: 10.0,
                     mainAxisSpacing: 10.0,
                   ),
@@ -170,6 +183,7 @@ class GenreListScreen extends StatelessWidget {
                     return InkWell(
                         child: InkWell(
                       onTap: () {
+                        tVClick();
                         Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -200,18 +214,44 @@ class GenreListScreen extends StatelessWidget {
                           ),
                           borderRadius: BorderRadius.circular(8.0),
                         ),
-                        child: Center(
-                          child: Text(
+                        child: Text(
                             genre,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: AppColors.primaryText,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              shadows: [
-                                Shadow(color: Colors.black38, blurRadius: 2)
-                              ],
-                            ),
+            style: TextStyle(
+              fontSize: 35,
+              fontWeight: FontWeight.w900,
+              // color: Colors.white,
+              letterSpacing: 1.5,
+              height: 1.2,
+              shadows: [
+                Shadow(
+                  offset: const Offset(2, 2),
+                  blurRadius: 8,
+                  color: Colors.black.withOpacity(0.8),
+                ),
+                Shadow(
+                  offset: const Offset(-1, -1),
+                  blurRadius: 4,
+                  color: Colors.purple.withOpacity(0.3),
+                ),
+                Shadow(
+                  offset: const Offset(0, 0),
+                  blurRadius: 20,
+                  color: Colors.cyan.withOpacity(0.4),
+                ),
+              ],
+              foreground: Paint()
+                ..shader = const LinearGradient(
+                  colors: [
+                    Color(0xFFFF6B6B),
+                    Color(0xFF4ECDC4),
+                    Color(0xFF45B7D1),
+                    Color(0xFF96CEB4),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ).createShader(const Rect.fromLTWH(0, 0, 300, 100)),
+            
                           ),
                         ),
                       ),

@@ -1,11 +1,9 @@
-// TODO Implement this library.
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:miko/screens/extractor.dart';
 import 'package:miko/screens/grid.dart' as g;
 
-import 'package:miko/screens/local_screen.dart';
 import 'package:miko/screens/tmdb_datails_process.dart';
 import 'package:miko/showcases/movie_page_copy.dart';
 import 'package:miko/showcases/tv_page_anime.dart';
@@ -111,15 +109,15 @@ class RightNavigationPanel extends ConsumerWidget {
             shrinkWrap: true,
             children: [
               // --- REVERSED ORDER ---
-              _buildNavigationItem(
-                context,
-                ref,
-                icon: Icons.file_open_outlined,
-                title: 'File Explorer',
-                showText: showText,
-                onTap: () =>
-                    _navigateTo(context, LocalScreen(), isMobileLayout),
-              ),
+              // _buildNavigationItem(
+              //   context,
+              //   ref,
+              //   icon: Icons.file_open_outlined,
+              //   title: 'File Explorer',
+              //   showText: showText,
+              //   onTap: () =>
+              //       _navigateTo(context, LocalScreen(), isMobileLayout),
+              // ),
               _buildNavigationItem(
                 context,
                 ref,
@@ -254,14 +252,7 @@ class RightNavigationPanel extends ConsumerWidget {
                 showText: showText,
                 onTap: () => _navigateTo(context, TmdbDatailsProcess(), isMobileLayout),
               ),
-              _buildNavigationItem(
-                context,
-                ref,
-                icon: Icons.fire_extinguisher,
-                title: 'Extractor',
-                showText: showText,
-                onTap: () => _navigateTo(context, ExtractionExamplesScreen(), isMobileLayout),
-              ),
+
               _buildNavigationItem(
                 context,
                 ref,

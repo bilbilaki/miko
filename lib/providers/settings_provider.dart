@@ -13,42 +13,8 @@ final setsettingsService = settingsServiceProvider.overrideWith(
 );
 
 final settingsServiceProvider = ChangeNotifierProvider<UserDataService>((ref) {
-  // The SettingsService constructor calls _init() which loads preferences
-  // and potentially fetches initial models if implemented there.
   return UserDataService();
 });
 
-// --- Derived Providers for Specific Settings ---
-// These rebuild only when the specific value changes, potentially more efficient
-// Provides the list of model IDs fetched via the custom URL in SettingsService
-// final showAdultProvider = Provider<bool>((ref) {
-//   final settingsService = ref.watch(settingsServiceProvider);
-//   return settingsService.showAdult;
-// });
-
-// final themeModeProvider = Provider<ThemeMode>((ref) {
-//   final settingsService = ref.watch(settingsServiceProvider);
-//   return settingsService.themeMode;
-// });
-
-// final gridSizeProvider = Provider<int>((ref) {
-//   final settingsService = ref.watch(settingsServiceProvider);
-//   return settingsService.gridSize;
-// });
-
-// final downloaderPackageProvider = Provider<String>((ref) {
-//   final settingsService = ref.watch(settingsServiceProvider);
-//   return settingsService.downloaderPackage;
-// });
-
-// final externalPlayerPackageProvider = Provider<String>((ref) {
-//   final settingsService = ref.watch(settingsServiceProvider);
-//   return settingsService.externalPlayerPackage;
-// });
-
-// final defaultPageProvider = Provider<String>((ref) {
-//   final settingsService = ref.watch(settingsServiceProvider);
-//   return settingsService.defaultPage;
-// });
-final rightSidebarCollapsedProvider = StateProvider<bool>((ref) => false);
-final sidebarCollapsedProvider = StateProvider<bool>((ref) => false);
+final rightSidebarCollapsedProvider = StateProvider<bool>((ref) => true);
+final sidebarCollapsedProvider = StateProvider<bool>((ref) => true);

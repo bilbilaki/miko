@@ -5,6 +5,7 @@ import 'package:flutter/services.dart'; // Import for HapticFeedback
 import 'package:miko/models/tv_series_anime.dart' as ss;
 import 'package:miko/providers/anime_provider.dart';
 import 'package:miko/services/user_data_service.dart';
+import 'package:miko/showcases/recommendations_page_series.dart';
 import 'package:miko/showcases/tv_page_grid.dart';
 import '../widgets/anime_series_card.dart'; // Keep if used elsewhere
 import 'seasondetailpage_anime.dart';
@@ -1383,7 +1384,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
       return const SizedBox.shrink();
     }
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Padding(
           padding: const EdgeInsets.only(top: 24.0, bottom: 12.0),
@@ -1397,7 +1398,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
               context,
               MaterialPageRoute(
                   builder: (context) =>
-                      TvPageGrid(response: "recommend", itemm: tvshowitemm)),
+                      RecommendationsPage( seriesId: widget.typec.id, seriesTitle: widget.tvShow.name,)),
             );
           },
           child: Text("Show All Recommends"),

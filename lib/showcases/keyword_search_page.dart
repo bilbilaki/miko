@@ -1,6 +1,6 @@
 // keyword_search_page.dart
 import 'package:flutter/material.dart';
-import 'package:miko/showcases/movie_detail_page.dart';
+import 'package:miko/showcases/movie_detail_page_copy.dart';
 import 'dart:async';
 import 'movie_service.dart';
 import 'model.dart';
@@ -364,7 +364,7 @@ class _KeywordMoviesPageState extends State<KeywordMoviesPage> {
   Widget _buildMovieCard(BuildContext context, Movie movie) {
     final String posterUrl = movie.posterPath != null
         ? 'https://inosdb.worker-inosuke.workers.dev/w500${movie.posterPath}'
-        : 'https://via.placeholder.com/200x300?text=No+Image';
+        : 'https://inosdb.worker-inosuke.workers.dev/w500${movie.posterPath}';
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),

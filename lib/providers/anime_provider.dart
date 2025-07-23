@@ -2,6 +2,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:csv/csv.dart';
+import 'dart:io';
+import 'dart:convert';
+import 'package:path_provider/path_provider.dart';
 import '../models/tv_series_anime.dart';
 
 // Define enum outside the class if not already globally defined
@@ -71,6 +74,29 @@ class AnimeProvider extends ChangeNotifier {
     _animeseriesMap.clear();
     _allAnimeSeriesList.clear();
     _searchResults.clear();
+
+    // Attempt to load cached data to avoid reprocessing CSV on each launch
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final cacheFile = File('${dir.path}/anime_cache.json');
+      if (await cacheFile.exists()) {
+        final content = await cacheFile.readAsString();
+        final List<dynamic> jsonData = jsonDecode(content);
+        for (var item in jsonData) {
+          final series = TvSeriesAnime.fromJson(item as Map<String, dynamic>);
+          _animeseriesMap[series.tmdbId] = series;
+        }
+        _allAnimeSeriesList = _animeseriesMap.values.toList()
+          ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        _searchResults = _allAnimeSeriesList;
+        _updateStatus(LoadingStatus.loaded);
+        _isInitialized = true;
+        if (kDebugMode) print('Loaded anime data from cache.');
+        return;
+      }
+    } catch (e) {
+      if (kDebugMode) print('Cache load failed, parsing CSV: $e');
+    }
 
     try {
       // 1. Load Series Details CSV
@@ -207,20 +233,28 @@ class AnimeProvider extends ChangeNotifier {
         _animeseriesMap[tmdbId] = finalSeries; // Add to the final map
       }
 
-      // Create the sorted list for display
-      _allAnimeSeriesList = _animeseriesMap.values.toList()
-        ..sort((a, b) => a.name
-            .toLowerCase()
-            .compareTo(b.name.toLowerCase())); // Case-insensitive sort
+    // Create the sorted list for display
+    _allAnimeSeriesList = _animeseriesMap.values.toList()
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    _searchResults = _allAnimeSeriesList; // Initialize search results
 
-      _searchResults = _allAnimeSeriesList; // Initialize search results
-      _updateStatus(LoadingStatus.loaded);
-      _isInitialized = true;
+    // Cache the combined data to avoid reprocessing CSV on next launch
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final cacheFile = File('${dir.path}/anime_cache.json');
+      final List<Map<String, dynamic>> jsonData =
+          _allAnimeSeriesList.map((s) => s.toJson()).toList();
+      await cacheFile.writeAsString(jsonEncode(jsonData));
+      if (kDebugMode) print('Cached anime data to ${cacheFile.path}');
+    } catch (e) {
+      if (kDebugMode) print('Failed to write anime cache: $e');
+    }
 
-      if (kDebugMode) {
-        print(
-            "Successfully loaded and combined data for ${_allAnimeSeriesList.length} TV series.");
-      }
+    _updateStatus(LoadingStatus.loaded);
+    _isInitialized = true;
+    if (kDebugMode) {
+      print("Successfully loaded and combined data for ${_allAnimeSeriesList.length} TV series.");
+    }
     } catch (e, stacktrace) {
       _updateStatus(LoadingStatus.error, "Failed to load TV series data: $e");
       if (kDebugMode) {

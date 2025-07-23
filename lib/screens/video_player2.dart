@@ -3,13 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:media_kit/media_kit.dart'; // Required.
 import 'package:media_kit_video/media_kit_video.dart'; // Required.
-import 'package:miko/providers/ui_providers.dart';
 import 'dart:async';
 import 'dart:io'; // Add this import
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io' show Platform;
 
-import 'package:provider/provider.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final String pathlocal;
@@ -38,7 +36,6 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   void initState() {
     super.initState();
-    Provider.of<FloatingButtonVisibilityNotifier>(context, listen: false).hide();
 
     // Move permission check to after widget is fully initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {});
@@ -80,7 +77,28 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
     }
   }
 
- 
+     final List<BoxFit> _fitOptions = [
+    BoxFit.contain, // Standard
+    BoxFit.cover,   // Fill/Crop
+    BoxFit.fill,    // Stretch
+    BoxFit.fitWidth,
+    BoxFit.fitHeight,
+  ];
+  int _currentFitIndex = 0;
+  BoxFit get _currentFit => _fitOptions[_currentFitIndex];
+  // Map to hold icons for each fit mode for better UX
+  final Map<BoxFit, IconData> _fitIcons = {
+    BoxFit.contain: Icons.fullscreen_exit,
+    BoxFit.cover: Icons.fullscreen,
+    BoxFit.fill: Icons.photo_size_select_large,
+    BoxFit.fitWidth: Icons.swap_horiz,
+    BoxFit.fitHeight: Icons.swap_vert,
+  };
+  void _cycleBoxFit() {
+    setState(() {
+      _currentFitIndex = (_currentFitIndex + 1) % _fitOptions.length;
+    });
+  }
 
   String currentQuality = 'Auto';
   final List<String> qualityOptions = ['Auto', '1080p', '720p', '480p', '360p'];
@@ -101,11 +119,10 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
   }
 
   @override
-  void dispose() {
+  void dispose()async {
     _hideTimer?.cancel();
-        Provider.of<FloatingButtonVisibilityNotifier>(context, listen: false).show();
 
-    player.dispose();
+   await player.dispose();
     super.dispose();
   }
 
@@ -174,6 +191,11 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         ],
                       ),
                     ),
+                        IconButton(
+                  icon: Icon(_fitIcons[_currentFit] ?? Icons.aspect_ratio, color: Colors.white),
+                  tooltip: 'Change display mode',
+                  onPressed: _cycleBoxFit,
+                ),
                   IconButton(
                     icon: const Icon(Icons.picture_in_picture_outlined,
                         color: Colors.white),

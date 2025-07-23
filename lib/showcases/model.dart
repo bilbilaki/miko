@@ -1540,7 +1540,7 @@ class Movie {
 
   String get fullBackdropPath => backdropPath != null
       ? 'https://inosdb.worker-inosuke.workers.dev/w780$backdropPath'
-      : 'https://image.tmdb.org/t/p/w780$backdropPath';
+      : 'https://inosdb.worker-inosuke.workers.dev/w780$backdropPath';
 
   String get formattedRuntime {
     if (runtime == null || runtime == 0) return 'N/A';

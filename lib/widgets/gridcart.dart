@@ -48,7 +48,7 @@ class _InteractiveVideoCardState extends State<InteractiveVideoCard> {
 
     if (mounted) {
       setState(() => _isPlayingPreview = true);
-      player.play();
+     await player.play();
     }
   }
 
@@ -82,16 +82,19 @@ class _InteractiveVideoCardState extends State<InteractiveVideoCard> {
         tVmedium();
         _startPreview();
       },
+
       // When long press ends, stop the preview.
       onLongPressEnd: (_) {
         tVmedium();
 
         _stopPreview();
       },
+
+      // When long press ends, stop the preview.
       onLongPressCancel: () {
         tVmedium();
 
-        _stopPreview();
+        // _stopPreview();
       },
       child: MouseRegion(
         // On hover, start the preview (for mouse devices).
@@ -100,7 +103,7 @@ class _InteractiveVideoCardState extends State<InteractiveVideoCard> {
         onExit: (_) => _stopPreview(),
         child: Card(
           //   elevation: _isPlayingPreview ? 12 : 2, // More elevation when active
-          //      margin: EdgeInsets.zero,
+                margin: EdgeInsets.zero,
           clipBehavior: Clip
               .antiAlias, // Ensures the video stays within the card's rounded corners
           shape: RoundedRectangleBorder(
@@ -113,8 +116,10 @@ class _InteractiveVideoCardState extends State<InteractiveVideoCard> {
                 child: _isPlayingPreview
                     ? Video(
                         controller: controller,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.fitWidth,
                         controls: null,
+                        filterQuality: FilterQuality.high,
+                        
                       )
                     : Stack(
                         fit: StackFit.expand,

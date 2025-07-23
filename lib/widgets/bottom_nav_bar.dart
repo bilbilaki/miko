@@ -16,7 +16,7 @@ class BottomNavBar extends StatelessWidget {
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed, // Ensures all labels are visible
       backgroundColor: AppColors.primaryBackground,
-      selectedItemColor: AppColors.accentColor,
+      selectedItemColor: const Color.fromARGB(255, 0, 72, 255),
       unselectedItemColor: AppColors.secondaryText,
       currentIndex: currentIndex,
       onTap: onTap,
@@ -24,12 +24,12 @@ class BottomNavBar extends StatelessWidget {
       unselectedFontSize: 10.0,
       items: const [
         BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          activeIcon: Icon(Icons.home),
+          icon: Icon(Icons.movie_edit),
+          activeIcon: Icon(Icons.camera_roll_sharp),
           label: 'Movies',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.live_tv_outlined),
+          icon: Icon(Icons.tv),
           activeIcon: Icon(Icons.live_tv),
           label: 'TVSeries',
         ),
@@ -45,8 +45,8 @@ class BottomNavBar extends StatelessWidget {
         ),
         // Center special button for Shorts
         BottomNavigationBarItem(
-          icon: Icon(Icons.add_circle_outline),
-          activeIcon: Icon(Icons.add_circle),
+          icon: Icon(Icons.bookmark_add),
+          activeIcon: Icon(Icons.bookmark),
           label: 'WatchList',
         ),
         BottomNavigationBarItem(

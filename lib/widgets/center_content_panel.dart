@@ -4,6 +4,7 @@ import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/screens/genre_detail_screen.dart';
 import 'package:miko/screens/watchlist_screen.dart';
 import 'package:miko/utils/colors.dart';
+import 'package:miko/utils/utils.dart';
 import 'package:miko/widgets/bottom_nav_bar.dart';
 
 class CenterContentPanel extends ConsumerStatefulWidget {
@@ -20,7 +21,7 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
 
   final List<Widget> _pages = [
     const AnimeGridScreen(typec: "movie"),
-  //  const TvSeriesGridScreen(),
+    //  const TvSeriesGridScreen(),
     const AnimeGridScreen(typec: "tvseries"), // Placeholder
     const AnimeGridScreen(typec: "anime"), // Placeholder
 
@@ -31,15 +32,17 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
 
   void _onPageChanged(int index) {
     debugPrint('Navigating to page index: $index');
+    tVmedium();
     setState(() {
       _currentIndex = index;
     });
   }
 
   void _onNavBarTap(int index) {
+    tVmedium();
     _pageController.animateToPage(
       index,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 200),
       curve: Curves.ease,
     );
   }
@@ -49,7 +52,7 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
     _pageController.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

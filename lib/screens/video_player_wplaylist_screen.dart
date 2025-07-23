@@ -4,29 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:miko/models/tv_series_anime.dart' as ss;
-import 'package:miko/providers/ui_providers.dart';
 import 'package:miko/services/user_data_service.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:provider/provider.dart';
 
 
-// Third Party Packages
-
-// Flutter Packages
-
-enum InternetConnectionStatus {
-  /// connected to internet
-  connected,
-
-  /// disconnected from internet
-  disconnected,
-
-  /// slow internet
-  slow,
-}
+final userdata = UserDataService().decoderPreference;
 
 class VideoPlayerScreen extends StatefulWidget {
-  // NEW: Receive the full context instead of just a URL
   final String seriesname;
   final int tvSeriesId;
   final ss.Season season;
@@ -50,36 +35,44 @@ class VideoPlayerScreen extends StatefulWidget {
 
 class VideoPlayerScreenState extends State<VideoPlayerScreen> {
   late final Player player = Player();
-  final userdata = UserDataService().decoderPreference;
   late final VideoController controller = VideoController(player);
   bool showControls = true;
   bool showEpisodeList = false;
   bool isFullScreen = false;
   bool isMuted = false;
   bool isPiPEnabled = false;
- // final String _selectedQuality = 'Auto'; // To track user's quality choice
-  //final bool _isChangingQuality =
-   //   false; // To prevent issues during quality switch
   Timer? _progressSaveTimer; // Timer to periodically save progress
   final ScrollController _seasonsScrollController = ScrollController();
 
-  // --- UI State ---
-
-  // Subtitle settings
   double subtitleSize = 32.0;
   Color subtitleColor = const Color.fromARGB(255, 238, 230, 5);
   bool showSubtitleControls = false;
-  // State to manage the playlist
   late int currentIndex;
   ss.Episode? get currentEpisode =>
       widget.playlist.isNotEmpty ? widget.playlist[currentIndex] : null;
 
-  // For showing/hiding controls
   Timer? _hideTimer;
-  //bool showSubtitleControls = false;
-  // double subtitleSize = 32.0;
   String currentQuality = 'Auto';
+ 
 
+  // --- 1. BoxFit Feature: State variables ---
+  final List<BoxFit> _fitOptions = [
+    BoxFit.contain, // Standard
+    BoxFit.cover,   // Fill/Crop
+    BoxFit.fill,    // Stretch
+    BoxFit.fitWidth,
+    BoxFit.fitHeight,
+  ];
+  int _currentFitIndex = 0;
+  BoxFit get _currentFit => _fitOptions[_currentFitIndex];
+  // Map to hold icons for each fit mode for better UX
+  final Map<BoxFit, IconData> _fitIcons = {
+    BoxFit.contain: Icons.fullscreen_exit,
+    BoxFit.cover: Icons.fullscreen,
+    BoxFit.fill: Icons.photo_size_select_large,
+    BoxFit.fitWidth: Icons.swap_horiz,
+    BoxFit.fitHeight: Icons.swap_vert,
+  };
   final List<String> qualityOptions = [
     'Auto',
     '1080p',
@@ -88,44 +81,41 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
     '480p',
     'DUBBED'
   ];
+  late final UserDataService _userDataService;
+
   @override
   void initState() {
     super.initState();
-    Provider.of<FloatingButtonVisibilityNotifier>(context, listen: false).hide();
 
     currentIndex = widget.initialIndex;
+    _userDataService = Provider.of<UserDataService>(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {});
 
-    // Open the video URL.
     player.open(Media(Uri.decodeComponent(widget.url)),
-        play: true); // Start playing immediately
+        play: true); 
 
-    // Listen for completion to auto-play the next episode
+
+        _progressSaveTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      _savePlaybackProgress();
+    });
+
     player.stream.completed.listen((completed) {
       if (completed) {
-        _clearPlaybackProgress(); // Clear progress for the completed episode
+        _clearPlaybackProgress(); 
         playNext();
       }
     });
 
-    player.stream.error.listen((error) => debugPrint('Player Error: $error'));
-
-    // The new core logic for playing an episode
-
-    // Start the timer to save progress periodically
-    _progressSaveTimer = Timer.periodic(const Duration(seconds: 15), (_) {
-      _savePlaybackProgress();
-    });
 
     player.stream.error.listen((error) => debugPrint('Player Error: $error'));
   }
+void cleanUpPlayer() async{
+  _progressSaveTimer?.cancel();
+  _savePlaybackProgress();
+ await player.dispose();
+}
 
-  //region Core Player Logic (The most important part)
-  //================================================================================
-
-  /// The main function to play an episode.
-  /// It handles resuming, auto-quality selection, and opening the media.
   void playEpisode(int index, {bool isInitialPlay = false}) async {
     if (index < 0 || index >= widget.playlist.length) return;
 
@@ -137,17 +127,16 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
     final userDataService =
         Provider.of<UserDataService>(context, listen: false);
 
-    // --- Task 3: Resume Playback Logic ---
     Duration? seekToPosition;
     if (isInitialPlay) {
-      final savedPosition = await userDataService.getEpisodeProgress(
+      final savedPosition = await _userDataService.getEpisodeProgress(
         widget.tvSeriesId,
         episodeToPlay.seasonNumber,
         episodeToPlay.episodeNumber,
       );
 
+      // Show resume dialog if saved progress is significant
       if (savedPosition != null && savedPosition.inSeconds > 10) {
-        // Ask user if they want to resume
         final resume = await _showResumeDialog(savedPosition);
         if (resume == true) {
           seekToPosition = savedPosition;
@@ -155,7 +144,7 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
       }
     }
 
-    // --- Task 1: Auto Quality Selection Logic ---
+
     final urlToPlay = episodeToPlay.getAvailableQualityUrls();
     
     final up = urlToPlay.values.first;
@@ -166,55 +155,22 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
     if (seekToPosition != null) {
       await player.seek(seekToPosition);
     }
-    // Mark as watched (or started watching)
     userDataService.toggleIsWatchedLink(
         widget.seriesname, widget.tvSeriesId, episodeToPlay, widget.season);
   }
 
-  /// --- Task 2: Change Quality Mid-Playback ---
-  // Future<void> _changeQuality(String newQuality) async {
-  //   if (_isChangingQuality || _selectedQuality == newQuality) return;
 
-  //   setState(() {
-  //     _isChangingQuality = true;
-  //   });
-
-  //   final position = player.state.position; // 1. Get current position
-  //   final episode = currentEpisode;
-  //   if (episode == null) return;
-
-  //   String? newUrl;
-
-  //   if (newUrl != null) {
-  //     await player.open(Media(Uri.decodeComponent(newUrl))); // 2. Open new URL
-  //     await player.seek(position); // 3. Seek to old position
-  //     setState(() {
-  //       _selectedQuality = newQuality;
-  //     });
-  //   } else {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('Quality "$newQuality" is not available.')),
-  //     );
-  //   }
-
-  //   setState(() {
-  //     _isChangingQuality = false;
-  //   });
-  // }
-
-  /// Task 1 (Auto Mode): Finds the best URL based on a priority list.
-  /// This is the simple version. For the speed test version, see below.
-
-  Future<void> _savePlaybackProgress() async {
-    if (player.state.playing && currentEpisode != null) {
+    Future<void> _savePlaybackProgress() async {
+    // --- 2. FIX: Removed `player.state.playing` check ---
+    // This ensures progress is saved even if the video is paused.
+    // We only need to check that a video is loaded and has a duration.
+    if (currentEpisode != null && player.state.duration > Duration.zero) {
       final position = player.state.position;
       final duration = player.state.duration;
 
-      // Don't save if video is almost over or just started
+      // Save if not too close to the beginning or end
       if (position.inSeconds > 10 && (duration - position).inSeconds > 15) {
-        final userDataService =
-            Provider.of<UserDataService>(context, listen: false);
-        await userDataService.saveEpisodeProgress(
+        await _userDataService.saveEpisodeProgress(
           widget.tvSeriesId,
           currentEpisode!.seasonNumber,
           currentEpisode!.episodeNumber,
@@ -224,11 +180,10 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
     }
   }
 
+
   Future<void> _clearPlaybackProgress() async {
     if (currentEpisode != null) {
-      final userDataService =
-          Provider.of<UserDataService>(context, listen: false);
-      await userDataService.clearEpisodeProgress(
+      await _userDataService.clearEpisodeProgress(
         widget.tvSeriesId,
         currentEpisode!.seasonNumber,
         currentEpisode!.episodeNumber,
@@ -236,26 +191,48 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
     }
   }
 
+  void playNext() {
+    if (currentIndex < widget.playlist.length - 1) {
+      playEpisode(currentIndex + 1);
+    } else {
+      debugPrint("Playlist finished.");
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    }
+  }
+  
+  void playPrevious() {
+    if (currentIndex > 0) {
+      playEpisode(currentIndex - 1);
+    }
+  }
+  
+  // Helper for resume dialog
   Future<bool?> _showResumeDialog(Duration savedPosition) {
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Resume Playback?'),
-        content: Text(
-            'You previously stopped watching at ${formatDuration(savedPosition)}. Would you like to resume?'),
+        content: Text('You previously stopped watching at ${formatDuration(savedPosition)}. Would you like to resume?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false), // Start over
-            child: const Text('START OVER'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true), // Resume
-            child: const Text('RESUME'),
-          ),
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('START OVER')),
+          ElevatedButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('RESUME')),
         ],
       ),
     );
   }
+
+  // Helper to format duration strings
+  String formatDuration(Duration duration) {
+    final hours = duration.inHours.toString().padLeft(2, '0');
+    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    if (duration.inHours > 0) return "$hours:$minutes:$seconds";
+    return "$minutes:$seconds";
+  }
+
+
 
   void _showSubtitleControls() {
     setState(() {
@@ -272,41 +249,30 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
     });
   }
 
-  void playNext() {
-    if (currentIndex < widget.playlist.length - 1) {
-      playEpisode(currentIndex + 1);
-    } else {
-      debugPrint("Playlist finished.");
-      Navigator.of(context).pop();
-    }
-  }
+ 
 
-  void nimdispose() {
+  void nimdispose() async{
     _progressSaveTimer?.cancel();
-    _savePlaybackProgress(); // Save one last time on exit
-    player.dispose();
-    super.dispose();
+    _savePlaybackProgress();
+   await player.dispose();
   }
 
   @override
-  void dispose() {
+  void dispose() async{
     _progressSaveTimer?.cancel();
-        Provider.of<FloatingButtonVisibilityNotifier>(context, listen: false).show();
-
-    _savePlaybackProgress(); // Save one last time on exit
-    player.dispose();
+  await  _savePlaybackProgress(); // Save one last time on exit
+   await player.dispose();
     super.dispose();
   }
 
-  String formatDuration(Duration duration) {
-    final hours = duration.inHours.toString().padLeft(2, '0');
-    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
-    if (duration.inHours > 0) {
-      return "$hours:$minutes:$seconds";
-    }
-    return "$minutes:$seconds";
+  // --- 1. BoxFit Feature: Function to cycle modes ---
+  void _cycleBoxFit() {
+    setState(() {
+      _currentFitIndex = (_currentFitIndex + 1) % _fitOptions.length;
+    });
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -317,11 +283,7 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
           backgroundColor: Colors.black,
           title: Text('${widget.seriesname}'
               '${currentEpisode?.episodeIdentifier ?? 'Loading...'}'),
-          actions: [
-            // Playlist button to open the drawer
-          ],
         ),
-        // The endDrawer will contain our playlist
         body: _buildPlayerWithControls());
   }
 
@@ -332,100 +294,6 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
         child: _buildSeasonsList(context, [widget.season], widget.tvSeriesId));
   }
 
-  //       ListView.builder(
-  //           itemCount: widget.playlist.length,
-  //           itemBuilder: (context, index) {
-  //             final episode = widget.playlist[index];
-
-  //             final availableQualities = episode.getAvailableQualityUrls();
-
-  //             final bool isPlaying = index == currentIndex;
-  //             final userDataService = Provider.of<UserDataService>(context);
-  //             final bool isWatched = userDataService.isWatchedEpisode(
-  //                 widget.seriesname, widget.tvSeriesId, episode, widget.season);
-
-  //             return ListTile(
-  //               tileColor: isPlaying ? Colors.blue.withOpacity(0.3) : null,
-  //               leading: Row(
-  //                 children: [
-  //                   // Episode Number/Identifier
-  //                   Expanded(
-  //                     flex: 3, // Give reasonable space to title/identifier
-  //                     child: Column(
-  //                       crossAxisAlignment: CrossAxisAlignment.start,
-  //                       children: [
-  //                         Text(
-  //                           'Episode ${episode.episodeNumber}', // Use the generated display title
-  //                           style: const TextStyle(
-  //                               color: AppColors.primaryText,
-  //                               fontSize: 14,
-  //                               fontWeight: FontWeight.w500),
-  //                           maxLines: 2, // Allow wrapping
-  //                           overflow: TextOverflow.ellipsis,
-  //                         ),
-  //                         // Optionally show the SxxExx identifier below if different
-  //                       ],
-  //                     ),
-  //                   ),
-  //                   const SizedBox(width: 12),
-
-  //                   // Quality Buttons
-  //                   if (availableQualities.isNotEmpty)
-  //                     Expanded(
-  //                       flex: 4, // Give slightly more space for buttons maybe
-  //                       child: Wrap(
-  //                         alignment:
-  //                             WrapAlignment.end, // Align buttons to the right
-  //                         spacing: 6.0, // Horizontal space between buttons
-  //                         runSpacing: 4.0, // Vertical space if wraps
-  //                         children:
-  //                             availableQualities.entries.map<Widget>((entry) {
-  //                           final quality = entry.key;
-  //                           final url = entry.value;
-  //                           return ElevatedButton(
-  //                             onPressed: () {
-  //                               // Close the drawer
-  //                               Navigator.of(context).pop();
-  //                               // Play the selected episode
-  //                               playEpisode(index);
-  //                             },
-  //                             style: ElevatedButton.styleFrom(
-  //                               backgroundColor:
-  //                                   AppColors.accentColor.withOpacity(0.7),
-  //                               foregroundColor: AppColors.primaryText,
-  //                               padding: const EdgeInsets.symmetric(
-  //                                   horizontal: 10, vertical: 5),
-  //                               minimumSize: const Size(45, 28),
-  //                               textStyle: const TextStyle(
-  //                                   fontSize: 11, fontWeight: FontWeight.bold),
-  //                               shape: RoundedRectangleBorder(
-  //                                 borderRadius: BorderRadius.circular(6),
-  //                               ),
-  //                               elevation: 1,
-  //                             ),
-  //                             child: Text(
-  //                               isWatched
-  //                                   ? "${quality.toUpperCase()} (Watched)"
-  //                                   : quality.toUpperCase(),
-  //                             ),
-  //                           );
-  //                         }).toList(),
-  //                       ),
-  //                     )
-  //                   else
-  //                     // Show something if no qualities are found for this episode
-  //                     const Text(
-  //                       'No links',
-  //                       style: TextStyle(
-  //                           color: AppColors.secondaryText,
-  //                           fontSize: 12,
-  //                           fontStyle: FontStyle.italic),
-  //                     ),
-  //                 ],
-  //               ),
-  //             );
-  //           }));
-  // }
 
   void toggleEpisodeList() {
     setState(() {
@@ -471,16 +339,11 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
     });
   }
 
-  // String formatDuration(Duration duration) {
-  //   final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
-  //   final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
-  //   return "$minutes:$seconds";
-  // }
   Widget _buildSeasonsList(
       BuildContext context, List<ss.Season> seasons, int TvseriesId) {
     bool defaultExpansion = seasons.length == 1;
     return SizedBox(
-        height: 500, // Adjust as needed
+        height: 500, 
         child: ListView.builder(
           controller: _seasonsScrollController,
           shrinkWrap: false,
@@ -489,21 +352,18 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
           itemBuilder: (context, index) {
             final season = seasons[index];
 
-            // ...existing ExpansionTile code...
-            // Use ExpansionTile for collapsable seasons
             return Card(
-              // Wrap ExpansionTile in a Card for better visual separation
               elevation: 1,
               margin: const EdgeInsets.symmetric(vertical: 6.0),
               color: AppColors.secondaryBackground
-                  .withOpacity(0.4), // Slightly transparent background
+                  .withOpacity(0.4), 
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8)),
               clipBehavior:
-                  Clip.antiAlias, // Ensures content respects border radius
+                  Clip.antiAlias, 
               child: ExpansionTile(
                 key: PageStorageKey(
-                    'season_${season.seasonNumber}'), // Maintain expansion state
+                    'season_${season.seasonNumber}'),
                 title: Text(
                   'Season ${season.seasonNumber}',
                   style: const TextStyle(
@@ -517,21 +377,16 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
                       color: AppColors.secondaryText, fontSize: 12),
                 ),
                 iconColor:
-                    AppColors.accentColor, // Use accent color for expand icon
+                    AppColors.accentColor, 
                 collapsedIconColor: AppColors.secondaryText,
-                // Expand first season or if only one season exists
                 initiallyExpanded: defaultExpansion ||
                     season.seasonNumber ==
-                        1, // Keep first season expanded usually
+                        1,
                 childrenPadding: const EdgeInsets.only(
                     bottom: 8.0,
                     left: 4,
-                    right: 4), // Padding for episode tiles
-                // Remove default dividers and use padding/margin on EpisodeTile instead
-                // children: season.episodes.map((episode) => EpisodeTile(episode: episode)).toList(),
-
+                    right: 4), 
                 children: ListTile.divideTiles(
-                  // Add subtle dividers between episodes
                   context: context,
                   color: AppColors.dividerColor.withOpacity(0.3),
                   tiles: season.episodes
@@ -556,7 +411,7 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
         Video(
           controller: controller,
           controls: AdaptiveVideoControls,
-          fit: BoxFit.fitWidth,
+          fit: _currentFit,
           filterQuality: FilterQuality.high,
           wakelock: true,
           subtitleViewConfiguration: SubtitleViewConfiguration(
@@ -584,6 +439,11 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                 IconButton(
+                  icon: Icon(_fitIcons[_currentFit] ?? Icons.aspect_ratio, color: Colors.white),
+                  tooltip: 'Change display mode',
+                  onPressed: _cycleBoxFit,
+                ),
                 if (showSubtitleControls)
                   Container(
                     width: 200,
@@ -607,15 +467,6 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
                       ],
                     ),
                   ),
-                // IconButton(
-                //   icon: const Icon(Icons.picture_in_picture_outlined,
-                //       color: Colors.white),
-                //   onPressed: () {
-                //     setState(() {
-                //       isPiPEnabled = !isPiPEnabled;
-                //     });
-                //   },
-                // ),
                 IconButton(
                   icon: const Icon(Icons.closed_caption,
                       color: Color.fromARGB(255, 178, 246, 255)),
@@ -624,53 +475,25 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
                 IconButton(
                   icon: const Icon(Icons.refresh, color: Colors.white),
                   onPressed: () {
-                    nimdispose;
+                    nimdispose();
                     playEpisode(currentIndex);
                   },
                 ),
-                // IconButton(
-                //   icon: const Icon(Icons.timer, color: Colors.white),
-                //   onPressed: () {
-                //     // Timer functionality
-                //   },
-                // ),
+        
                 IconButton(
                     icon: const Icon(Icons.skip_previous,
                         color: Color.fromARGB(255, 250, 109, 109), size: 28),
                     onPressed: () {
-                      nimdispose;
-                      playEpisode(currentIndex--);
+                      nimdispose();
+                      playEpisode(currentIndex-1);
                     }),
                 IconButton(
                     icon: const Icon(Icons.skip_next,
                         color: Color.fromARGB(255, 97, 166, 251), size: 28),
                     onPressed: () async {
                       nimdispose();
-                      playEpisode(currentIndex++);
+                      playEpisode(currentIndex + 1);
                     }),
-                // IconButton(
-                //   icon: const Icon(Icons.closed_caption,
-                //       color: Color.fromARGB(255, 234, 237, 148)),
-                //   onPressed: () {
-                //     // Subtitle functionality
-                //   },
-                // ),
-                // IconButton(
-                //   icon: const Icon(Icons.mic, color: Colors.white),
-                //   onPressed: () {
-                //     // Audio track functionality
-                //   },
-                // ),
-                // IconButton(
-                //   icon: const Icon(Icons.playlist_play, color: Colors.white),
-                //   onPressed: toggleEpisodeList,
-                // ),
-                // IconButton(
-                //   icon: Icon(Icons.screenshot, color: Colors.white),
-                //   onPressed: () async {
-                //     final screenshot = await player.screenshot();
-                //   },
-                // ),
               ],
             ),
           ),
@@ -691,68 +514,54 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
         Provider.of<UserDataService>(context, listen: false);
 
     void playEpisodes(BuildContext context, url) async {
-      // Find the index of the current episode within its season's list
       final int initialIndex = season.episodes.indexOf(episode);
-      nimdispose;
+      nimdispose();
       playEpisode(initialIndex);
-      // Navigate to the player with the full context
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (_) => VideoPlayerScreen(
-      //       seriesname: seriesname,
-      //       tvSeriesId: id,
-      //       season: season,
-      //       playlist: season
-      //           .episodes, // Pass the whole list of episodes for the season
-      //       initialIndex: initialIndex,
-      //       url: url,
-      //     ),
-      //   ),
-      //  );
+
     }
 
-    // Create a display title: "E01: Episode Name" or just "Episode 1" if no name
-    // Since we removed tmdbTitle, we'll rely on season/episode numbers.
-    final displayTitle = 'Episode ${episode.episodeNumber}'; // Simple display
-    // Or use the identifier: final displayTitle = episode.episodeIdentifier;
+    final displayTitle = 'Episode ${episode.episodeNumber}'; 
     bool isInWatchlist =
         userDataService.isWatchedEpisode(seriesname, id, episode, season);
     return Padding(
-      // Add padding instead of using Card margin for better control with dividers
       padding: const EdgeInsets.symmetric(
-          vertical: 8.0, horizontal: 16.0), // Adjust padding as needed
+          vertical: 8.0, horizontal: 16.0),
       child: Row(
         children: [
-          // Episode Number/Identifier
           Expanded(
-            flex: 3, // Give reasonable space to title/identifier
+            flex: 3, 
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  displayTitle, // Use the generated display title
-                  style: const TextStyle(
-                      color: AppColors.primaryText,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500),
-                  maxLines: 2, // Allow wrapping
-                  overflow: TextOverflow.ellipsis,
-                ),
-                // Optionally show the SxxExx identifier below if different
-                if (episode.episodeIdentifier != displayTitle)
-                  Text(
-                    episode.episodeIdentifier,
-                    style: const TextStyle(
-                        color: AppColors.secondaryText, fontSize: 11),
+                      Text(
+                        'Episode ${episode.episodeNumber}',
+                        style: const TextStyle(color: AppColors.primaryText, fontSize: 14, fontWeight: FontWeight.w500),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (episode.episodeIdentifier != 'Episode ${episode.episodeNumber}')
+                        Text(
+                          episode.episodeIdentifier,
+                          style: const TextStyle(color: AppColors.secondaryText, fontSize: 11),
+                        ),
+                    ],
                   ),
-              ],
-            ),
-          ),
+                ),
+                // --- ADDED THIS: The watched icon ---
+                if (isInWatchlist)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Icon(
+                      Icons.check_circle,
+                      color: AppColors.accentColor,
+                      size: 18.0,
+                    ),
+                  ),
+              
+            
+    
           const SizedBox(width: 12),
-
-          // Quality Buttons
-          if (availableQualities.isNotEmpty)
+         if (availableQualities.isNotEmpty)
             Expanded(
               flex: 4,
               child: Wrap(
@@ -760,146 +569,33 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
                 spacing: 6.0,
                 runSpacing: 4.0,
                 children: availableQualities.entries.map<Widget>((entry) {
-                  final quality = entry.key;
-                  final url = entry.value;
                   return ElevatedButton(
-                    onPressed: () => playEpisodes(context, url),
+                    onPressed: () {
+                      final int episodeIndex = widget.playlist.indexOf(episode);
+                      playEpisode(episodeIndex);
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.accentColor.withOpacity(0.7),
                       foregroundColor: AppColors.primaryText,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       minimumSize: const Size(45, 28),
-                      textStyle: const TextStyle(
-                          fontSize: 11, fontWeight: FontWeight.bold),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
+                      textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                       elevation: 1,
                     ),
-                    child: Text(
-                      isInWatchlist
-                          ? "${quality.toUpperCase()} (Watched)"
-                          : quality.toUpperCase(),
-                    ),
+                    // --- REMOVED: The "(Watched)" text logic ---
+                    child: Text(entry.key.toUpperCase()),
                   );
                 }).toList(),
               ),
             )
           else
-            // Show something if no qualities are found for this episode
             const Text(
               'No links',
-              style: TextStyle(
-                  color: AppColors.secondaryText,
-                  fontSize: 12,
-                  fontStyle: FontStyle.italic),
+              style: TextStyle(color: AppColors.secondaryText, fontSize: 12, fontStyle: FontStyle.italic),
             ),
-        ],
-      ),
-    );
+        
+     ]) );
+    
   }
 }
-  // void _showQualitySelectionDialog() {
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) {
-  //       final availableQualities = [
-  //         'Auto',
-  //         '1080p',
-  //         '720p',
-  //         '540p',
-  //         '480p',
-  //         'DUBBED'
-  //       ];
-  //       return AlertDialog(
-  //         title: const Text('Select Quality'),
-  //         content: Column(
-  //           mainAxisSize: MainAxisSize.min,
-  //           children: availableQualities.map((quality) {
-  //             return ListTile(
-  //               title: Text(quality),
-  //               trailing: _selectedQuality == quality
-  //                   ? const Icon(Icons.check, color: Colors.blue)
-  //                   : null,
-  //               onTap: () {
-  //                 Navigator.of(context).pop();
-  //                 _changeQuality(quality);
-  //               },
-  //             );
-  //           }).toList(),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
-  // Future<String?> saveScreenshot(Uint8List? screenshot) async {
-  //   if (screenshot == null) return null;
-  //   try {
-  //     1. Check and request storage permission
-  //     final status = await Permission.storage.request();
-  //     if (!status.isGranted) {
-  //       debugPrint('Storage permission denied');
-  //       return null;
-  //     }
-
-  //     2. Get the base directory for saving
-  //     final Directory? baseDir = await getExternalStorageDirectory();
-  //     if (baseDir == null) {
-  //       debugPrint('Unable to get storage directory');
-  //       return null;
-  //     }
-
-  //     3. Create the save directory if it doesn't exist
-  //     final Directory saveDir = Directory('${baseDir.path}/Screenshots');
-  //     if (!saveDir.existsSync()) {
-  //       await saveDir.create(recursive: true);
-  //     }
-
-  //     4. Generate filename with timestamp
-  //     final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-  //     final String filePath =
-  //         '${saveDir.path}/${widget.seriesname}.S${widget.season.seasonNumber}.E${widget.initialIndex}.$timestamp.png';
-
-  //     5. Write the file
-  //     final File file = File(filePath);
-  //     await file.writeAsBytes(screenshot);
-
-  //     6. Save to gallery
-  //     final result = await ImageGallerySaver.saveFile(
-  //       filePath,
-  //       name:
-  //           '${widget.seriesname}.S${widget.season.seasonNumber}.E${widget.initialIndex}',
-  //     );
-
-  //     if (result['isSuccess'] == true) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(
-  //           content: Text('Screenshot saved to gallery'),
-  //           duration: Duration(seconds: 2),
-  //         ),
-  //       );
-  //       return filePath;
-  //     } else {
-  //       debugPrint('Error saving to gallery: ${result['error']}');
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(
-  //           content: Text('Failed to save screenshot to gallery'),
-  //           duration: Duration(seconds: 2),
-  //         ),
-  //       );
-  //       return null;
-  //     }
-  //   } catch (e) {
-  //     debugPrint('Error saving screenshot: $e');
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //         content: Text('Error saving screenshot: $e'),
-  //         duration: const Duration(seconds: 2),
-  //       ),
-  //     );
-  //     return null;
-  //   }
-  // }
-

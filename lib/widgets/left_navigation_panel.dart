@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
+import 'package:miko/screens/filtrering_screen.dart';
 import 'package:miko/screens/genre_detail_screen.dart';
-import 'package:miko/screens/settings_screen.dart';
-import 'package:miko/screens/shorts_screen.dart';
+import 'package:miko/screens/grid.dart';
+import 'package:miko/screens/http.dart';
+import 'package:miko/screens/unisearch_screen.dart';
 import 'package:miko/screens/watchlist_screen.dart';
 import 'package:miko/showcases/keyword_search_page.dart';
 import 'package:miko/showcases/movie_page_copy.dart';
 import 'package:miko/showcases/moviesearchpage.dart';
-import 'package:miko/showcases/multi_search_page.dart';
 import 'package:miko/showcases/tvsearchpage.dart';
 import 'package:miko/utils/colors.dart';
 
@@ -23,10 +24,12 @@ class LeftNavigationPanel extends ConsumerWidget {
     required this.isCollapsed, // Pass collapsed state
   });
 
+
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Watch providers needed for display and actions
-    // No need to watch sidebarCollapsedProvider directly if passed via constructor
+
+
 
     final bool showText =
         !isCollapsed || isMobileLayout; // Determine when to show text
@@ -42,7 +45,6 @@ class LeftNavigationPanel extends ConsumerWidget {
                   // Icon when collapsed
                   icon: const Icon(
                       Icons.interests_rounded), // Use a relevant icon
-                  tooltip: 'Xoshio',
                   onPressed: () {
                     // Maybe expand sidebar on icon click?
                     ref.read(sidebarCollapsedProvider.notifier).state = false;
@@ -56,7 +58,7 @@ class LeftNavigationPanel extends ConsumerWidget {
                         color: Colors.blue[300], size: 24),
                     const SizedBox(width: 8),
                     const Text(
-                      'Xoshio',
+                      '',
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
@@ -83,13 +85,12 @@ class LeftNavigationPanel extends ConsumerWidget {
           child: isCollapsed && !isMobileLayout
               ? IconButton(
                   icon: const Icon(Icons.add_comment_outlined),
-                  tooltip: "New Chat",
                   onPressed: () {},
                   color: Colors.grey[300],
                 )
               : ElevatedButton.icon(
                   icon: const Icon(Icons.add, size: 20),
-                  label: const Text('New Chat'),
+                  label: const Text(''),
                   onPressed: () {
                     if (isMobileLayout) Navigator.pop(context); // Close drawer
                   },
@@ -119,7 +120,7 @@ class LeftNavigationPanel extends ConsumerWidget {
         icon: Icons.movie_creation, 
         title: 'Movies',
         showText: showText,
-        onTap: () => _navigateTo(context, AnimeGridScreen(typec: "movie",), isMobileLayout),
+        onTap: () => _navigateTo(context, AnimeGridScreen(typec: "movie"), isMobileLayout),
       ),
       _buildNavigationItem(
         context,
@@ -127,7 +128,7 @@ class LeftNavigationPanel extends ConsumerWidget {
         icon: Icons.live_tv_rounded,
         title: 'TV Series',
         showText: showText,
-        onTap: () => _navigateTo(context, AnimeGridScreen(typec: "tvseries"), isMobileLayout),
+        onTap: () => _navigateTo(context, const AnimeGridScreen(typec: "tvseries"), isMobileLayout),
       ),
                   _buildNavigationItem(
             context,
@@ -136,7 +137,7 @@ class LeftNavigationPanel extends ConsumerWidget {
             title: 'Anime',
                     showText: showText,
 
-            onTap: () => _navigateTo(context, AnimeGridScreen(typec: "anime") ,isMobileLayout),
+            onTap: () => _navigateTo(context, const AnimeGridScreen(typec: "anime") ,isMobileLayout),
           ),
           _buildNavigationItem(
             context,
@@ -144,24 +145,17 @@ class LeftNavigationPanel extends ConsumerWidget {
             icon: Icons.category_outlined,
             title: 'Genres',
             showText:showText,
-            onTap: () => _navigateTo(context, GenreListScreen(), isMobileLayout),
+            onTap: () => _navigateTo(context, const GenreListScreen(), isMobileLayout),
           ),
           const Divider(color: AppColors.dividerColor, height: 1),
-          _buildNavigationItem(
-            context,
-            ref,
-            icon: Icons.video_library_outlined,
-            title: 'Subscription',
-            showText:showText,
-            onTap: () => _navigateTo(context, SubscriptionsPage(), isMobileLayout),
-          ),
+    
           _buildNavigationItem(
             context,
             ref,
             icon: Icons.settings_outlined,
-            title: 'Settings',
+            title: 'Search Local',
             showText:showText,
-            onTap: () => _navigateTo(context, SettingsScreen(), isMobileLayout),
+            onTap: () => _navigateTo(context, const UnifiedSearchScreen(), isMobileLayout),
           ),
           _buildNavigationItem(
             context,
@@ -169,7 +163,7 @@ class LeftNavigationPanel extends ConsumerWidget {
             icon: Icons.watch_later_outlined,
             title: 'Watchlist',
             showText:showText,
-            onTap: () => _navigateTo(context, WatchlistScreen(), isMobileLayout),
+            onTap: () => _navigateTo(context, const WatchlistScreen(), isMobileLayout),
           ),
           _buildNavigationItem(
             context,
@@ -177,21 +171,16 @@ class LeftNavigationPanel extends ConsumerWidget {
             icon: Icons.favorite_border_sharp,
             title: 'Favorites',
             showText:showText,
-            onTap: () => _navigateTo(context, FavoritesScreen(), isMobileLayout),
+            onTap: () => _navigateTo(context, const FavoritesScreen(), isMobileLayout),
           ),
-          // _buildDrawerItem(
-          //   context,
-          //   icon: Icons.download_outlined,
-          //   title: 'Downloads',
-          //   onTap: () => _showNotImplementedSnackbar(context),
-          // ),
+
                   _buildNavigationItem(
                     context,
                     ref,
-                    icon: Icons.playlist_play,
-                    title: 'Playlist Player',
+                    icon: Icons.spoke_outlined,
+                    title: 'Crawler Tools',
                     showText: showText,
-                    onTap: () => _navigateTo(context, SubscriptionsPage(), isMobileLayout),
+                    onTap: () => _navigateTo(context, const CrawlerHomePage4(), isMobileLayout),
                   ),
                   const Divider(color: AppColors.dividerColor, height: 1),
                   const Padding(
@@ -203,7 +192,7 @@ class LeftNavigationPanel extends ConsumerWidget {
         icon: Icons.movie_outlined,
         title: 'Popular Movie',
         showText: showText,
-        onTap: () => _navigateTo(context, MoviePage1(), isMobileLayout),
+        onTap: () => _navigateTo(context, const MoviePage1(), isMobileLayout),
       ),                  
                      
                 _buildNavigationItem(
@@ -212,59 +201,63 @@ class LeftNavigationPanel extends ConsumerWidget {
  icon: Icons.tv_rounded,
  title: 'Popular TV Shows',
  showText: showText,
- onTap: () => _navigateTo(context, TvSearchPage(), isMobileLayout),
+ onTap: () => _navigateTo(context, const TvSearchPage(), isMobileLayout),
+),
+
+
+_buildNavigationItem(
+ context,
+ ref,
+ icon: Icons.search,
+ title: 'Search movies',
+ showText: showText,
+ onTap: () => _navigateTo(context, const MovieSearchPage(), isMobileLayout),
 ),
 
 _buildNavigationItem(
  context,
  ref,
- icon: Icons.add,
- title: 'Browse channels',
+ icon: Icons.text_fields,
+ title: 'Search keywords',
  showText: showText,
- onTap: () => _navigateTo(context, TvSearchPage(), isMobileLayout),
+ onTap: () => _navigateTo(context, const KeywordSearchPage(), isMobileLayout),
 ),
-
 _buildNavigationItem(
  context,
  ref,
- icon: Icons.question_mark,
- title: 'Browse movies',
+ icon: Icons.send_and_archive_outlined,
+ title: 'Filtering Page',
  showText: showText,
- onTap: () => _navigateTo(context, MovieSearchPage(), isMobileLayout),
-),
-
-_buildNavigationItem(
- context,
- ref,
- icon: Icons.five_k_plus_rounded,
- title: 'Browse keywords',
- showText: showText,
- onTap: () => _navigateTo(context, KeywordSearchPage(), isMobileLayout),
-),
-
-_buildNavigationItem(
- context,
- ref,
- icon: Icons.javascript,
- title: 'Browse search',
- showText: showText,
- onTap: () => _navigateTo(context, MultiSearchPage(), isMobileLayout),
+ onTap: () => _navigateTo(context, const MovieListPage(), isMobileLayout),
 ),
 
 // _buildNavigationItem(
 //  context,
 //  ref,
-//  icon: Icons.dangerous,
-//  title: 'Fullscreen',
+//  icon: Icons.file_copy,
+//  title: 'File Browser',
 //  showText: showText,
-//  onTap: () => _navigateTo(context, const WebV(), isMobileLayout),
+//  onTap: () => _navigateTo(context, const LocalScreen(), isMobileLayout),
 // ),
+
+_buildNavigationItem(
+ context,
+ ref,
+ icon: Icons.dangerous,
+ title: 'Fullscreen',
+ showText: showText,
+ onTap: () => _navigateTo(context, const GridWall(), isMobileLayout),
+),
+
+
                   
                 ])
         )
       ],
     );
   }
+
+  
 // New helper methods
 void _navigateTo(BuildContext context, Widget screen, bool isMobileLayout) {
   if (isMobileLayout) Navigator.pop(context);

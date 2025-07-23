@@ -15,7 +15,7 @@ import 'package:miko/showcases/model.dart' as mo;
 import 'package:miko/showcases/movie_detail_page_copy.dart';
 import 'package:miko/showcases/movie_service.dart' as mo;
 import 'package:miko/showcases/person_detail_page.dart';
- import 'package:miko/showcases/tv_detail_page_anime.dart';
+import 'package:miko/showcases/tv_detail_page_anime.dart';
 import 'package:miko/utils/utils.dart';
 //import 'package:miko/showcases/tv_detail_page_anime.dart';
 import 'package:miko/widgets/anime_series_card.dart';
@@ -38,7 +38,7 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
   late double? gridCrossAxisCount = 3.0; // Default grid size
 
   // Haptic feedback function
-  
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -56,7 +56,7 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
           child: GestureDetector(
             // Added GestureDetector for general touch/drag vibration
             onTapDown: (_) => triggerVibration(), // Vibrate on touch/tap down
-            onPanDown: (_) => triggerVibration(), // Vibrate on pan/drag down
+            //        onPanDown: (_) => triggerVibration(), // Vibrate on pan/drag down
             child: Stack(
               children: [
                 if (widget.typec == "movie")
@@ -86,8 +86,8 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
                   right: 0,
                   child: GestureDetector(
                     onTap: () {
-                      triggerVibration(); // Vibrate on search bar tap
                       _showSearchOverlay();
+                      triggerVibration(); // Vibrate on search bar tap
                     },
                     child: Container(
                       padding: const EdgeInsets.all(16),
@@ -162,20 +162,20 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
     super.dispose();
   }
 
-  void _searchScrollListener() {
+  void _searchScrollListener() async {
     if (_searchScrollController2.position.pixels >=
-        _searchScrollController2.position.maxScrollExtent * 0.8) {
+        _searchScrollController2.position.maxScrollExtent * 0.7) {
       if (!_isFetchingMore2 && _searchPage2 < _searchTotalPages2) {
         _searchPage2++;
-        _fetchMultiSearch(loadMore: true);
+        await fetchMultiSearch(loadMore: true);
       }
     }
   }
 
   void _onSearchChanged2() async {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 200), () {
-      final query = _searchController2.text;
+    _debounce = Timer(const Duration(milliseconds: 100), () {
+      final query = _searchController2.text.trim();
       if (query != _currentQuery2) {
         _currentQuery2 = query;
         _searchPage2 = 1;
@@ -185,7 +185,7 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
             _isLoading2 = true;
             _error2 = null;
           });
-          _fetchMultiSearch();
+          fetchMultiSearch();
         } else {
           setState(() {
             _isLoading2 = false;
@@ -197,7 +197,7 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
     });
   }
 
-  Future<void> _fetchMultiSearch({bool loadMore = false}) async {
+  Future<void> fetchMultiSearch({bool loadMore = false}) async {
     if (_currentQuery2.isEmpty || _isFetchingMore2) return;
     setState(() {
       if (loadMore) {
@@ -247,8 +247,8 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
     }
   }
 
-  void _navigateToDetailPage(MultiSearchResult result) {
-    if (Platform.isAndroid) triggerVibration(); // Vibrate on navigation
+  void navigateToDetailPage(MultiSearchResult result) {
+    tVmedium(); // Vibrate on navigation
     switch (result.mediaType) {
       case MediaType.movie:
         if (result is MultiSearchMovie) {
@@ -332,14 +332,14 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) {
           // Listen to changes in the search controller and update overlay state
-          _searchController2.removeListener(_onSearchChanged2);
+          //  _searchController2.removeListener(_onSearchChanged2);
           _searchController2.addListener(() {
             setModalState(() {}); // Rebuild overlay on text change
             _onSearchChanged2();
           });
           return DraggableScrollableSheet(
             initialChildSize: 0.9,
-            minChildSize: 0.7,
+            minChildSize: 0.8,
             maxChildSize: 0.95,
             builder: (context, controller2) => Container(
               decoration: BoxDecoration(
@@ -360,9 +360,10 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
                         suffixIcon: IconButton(
                           icon: const Icon(Icons.clear),
                           onPressed: () async {
-                            triggerVibration(); // Vibrate on clear
+                            // Vibrate on clear
                             _searchController2.clear();
                             setModalState(() {});
+                            triggerVibration();
                           },
                         ),
                         border: OutlineInputBorder(
@@ -370,9 +371,9 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
                         ),
                       ),
                       onChanged: (value) async {
-                        triggerVibration(); // Vibrate on typing
                         setModalState(() {});
                         _onSearchChanged2();
+                        triggerVibration(); // Vibrate on typing
                       },
                     ),
                   ),
@@ -511,8 +512,8 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
+          navigateToDetailPage(result);
           vibrateCallback(); // Vibrate on card tap
-          _navigateToDetailPage(result);
         },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -532,7 +533,7 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
                       ),
                       errorWidget: (context, url, error) =>
                           _buildErrorWidget(result.mediaType),
-                      fadeInDuration: const Duration(milliseconds: 300),
+                      fadeInDuration: const Duration(milliseconds: 200),
                       fadeOutDuration: const Duration(milliseconds: 100),
                     )
                   : _buildErrorWidget(
@@ -613,9 +614,9 @@ Widget _buildBody0(
         highlightColor: AppColors.secondaryBackground.withOpacity(0.1),
         child: MasonryGridView.count(
           padding: const EdgeInsets.all(5.0),
-          crossAxisCount: 1 * gridSize,
-          mainAxisSpacing: 1.5,
-          crossAxisSpacing: 1.5,
+          crossAxisCount: 3,
+          mainAxisSpacing: 0.5,
+          crossAxisSpacing: 0.5,
           itemCount: 10, // Show a few shimmer items
           itemBuilder: (context, index) {
             return Container(
@@ -631,44 +632,33 @@ Widget _buildBody0(
   }
 
   final seriesList = seriesProvider.animeseriesForDisplay;
-  return NotificationListener<ScrollNotification>(
-    // Vibrate on scroll for main grid
-    onNotification: (ScrollNotification notification) {
-      if (Platform.isAndroid) {
-        if (notification is ScrollStartNotification) {
-          vibrateCallback(); // Vibrate when scroll starts
-        }
-      }
-      return false; // Continue to bubble up the notification
+  return MasonryGridView.count(
+    padding: const EdgeInsets.all(5.0),
+    crossAxisCount: 1 * gridSize, // Adjust number of
+    mainAxisSpacing: 1.5,
+    controller: ScrollController(keepScrollOffset: true),
+    shrinkWrap: true,
+    physics: const BouncingScrollPhysics(),
+    crossAxisSpacing: 1.5,
+    cacheExtent: 100,
+    itemCount: seriesList.length,
+    itemBuilder: (context, index) {
+      final series = seriesList[index];
+      return GestureDetector(
+        // Wrap card for tap vibration if the card itself does not handle
+        onTap: () {
+          tVmedium();
+          // Assuming AnimeSeriesCard has its own navigation logic
+          // If not, you'd add navigation here.
+        },
+        child: typec == "movie"
+            ? MovieCard(
+                movie: series,
+                typec: typec,
+              )
+            : AnimeSeriesCard(series: series, typec: typec),
+      );
     },
-    child: MasonryGridView.count(
-      padding: const EdgeInsets.all(5.0),
-      crossAxisCount: 1 * gridSize, // Adjust number of
-      mainAxisSpacing: 1.5,
-      controller: ScrollController(keepScrollOffset: true),
-      shrinkWrap: true,
-      physics: const BouncingScrollPhysics(),
-      crossAxisSpacing: 1.5,
-      cacheExtent: 100,
-      itemCount: seriesList.length,
-      itemBuilder: (context, index) {
-        final series = seriesList[index];
-        return GestureDetector(
-          // Wrap card for tap vibration if the card itself does not handle
-          onTap: () {
-            vibrateCallback();
-            // Assuming AnimeSeriesCard has its own navigation logic
-            // If not, you'd add navigation here.
-          },
-          child: typec == "movie"
-              ? MovieCard(
-                  movie: series,
-                  typec: typec,
-                )
-              : AnimeSeriesCard(series: series, typec: typec),
-        );
-      },
-    ),
   );
 }
 
@@ -680,11 +670,6 @@ class AnimeDetailsScreen extends StatelessWidget {
   final ScrollController _seasonsScrollController = ScrollController();
 
   // Haptic feedback function instance for this class
-  void triggerVibration() {
-    if (Platform.isAndroid) {
-      HapticFeedback.lightImpact();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -730,447 +715,431 @@ class AnimeDetailsScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.primaryBackground,
-      body: NotificationListener<ScrollNotification>(
-        // Vibrate on scroll for details screen
-        onNotification: (ScrollNotification notification) {
-          if (Platform.isAndroid) {
-            if (notification is ScrollStartNotification) {
-              triggerVibration(); // Vibrate when scroll starts
-            }
-          }
-          return false; // Continue to bubble up the notification
-        },
-        child: CustomScrollView(
-          slivers: <Widget>[
-            // --- App Bar with Backdrop ---
-            SliverAppBar(
-              expandedHeight: 500.0,
-              pinned: true,
-              stretch: true, // Optional: Allows overscroll stretch effect
-              backgroundColor: AppColors.primaryBackground, // Base color
-              iconTheme: const IconThemeData(
-                  color: AppColors.primaryText), // Ensure icons are visible
-              centerTitle: false,
-              bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(1.0),
-                child: Container(
-                  color:
-                      const Color.fromARGB(255, 255, 255, 255).withOpacity(0.5),
-                  height: 1.0,
-                ),
-              ),
-              flexibleSpace: FlexibleSpaceBar(
-                background: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    backdropUrl != null
-                        ? CachedNetworkImage(
-                            imageUrl: backdropUrl,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) =>
-                                Container(color: AppColors.secondaryBackground),
-                            errorWidget: (context, url, error) => Container(
-                                color: AppColors.secondaryBackground,
-                                child: const Icon(Icons.broken_image,
-                                    color: AppColors.secondaryText, size: 60)),
-                            fadeInDuration: const Duration(milliseconds: 300),
-                            fadeOutDuration: const Duration(milliseconds: 100),
-                          )
-                        : Container(
-                            // Fallback color if no backdrop
-                            color: AppColors.secondaryBackground,
-                            child: posterUrl !=
-                                    null // Try poster as fallback background
-                                ? CachedNetworkImage(
-                                    imageUrl: posterUrl,
-                                    fit: BoxFit.contain,
-                                    alignment: Alignment.center,
-                                    placeholder: (context, url) => const Center(
-                                        child: CircularProgressIndicator(
-                                            strokeWidth: 1,
-                                            color: AppColors.accentColor)),
-                                    errorWidget: (context, url, error) =>
-                                        const Center(
-                                            child: Icon(Icons.tv_off_outlined,
-                                                color: AppColors.secondaryText,
-                                                size: 40)),
-                                    fadeInDuration:
-                                        const Duration(milliseconds: 300),
-                                    fadeOutDuration:
-                                        const Duration(milliseconds: 100),
-                                  )
-                                : const Center(
-                                    child: Icon(Icons.tv_off_outlined,
-                                        size: 40,
-                                        color: AppColors
-                                            .secondaryText)), // Changed to tv_off_outlined
-                          ),
-                    // Gradient overlay for text readability
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Colors.black.withOpacity(0.2),
-                            AppColors.primaryBackground.withOpacity(0.8),
-                            AppColors.primaryBackground,
-                          ],
-                          stops: const [
-                            0.0,
-                            0.5,
-                            0.9,
-                            1.0
-                          ], // Adjust stops for desired effect
-                        ),
-                      ),
-                    ),
-                    // Positioned widget moved inside the Stack
-                    Positioned(
-                      top: 8.0,
-                      right: 8.0,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Favorite
-                          IconButton(
-                            icon: Icon(
-                              isFavorite
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: isFavorite ? Colors.red : Colors.white,
-                              size: 20,
-                            ),
-                            onPressed: () async {
-                              triggerVibration(); // Vibrate on favorite tap
-                              await userDataService
-                                  .toggleFavoriteAnime(series.tmdbId);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    isFavorite
-                                        ? 'Removed from Favorites'
-                                        : 'Added to Favorites',
-                                  ),
-                                  duration: const Duration(seconds: 1),
-                                ),
-                              );
-                            },
-                            style: IconButton.styleFrom(
-                              backgroundColor: Colors.black.withOpacity(0.5),
-                              padding: const EdgeInsets.all(4.0),
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          // Rating bubble
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6.0, vertical: 4.0),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(4.0),
-                            ),
-                            child: Text(
-                              '${series.voteAverage.toStringAsFixed(1)} (${series.voteCount})',
-                              style: const TextStyle(
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primaryText,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          // Watchlist
-                          IconButton(
-                            icon: Icon(
-                              isInWatchlist
-                                  ? Icons.bookmark
-                                  : Icons.bookmark_border,
-                              color:
-                                  isInWatchlist ? Colors.green : Colors.white,
-                              size: 20,
-                            ),
-                            onPressed: () {
-                              triggerVibration(); // Vibrate on watchlist tap
-                              userDataService
-                                  .toggleWatchlistAnime(series.tmdbId);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    isInWatchlist
-                                        ? 'Removed from Watchlist'
-                                        : 'Added to Watchlist',
-                                  ),
-                                  duration: const Duration(seconds: 1),
-                                ),
-                              );
-                            },
-                            style: IconButton.styleFrom(
-                              backgroundColor: Colors.black.withOpacity(0.5),
-                              padding: const EdgeInsets.all(4.0),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+      body: CustomScrollView(
+        slivers: <Widget>[
+          // --- App Bar with Backdrop ---
+          SliverAppBar(
+            expandedHeight: 500.0,
+            pinned: true,
+            stretch: true, // Optional: Allows overscroll stretch effect
+            backgroundColor: AppColors.primaryBackground, // Base color
+            iconTheme: const IconThemeData(
+                color: AppColors.primaryText), // Ensure icons are visible
+            centerTitle: false,
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(1.0),
+              child: Container(
+                color:
+                    const Color.fromARGB(255, 255, 255, 255).withOpacity(0.5),
+                height: 1.0,
               ),
             ),
-
-            // --- Main Content Area ---
-            SliverList(
-              delegate: SliverChildListDelegate(
-                [
-                  // --- Basic Info Section (Poster & Core Details) ---
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 8.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Poster
-                        SizedBox(
-                          width: 110,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: posterUrl != null
-                                ? CachedNetworkImage(
-                                    imageUrl: posterUrl,
-                                    fit: BoxFit.cover,
-                                    height: 190,
-                                    width: 130,
-                                    placeholder: (context, url) => const Center(
-                                        child: CircularProgressIndicator(
-                                            strokeWidth: 1,
-                                            color: AppColors.accentColor)),
-                                    errorWidget: (context, url, error) =>
-                                        const SizedBox(
-                                            height: 190,
-                                            width: 130,
-                                            child: Icon(
-                                              Icons
-                                                  .image_not_supported_outlined,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  backdropUrl != null
+                      ? CachedNetworkImage(
+                          imageUrl: backdropUrl,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) =>
+                              Container(color: AppColors.secondaryBackground),
+                          errorWidget: (context, url, error) => Container(
+                              color: AppColors.secondaryBackground,
+                              child: const Icon(Icons.broken_image,
+                                  color: AppColors.secondaryText, size: 60)),
+                          fadeInDuration: const Duration(milliseconds: 300),
+                          fadeOutDuration: const Duration(milliseconds: 100),
+                        )
+                      : Container(
+                          // Fallback color if no backdrop
+                          color: AppColors.secondaryBackground,
+                          child: posterUrl !=
+                                  null // Try poster as fallback background
+                              ? CachedNetworkImage(
+                                  imageUrl: posterUrl,
+                                  fit: BoxFit.contain,
+                                  alignment: Alignment.center,
+                                  placeholder: (context, url) => const Center(
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 1,
+                                          color: AppColors.accentColor)),
+                                  errorWidget: (context, url, error) =>
+                                      const Center(
+                                          child: Icon(Icons.tv_off_outlined,
                                               color: AppColors.secondaryText,
-                                              size: 30,
-                                            )),
-                                    fadeInDuration:
-                                        const Duration(milliseconds: 200),
-                                    fadeOutDuration:
-                                        const Duration(milliseconds: 100),
-                                  )
-                                : Container(
-                                    height: 190,
-                                    width: 130,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.secondaryBackground,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: const Center(
-                                      child: Icon(
-                                        Icons
-                                            .tv_off_outlined, // Changed to tv_off_outlined
-                                        size: 40, // Changed size
-                                        color: AppColors.secondaryText,
-                                      ),
-                                    ),
-                                  ),
+                                              size: 40)),
+                                  fadeInDuration:
+                                      const Duration(milliseconds: 300),
+                                  fadeOutDuration:
+                                      const Duration(milliseconds: 100),
+                                )
+                              : const Center(
+                                  child: Icon(Icons.tv_off_outlined,
+                                      size: 40,
+                                      color: AppColors
+                                          .secondaryText)), // Changed to tv_off_outlined
+                        ),
+                  // Gradient overlay for text readability
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.2),
+                          AppColors.primaryBackground.withOpacity(0.8),
+                          AppColors.primaryBackground,
+                        ],
+                        stops: const [
+                          0.0,
+                          0.5,
+                          0.9,
+                          1.0
+                        ], // Adjust stops for desired effect
+                      ),
+                    ),
+                  ),
+                  // Positioned widget moved inside the Stack
+                  Positioned(
+                    top: 8.0,
+                    right: 8.0,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Favorite
+                        IconButton(
+                          icon: Icon(
+                            isFavorite ? Icons.favorite : Icons.favorite_border,
+                            color: isFavorite ? Colors.red : Colors.white,
+                            size: 20,
+                          ),
+                          onPressed: () async {
+                            await userDataService
+                                .toggleFavoriteAnime(series.tmdbId);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  isFavorite
+                                      ? 'Removed from Favorites'
+                                      : 'Added to Favorites',
+                                ),
+                                duration: const Duration(seconds: 1),
+                              ),
+                            );
+                            triggerVibration(); // Vibrate on favorite tap
+                          },
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.black.withOpacity(0.5),
+                            padding: const EdgeInsets.all(4.0),
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        // Core Details
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(series.name,
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w900,
-                                    // color: Colors.white,
-                                    letterSpacing: 1.5,
-                                    height: 1.2,
-                                    shadows: [
-                                      Shadow(
-                                        offset: Offset(2, 2),
-                                        blurRadius: 8,
-                                        color: Colors.black.withOpacity(0.8),
-                                      ),
-                                      Shadow(
-                                        offset: Offset(-1, -1),
-                                        blurRadius: 4,
-                                        color: Colors.purple.withOpacity(0.3),
-                                      ),
-                                      Shadow(
-                                        offset: Offset(0, 0),
-                                        blurRadius: 20,
-                                        color: Colors.cyan.withOpacity(0.4),
-                                      ),
-                                    ],
-                                    foreground: Paint()
-                                      ..shader = LinearGradient(
-                                        colors: [
-                                          Color(0xFFFF6B6B),
-                                          Color(0xFF4ECDC4),
-                                          Color(0xFF45B7D1),
-                                          Color(0xFF96CEB4),
-                                        ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ).createShader(
-                                          Rect.fromLTWH(0, 0, 300, 100)),
-                                  )),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4.0),
-                                child: Text(
-                                  series.originalName,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontStyle: FontStyle.italic,
-                                    color: AppColors.secondaryText,
-                                  ),
+                        const SizedBox(width: 4),
+                        // Rating bubble
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6.0, vertical: 4.0),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(4.0),
+                          ),
+                          child: Text(
+                            '${series.voteAverage.toStringAsFixed(1)} (${series.voteCount})',
+                            style: const TextStyle(
+                              fontSize: 14.0,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primaryText,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        // Watchlist
+                        IconButton(
+                          icon: Icon(
+                            isInWatchlist
+                                ? Icons.bookmark
+                                : Icons.bookmark_border,
+                            color: isInWatchlist ? Colors.green : Colors.white,
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            userDataService.toggleWatchlistAnime(series.tmdbId);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  isInWatchlist
+                                      ? 'Removed from Watchlist'
+                                      : 'Added to Watchlist',
                                 ),
+                                duration: const Duration(seconds: 1),
                               ),
-                              const SizedBox(height: 8),
-                              // small info chips
-                              Wrap(
-                                spacing: 6,
-                                runSpacing: 4,
-                                children: [
-                                  _buildInfoChip(Icons.calendar_today,
-                                      releaseYear, Colors.white),
-                                  _buildInfoChip(
-                                      Icons.timer, runtimeString, Colors.white),
-                                  _buildInfoChip(
-                                      Icons.check, series.status, Colors.green),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              // genres
-                              Wrap(
-                                spacing: 6.0,
-                                runSpacing: 4.0,
-                                children: series.genres
-                                    .map((g) => Chip(
-                                          label: Text(g),
-                                          backgroundColor:
-                                              AppColors.chipBackground,
-                                          labelStyle: const TextStyle(
-                                              fontSize: 11,
-                                              color: AppColors.chipText),
-                                          visualDensity: VisualDensity.compact,
-                                          materialTapTargetSize:
-                                              MaterialTapTargetSize.shrinkWrap,
-                                        ))
-                                    .toList(),
-                              ),
-                            ],
+                            );
+                            triggerVibration(); // Vibrate on watchlist tap
+                          },
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.black.withOpacity(0.5),
+                            padding: const EdgeInsets.all(4.0),
                           ),
                         ),
                       ],
                     ),
                   ),
-
-                  // --- Overview ---
-                  if (series.overview.isNotEmpty) ...[
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 8.0),
-                      child: Text('Overview',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(
-                                  color: AppColors.primaryText,
-                                  fontWeight: FontWeight.bold)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 0),
-                      child: Text(
-                        series.overview,
-                        style: const TextStyle(
-                            color: AppColors.secondaryText,
-                            fontSize: 14,
-                            height: 1.5),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-
-                  // --- Keywords (Optional) ---
-                  if (series.keywords.isNotEmpty) ...[
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 8.0),
-                      child: Text('Keywords',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(
-                                  color: AppColors.primaryText,
-                                  fontWeight: FontWeight.bold)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 0),
-                      child: Wrap(
-                        spacing: 6.0,
-                        runSpacing: 4.0,
-                        children: series.keywords
-                            .map((keyword) => Chip(
-                                  label: Text(keyword),
-                                  backgroundColor: AppColors.secondaryBackground
-                                      .withOpacity(0.7),
-                                  labelStyle: const TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.secondaryText),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 2),
-                                  visualDensity: VisualDensity.compact,
-                                ))
-                            .toList(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-
-                  // --- Seasons and Episodes Section ---
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 8.0),
-                    child: Text('Episodes',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: AppColors.primaryText,
-                            fontWeight: FontWeight.bold)),
-                  ),
-                  const SizedBox(height: 8),
-                  if (series.seasons.isEmpty)
-                    const Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                      child: Text(
-                        'No episode information found for this series in the database.',
-                        style: TextStyle(
-                            color: AppColors.secondaryText,
-                            fontStyle: FontStyle.italic),
-                      ),
-                    )
-                  else
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 0),
-                      child: _buildSeasonsList(context, series.seasons,
-                          series.tmdbId, series.name, triggerVibration),
-                    ),
-
-                  const SizedBox(height: 40),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+
+          // --- Main Content Area ---
+          SliverList(
+            delegate: SliverChildListDelegate(
+              [
+                // --- Basic Info Section (Poster & Core Details) ---
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Poster
+                      SizedBox(
+                        width: 110,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: posterUrl != null
+                              ? CachedNetworkImage(
+                                  imageUrl: posterUrl,
+                                  fit: BoxFit.cover,
+                                  height: 190,
+                                  width: 130,
+                                  placeholder: (context, url) => const Center(
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 1,
+                                          color: AppColors.accentColor)),
+                                  errorWidget: (context, url, error) =>
+                                      const SizedBox(
+                                          height: 190,
+                                          width: 130,
+                                          child: Icon(
+                                            Icons.image_not_supported_outlined,
+                                            color: AppColors.secondaryText,
+                                            size: 30,
+                                          )),
+                                  fadeInDuration:
+                                      const Duration(milliseconds: 200),
+                                  fadeOutDuration:
+                                      const Duration(milliseconds: 100),
+                                )
+                              : Container(
+                                  height: 190,
+                                  width: 130,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.secondaryBackground,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons
+                                          .tv_off_outlined, // Changed to tv_off_outlined
+                                      size: 40, // Changed size
+                                      color: AppColors.secondaryText,
+                                    ),
+                                  ),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      // Core Details
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(series.name,
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w900,
+                                  // color: Colors.white,
+                                  letterSpacing: 1.5,
+                                  height: 1.2,
+                                  shadows: [
+                                    Shadow(
+                                      offset: Offset(2, 2),
+                                      blurRadius: 8,
+                                      color: Colors.black.withOpacity(0.8),
+                                    ),
+                                    Shadow(
+                                      offset: Offset(-1, -1),
+                                      blurRadius: 4,
+                                      color: Colors.purple.withOpacity(0.3),
+                                    ),
+                                    Shadow(
+                                      offset: Offset(0, 0),
+                                      blurRadius: 20,
+                                      color: Colors.cyan.withOpacity(0.4),
+                                    ),
+                                  ],
+                                  foreground: Paint()
+                                    ..shader = const LinearGradient(
+                                      colors: [
+                                        Color(0xFFFF6B6B),
+                                        Color(0xFF4ECDC4),
+                                        Color(0xFF45B7D1),
+                                        Color(0xFF96CEB4),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ).createShader(
+                                        const Rect.fromLTWH(0, 0, 300, 100)),
+                                )),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4.0),
+                              child: Text(
+                                series.originalName,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontStyle: FontStyle.italic,
+                                  color: AppColors.secondaryText,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            // small info chips
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 4,
+                              children: [
+                                _buildInfoChip(Icons.calendar_today,
+                                    releaseYear, Colors.white),
+                                _buildInfoChip(
+                                    Icons.timer, runtimeString, Colors.white),
+                                _buildInfoChip(
+                                    Icons.check, series.status, Colors.green),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            // genres
+                            Wrap(
+                              spacing: 6.0,
+                              runSpacing: 4.0,
+                              children: series.genres
+                                  .map((g) => Chip(
+                                        label: Text(g),
+                                        backgroundColor:
+                                            AppColors.chipBackground,
+                                        labelStyle: const TextStyle(
+                                            fontSize: 11,
+                                            color: AppColors.chipText),
+                                        visualDensity: VisualDensity.compact,
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                      ))
+                                  .toList(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // --- Overview ---
+                if (series.overview.isNotEmpty) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8.0),
+                    child: Text('Overview',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
+                                color: AppColors.primaryText,
+                                fontWeight: FontWeight.bold)),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 0),
+                    child: Text(
+                      series.overview,
+                      style: const TextStyle(
+                          color: AppColors.secondaryText,
+                          fontSize: 14,
+                          height: 1.5),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // --- Keywords (Optional) ---
+                if (series.keywords.isNotEmpty) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8.0),
+                    child: Text('Keywords',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
+                                color: AppColors.primaryText,
+                                fontWeight: FontWeight.bold)),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 0),
+                    child: Wrap(
+                      spacing: 6.0,
+                      runSpacing: 4.0,
+                      children: series.keywords
+                          .map((keyword) => Chip(
+                                label: Text(keyword),
+                                backgroundColor: AppColors.secondaryBackground
+                                    .withOpacity(0.7),
+                                labelStyle: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.secondaryText),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 2),
+                                visualDensity: VisualDensity.compact,
+                              ))
+                          .toList(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // --- Seasons and Episodes Section ---
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
+                  child: Text('Episodes',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: AppColors.primaryText,
+                          fontWeight: FontWeight.bold)),
+                ),
+                const SizedBox(height: 8),
+                if (series.seasons.isEmpty)
+                  const Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    child: Text(
+                      'No episode information found for this series in the database.',
+                      style: TextStyle(
+                          color: AppColors.secondaryText,
+                          fontStyle: FontStyle.italic),
+                    ),
+                  )
+                else
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 0),
+                    child: _buildSeasonsList(context, series.seasons,
+                        series.tmdbId, series.name, triggerVibration),
+                  ),
+
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1185,7 +1154,7 @@ class AnimeDetailsScreen extends StatelessWidget {
         Text(
           text,
           style: const TextStyle(
-            color: AppColors.secondaryText,
+            color: Color.fromARGB(255, 190, 190, 190),
             fontSize: 13,
           ),
         ),
@@ -1194,10 +1163,10 @@ class AnimeDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildSeasonsList(BuildContext context, List<ss.Season> seasons,
-      int TvseriesId, String name, VoidCallback vibrateCallback) {
+      int tvseriesId, String name, VoidCallback vibrateCallback) {
     bool defaultExpansion = seasons.length == 1;
     return SizedBox(
-      height: 500, // Adjust as needed
+      height: 700, // Adjust as needed
       child: ListView.builder(
         controller: _seasonsScrollController,
         shrinkWrap: false,
@@ -1223,14 +1192,14 @@ class AnimeDetailsScreen extends StatelessWidget {
               title: Text(
                 'Season ${season.seasonNumber}',
                 style: const TextStyle(
-                    color: AppColors.primaryText,
+                    color: Color.fromARGB(255, 240, 199, 88),
                     fontWeight: FontWeight.w600,
                     fontSize: 16),
               ),
               subtitle: Text(
                 '${season.episodes.length} Episode${season.episodes.length == 1 ? '' : 's'}',
                 style: const TextStyle(
-                    color: AppColors.secondaryText, fontSize: 12),
+                    color: Color.fromARGB(255, 199, 199, 199), fontSize: 12),
               ),
               iconColor:
                   AppColors.accentColor, // Use accent color for expand icon
@@ -1261,7 +1230,7 @@ class AnimeDetailsScreen extends StatelessWidget {
                             seriesname: name,
                             episode: episode,
                             season: season,
-                            id: TvseriesId,
+                            id: tvseriesId,
                           ),
                         ))
                     .toList(),
@@ -1276,16 +1245,11 @@ class AnimeDetailsScreen extends StatelessWidget {
 
 class MovieDetailsScreen extends StatelessWidget {
   final int movieId;
-  final typec;
+  final String typec;
   const MovieDetailsScreen(
       {required this.typec, required this.movieId, super.key});
 
   // Helper function for haptic feedback
-  void _triggerHapticFeedback() {
-    if (Platform.isAndroid) {
-      HapticFeedback.lightImpact();
-    }
-  }
 
   // --- Function to show Trailer Selection Dialog ---
 
@@ -1293,7 +1257,6 @@ class MovieDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Find the movie using the provider
     final movie = Provider.of<MovieProvider>(context, listen: false)
-    
         .getMovieById(movieId);
 
     // Fetch UserDataService
@@ -1310,7 +1273,14 @@ class MovieDetailsScreen extends StatelessWidget {
         ),
       );
     }
-
+// NotificationListener<ScrollNotification>(
+//         onNotification: (ScrollNotification scrollInfo) {
+//           if (scrollInfo is ScrollUpdateNotification) {
+//             _triggerHapticFeedback(); // Haptic feedback on scroll drag
+//           }
+//           return false;
+//         },
+//         child:
     final backdropUrl = movie.getBackdropUrl();
     final posterUrl = movie.getPosterUrl();
     final downloadLinks = movie.getDownloadLinksList();
@@ -1319,431 +1289,413 @@ class MovieDetailsScreen extends StatelessWidget {
         movieId, movieId, movieId, downloadLinks.toString());
     return Scaffold(
       backgroundColor: AppColors.primaryBackground,
-      body: NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification scrollInfo) {
-          if (scrollInfo is ScrollUpdateNotification) {
-            _triggerHapticFeedback(); // Haptic feedback on scroll drag
-          }
-          return false;
-        },
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              expandedHeight: 250.0, // Height of the backdrop
-              pinned: true, // Keep AppBar visible when scrolling up
-              backgroundColor: const Color.fromARGB(255, 71, 43, 91),
-              flexibleSpace: FlexibleSpaceBar(
-                title: Text(
-                  movie.title,
-                  style: const TextStyle(
-                      color: AppColors.primaryText,
-                      fontSize: 16.0,
-                      shadows: [Shadow(blurRadius: 4, color: Colors.black54)]),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                centerTitle: false, // Align title to start
-                titlePadding: const EdgeInsets.only(
-                    left: 60, bottom: 16), // Adjust padding
-                background: backdropUrl != null
-                    ? Stack(fit: StackFit.expand, children: [
-                        CachedNetworkImage(
-                          imageUrl: backdropUrl,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => const Center(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 1,
-                              color: AppColors.accentColor,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 250.0, // Height of the backdrop
+            pinned: true, // Keep AppBar visible when scrolling up
+            backgroundColor: const Color.fromARGB(255, 71, 43, 91),
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                movie.title,
+                style: const TextStyle(
+                    color: AppColors.primaryText,
+                    fontSize: 16.0,
+                    shadows: [Shadow(blurRadius: 4, color: Colors.black54)]),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              centerTitle: false, // Align title to start
+              titlePadding:
+                  const EdgeInsets.only(left: 60, bottom: 16), // Adjust padding
+              background: backdropUrl != null
+                  ? Stack(fit: StackFit.expand, children: [
+                      CachedNetworkImage(
+                        imageUrl: backdropUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => const Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 1,
+                            color: AppColors.accentColor,
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Center(
+                          child: posterUrl != null
+                              ? CachedNetworkImage(
+                                  imageUrl: posterUrl,
+                                  fit: BoxFit.contain, // Fallback to poster
+                                  placeholder: (context, url) => const Center(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 1,
+                                      color: AppColors.accentColor,
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      const Center(
+                                    child: Icon(
+                                      Icons.image_not_supported_outlined,
+                                      color: AppColors.secondaryText,
+                                      size: 30,
+                                    ),
+                                  ),
+                                  fadeInDuration:
+                                      const Duration(milliseconds: 300),
+                                  fadeOutDuration:
+                                      const Duration(milliseconds: 100),
+                                )
+                              : const Icon(Icons.movie_outlined,
+                                  size: 100, color: AppColors.secondaryText),
+                        ),
+                        fadeInDuration: const Duration(milliseconds: 300),
+                        fadeOutDuration: const Duration(milliseconds: 100),
+                      ),
+                      // Add a gradient overlay for better title readability
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withOpacity(0.2),
+                                AppColors.primaryBackground.withOpacity(0.9),
+                                AppColors.primaryBackground,
+                              ],
+                              stops: const [
+                                0.0,
+                                0.5,
+                                0.9,
+                                1.0
+                              ]),
+                        ),
+                      ),
+                      // Add the Positioned widget for favorite, rating, and watchlist
+                      Positioned(
+                        top: 8.0,
+                        right: 8.0,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Favorite
+                            IconButton(
+                              icon: Icon(
+                                isFavorite
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: isFavorite ? Colors.red : Colors.white,
+                                size: 20,
+                              ),
+                              onPressed: () async {
+                                await userDataService
+                                    .toggleFavoriteMovie(movieId);
+                                tVClick();
+                                // Show snackbar feedback
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      isFavorite
+                                          ? 'Removed from Favorites'
+                                          : 'Added to Favorites',
+                                    ),
+                                    duration: const Duration(seconds: 1),
+                                  ),
+                                );
+                              },
+                              style: IconButton.styleFrom(
+                                backgroundColor: Colors.black.withOpacity(0.5),
+                                padding: const EdgeInsets.all(4.0),
+                              ),
                             ),
-                          ),
-                          errorWidget: (context, url, error) => Center(
-                            child: posterUrl != null
-                                ? CachedNetworkImage(
-                                    imageUrl: posterUrl,
-                                    fit: BoxFit.contain, // Fallback to poster
-                                    placeholder: (context, url) => const Center(
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 1,
-                                        color: AppColors.accentColor,
-                                      ),
-                                    ),
-                                    errorWidget: (context, url, error) =>
-                                        const Center(
-                                      child: Icon(
-                                        Icons.image_not_supported_outlined,
-                                        color: AppColors.secondaryText,
-                                        size: 30,
-                                      ),
-                                    ),
-                                    fadeInDuration:
-                                        const Duration(milliseconds: 300),
-                                    fadeOutDuration:
-                                        const Duration(milliseconds: 100),
-                                  )
-                                : const Icon(Icons.movie_outlined,
-                                    size: 100, color: AppColors.secondaryText),
-                          ),
-                          fadeInDuration: const Duration(milliseconds: 300),
-                          fadeOutDuration: const Duration(milliseconds: 100),
-                        ),
-                        // Add a gradient overlay for better title readability
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Colors.transparent,
-                                  Colors.black.withOpacity(0.2),
-                                  AppColors.primaryBackground.withOpacity(0.9),
-                                  AppColors.primaryBackground,
-                                ],
-                                stops: const [
-                                  0.0,
-                                  0.5,
-                                  0.9,
-                                  1.0
-                                ]),
-                          ),
-                        ),
-                        // Add the Positioned widget for favorite, rating, and watchlist
-                        Positioned(
-                          top: 8.0,
-                          right: 8.0,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Favorite
-                              IconButton(
-                                icon: Icon(
-                                  isFavorite
-                                      ? Icons.favorite
-                                      : Icons.favorite_border,
-                                  color: isFavorite ? Colors.red : Colors.white,
-                                  size: 20,
-                                ),
-                                onPressed: () async {
-                                  _triggerHapticFeedback(); // Haptic feedback on favorite
-                                  await userDataService
-                                      .toggleFavoriteMovie(movieId);
-                                  // Show snackbar feedback
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        isFavorite
-                                            ? 'Removed from Favorites'
-                                            : 'Added to Favorites',
-                                      ),
-                                      duration: const Duration(seconds: 1),
-                                    ),
-                                  );
-                                },
-                                style: IconButton.styleFrom(
-                                  backgroundColor:
-                                      Colors.black.withOpacity(0.5),
-                                  padding: const EdgeInsets.all(4.0),
+                            const SizedBox(width: 4),
+                            // Rating bubble
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6.0, vertical: 4.0),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.5),
+                                borderRadius: BorderRadius.circular(4.0),
+                              ),
+                              child: Text(
+                                '${movie.voteAverage.toStringAsFixed(1)}/10', // Display rating
+                                style: const TextStyle(
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primaryText,
                                 ),
                               ),
-                              const SizedBox(width: 4),
-                              // Rating bubble
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 6.0, vertical: 4.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.5),
-                                  borderRadius: BorderRadius.circular(4.0),
-                                ),
-                                child: Text(
-                                  '${movie.voteAverage.toStringAsFixed(1)}/10', // Display rating
-                                  style: const TextStyle(
-                                    fontSize: 14.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.primaryText,
+                            ),
+                            const SizedBox(width: 4),
+
+                            IconButton(
+                              icon: Icon(
+                                isInWatchlist
+                                    ? Icons.bookmark
+                                    : Icons.bookmark_border,
+                                color:
+                                    isInWatchlist ? Colors.green : Colors.white,
+                                size: 20,
+                              ),
+                              onPressed: () async {
+                                await userDataService
+                                    .toggleWatchlistMovie(movieId);
+                                tVClick();
+                                // Show snackbar feedback
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      isInWatchlist
+                                          ? 'Removed from Watchlist'
+                                          : 'Added to Watchlist',
+                                    ),
+                                    duration: const Duration(seconds: 1),
+                                  ),
+                                );
+                              },
+                              style: IconButton.styleFrom(
+                                backgroundColor: Colors.black.withOpacity(0.5),
+                                padding: const EdgeInsets.all(4.0),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    ])
+                  : Container(
+                      color: AppColors.secondaryBackground,
+                      child: Center(
+                          child: Text(movie.title,
+                              style: const TextStyle(
+                                  color: AppColors.primaryText,
+                                  fontSize: 24)))),
+            ),
+            // Optional: Add subtle border when pinned
+            bottom: PreferredSize(
+                // Add this code to get bottom border
+                preferredSize:
+                    const Size.fromHeight(1.0), // Creates the border size
+                child: Container(
+                  // Creates the border container
+                  color: AppColors.dividerColor.withOpacity(0.5),
+                  height: 1.0,
+                )),
+          ),
+
+          // --- Movie Content Below AppBar ---
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // --- Title and Basic Info Row ---
+                  Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    // Small Poster on the side
+                    SizedBox(
+                      width: 100,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: posterUrl != null
+                            ? CachedNetworkImage(
+                                imageUrl: posterUrl,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => const Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 1,
+                                    color: AppColors.accentColor,
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 4),
-
-                              IconButton(
-                                icon: Icon(
-                                  isInWatchlist
-                                      ? Icons.bookmark
-                                      : Icons.bookmark_border,
-                                  color: isInWatchlist
-                                      ? Colors.green
-                                      : Colors.white,
-                                  size: 20,
+                                errorWidget: (context, url, error) =>
+                                    const Center(
+                                  child: Icon(
+                                    Icons.image_not_supported_outlined,
+                                    color: AppColors.secondaryText,
+                                    size: 30,
+                                  ),
                                 ),
-                                onPressed: () async {
-                                  _triggerHapticFeedback(); // Haptic feedback on watchlist
-                                  await userDataService
-                                      .toggleWatchlistMovie(movieId);
-                                  // Show snackbar feedback
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        isInWatchlist
-                                            ? 'Removed from Watchlist'
-                                            : 'Added to Watchlist',
-                                      ),
-                                      duration: const Duration(seconds: 1),
-                                    ),
-                                  );
-                                },
-                                style: IconButton.styleFrom(
-                                  backgroundColor:
-                                      Colors.black.withOpacity(0.5),
-                                  padding: const EdgeInsets.all(4.0),
+                                fadeInDuration:
+                                    const Duration(milliseconds: 200),
+                                fadeOutDuration:
+                                    const Duration(milliseconds: 100),
+                              )
+                            : const Center(
+                                child: Icon(
+                                  Icons.tv_off_outlined,
+                                  color: AppColors.secondaryText,
+                                  size: 40,
                                 ),
                               ),
-                            ],
-                          ),
-                        )
-                      ])
-                    : Container(
-                        color: AppColors.secondaryBackground,
-                        child: Center(
-                            child: Text(movie.title,
-                                style: const TextStyle(
-                                    color: AppColors.primaryText,
-                                    fontSize: 24)))),
-              ),
-              // Optional: Add subtle border when pinned
-              bottom: PreferredSize(
-                  // Add this code to get bottom border
-                  preferredSize:
-                      const Size.fromHeight(1.0), // Creates the border size
-                  child: Container(
-                    // Creates the border container
-                    color: AppColors.dividerColor.withOpacity(0.5),
-                    height: 1.0,
-                  )),
-            ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
 
-            // --- Movie Content Below AppBar ---
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // --- Title and Basic Info Row ---
-                    Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Small Poster on the side
-                          SizedBox(
-                            width: 100,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: posterUrl != null
-                                  ? CachedNetworkImage(
-                                      imageUrl: posterUrl,
-                                      fit: BoxFit.cover,
-                                      placeholder: (context, url) =>
-                                          const Center(
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 1,
-                                          color: AppColors.accentColor,
-                                        ),
-                                      ),
-                                      errorWidget: (context, url, error) =>
-                                          const Center(
-                                        child: Icon(
-                                          Icons.image_not_supported_outlined,
-                                          color: AppColors.secondaryText,
-                                          size: 30,
-                                        ),
-                                      ),
-                                      fadeInDuration:
-                                          const Duration(milliseconds: 300),
-                                      fadeOutDuration:
-                                          const Duration(milliseconds: 100),
-                                    )
-                                  : const Center(
-                                      child: Icon(
-                                        Icons.tv_off_outlined,
-                                        color: AppColors.secondaryText,
-                                        size: 40,
-                                      ),
-                                    ),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-
-                          Expanded(
-                              child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(movie.title,
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w900,
-                                    // color: Colors.white,
-                                    letterSpacing: 1.5,
-                                    height: 1.2,
-                                    shadows: [
-                                      Shadow(
-                                        offset: Offset(2, 2),
-                                        blurRadius: 8,
-                                        color: Colors.black.withOpacity(0.8),
-                                      ),
-                                      Shadow(
-                                        offset: Offset(-1, -1),
-                                        blurRadius: 4,
-                                        color: Colors.purple.withOpacity(0.3),
-                                      ),
-                                      Shadow(
-                                        offset: Offset(0, 0),
-                                        blurRadius: 20,
-                                        color: Colors.cyan.withOpacity(0.4),
-                                      ),
-                                    ],
-                                    foreground: Paint()
-                                      ..shader = LinearGradient(
-                                        colors: [
-                                          Color(0xFFFF6B6B),
-                                          Color(0xFF4ECDC4),
-                                          Color(0xFF45B7D1),
-                                          Color(0xFF96CEB4),
-                                        ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ).createShader(
-                                          Rect.fromLTWH(0, 0, 300, 100)),
-                                  )),
-                              ...[
-                                const SizedBox(height: 4),
-                                Text(
-                                  movie.tagline!,
-                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      fontStyle: FontStyle.italic,
-                                      color: AppColors.secondaryText),
+                    Expanded(
+                        child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(movie.title,
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w900,
+                              // color: Colors.white,
+                              letterSpacing: 1.5,
+                              height: 1.2,
+                              shadows: [
+                                Shadow(
+                                  offset: Offset(2, 2),
+                                  blurRadius: 8,
+                                  color: Colors.black.withOpacity(0.8),
+                                ),
+                                Shadow(
+                                  offset: Offset(-1, -1),
+                                  blurRadius: 4,
+                                  color: Colors.purple.withOpacity(0.3),
+                                ),
+                                Shadow(
+                                  offset: Offset(0, 0),
+                                  blurRadius: 20,
+                                  color: Colors.cyan.withOpacity(0.4),
                                 ),
                               ],
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  const Icon(Icons.calendar_today,
-                                      size: 16, color: AppColors.secondaryText),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                      movie.releaseDate != null
-                                          ? DateFormat('yyyy')
-                                              .format(movie.releaseDate!)
-                                          : 'N/A',
-                                      style: const TextStyle(
-                                          color: AppColors.secondaryText)),
-                                  const SizedBox(width: 10),
-                                  if (movie.runtime != null) ...[
-                                    const Icon(Icons.timer_outlined,
-                                        size: 16,
-                                        color: AppColors.secondaryText),
-                                    const SizedBox(width: 4),
-                                    Text('${movie.runtime} min',
-                                        style: const TextStyle(
-                                            color: AppColors.secondaryText)),
-                                  ]
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-                              Wrap(
-                                // Display Genres as chips
-                                spacing: 6.0,
-                                runSpacing: 4.0,
-                                children: movie.genres
-                                    .map((genre) => Chip(
-                                          label: Text(genre,
-                                              style: const TextStyle(
-                                                  fontSize: 11)),
-                                          backgroundColor:
-                                              AppColors.chipBackground,
-                                          labelStyle: const TextStyle(
-                                              color: AppColors.chipText),
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 6, vertical: 0),
-                                          materialTapTargetSize:
-                                              MaterialTapTargetSize.shrinkWrap,
-                                        ))
-                                    .toList(),
-                              )
-                            ],
-                          ))
-                        ]),
-                    const SizedBox(height: 24),
-
-                    // --- Play and Download Buttons ---
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton.icon(
-                          icon: const Icon(Icons.play_arrow),
-                          label: Text(
-                            isWatched ? 'Played Before' : 'Play',
+                              foreground: Paint()
+                                ..shader = const LinearGradient(
+                                  colors: [
+                                    Color(0xFFFF6B6B),
+                                    Color(0xFF4ECDC4),
+                                    Color(0xFF45B7D1),
+                                    Color(0xFF96CEB4),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ).createShader(
+                                    const Rect.fromLTWH(0, 0, 300, 100)),
+                            )),
+                        ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            movie.tagline!,
+                            style: const TextStyle(
+                                fontSize: 14,
+                                fontStyle: FontStyle.italic,
+                                color: AppColors.secondaryText),
                           ),
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.accentColor,
-                              foregroundColor: AppColors.primaryText,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 30, vertical: 12)),
-                          onPressed: downloadLinks.isEmpty
-                              ? null // Disable if no links
-                              : () {
-                                  _triggerHapticFeedback(); // Haptic feedback on play button
-                                  _showDownloadLinkSelection(
-                                      context, downloadLinks);
-                                },
+                        ],
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            const Icon(Icons.calendar_today,
+                                size: 16, color: AppColors.secondaryText),
+                            const SizedBox(width: 4),
+                            Text(
+                                movie.releaseDate != null
+                                    ? DateFormat('yyyy')
+                                        .format(movie.releaseDate!)
+                                    : 'N/A',
+                                style: const TextStyle(
+                                    color: AppColors.secondaryText)),
+                            const SizedBox(width: 10),
+                            if (movie.runtime != null) ...[
+                              const Icon(Icons.timer_outlined,
+                                  size: 16, color: AppColors.secondaryText),
+                              const SizedBox(width: 4),
+                              Text('${movie.runtime} min',
+                                  style: const TextStyle(
+                                      color: AppColors.secondaryText)),
+                            ]
+                          ],
                         ),
-                        ElevatedButton.icon(
-                          icon: const Icon(Icons.download_outlined),
-                          label: const Text('Download'),
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors
-                                  .secondaryBackground, // Different style
-                              foregroundColor: AppColors.primaryText,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 25, vertical: 12)),
-                          onPressed: () async {
-                            _triggerHapticFeedback();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content:
-                                        Text('Download not implemented yet.'),
-                                    duration: Duration(seconds: 2)));
-                          },
-                        ),
+                        const SizedBox(height: 10),
+                        Wrap(
+                          // Display Genres as chips
+                          spacing: 6.0,
+                          runSpacing: 4.0,
+                          children: movie.genres
+                              .map((genre) => Chip(
+                                    label: Text(genre,
+                                        style: const TextStyle(fontSize: 11)),
+                                    backgroundColor: AppColors.chipBackground,
+                                    labelStyle: const TextStyle(
+                                        color: AppColors.chipText),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 0),
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ))
+                              .toList(),
+                        )
                       ],
-                    ),
-                    // --- Overview / Synopsis ---
-                    const Text('Overview',
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primaryText)),
-                    const SizedBox(height: 8),
-                    Text(
-                      movie.overview,
-                      style: const TextStyle(
-                          fontSize: 14,
-                          color: AppColors.secondaryText,
-                          height: 1.4),
-                    ),
-                    const SizedBox(height: 24),
+                    ))
+                  ]),
+                  const SizedBox(height: 24),
 
-                    // --- Additional Details (Optional) ---
-                    _buildDetailSection('Keywords', movie.keywords.join(', ')),
-                    _buildDetailSection('Production Countries',
-                        movie.productionCountries.join(', ')),
+                  // --- Play and Download Buttons ---
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.play_arrow),
+                        label: Text(
+                          isWatched ? 'Played Before' : 'Play',
+                        ),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.accentColor,
+                            foregroundColor: AppColors.primaryText,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 30, vertical: 12)),
+                        onPressed: downloadLinks.isEmpty
+                            ? null // Disable if no links
+                            : () {
+                                _showDownloadLinkSelection(
+                                    context, downloadLinks);
+                                tVClick();
+                              },
+                      ),
+                      // ElevatedButton.icon(
+                      //   icon: const Icon(Icons.download_outlined),
+                      //   label: const Text('Download'),
+                      //   style: ElevatedButton.styleFrom(
+                      //       backgroundColor: AppColors
+                      //           .secondaryBackground, // Different style
+                      //       foregroundColor: AppColors.primaryText,
+                      //       padding: const EdgeInsets.symmetric(
+                      //           horizontal: 25, vertical: 12)),
+                      //   onPressed: () async {
+                      //     ScaffoldMessenger.of(context).showSnackBar(
+                      //         const SnackBar(
+                      //             content:
+                      //                 Text('Download not implemented yet.'),
+                      //             duration: Duration(seconds: 2)));
+                      //   },
 
-                    const SizedBox(
-                        height: 50), // Add some padding at the bottom
-                  ],
-                ),
+                      // ),
+                    ],
+                  ),
+                  // --- Overview / Synopsis ---
+                  const Text('Overview',
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryText)),
+                  const SizedBox(height: 8),
+                  Text(
+                    movie.overview,
+                    style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.secondaryText,
+                        height: 1.4),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // --- Additional Details (Optional) ---
+                  _buildDetailSection('Keywords', movie.keywords.join(', ')),
+                  _buildDetailSection('Production Countries',
+                      movie.productionCountries.join(', ')),
+
+                  const SizedBox(height: 50), // Add some padding at the bottom
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -1805,10 +1757,10 @@ class MovieDetailsScreen extends StatelessWidget {
 
             return SimpleDialogOption(
               onPressed: () async {
-                _triggerHapticFeedback(); // Haptic feedback on dialog option tap
                 Navigator.pop(dialogContext); // Close the dialog
                 userDataService.toggleIsWatchedLink(
                     movieId, movieId, movieId, links.toString());
+                tVClick();
                 Navigator.push(
                   context,
                   MaterialPageRoute(

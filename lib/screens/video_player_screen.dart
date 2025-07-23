@@ -4,10 +4,6 @@ import 'package:media_kit/media_kit.dart'; // Required.
 import 'package:media_kit_video/media_kit_video.dart'; // Required.
 import 'dart:async';
 
-import 'package:miko/providers/ui_providers.dart';
-import 'package:provider/provider.dart';
-// Add this import
-
 class VideoPlayerScreen extends StatefulWidget {
   final String videoUrl;
   final List? playlistitem;
@@ -18,15 +14,11 @@ class VideoPlayerScreen extends StatefulWidget {
 }
 
 class VideoPlayerScreenState extends State<VideoPlayerScreen> {
-  // Create a [Player] instance from `package:media_kit`.
   late final Player player = Player();
-  // Create a [VideoController] instance from `package:media_kit_video`.
   late final VideoController controller = VideoController(player);
 
-  // PiP state
   bool isPiPEnabled = false;
 
-  // Subtitle settings
   double subtitleSize = 32.0;
   Color subtitleColor = const Color.fromARGB(255, 238, 230, 5);
   bool showSubtitleControls = false;
@@ -35,19 +27,14 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   void initState() {
     super.initState();
-    Provider.of<FloatingButtonVisibilityNotifier>(context, listen: false).hide();
 
-    // Move permission check to after widget is fully initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {});
 
-    // Open the video URL.
     player.open(Media(Uri.decodeComponent(widget.videoUrl)),
-        play: true); // Start playing immediately
+        play: true); 
 
-    // Add error handling
     player.stream.error.listen((error) {
       debugPrint('Player error: $error');
-      // You might want to show a snackbar or dialog here
     });
   }
 
@@ -73,12 +60,32 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   void dispose(){
     _hideTimer?.cancel();
-    Provider.of<FloatingButtonVisibilityNotifier>(context, listen: false).show();
 
  player.dispose();
     super.dispose();
   }
-
+    final List<BoxFit> _fitOptions = [
+    BoxFit.contain, // Standard
+    BoxFit.cover,   // Fill/Crop
+    BoxFit.fill,    // Stretch
+    BoxFit.fitWidth,
+    BoxFit.fitHeight,
+  ];
+  int _currentFitIndex = 0;
+  BoxFit get _currentFit => _fitOptions[_currentFitIndex];
+  // Map to hold icons for each fit mode for better UX
+  final Map<BoxFit, IconData> _fitIcons = {
+    BoxFit.contain: Icons.fullscreen_exit,
+    BoxFit.cover: Icons.fullscreen,
+    BoxFit.fill: Icons.photo_size_select_large,
+    BoxFit.fitWidth: Icons.swap_horiz,
+    BoxFit.fitHeight: Icons.swap_vert,
+  };
+  void _cycleBoxFit() {
+    setState(() {
+      _currentFitIndex = (_currentFitIndex + 1) % _fitOptions.length;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,16 +93,16 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
         backgroundColor: Colors.black,
         actions: [],
       ),
-      backgroundColor: Colors.black, // Player usually on black background
+      backgroundColor: Colors.black, 
       body: Stack(
         children: [
           Video(
             controller: controller,
             controls: AdaptiveVideoControls,
-            fit: BoxFit.fitWidth,
+            fit: BoxFit.fill,
             filterQuality: FilterQuality.high,
             wakelock: true,
-            subtitleViewConfiguration: SubtitleViewConfiguration(
+            subtitleViewConfiguration:  SubtitleViewConfiguration(
               visible: true,
               style: TextStyle(
                 height: 1.4,
@@ -143,6 +150,11 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         ],
                       ),
                     ),
+                                     IconButton(
+                  icon: Icon(_fitIcons[_currentFit] ?? Icons.aspect_ratio, color: Colors.white),
+                  tooltip: 'Change display mode',
+                  onPressed: _cycleBoxFit,
+                ),
                   IconButton(
                     icon: const Icon(Icons.picture_in_picture_outlined,
                         color: Colors.white),

@@ -11,15 +11,12 @@ class GridWall extends StatefulWidget {
 }
 
 class _GridWallState extends State<GridWall> {
-  // Hold the future in the state so it's not re-created on every build
   Future<List<Scene>>? _scenesFuture;
 
   @override
   void initState() {
     super.initState();
-    // Schedule the getBase call to run after the first frame is built.
-    // This is the correct way to show a dialog or perform context-dependent
-    // actions from initState.
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         setState(() {
@@ -110,8 +107,8 @@ class _GridWallState extends State<GridWall> {
     return MasonryGridView.count(
     //  padding: const EdgeInsets.all(5.0),
       crossAxisCount: 3,
-      mainAxisSpacing: 1.5,
-      crossAxisSpacing: 1.5,
+      mainAxisSpacing: 0.0,
+      crossAxisSpacing: 0.0,
       itemCount: 10,
       itemBuilder: (context, index) => Container(
         height: index % 2 == 0 ? 200 : 250,
@@ -125,8 +122,8 @@ class _GridWallState extends State<GridWall> {
     return MasonryGridView.count(
    //   padding: const EdgeInsets.all(5.0),
       crossAxisCount: 3,
-      mainAxisSpacing: 5, // A bit more spacing looks nice
-      crossAxisSpacing: 5,
+      mainAxisSpacing: 0.0, // A bit more spacing looks nice
+      crossAxisSpacing: 0.0,
       itemCount: scenes.length,
       // --- THE ONLY CHANGE IS HERE ---
       itemBuilder: (context, index) => InteractiveVideoCard(
@@ -146,126 +143,3 @@ class Scene {
   Scene(this.index, this.screenshot, this.preview, this.stream);
 }
 
-// class AnimeSeriesCard extends StatefulWidget {
-//   final Scene scene;
-//   const AnimeSeriesCard({required this.scene, super.key});
-
-//   @override
-//   State<AnimeSeriesCard> createState() => _AnimeSeriesCardState();
-// }
-
-// class _AnimeSeriesCardState extends State<AnimeSeriesCard> {
-//   bool _isHovering = false;
-//   OverlayEntry? _previewOverlay;
-
-//   @override
-//   void dispose() {
-//     _removePreview();
-//     super.dispose();
-//   }
-
-//   void _showPreviewPlayer(Offset position) {
-//     _removePreview();
-    
-//     // Using addPostFrameCallback here is good practice to ensure the overlay
-//     // is inserted after the current build cycle (triggered by setState) is complete.
-//     WidgetsBinding.instance.addPostFrameCallback((_) {
-//       if (!mounted) return;
-      
-//       _previewOverlay = OverlayEntry(
-//         builder: (context) => Positioned(
-//           left: position.dx + 20,
-//           top: position.dy,
-//           width: 300,
-//           height: 200,
-//           child: Material(
-//             elevation: 8,
-//             child: VideoPlayerScreenEmbedded(
-//               videoUrl: widget.scene.preview,
-//               autoPlay: true,
-//             ),
-//           ),
-//         ),
-//       );
-      
-//       Overlay.of(context).insert(_previewOverlay!);
-//     });
-//   }
-
-//   void _removePreview() {
-//     _previewOverlay?.remove();
-//     _previewOverlay = null;
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MouseRegion(
-//       onEnter: (event) {
-//         setState(() => _isHovering = true);
-//         _showPreviewPlayer(event.position);
-//       },
-//       onExit: (event) {
-//         setState(() => _isHovering = false);
-//         _removePreview();
-//       },
-//       // --- MODIFICATION 2: Removed onHover ---
-//       // This call to markNeedsBuild() could also trigger the error
-//       // and was not providing any functionality in this implementation.
-//       // onHover: (event) {
-//       //   if (_previewOverlay != null) {
-//       //     _previewOverlay!.markNeedsBuild();
-//       //   }
-//       // },
-//       child: GestureDetector(
-//         onTap: () => Navigator.push(
-//           context,
-//           MaterialPageRoute(
-//             builder: (_) => VideoPlayerScreen(
-//               videoUrl: widget.scene.stream,
-//             ),
-//           ),
-//         ),
-//         child: Card(
-//           color: Colors.transparent,
-//           elevation: _isHovering ? 8 : 0,
-//           margin: EdgeInsets.zero,
-//           child: Column(
-//             mainAxisSize: MainAxisSize.min,
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               AspectRatio(
-//                 aspectRatio: 2 / 3,
-//                 child: Stack(
-//                   children: [
-//                     ClipRRect(
-//                       borderRadius: BorderRadius.circular(6.0),
-//                       child: Container(
-//                         color: Colors.black.withOpacity(0.3),
-//                         child: CachedNetworkImage(
-//                           imageUrl: widget.scene.screenshot,
-//                           fit: BoxFit.cover,
-//                           placeholder: (context, url) => const Center(
-//                             child: CircularProgressIndicator(strokeWidth: 1),
-//                           ),
-//                           errorWidget: (context, url, error) => const Center(
-//                             child: Icon(Icons.image_not_supported_outlined),
-//                           ),
-//                         ),
-//                       ),
-//                     ),
-//                     if (_isHovering)
-//                       const Center(
-//                         child: Icon(Icons.play_circle_fill, 
-//                                    size: 50, 
-//                                    color: Colors.white70),
-//                       ),
-//                   ],
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }

@@ -14,6 +14,51 @@ class VideoInfo {
 
   VideoInfo({required this.title, required this.key, required this.type});
 }
+
+/// Extension providing advanced filtering on TvSeriesAnime
+extension TvSeriesAnimeFilter on TvSeriesAnime {
+  /// Returns true if this series matches all provided criteria.
+  bool matchesFilter({
+    List<String>? genres,
+    DateTime? startDate,
+    DateTime? endDate,
+    List<String>? languages,
+    int? minRuntime,
+    int? maxRuntime,
+    double? minVoteAverage,
+    double? maxVoteAverage,
+  }) {
+    // Filter by genres (any match)
+    if (genres != null && genres.isNotEmpty) {
+      final wanted = genres.map((g) => g.toLowerCase()).toSet();
+      final have = this.genres.map((g) => g.toLowerCase()).toSet();
+      if (!wanted.any((g) => have.contains(g))) return false;
+    }
+    // Filter by release date range
+    if (startDate != null) {
+      if (this.firstAirDate == null || this.firstAirDate!.isBefore(startDate)) return false;
+    }
+    if (endDate != null) {
+      if (this.firstAirDate == null || this.firstAirDate!.isAfter(endDate)) return false;
+    }
+    // Filter by language
+    if (languages != null && languages.isNotEmpty) {
+      final langs = languages.map((l) => l.toLowerCase()).toSet();
+      if (!langs.contains(this.originalLanguage.toLowerCase())) return false;
+    }
+    // Filter by runtime
+    if (minRuntime != null) {
+      if (this.runtime == null || this.runtime! < minRuntime) return false;
+    }
+    if (maxRuntime != null) {
+      if (this.runtime == null || this.runtime! > maxRuntime) return false;
+    }
+    // Filter by vote average
+    if (minVoteAverage != null && this.voteAverage < minVoteAverage) return false;
+    if (maxVoteAverage != null && this.voteAverage > maxVoteAverage) return false;
+    return true;
+  }
+}
 class Season {
   final int seasonNumber;
   final List<Episode> episodes;
@@ -24,6 +69,16 @@ class Season {
   }) {
     episodes.sort((a, b) => a.episodeNumber.compareTo(b.episodeNumber));
   }
+  /// Serialize Season to JSON
+  Map<String, dynamic> toJson() => {
+    'seasonNumber': seasonNumber,
+    'episodes': episodes.map((e) => e.toJson()).toList(),
+  };
+  /// Deserialize Season from JSON
+  static Season fromJson(Map<String, dynamic> m) => Season(
+    seasonNumber: m['seasonNumber'] as int,
+    episodes: (m['episodes'] as List).map((e) => Episode.fromJson(e as Map<String, dynamic>)).toList(),
+  );
 }
 
 class Episode {
@@ -135,6 +190,32 @@ class Episode {
   String toString() {
     return 'Episode(seriesCsv: $seriesNameCsv, tmdbId: $seriesTmdbId, id: $episodeIdentifier, S$seasonNumber E$episodeNumber, #Qualities: ${getAvailableQualityUrls().length})';
   }
+  /// Serialize Episode to JSON
+  Map<String, dynamic> toJson() => {
+    'seriesNameCsv': seriesNameCsv,
+    'seriesTmdbId': seriesTmdbId,
+    'episodeIdentifier': episodeIdentifier,
+    'seasonNumber': seasonNumber,
+    'episodeNumber': episodeNumber,
+    'url1080p': url1080p,
+    'url720p': url720p,
+    'url540p': url540p,
+    'url480p': url480p,
+    'dubbedUrl': dubbedUrl,
+  };
+  /// Deserialize Episode from JSON
+  static Episode fromJson(Map<String, dynamic> m) => Episode(
+    seriesNameCsv: m['seriesNameCsv'] as String,
+    seriesTmdbId: m['seriesTmdbId'] as int,
+    episodeIdentifier: m['episodeIdentifier'] as String,
+    seasonNumber: m['seasonNumber'] as int,
+    episodeNumber: m['episodeNumber'] as int,
+    url1080p: m['url1080p'] as String?,
+    url720p: m['url720p'] as String?,
+    url540p: m['url540p'] as String?,
+    url480p: m['url480p'] as String?,
+    dubbedUrl: m['dubbedUrl'] as String?,
+  );
 }
 
 // Helper function for safe parsing (can be moved to a utility file)
@@ -247,6 +328,60 @@ class TvSeriesAnime {
     required this.seasons,
     this.rawVideos, // Add to constructor
   });
+  /// Serialize this instance to JSON
+  Map<String, dynamic> toJson() => {
+    'tmdbId': tmdbId,
+    'name': name,
+    'status': status,
+    'firstAirDate': firstAirDate?.toIso8601String(),
+    'runtime': runtime,
+    'overview': overview,
+    'voteAverage': voteAverage,
+    'voteCount': voteCount,
+    'genres': genres,
+    'keywords': keywords,
+    'originalName': originalName,
+    'posterPath': posterPath,
+    'backdropPath': backdropPath,
+    'popularity': popularity,
+    'originalLanguage': originalLanguage,
+    'type': type,
+    'numberOfEpisodes': numberOfEpisodes,
+    'numberOfSeasons': numberOfSeasons,
+    'homepage': homepage,
+    'cast': cast,
+    'crew': crew,
+    'videos': videos,
+    'rawVideos': rawVideos,
+    'seasons': seasons.map((s) => s.toJson()).toList(),
+  };
+  /// Deserialize from JSON
+  static TvSeriesAnime fromJson(Map<String, dynamic> m) => TvSeriesAnime(
+    tmdbId: m['tmdbId'] as int,
+    name: m['name'] as String,
+    status: m['status'] as String,
+    firstAirDate: m['firstAirDate'] != null ? DateTime.parse(m['firstAirDate'] as String) : null,
+    runtime: m['runtime'] as int?,
+    overview: m['overview'] as String,
+    voteAverage: (m['voteAverage'] as num).toDouble(),
+    voteCount: m['voteCount'] as int,
+    genres: List<String>.from(m['genres'] as List<dynamic>),
+    keywords: List<String>.from(m['keywords'] as List<dynamic>),
+    originalName: m['originalName'] as String,
+    posterPath: m['posterPath'] as String?,
+    backdropPath: m['backdropPath'] as String?,
+    popularity: (m['popularity'] as num).toDouble(),
+    originalLanguage: m['originalLanguage'] as String,
+    type: m['type'] as String,
+    numberOfEpisodes: m['numberOfEpisodes'] as int?,
+    numberOfSeasons: m['numberOfSeasons'] as int?,
+    homepage: m['homepage'] as String?,
+    cast: List<String>.from(m['cast'] as List<dynamic>),
+    crew: List<String>.from(m['crew'] as List<dynamic>),
+    videos: List<String>.from(m['videos'] as List<dynamic>),
+    seasons: (m['seasons'] as List<dynamic>).map((e) => Season.fromJson(e as Map<String, dynamic>)).toList(),
+    rawVideos: m['rawVideos'] as String?,
+  );
 
   // Helper to get the full poster URL
   String? get fullPosterUrl {

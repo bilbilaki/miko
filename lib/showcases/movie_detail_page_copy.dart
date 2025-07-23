@@ -2,6 +2,8 @@ import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:miko/providers/anime_provider.dart';
+import 'package:miko/showcases/cast_page.dart';
+import 'package:miko/showcases/recommendations_page.dart';
 import 'package:miko/utils/utils.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -10,10 +12,43 @@ import 'package:miko/services/user_data_service.dart';
 import 'package:miko/showcases/movies_by_keyword_screen.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../screens/video_player_screen.dart';
 import 'model.dart';
 import 'movie_service.dart';
 import 'person_detail_page.dart';
+class FadeIn extends StatefulWidget {
+  final Widget child;
+  final Duration duration;
+  const FadeIn({Key? key, required this.child, this.duration = const Duration(milliseconds: 300)}) : super(key: key);
+
+  @override
+  _FadeInState createState() => _FadeInState();
+}
+
+class _FadeInState extends State<FadeIn> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: widget.duration);
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(opacity: _animation, child: widget.child);
+  }
+}
 
 class MovieDetailPage extends StatefulWidget {
   final Movie movie;
@@ -66,6 +101,8 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+  final userDataService = Provider.of<UserDataService>(context);
+
     return Scaffold(
       body: FutureBuilder<Map<String, dynamic>>(
         future: _movieDataFuture,
@@ -73,7 +110,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return _buildLoadingView();
           } else if (snapshot.hasError) {
-            return _buildRetryableView(context);
+            return _buildRetryableView(context,userDataService);
           } else if (snapshot.hasData) {
             final detailedMovie = snapshot.data!['details'] as Movie;
             final credits = snapshot.data!['credits'] as MovieCredits;
@@ -82,9 +119,9 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
 
             _movieKeywords = detailedMovie.keywords;
 
-            return _buildDetailView(context, detailedMovie, credits);
+            return _buildDetailView(context, detailedMovie, credits,userDataService);
           } else {
-            return _buildRetryableView(context);
+            return _buildRetryableView(context,userDataService);
           }
         },
       ),
@@ -92,10 +129,10 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   }
 
   int _retryCount = 0;
-  Widget _buildRetryableView(context) {
+  Widget _buildRetryableView(context, userDataService) {
     if (_retryCount < 3) {
       _retryCount++;
-      Future.delayed(Duration(milliseconds: 500), () {
+      Future.delayed(const Duration(milliseconds: 500), () {
         setState(() {
           _loadMovieData();
         });
@@ -103,7 +140,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
       return _buildLoadingView();
     } else {
       return _buildErrorView(
-          context, "Error when We Try to Load Data From TMDB!!");
+          context, "Error when We Try to Load Data From TMDB!!",userDataService);
     }
   }
 
@@ -213,10 +250,10 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
     );
   }
 
-  Widget _buildErrorView(BuildContext context, String errorMessage) {
+  Widget _buildErrorView(BuildContext context, String errorMessage,userDataService) {
     return Column(
       children: [
-        _buildDetailView(context, widget.movie, null, showDetailedInfo: false),
+        _buildDetailView(context, widget.movie, null,userDataService, showDetailedInfo: false),
         Expanded(
           child: Container(
             color: Colors.black87,
@@ -229,13 +266,13 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                     const Icon(Icons.error_outline,
                         size: 60, color: Colors.red),
                     const SizedBox(height: 16),
-                    Text('Error loading movie details',
+                    SelectableText('Error loading movie details',
                         style: Theme.of(context)
                             .textTheme
                             .titleLarge
                             ?.copyWith(color: Colors.white)),
                     const SizedBox(height: 8),
-                    Text(errorMessage,
+                    SelectableText(errorMessage,
                         textAlign: TextAlign.center,
                         style: Theme.of(context)
                             .textTheme
@@ -262,7 +299,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   }
 
   Widget _buildDetailView(
-      BuildContext context, Movie movie, MovieCredits? credits,
+      BuildContext context, Movie movie, MovieCredits? credits,userDataService,
       {bool showDetailedInfo = true}) {
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification scrollInfo) {
@@ -275,18 +312,17 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
       },
       child: CustomScrollView(
         slivers: [
-          _buildAppBar(context, movie),
+          _buildAppBar(context, movie,userDataService),
           SliverToBoxAdapter(
             child:
-                _buildMovieDetails(context, movie, credits, showDetailedInfo),
+                _buildMovieDetails(context, movie, credits, showDetailedInfo,userDataService),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAppBar(BuildContext context, Movie movie) {
-    final userDataService = Provider.of<UserDataService>(context);
+  Widget _buildAppBar(BuildContext context, Movie movie, userDataService) {
     bool isFavorite = userDataService.isFavoriteMovie(movie.id);
     final movieM = Provider.of<MovieProvider>(context, listen: false)
         .getMovieById(movie.id);
@@ -308,23 +344,23 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
               height: 1.2,
               shadows: [
                 Shadow(
-                  offset: Offset(2, 2),
+                  offset: const Offset(2, 2),
                   blurRadius: 8,
                   color: Colors.black.withOpacity(0.8),
                 ),
                 Shadow(
-                  offset: Offset(-1, -1),
+                  offset: const Offset(-1, -1),
                   blurRadius: 4,
                   color: Colors.purple.withOpacity(0.3),
                 ),
                 Shadow(
-                  offset: Offset(0, 0),
+                  offset: const Offset(0, 0),
                   blurRadius: 20,
                   color: Colors.cyan.withOpacity(0.4),
                 ),
               ],
               foreground: Paint()
-                ..shader = LinearGradient(
+                ..shader = const LinearGradient(
                   colors: [
                     Color(0xFFFF6B6B),
                     Color(0xFF4ECDC4),
@@ -333,7 +369,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                ).createShader(Rect.fromLTWH(0, 0, 300, 100)),
+                ).createShader(const Rect.fromLTWH(0, 0, 300, 100)),
             )),
         background: Stack(fit: StackFit.expand, children: [
           backdropUrl.isNotEmpty
@@ -489,10 +525,9 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   }
 
   Widget _buildMovieDetails(BuildContext context, Movie movie,
-      MovieCredits? credits, bool showDetailedInfo) {
+      MovieCredits? credits, bool showDetailedInfo,userDataService) {
     final mmovie = Provider.of<MovieProvider>(context, listen: false)
         .getMovieById(widget.movie.id);
-    final userDataService = Provider.of<UserDataService>(context);
         final downloadLinks = mmovie!.getDownloadLinksList();
 
     bool isWatched = userDataService.isWatchedEpisode(widget.movie.id,
@@ -519,12 +554,12 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                     fontStyle: FontStyle.italic,
                     shadows: [
                       Shadow(
-                        offset: Offset(1, 1),
+                        offset: const Offset(1, 1),
                         blurRadius: 4,
                         color: Colors.black.withOpacity(0.6),
                       ),
                       Shadow(
-                        offset: Offset(0, 0),
+                        offset: const Offset(0, 0),
                         blurRadius: 8,
                         color: Colors.blue.withOpacity(0.2),
                       ),
@@ -580,7 +615,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    SelectableText(
                       movie.title,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
@@ -642,7 +677,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                (mmovie != null)
+                (mmovie== mmovie)
                     ? ElevatedButton.icon(
                         icon: const Icon(Icons.play_arrow),
                         label: Text(
@@ -660,8 +695,8 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                           //   downloadLinks.toString());
                         },
                       )
-                    : SizedBox(height: 4),
-                Text("No Playing Link Exist"),
+                    : const SizedBox(height: 4),
+                const Text("No Playing Link Exist"),
                 // ElevatedButton.icon(
                 //   icon: const Icon(Icons.download_outlined),
                 //   label: const Text('Download'),
@@ -691,7 +726,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
-          Text(
+          SelectableText(
             movie.overview.isEmpty ? 'No overview available.' : movie.overview,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
@@ -710,7 +745,16 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                 ),
                 TextButton(
                   onPressed: () {
-                    _performHapticFeedback();
+                                        _performHapticFeedback();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CastPage(
+                          movieId: movie.id,
+                          movieTitle: movie.title,
+                        ),
+                      ),
+                    );
                   },
                   child: Text(
                     'See all ${credits.cast.length}',
@@ -1150,7 +1194,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                                 ),
                               )
                             else
-                              SizedBox(
+                              const SizedBox(
                                 // Changed from Container with Text to SizedBox with Icon for consistency
                                 height: 40,
                                 width: 80,
@@ -1263,24 +1307,24 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                     OutlinedButton.icon(
                       icon: const Icon(Icons.language),
                       label: const Text('Official Website'),
-                      onPressed: () {
+                      onPressed: () async{
                         // TODO: Launch URL (would need url_launcher package)
                         // import 'package:url_launcher/url_launcher.dart';
-                        // if (await canLaunchUrl(Uri.parse(movie.homepage!))) {
-                        //   await launchUrl(Uri.parse(movie.homepage!));
-                        // }
+                         if (await canLaunchUrl(Uri.parse(movie.homepage!))) {
+                           await launchUrl(Uri.parse(movie.homepage!));
+                         }
                       },
                     ),
                   if (movie.imdbId != null)
                     OutlinedButton.icon(
                       icon: const Icon(Icons.movie),
                       label: const Text('IMDb'),
-                      onPressed: () {
+                      onPressed: () async{
                         // TODO: Launch IMDb URL
-                        // final imdbUrl = 'https://www.imdb.com/title/${movie.imdbId}/';
-                        // if (await canLaunchUrl(Uri.parse(imdbUrl))) {
-                        //   await launchUrl(Uri.parse(imdbUrl));
-                        // }
+                         final imdbUrl = 'https://www.imdb.com/title/${movie.imdbId}/';
+                         if (await canLaunchUrl(Uri.parse(imdbUrl))) {
+                           await launchUrl(Uri.parse(imdbUrl));
+                         }
                       },
                     ),
                 ],
@@ -1313,9 +1357,9 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
           children: links.map((link) {
             // Try to guess quality from URL (very basic)
             String qualityGuess = "Unknown";
-            if (link.contains('1080p')) {
+            if (link.contains('1080p')) 
               qualityGuess = "1080p ";
-            } else if (link.contains('720p'))
+             else if (link.contains('720p'))
               qualityGuess = "720p ";
             else if (link.contains('480p'))
               qualityGuess = "480p ";
@@ -1428,14 +1472,16 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
               if (recommendations!.results.length > 10)
                 TextButton(
                   onPressed: () {
-                    _performHapticFeedback();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('More recommendations coming soon!'),
-                        duration: Duration(seconds: 1),
+                        _performHapticFeedback();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RecommendationsPage(
+                          movieId: widget.movie.id,
+                          movieTitle: widget.movie.title,
+                        ),
                       ),
-                    );
-                  },
+                    );},
                   child: Text(
                     'See All',
                     style: TextStyle(

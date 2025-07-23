@@ -14,31 +14,31 @@ class WatchlistScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final userData = Provider.of<UserDataService>(context);
     final movieProvider = Provider.of<MovieProvider>(context, listen: false);
- //   final tvProvider = Provider.of<TvSeriesProvider>(context, listen: false);
+    final tvProvider = Provider.of<TvSeriesProvider>(context, listen: false);
     final animeProvider = Provider.of<AnimeProvider>(context, listen: false);
     final watchlistMovies = userData.watchlistMovieIds
         .map((id) => movieProvider.getMovieById(id))
         .whereType<Movie>()
         .toList();
 
-    // final watchlistTvSeries = userData.watchlistTvSeriesIds
-    //     .map((id) => tvProvider.getAnimeByTmdbId(id))
-    //     .whereType<TvSeriesAnime>()
-    //     .toList();
+     final watchlistTvSeries = userData.watchlistTvSeriesIds
+        .map((id) => tvProvider.getAnimeByTmdbId(id))
+          .whereType<TvSeriesAnime>()
+          .toList();
 
        final watchlistAnime = userData.watchlistAnimeIds
         .map((id) => animeProvider.getAnimeByTmdbId(id))
         .whereType<TvSeriesAnime>() // Filter out nulls if movie not found
         .toList();
 
-    final allWatchlist = [...watchlistMovies,/* ...watchlistTvSeries,*/ ...watchlistAnime];
+    final allWatchlist = [...watchlistMovies, ...watchlistTvSeries, ...watchlistAnime];
      allWatchlist.sort((a, b) { // Optional sort
     String nameA;
     if (a is Movie) {
       nameA = a.title;
-  //  } 
-    //else if (a is TvSeriesAnime) {
-     // nameA = a.name;
+    } 
+    else if (a is TvSeriesAnime) {
+      nameA = a.name;
     } else {
       nameA = (a as TvSeriesAnime).name; // Assuming Anime model has a 'title' or 'name' field
     }
@@ -47,9 +47,9 @@ class WatchlistScreen extends StatelessWidget {
     if (b is Movie) {
       nameB = b.title;
     } 
-    // else if (b is TvSeriesAnime) {
-    //   nameB = b.name;
-    // }
+     else if (b is TvSeriesAnime) {
+       nameB = b.name;
+   }
      else {
       nameB = (b as TvSeriesAnime).name; // Assuming Anime model has a 'title' or 'name' field
     }
@@ -100,7 +100,7 @@ class FavoritesScreen extends StatelessWidget {
     final userData = Provider.of<UserDataService>(context);
     final movieProvider = Provider.of<MovieProvider>(context,
         listen: false); // don't listen if list is static
-  //  final tvProvider = Provider.of<TvSeriesProvider>(context, listen: false);
+    final tvProvider = Provider.of<TvSeriesProvider>(context, listen: false);
     final animeProvider = Provider.of<AnimeProvider>(context, listen: false);
 
     // Get favorite items
@@ -113,23 +113,23 @@ class FavoritesScreen extends StatelessWidget {
         .whereType<TvSeriesAnime>() // Filter out nulls if movie not found
         .toList();
 
-    // final favoriteTvSeries = userData.favoriteTvSeriesIds
-    //     .map((id) => tvProvider.getAnimeByTmdbId(id))
-    //     .whereType<TvSeriesAnime>() // Filter out nulls
-    //     .toList();
+     final favoriteTvSeries = userData.favoriteTvSeriesIds
+        .map((id) => tvProvider.getAnimeByTmdbId(id))
+         .whereType<TvSeriesAnime>() // Filter out nulls
+        .toList();
 
     // Combine and sort (optional, e.g., alphabetically)
     final allFavorites = [
       ...favoriteMovies,
-     // ...favoriteTvSeries,
+      ...favoriteTvSeries,
       ...favoriteAnime
     ];
     allFavorites.sort((a, b) {
       String nameA;
       if (a is Movie) {
         nameA = a.title;
-        //   } else if (a is TvSeriesAnime) {
-        //   nameA = a.name;
+           } else if (a is TvSeriesAnime) {
+          nameA = a.name;
       } else {
         nameA = (a as TvSeriesAnime)
             .name; // Assuming Anime model has a 'title' or 'name' field
@@ -138,8 +138,8 @@ class FavoritesScreen extends StatelessWidget {
       String nameB;
       if (b is Movie) {
         nameB = b.title;
-        // } else if (b is TvSeriesAnime) {
-        //   nameB = b.name;
+         } else if (b is TvSeriesAnime) {
+           nameB = b.name;
       } else {
         nameB = (b as TvSeriesAnime)
             .name; // Assuming Anime model has a 'title' or 'name' field

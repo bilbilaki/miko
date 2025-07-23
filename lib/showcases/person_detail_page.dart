@@ -1,7 +1,5 @@
-import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'model.dart';
 import 'movie_service.dart';
 
@@ -57,12 +55,7 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
       }
     });
   }
-void _performHapticFeedback() {
-    if (Platform.isAndroid) {
-      // Provides a subtle vibration
-      HapticFeedback.lightImpact;
-    }
-  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
