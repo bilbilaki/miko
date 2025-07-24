@@ -55,25 +55,21 @@ class EpisodeTileNew extends StatelessWidget {
             tvSeriesId: id,
             season: season,
             playlist: season
-                .episodes, // Pass the whole list of episodes for the season
+                .episodes, 
             initialIndex: initialIndex,
             url: url,
-            episode: episode
+          //  episode: episode
           ),
         ),
       );
     }
 
-    // Create a display title: "E01: Episode Name" or just "Episode 1" if no name
-    // Since we removed tmdbTitle, we'll rely on season/episode numbers.
-    final displayTitle = 'Episode ${episode.episodeNumber}'; // Simple display
-    // Or use the identifier: final displayTitle = episode.episodeIdentifier;
     bool isInWatchlist =
         userDataService.isWatchedEpisode(seriesname, id, episode.episodeNumber, season.seasonNumber);
     return Padding(
-      // Add padding instead of using Card margin for better control with dividers
+
       padding: const EdgeInsets.symmetric(
-          vertical: 8.0, horizontal: 16.0), // Adjust padding as needed
+          vertical: 8.0, horizontal: 16.0),
       child: Row(
         children: [
           Expanded(
@@ -110,7 +106,6 @@ class EpisodeTileNew extends StatelessWidget {
     
           const SizedBox(width: 12),
 
-          // Quality Buttons
             if (availableQualities.isNotEmpty)
             Expanded(
               flex: 4,
@@ -119,7 +114,6 @@ class EpisodeTileNew extends StatelessWidget {
                 spacing: 6.0,
                 runSpacing: 4.0,
                 children: availableQualities.entries.map<Widget>((entry) {
-                  final quality = entry.key;
                   final url = entry.value;
                   return ElevatedButton(
                     onPressed: () => playEpisode(context, url),
@@ -132,7 +126,6 @@ class EpisodeTileNew extends StatelessWidget {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                       elevation: 1,
                     ),
-                    // --- REMOVED: The "(Watched)" text logic ---
                     child: Text(entry.key.toUpperCase()),
                   );
                 }).toList(),
@@ -161,7 +154,6 @@ class MovieCard extends StatelessWidget {
     final posterUrl = movie.getPosterUrl();
     final releaseYear = movie.releaseDate?.year.toString() ?? 'N/A';
     final userDataService = Provider.of<UserDataService>(context);
-    // Check if the movie is in Favorites or Watchlist
     bool isFavorite = userDataService.isFavoriteMovie(movie.id);
     bool isInWatchlist = userDataService.isOnWatchlistMovie(movie.id);
     return FutureBuilder<mmd.Movie>(
@@ -186,15 +178,14 @@ class MovieCard extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (_) =>
-                        MovieDetailPage(movie: nms), // Pass movie ID
+                        MovieDetailPage(movie: nms), 
                   ),
                 );
-                //context.go('/movie/${movie.id}');
               }
             },
             child: Card(
                 color: AppColors2
-                    .blackbackground, // Make card transparent, container handles bg
+                    .blackbackground, 
                 elevation: 0,
                 margin:
                     const EdgeInsets.symmetric(vertical: 1.0, horizontal: 1.0),
@@ -202,11 +193,9 @@ class MovieCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Movie Poster using CachedNetworkImage with Buttons
                     AspectRatio(
                       aspectRatio: 2 / 3,
 
-                      // Common poster aspect ratio
                       child: Stack(
                         children: [
                           ClipRRect(
@@ -359,7 +348,6 @@ class MovieCard extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 2.0),
-                          // Additional Info: Runtime, Language, Popularity
                           Text(
                             'Runtime: ${movie.runtime != null ? "${movie.runtime} min" : 'N/A'}',
                             style: const TextStyle(
@@ -410,7 +398,6 @@ class AnimeSeriesCard extends StatelessWidget {
     final posterUrl = series.fullPosterUrl;
     final userDataService = Provider.of<UserDataService>(context);
     final MovieService mmm = MovieService();
-    // Safely get the year
     String displayYear = 'N/A';
     if (series.firstAirDate != null) {
       try {
@@ -422,7 +409,6 @@ class AnimeSeriesCard extends StatelessWidget {
       displayYear = "Info Missing";
     }
 
-    // Check if the series is in Favorites or Watchlist
     bool isFavorite = userDataService.isFavoriteAnime(series.tmdbId);
     bool isInWatchlist = userDataService.isOnWatchlistAnime(series.tmdbId);
 
@@ -443,7 +429,6 @@ class AnimeSeriesCard extends StatelessWidget {
                     ),
                   );
                 } else {
-                  // Navigate to Movie Details Screen
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -451,7 +436,6 @@ class AnimeSeriesCard extends StatelessWidget {
                           tvShow: nms, typec: typec), // Pass movie ID
                     ),
                   );
-                  //context.go('/movie/${movie.id}');
                 }
               },
               child: Card(
@@ -504,13 +488,11 @@ class AnimeSeriesCard extends StatelessWidget {
                                     ),
                             ),
                           ),
-                          // Positioned buttons on top of the poster
                           Positioned(
                             top: 3.0,
                             right: 3.0,
                             child: Row(
                               children: [
-                                // Favorite Button
                                 IconButton(
                                   icon: Icon(
                                     isFavorite

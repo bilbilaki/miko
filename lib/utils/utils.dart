@@ -5,17 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:miko/showcases/model.dart' as TmdbApiModels;
 import '../providers/god_proovider.dart' as CsvModels;
 
-import 'dart:io';
 
-import 'package:flutter/material.dart';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as p;
 import 'dart:convert';
-import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'package:file_picker/file_picker.dart';
 void triggerVibration() {
     if (Platform.isAndroid) {
       HapticFeedback.lightImpact();

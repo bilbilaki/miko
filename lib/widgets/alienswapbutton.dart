@@ -80,18 +80,6 @@ class _AlienFloatSwapMenuState extends State<AlienFloatSwapMenu> {
     }
   }
   // Helper method to get an icon based on action name
-  IconData _getIconForAction(String action) {
-    switch (action) {
-      case "Open": return Icons.edit;
-      case "Save": return Icons.save;
-      case "Filter": return Icons.filter;
-      case "SearchOnline": return Icons.search;
-      case "New": return Icons.add_box;
-      case "Undo": return Icons.undo;
-      case "Redo": return Icons.redo;
-      default: return Icons.help_outline;
-    }
-  }
  
   String? getOverlappingAction() {
     for (var entry in actions.entries) {
@@ -106,7 +94,7 @@ class _AlienFloatSwapMenuState extends State<AlienFloatSwapMenu> {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final centerStart =
-        Offset(screenSize.width / 1.08, screenSize.height / 1.14);
+        Offset(screenSize.width / 1.15, screenSize.height / 1.24);
     final position = centerStart + centerOffset;
     return GestureDetector(
         // Added GestureDetector for general touch/drag vibration
@@ -133,7 +121,7 @@ class _AlienFloatSwapMenuState extends State<AlienFloatSwapMenu> {
                   child: Container(
                     padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 118, 45, 252),
+                      color: const Color.fromARGB(255, 76, 2, 78),
                       borderRadius: BorderRadius.circular(13),
                     ),
                     child:

@@ -4,12 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:miko/aiconfig/consts.dart';
 import 'package:miko/app_keeper.dart';
-import 'package:miko/providers/ai_chat_provider.dart';
 
 import 'package:miko/providers/csv_detail_process_provider.dart';
 import 'package:miko/providers/god_proovider.dart';
 import 'package:miko/providers/settings_provider.dart';
-import 'package:miko/services/ai_chat_service.dart';
 import 'package:miko/services/user_data_service.dart'; // Import UserDataService
 import 'package:miko/utils/colors.dart';
 import 'package:provider/provider.dart';

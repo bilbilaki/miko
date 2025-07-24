@@ -917,7 +917,7 @@ class TVCast {
   final int id;
   final String name;
   final String originalName;
-  final String profilePath;
+  String profilePath;
   final String character;
   final int order;
   final String creditId;
@@ -957,10 +957,8 @@ class TVCast {
   }
 
   String get profileImageUrl {
-    return profilePath != null
-        ? 'https://inosdb.worker-inosuke.workers.dev/w500$profilePath'
-        : 'https://inosdb.worker-inosuke.workers.dev/w500$profilePath';
-  }
+    return profilePath =
+         'https://inosdb.worker-inosuke.workers.dev/w500$profilePath';  }
 
   String get genderString {
     switch (gender) {

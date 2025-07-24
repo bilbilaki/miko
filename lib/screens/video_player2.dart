@@ -119,10 +119,10 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
   }
 
   @override
-  void dispose()async {
+  void dispose() {
     _hideTimer?.cancel();
 
-   await player.dispose();
+    player.dispose();
     super.dispose();
   }
 

@@ -419,7 +419,7 @@ class _KeywordMoviesPageState extends State<KeywordMoviesPage> {
                       ]),
                     const SizedBox(height: 8),
                     Text(
-                      movie.overview ?? '',
+                      movie.overview,
                       style: Theme.of(context).textTheme.bodySmall,
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,

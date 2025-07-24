@@ -29,13 +29,11 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
 
   final List<Widget> _pages = [
     const AnimeGridScreen(typec: "movie"),
-    //  const TvSeriesGridScreen(),
-    const AnimeGridScreen(typec: "tvseries"), // Placeholder
-    const AnimeGridScreen(typec: "anime"), // Placeholder
-
-    const GenreListScreen(), // Placeholder
-    const FavoritesScreen(), // Placeholder
-    const WatchlistScreen(), // Placeholder
+    const AnimeGridScreen(typec: "tvseries"),
+    const AnimeGridScreen(typec: "anime"), 
+    const GenreListScreen(), 
+    const FavoritesScreen(), 
+    const WatchlistScreen(), 
   ];
 
   void _onPageChanged(int index) {
@@ -82,18 +80,13 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
         ),
         floatingActionButton: pp.Consumer<FloatingButtonVisibilityNotifier>(
     builder: (context, visibilityNotifier, child) {
-      // Conditionally return the button or an empty container
       return visibilityNotifier.isVisible ?
          AlienFloatSwapMenu(
             OnAskAi: () {
-              // Now simply show the new AiChatDialog widget
               showDialog(
                     context: context,
                     builder: (ctx) {
-                      // It is critical to wrap the dialog with ProviderScope
-                      // if the dialog (or its children) will consume Riverpod providers,
-                      // and it's being shown outside of the main widget tree's ProviderScope.
-                      // ProviderScope.containerOf(context) ensures it uses the existing Riverpod container.
+        
                       return ProviderScope(
                         parent: ProviderScope.containerOf(context),
                         child: const AiChatDialog(),
@@ -121,16 +114,11 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
               },
                 search: () {showModalBottomSheet(
   context: context,
-  isScrollControlled: true, // For full height if needed
+  isScrollControlled: true, 
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
   builder: (context) => UnifiedSearchBottomSheet(initialQuery: ''),
 );},
-           //     searchOnline: () => AnimeGridScreenState().showSearchOverlay(context),
-                // onNew: () => print("New"), // Consistent naming
-                // onUndo: () => print("Undo"), // Consistent naming
-                // onRedo: () => print("Redo"), // Consistent naming
-
-          ) : Container(); // Return an empty container if not visible
+          ) : Container();
         }),
       ),
     );

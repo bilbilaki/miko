@@ -1,9 +1,7 @@
 // lib/widgets/ai_chat_dialog.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:miko/widgets/Typing_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:miko/providers/ai_chat_provider.dart';
 
@@ -16,13 +14,7 @@ class AiChatDialog extends ConsumerStatefulWidget {
 
 class _AiChatDialogState extends ConsumerState<AiChatDialog> {
   final TextEditingController _textEditingController = TextEditingController();
-  bool _isLoading = false;
-  bool _isThinkingExpanded = false;
-  String _thinkingText = '';
-  String _finalAnswerText = '';
-  bool _isThinking = false;
-  bool _isFinished = false;
-
+ 
   @override
   void dispose() {
     _textEditingController.dispose();
@@ -222,54 +214,4 @@ class _AiChatDialogState extends ConsumerState<AiChatDialog> {
 
   // This custom widget seems to be for a specific response parsing logic
   // and can be kept as is, though it's not currently wired up to the provider state.
-  Widget _buildThinkingBox() {
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _isThinkingExpanded = !_isThinkingExpanded;
-        });
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: _isThinkingExpanded ? Colors.grey.shade800 : Colors.grey.shade900,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade700),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.psychology, color: Colors.tealAccent, size: 20),
-                const SizedBox(width: 8),
-                const Text("AI is thinking"),
-                if (_isLoading) const TypingIndicator(),
-                const Spacer(),
-                Icon(
-                  _isThinkingExpanded ? Icons.expand_less : Icons.expand_more,
-                  color: Colors.grey.shade400,
-                ),
-              ],
-            ),
-            if (_isThinkingExpanded)
-              Padding(
-                padding: const EdgeInsets.only(top: 12.0),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 150),
-                  child: SingleChildScrollView(
-                    child: MarkdownBody(
-                      data: _thinkingText.isEmpty ? "..." : _thinkingText,
-                      styleSheet: MarkdownStyleSheet(p: const TextStyle(color: Colors.grey)),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
 }
