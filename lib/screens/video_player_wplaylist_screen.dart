@@ -91,14 +91,19 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
     _userDataService = Provider.of<UserDataService>(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {});
+ _userDataService.toggleIsWatchedLink(
+        widget.seriesname, widget.tvSeriesId, widget.initialIndex, widget.season);
+            setState(() {
+    });
 
-    player.open(Media(Uri.decodeComponent(widget.url)),
-        play: true); 
-
-
-        _progressSaveTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+    firstDialog();
+      // Show resume dialog if saved progress is significant
+      
+            _progressSaveTimer = Timer.periodic(const Duration(seconds: 15), (_) {
       _savePlaybackProgress();
     });
+    player.open(Media(Uri.decodeComponent(widget.url)),
+        play: true); 
 
     player.stream.completed.listen((completed) {
       if (completed) {
@@ -116,6 +121,22 @@ void cleanUpPlayer() async{
  await player.dispose();
 }
 
+void firstDialog() async {
+  final episodeToPlay = widget.playlist[widget.initialIndex];
+    Duration? seekToPosition;
+      final savedPosition = await _userDataService.getEpisodeProgress(
+        widget.tvSeriesId,
+        episodeToPlay.seasonNumber,
+        episodeToPlay.episodeNumber,
+      );
+
+  if (savedPosition != null && savedPosition.inSeconds > 10) {
+        final resume = await _showResumeDialog(savedPosition);
+        if (resume == true) {
+          seekToPosition = savedPosition;
+        }
+      }
+}
   void playEpisode(int index, {bool isInitialPlay = false}) async {
     if (index < 0 || index >= widget.playlist.length) return;
 
@@ -128,7 +149,7 @@ void cleanUpPlayer() async{
         Provider.of<UserDataService>(context, listen: false);
 
     Duration? seekToPosition;
-    if (isInitialPlay) {
+ //   if (isInitialPlay) {
       final savedPosition = await _userDataService.getEpisodeProgress(
         widget.tvSeriesId,
         episodeToPlay.seasonNumber,
@@ -141,7 +162,7 @@ void cleanUpPlayer() async{
         if (resume == true) {
           seekToPosition = savedPosition;
         }
-      }
+   //   }
     }
 
 
@@ -156,7 +177,7 @@ void cleanUpPlayer() async{
       await player.seek(seekToPosition);
     }
     userDataService.toggleIsWatchedLink(
-        widget.seriesname, widget.tvSeriesId, episodeToPlay, widget.season);
+        widget.seriesname, widget.tvSeriesId, currentIndex, urlToPlay);
   }
 
 
@@ -169,14 +190,14 @@ void cleanUpPlayer() async{
       final duration = player.state.duration;
 
       // Save if not too close to the beginning or end
-      if (position.inSeconds > 10 && (duration - position).inSeconds > 15) {
+     // if (position.inSeconds > 10 && (duration - position).inSeconds > 15) {
         await _userDataService.saveEpisodeProgress(
           widget.tvSeriesId,
           currentEpisode!.seasonNumber,
           currentEpisode!.episodeNumber,
           position,
         );
-      }
+     // }
     }
   }
 
@@ -191,10 +212,12 @@ void cleanUpPlayer() async{
     }
   }
 
-  void playNext() {
-    if (currentIndex < widget.playlist.length - 1) {
+  void playNext() async{
+   // if (currentIndex < widget.playlist.indexOf(widget.playlist) - 1) {
+    try {
+    AsyncSnapshot.waiting();
       playEpisode(currentIndex + 1);
-    } else {
+    } catch (e) {
       debugPrint("Playlist finished.");
       if (mounted) {
         Navigator.of(context).pop();
