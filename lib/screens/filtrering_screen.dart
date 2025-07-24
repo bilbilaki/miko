@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:miko/models/advancedfiltering.dart';
+import 'package:miko/services/user_data_service.dart';
+import 'package:miko/utils/colors.dart';
+import 'package:miko/utils/utils.dart';
+import 'package:miko/widgets/anime_series_card.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 class ContentFilterBottomSheet<T extends ContentProvider<dynamic>> extends StatefulWidget {
   final T provider;
@@ -430,12 +436,14 @@ class MovieListPage extends StatelessWidget {
                 }
                 if (activeFilters.startDate != null || activeFilters.endDate != null) {
                   String dateRange = '';
-                  if (activeFilters.startDate != null)
+                  if (activeFilters.startDate != null) {
                     dateRange +=
                         'From: ${activeFilters.startDate!.toLocal().year}-${activeFilters.startDate!.toLocal().month.toString().padLeft(2, '0')}-${activeFilters.startDate!.toLocal().day.toString().padLeft(2, '0')}';
-                  if (activeFilters.endDate != null)
+                  }
+                  if (activeFilters.endDate != null) {
                     dateRange +=
                         ' To: ${activeFilters.endDate!.toLocal().year}-${activeFilters.endDate!.toLocal().month.toString().padLeft(2, '0')}-${activeFilters.endDate!.toLocal().day.toString().padLeft(2, '0')}';
+                  }
                   filterChips.add(_buildActiveFilterChip(
                     'Date: $dateRange',
                     () => provider.applyFiltersAndSort(
@@ -490,16 +498,76 @@ class MovieListPage extends StatelessWidget {
                             itemCount: movieProvider.filteredAndSortedContent.length,
                             itemBuilder: (context, index) {
                               final movie = movieProvider.filteredAndSortedContent[index];
-                              return ListTile(
-                                leading: movie.getPosterUrl() != null
-                                    ? Image.network(movie.getPosterUrl()!, height: 60, width: 40, fit: BoxFit.cover)
-                                    : null,
-                                title: Text(movie.title),
-                                subtitle: Text(
-                                    'Rating: ${movie.voteAverage.toStringAsFixed(1)} | Year: ${movie.releaseDate?.year ?? 'N/A'}'),
-                                // Add more details or navigate to a detail page
-                              );
-                            },
+                              // return ListTile(
+                              //   leading: movie.getPosterUrl() != null
+                              //       ? Image.network(movie.getPosterUrl()!, height: 60, width: 40, fit: BoxFit.cover)
+                              //       : null,
+                              //   title: Text(movie.title),
+                              //   subtitle: Text(
+                              //       'Rating: ${movie.voteAverage.toStringAsFixed(1)} | Year: ${movie.releaseDate?.year ?? 'N/A'}'),
+                              //   // Add more details or navigate to a detail page
+                              // );
+                              final status = movieProvider.status;
+  final userData = Provider.of<UserDataService>(context);
+
+  if (status == LoadingStatus.loading) {
+    // Show loading indicator initially or while loading
+    return Center(
+      child: Shimmer.fromColors(
+        // Shimmer effect for main grid loading
+        baseColor: AppColors.secondaryBackground.withOpacity(0.5),
+        highlightColor: AppColors.secondaryBackground.withOpacity(0.1),
+        child: MasonryGridView.count(
+          padding: const EdgeInsets.all(5.0),
+          crossAxisCount: 3,
+          mainAxisSpacing: 0.5,
+          crossAxisSpacing: 0.5,
+          itemCount: 10, // Show a few shimmer items
+          itemBuilder: (context, index) {
+            return Container(
+              height: index % 2 == 0
+                  ? 200
+                  : 250, // Vary height for staggered effect
+              color: Colors.white,
+            );
+          },
+        ),
+      ),
+    );
+  }
+ // final typec = "movie";
+  return MasonryGridView.count(
+    padding: const EdgeInsets.all(5.0),
+    crossAxisCount: 1 * 3, // Adjust number of
+    mainAxisSpacing: 1.5,
+    controller: ScrollController(keepScrollOffset: true),
+    shrinkWrap: true,
+    physics: const BouncingScrollPhysics(),
+    crossAxisSpacing: 1.5,
+    cacheExtent: 100,
+    itemCount: movieProvider.filteredAndSortedContent.length,
+    itemBuilder: (context, index) {
+      final series = movieProvider.filteredAndSortedContent[index];
+      return GestureDetector(
+        // Wrap card for tap vibration if the card itself does not handle
+        onTap: () {
+          tVmedium();
+          // Assuming AnimeSeriesCard has its own navigation logic
+          // If not, you'd add navigation here.
+        },
+        child: 
+        // typec == "movie"
+        //     ? 
+            MovieCard(
+                movie: series,
+                typec: "movie",
+              )
+            //: AnimeSeriesCard(series: series, typec: "series"),
+      );
+    },
+  );
+}
+                          
                           ),
           ),
         ],
