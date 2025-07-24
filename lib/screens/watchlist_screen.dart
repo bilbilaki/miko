@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:miko/providers/god_proovider.dart';
 import 'package:miko/widgets/anime_series_card.dart';
 import 'package:provider/provider.dart';
-import 'package:miko/models/tv_series_anime.dart';
-import 'package:miko/providers/anime_provider.dart';
+
+
 import 'package:miko/services/user_data_service.dart';
 import 'package:miko/utils/colors.dart';
 

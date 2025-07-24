@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:miko/showcases/model.dart' as TmdbApiModels;
-import '../models/tv_series_anime.dart' as CsvModels;
+import '../providers/god_proovider.dart' as CsvModels;
 
 void triggerVibration() {
     if (Platform.isAndroid) {

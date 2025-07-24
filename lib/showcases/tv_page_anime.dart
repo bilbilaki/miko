@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:miko/providers/god_proovider.dart' hide Movie;
 import 'package:miko/showcases/movie_detail_page_copy.dart';
 import 'package:miko/showcases/person_detail_page.dart';
 import 'package:miko/showcases/tv_detail_page_anime.dart';
 import 'model.dart';
 import 'movie_service.dart';
-import '../providers/anime_provider.dart';
 
 class TvShowPage1 extends StatefulWidget {
   const TvShowPage1({super.key});
@@ -618,7 +618,7 @@ class _TvShowPageState extends State<TvShowPage1> {
   Widget _buildTvShowGrid() {
     late AnimeProvider seriesProvider = AnimeProvider();
 
-    final seriesList = seriesProvider.animeseriesForDisplay;
+    final seriesList = seriesProvider.filteredAndSortedContent;
 
     return GridView.builder(
       controller: _scrollController,

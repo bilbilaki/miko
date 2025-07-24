@@ -1,7 +1,8 @@
 import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:miko/providers/anime_provider.dart';
+
+import 'package:miko/providers/god_proovider.dart' show MovieProvider;
 import 'package:miko/showcases/cast_page.dart';
 import 'package:miko/showcases/recommendations_page.dart';
 import 'package:miko/utils/utils.dart';
@@ -1479,6 +1480,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                         builder: (context) => RecommendationsPage(
                           movieId: widget.movie.id,
                           movieTitle: widget.movie.title,
+                          typec: "movie",
                         ),
                       ),
                     );},

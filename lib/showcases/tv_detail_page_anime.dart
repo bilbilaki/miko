@@ -2,11 +2,9 @@ import 'dart:io'; // Import for Platform check
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import for HapticFeedback
-import 'package:miko/models/tv_series_anime.dart' as ss;
-import 'package:miko/providers/anime_provider.dart';
+import 'package:miko/providers/god_proovider.dart' as ss;
 import 'package:miko/services/user_data_service.dart';
-import 'package:miko/showcases/recommendations_page_series.dart';
-import 'package:miko/showcases/tv_page_grid.dart';
+import 'package:miko/showcases/recommendations_page.dart';
 import '../widgets/anime_series_card.dart'; // Keep if used elsewhere
 import 'seasondetailpage_anime.dart';
 import 'package:miko/utils/colors.dart';
@@ -225,8 +223,8 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
 
   Widget _buildDetailView(BuildContext context, TvShow tvShow) {
     final series = widget.typec == "anime"
-        ? Provider.of<AnimeProvider>(context).getAnimeByTmdbId(tvShow.id)
-        : Provider.of<TvSeriesProvider>(context).getAnimeByTmdbId(tvShow.id);
+        ? Provider.of<ss.AnimeProvider>(context).getAnimeByTmdbId(tvShow.id)
+        : Provider.of<ss.TvSeriesProvider>(context).getAnimeByTmdbId(tvShow.id);
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification scrollInfo) {
         if (Platform.isAndroid && scrollInfo is ScrollUpdateNotification) {
@@ -965,7 +963,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: CachedNetworkImage(
-                          imageUrl: member.profileImageUrl,
+                          imageUrl: member.fullProfilePath,
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Shimmer.fromColors(
                             baseColor: Colors.grey[800]!,
@@ -1398,7 +1396,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
               context,
               MaterialPageRoute(
                   builder: (context) =>
-                      RecommendationsPage( seriesId: widget.typec.id, seriesTitle: widget.tvShow.name,)),
+                      RecommendationsPage( movieId: widget.tvShow.id, movieTitle: widget.tvShow.name,typec: widget.typec,)),
             );
           },
           child: Text("Show All Recommends"),

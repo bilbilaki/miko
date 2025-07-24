@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:miko/models/advancedfiltering.dart';
-import 'package:miko/services/user_data_service.dart';
-import 'package:miko/utils/colors.dart';
-import 'package:miko/utils/utils.dart';
-import 'package:miko/widgets/anime_series_card.dart';
+import 'package:miko/providers/god_proovider.dart';
 import 'package:provider/provider.dart';
-import 'package:shimmer/shimmer.dart';
 
-class ContentFilterBottomSheet<T extends ContentProvider<dynamic>> extends StatefulWidget {
+class ContentFilterBottomSheet<T extends ContentProvider<dynamic>>
+    extends StatefulWidget {
   final T provider;
 
-  const ContentFilterBottomSheet({Key? key, required this.provider}) : super(key: key);
+  const ContentFilterBottomSheet({Key? key, required this.provider})
+      : super(key: key);
 
   @override
-  _ContentFilterBottomSheetState<T> createState() => _ContentFilterBottomSheetState<T>();
+  _ContentFilterBottomSheetState<T> createState() =>
+      _ContentFilterBottomSheetState<T>();
 }
 
-class _ContentFilterBottomSheetState<T extends ContentProvider<dynamic>> extends State<ContentFilterBottomSheet<T>> {
+class _ContentFilterBottomSheetState<T extends ContentProvider<dynamic>>
+    extends State<ContentFilterBottomSheet<T>> {
   late ContentFilterState _tempFilters;
   late Set<String> _allGenres;
   late Set<String> _allLanguages;
@@ -32,7 +30,8 @@ class _ContentFilterBottomSheetState<T extends ContentProvider<dynamic>> extends
   @override
   void initState() {
     super.initState();
-    _tempFilters = widget.provider.activeFilters.copyWith(); // Create a local mutable copy
+    _tempFilters =
+        widget.provider.activeFilters.copyWith(); // Create a local mutable copy
     _allGenres = widget.provider.allAvailableGenres;
     _allLanguages = widget.provider.allAvailableLanguages;
     _allCountries = widget.provider.allAvailableCountries;
@@ -73,24 +72,29 @@ class _ContentFilterBottomSheetState<T extends ContentProvider<dynamic>> extends
           }),
           const SizedBox(height: 16),
           _buildSectionTitle('Languages'),
-          _buildChipFilter(_allLanguages, _tempFilters.languages, (selectedLanguages) {
+          _buildChipFilter(_allLanguages, _tempFilters.languages,
+              (selectedLanguages) {
             setState(() {
-              _tempFilters = _tempFilters.copyWith(languages: selectedLanguages);
+              _tempFilters =
+                  _tempFilters.copyWith(languages: selectedLanguages);
             });
           }),
           if (T == MovieProvider) ...[
             const SizedBox(height: 16),
             _buildSectionTitle('Production Countries'),
-            _buildChipFilter(_allCountries, _tempFilters.countries, (selectedCountries) {
+            _buildChipFilter(_allCountries, _tempFilters.countries,
+                (selectedCountries) {
               setState(() {
-                _tempFilters = _tempFilters.copyWith(countries: selectedCountries);
+                _tempFilters =
+                    _tempFilters.copyWith(countries: selectedCountries);
               });
             }),
           ],
           const SizedBox(height: 16),
           _buildSectionTitle('Vote Average'),
           RangeSlider(
-            values: RangeValues(_tempFilters.minVoteAverage, _tempFilters.maxVoteAverage),
+            values: RangeValues(
+                _tempFilters.minVoteAverage, _tempFilters.maxVoteAverage),
             min: _minVoteRange,
             max: _maxVoteRange,
             divisions: 20, // 0.5 increments
@@ -178,7 +182,8 @@ class _ContentFilterBottomSheetState<T extends ContentProvider<dynamic>> extends
               child: TextButton(
                 onPressed: () {
                   setState(() {
-                    _tempFilters = _tempFilters.copyWith(startDate: null, endDate: null);
+                    _tempFilters =
+                        _tempFilters.copyWith(startDate: null, endDate: null);
                   });
                 },
                 child: const Text('Clear Dates'),
@@ -198,7 +203,8 @@ class _ContentFilterBottomSheetState<T extends ContentProvider<dynamic>> extends
             },
             items: SortBy.values.map((SortBy sort) {
               String name = sort.toString().split('.').last;
-              name = name.replaceAllMapped(RegExp(r'([A-Z])'), (match) => ' ${match.group(1)}');
+              name = name.replaceAllMapped(
+                  RegExp(r'([A-Z])'), (match) => ' ${match.group(1)}');
               return DropdownMenuItem<SortBy>(
                 value: sort,
                 child: Text(name.replaceFirst(' ', '')),
@@ -225,7 +231,8 @@ class _ContentFilterBottomSheetState<T extends ContentProvider<dynamic>> extends
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    widget.provider.applyFiltersAndSort(ContentFilterState.initial());
+                    widget.provider
+                        .applyFiltersAndSort(ContentFilterState.initial());
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
@@ -267,10 +274,11 @@ class _ContentFilterBottomSheetState<T extends ContentProvider<dynamic>> extends
     );
   }
 
-  Widget _buildChipFilter(
-      Set<String> allOptions, Set<String> selectedOptions, ValueChanged<Set<String>> onChanged) {
+  Widget _buildChipFilter(Set<String> allOptions, Set<String> selectedOptions,
+      ValueChanged<Set<String>> onChanged) {
     if (allOptions.isEmpty) {
-      return const Text('No options available.', style: TextStyle(fontStyle: FontStyle.italic));
+      return const Text('No options available.',
+          style: TextStyle(fontStyle: FontStyle.italic));
     }
     return Wrap(
       spacing: 8.0,
@@ -296,8 +304,8 @@ class _ContentFilterBottomSheetState<T extends ContentProvider<dynamic>> extends
     );
   }
 
-  Widget _buildDateInput(
-      BuildContext context, String label, DateTime? currentDate, ValueChanged<DateTime?> onChanged) {
+  Widget _buildDateInput(BuildContext context, String label,
+      DateTime? currentDate, ValueChanged<DateTime?> onChanged) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -317,14 +325,17 @@ class _ContentFilterBottomSheetState<T extends ContentProvider<dynamic>> extends
           child: InputDecorator(
             decoration: InputDecoration(
               border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+              contentPadding:
+                  EdgeInsets.symmetric(vertical: 10, horizontal: 12),
               isDense: true,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text(currentDate == null ? 'Select Date' : '${currentDate.toLocal().year}-${currentDate.toLocal().month.toString().padLeft(2, '0')}-${currentDate.toLocal().day.toString().padLeft(2, '0')}'),
+                Text(currentDate == null
+                    ? 'Select Date'
+                    : '${currentDate.toLocal().year}-${currentDate.toLocal().month.toString().padLeft(2, '0')}-${currentDate.toLocal().day.toString().padLeft(2, '0')}'),
                 Icon(Icons.calendar_today, size: 20),
               ],
             ),
@@ -356,7 +367,8 @@ class MovieListPage extends StatelessWidget {
             onPressed: () {
               showModalBottomSheet(
                 context: context,
-                isScrollControlled: true, // Allow bottom sheet to cover full screen if needed
+                isScrollControlled:
+                    true, // Allow bottom sheet to cover full screen if needed
                 builder: (context) => ContentFilterBottomSheet<MovieProvider>(
                   provider: movieProvider,
                 ),
@@ -367,7 +379,8 @@ class MovieListPage extends StatelessWidget {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60.0),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Search movies...',
@@ -417,33 +430,37 @@ class MovieListPage extends StatelessWidget {
                         activeFilters.copyWith(countries: {})),
                   ));
                 }
-                if (activeFilters.minVoteAverage > ContentFilterState.initial().minVoteAverage ||
-                    activeFilters.maxVoteAverage < ContentFilterState.initial().maxVoteAverage) {
+                if (activeFilters.minVoteAverage >
+                        ContentFilterState.initial().minVoteAverage ||
+                    activeFilters.maxVoteAverage <
+                        ContentFilterState.initial().maxVoteAverage) {
                   filterChips.add(_buildActiveFilterChip(
                     'Vote: ${activeFilters.minVoteAverage.toStringAsFixed(1)}-${activeFilters.maxVoteAverage.toStringAsFixed(1)}',
                     () => provider.applyFiltersAndSort(activeFilters.copyWith(
-                          minVoteAverage: ContentFilterState.initial().minVoteAverage,
-                          maxVoteAverage: ContentFilterState.initial().maxVoteAverage,
-                        )),
+                      minVoteAverage:
+                          ContentFilterState.initial().minVoteAverage,
+                      maxVoteAverage:
+                          ContentFilterState.initial().maxVoteAverage,
+                    )),
                   ));
                 }
-                if (activeFilters.minRuntime != null || activeFilters.maxRuntime != null) {
+                if (activeFilters.minRuntime != null ||
+                    activeFilters.maxRuntime != null) {
                   filterChips.add(_buildActiveFilterChip(
                     'Runtime: ${activeFilters.minRuntime ?? 'Any'}-${activeFilters.maxRuntime ?? 'Any'} min',
-                    () => provider.applyFiltersAndSort(
-                        activeFilters.copyWith(minRuntime: null, maxRuntime: null)),
+                    () => provider.applyFiltersAndSort(activeFilters.copyWith(
+                        minRuntime: null, maxRuntime: null)),
                   ));
                 }
-                if (activeFilters.startDate != null || activeFilters.endDate != null) {
+                if (activeFilters.startDate != null ||
+                    activeFilters.endDate != null) {
                   String dateRange = '';
-                  if (activeFilters.startDate != null) {
+                  if (activeFilters.startDate != null)
                     dateRange +=
                         'From: ${activeFilters.startDate!.toLocal().year}-${activeFilters.startDate!.toLocal().month.toString().padLeft(2, '0')}-${activeFilters.startDate!.toLocal().day.toString().padLeft(2, '0')}';
-                  }
-                  if (activeFilters.endDate != null) {
+                  if (activeFilters.endDate != null)
                     dateRange +=
                         ' To: ${activeFilters.endDate!.toLocal().year}-${activeFilters.endDate!.toLocal().month.toString().padLeft(2, '0')}-${activeFilters.endDate!.toLocal().day.toString().padLeft(2, '0')}';
-                  }
                   filterChips.add(_buildActiveFilterChip(
                     'Date: $dateRange',
                     () => provider.applyFiltersAndSort(
@@ -452,16 +469,19 @@ class MovieListPage extends StatelessWidget {
                 }
 
                 // Sorting info (not a filter to remove)
-                String sortLabel = 'Sort by: ${activeFilters.sortBy.toString().split('.').last.replaceAllMapped(RegExp(r'([A-Z])'), (match) => ' ${match.group(1)}').trim()} (${activeFilters.isAscending ? 'Asc' : 'Desc'})';
+                String sortLabel =
+                    'Sort by: ${activeFilters.sortBy.toString().split('.').last.replaceAllMapped(RegExp(r'([A-Z])'), (match) => ' ${match.group(1)}').trim()} (${activeFilters.isAscending ? 'Asc' : 'Desc'})';
                 filterChips.add(Chip(label: Text(sortLabel)));
               }
 
               if (filterChips.isEmpty && provider.searchQuery.isEmpty) {
-                return const SizedBox.shrink(); // No filters or search query, hide
+                return const SizedBox
+                    .shrink(); // No filters or search query, hide
               }
 
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Wrap(
                   spacing: 8.0,
                   runSpacing: 4.0,
@@ -469,7 +489,7 @@ class MovieListPage extends StatelessWidget {
                     if (provider.searchQuery.isNotEmpty)
                       _buildActiveFilterChip(
                         'Search: "${provider.searchQuery}"',
-                            () {
+                        () {
                           provider.updateSearchQuery('');
                         },
                       ),
@@ -479,7 +499,8 @@ class MovieListPage extends StatelessWidget {
                         label: const Text('Clear All Filters'),
                         avatar: const Icon(Icons.clear_all),
                         onPressed: () {
-                          provider.applyFiltersAndSort(ContentFilterState.initial());
+                          provider.applyFiltersAndSort(
+                              ContentFilterState.initial());
                         },
                       ),
                   ],
@@ -491,84 +512,90 @@ class MovieListPage extends StatelessWidget {
             child: movieProvider.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : movieProvider.hasError
-                    ? Center(child: Text('Error: ${movieProvider.errorMessage}'))
+                    ? Center(
+                        child: Text('Error: ${movieProvider.errorMessage}'))
                     : movieProvider.filteredAndSortedContent.isEmpty
-                        ? const Center(child: Text('No movies found matching criteria.'))
+                        ? const Center(
+                            child: Text('No movies found matching criteria.'))
                         : ListView.builder(
-                            itemCount: movieProvider.filteredAndSortedContent.length,
+                            itemCount:
+                                movieProvider.filteredAndSortedContent.length,
                             itemBuilder: (context, index) {
-                              final movie = movieProvider.filteredAndSortedContent[index];
-                              // return ListTile(
-                              //   leading: movie.getPosterUrl() != null
-                              //       ? Image.network(movie.getPosterUrl()!, height: 60, width: 40, fit: BoxFit.cover)
-                              //       : null,
-                              //   title: Text(movie.title),
-                              //   subtitle: Text(
-                              //       'Rating: ${movie.voteAverage.toStringAsFixed(1)} | Year: ${movie.releaseDate?.year ?? 'N/A'}'),
-                              //   // Add more details or navigate to a detail page
-                              // );
-                              final status = movieProvider.status;
-  final userData = Provider.of<UserDataService>(context);
+                              final movie =
+                                  movieProvider.filteredAndSortedContent[index];
+                              return ListTile(
+                                leading: movie.getPosterUrl() != null
+                                    ? Image.network(movie.getPosterUrl()!,
+                                        height: 60,
+                                        width: 40,
+                                        fit: BoxFit.cover)
+                                    : null,
+                                title: Text(movie.title),
+                                subtitle: Text(
+                                    'Rating: ${movie.voteAverage.toStringAsFixed(1)} | Year: ${movie.releaseDate?.year ?? 'N/A'}'),
+                                // Add more details or navigate to a detail page
+                              );
+//                               final status = movieProvider.status;
+//   final userData = Provider.of<UserDataService>(context);
 
-  if (status == LoadingStatus.loading) {
-    // Show loading indicator initially or while loading
-    return Center(
-      child: Shimmer.fromColors(
-        // Shimmer effect for main grid loading
-        baseColor: AppColors.secondaryBackground.withOpacity(0.5),
-        highlightColor: AppColors.secondaryBackground.withOpacity(0.1),
-        child: MasonryGridView.count(
-          padding: const EdgeInsets.all(5.0),
-          crossAxisCount: 3,
-          mainAxisSpacing: 0.5,
-          crossAxisSpacing: 0.5,
-          itemCount: 10, // Show a few shimmer items
-          itemBuilder: (context, index) {
-            return Container(
-              height: index % 2 == 0
-                  ? 200
-                  : 250, // Vary height for staggered effect
-              color: Colors.white,
-            );
-          },
-        ),
-      ),
-    );
-  }
- // final typec = "movie";
-  return MasonryGridView.count(
-    padding: const EdgeInsets.all(5.0),
-    crossAxisCount: 1 * 3, // Adjust number of
-    mainAxisSpacing: 1.5,
-    controller: ScrollController(keepScrollOffset: true),
-    shrinkWrap: true,
-    physics: const BouncingScrollPhysics(),
-    crossAxisSpacing: 1.5,
-    cacheExtent: 100,
-    itemCount: movieProvider.filteredAndSortedContent.length,
-    itemBuilder: (context, index) {
-      final series = movieProvider.filteredAndSortedContent[index];
-      return GestureDetector(
-        // Wrap card for tap vibration if the card itself does not handle
-        onTap: () {
-          tVmedium();
-          // Assuming AnimeSeriesCard has its own navigation logic
-          // If not, you'd add navigation here.
-        },
-        child: 
-        // typec == "movie"
-        //     ? 
-            MovieCard(
-                movie: series,
-                typec: "movie",
-              )
-            //: AnimeSeriesCard(series: series, typec: "series"),
-      );
-    },
-  );
-}
-                          
-                          ),
+//   if (status == LoadingStatus.loading) {
+//     // Show loading indicator initially or while loading
+//     return Center(
+//       child: Shimmer.fromColors(
+//         // Shimmer effect for main grid loading
+//         baseColor: AppColors.secondaryBackground.withOpacity(0.5),
+//         highlightColor: AppColors.secondaryBackground.withOpacity(0.1),
+//         child: MasonryGridView.count(
+//           padding: const EdgeInsets.all(5.0),
+//           crossAxisCount: 3,
+//           mainAxisSpacing: 0.5,
+//           crossAxisSpacing: 0.5,
+//           itemCount: 10, // Show a few shimmer items
+//           itemBuilder: (context, index) {
+//             return Container(
+//               height: index % 2 == 0
+//                   ? 200
+//                   : 250, // Vary height for staggered effect
+//               color: Colors.white,
+//             );
+//           },
+//         ),
+//       ),
+//     );
+//   }
+//  // final typec = "movie";
+//   return MasonryGridView.count(
+//     padding: const EdgeInsets.all(5.0),
+//     crossAxisCount: 1 * 3, // Adjust number of
+//     mainAxisSpacing: 1.5,
+//     controller: ScrollController(keepScrollOffset: true),
+//     shrinkWrap: true,
+//     physics: const BouncingScrollPhysics(),
+//     crossAxisSpacing: 1.5,
+//     cacheExtent: 100,
+//     itemCount: movieProvider.filteredAndSortedContent.length,
+//     itemBuilder: (context, index) {
+//       final series = movieProvider.filteredAndSortedContent[index];
+//       return GestureDetector(
+//         // Wrap card for tap vibration if the card itself does not handle
+//         onTap: () {
+//           tVmedium();
+//           // Assuming AnimeSeriesCard has its own navigation logic
+//           // If not, you'd add navigation here.
+//         },
+//         child:
+//         // typec == "movie"
+//         //     ?
+//             MovieCard(
+//                 movie: series,
+//                 typec: "movie",
+//               )
+//             //: AnimeSeriesCard(series: series, typec: "series"),
+//       );
+//     },
+//   );
+// }
+                            }),
           ),
         ],
       ),

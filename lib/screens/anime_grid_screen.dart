@@ -1,13 +1,13 @@
 // lib/screens/tv_series_grid_screen.dart
 import 'dart:async';
 import 'dart:io'; // Added for Platform.isAndroid
-import 'package:flutter/services.dart'; // Added for HapticFeedback
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:miko/models/tv_series_anime.dart';
-import 'package:miko/models/tv_series_anime.dart' as ss;
+
+
+import 'package:miko/providers/god_proovider.dart';
 import 'package:miko/screens/video_player_screen.dart';
 import 'package:miko/services/user_data_service.dart';
 import 'package:miko/showcases/model.dart';
@@ -20,10 +20,12 @@ import 'package:miko/utils/utils.dart';
 //import 'package:miko/showcases/tv_detail_page_anime.dart';
 import 'package:miko/widgets/anime_series_card.dart';
 import 'package:provider/provider.dart';
-import 'package:miko/providers/anime_provider.dart'; // Ensure correct provider import
+ // Ensure correct provider import
 import 'package:miko/utils/colors.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:shimmer/shimmer.dart'; // Added for shimmer effect
+import 'package:shimmer/shimmer.dart';
+
+import '../providers/god_proovider.dart' as ss; // Added for shimmer effect
 
 class AnimeGridScreen extends StatefulWidget {
   final String typec;
@@ -31,10 +33,10 @@ class AnimeGridScreen extends StatefulWidget {
   const AnimeGridScreen({super.key, required this.typec});
 
   @override
-  State<AnimeGridScreen> createState() => _AnimeGridScreenState();
+  State<AnimeGridScreen> createState() => AnimeGridScreenState();
 }
 
-class _AnimeGridScreenState extends State<AnimeGridScreen> {
+class AnimeGridScreenState extends State<AnimeGridScreen> {
   late double? gridCrossAxisCount = 3.0; // Default grid size
 
   // Haptic feedback function
@@ -86,11 +88,11 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
                   right: 0,
                   child: GestureDetector(
                     onTap: () {
-                      _showSearchOverlay();
+                      showSearchOverlay(context);
                       triggerVibration(); // Vibrate on search bar tap
                     },
                     child: Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(7),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surface,
                         borderRadius: const BorderRadius.vertical(
@@ -148,7 +150,7 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
     _searchScrollController2.addListener(
         _searchScrollListener); // Corrected scroll controller for search results
 
-    _searchController2.addListener(_onSearchChanged2);
+    _searchController2.addListener(onSearchChanged2);
   }
 
   @override
@@ -156,7 +158,7 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
     _scrollController.dispose();
     _searchScrollController2.dispose(); // Dispose the correct controller
     _movieService.dispose();
-    _searchController2.removeListener(_onSearchChanged2);
+    _searchController2.removeListener(onSearchChanged2);
     _searchController2.dispose();
     _debounce?.cancel();
     super.dispose();
@@ -172,7 +174,7 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
     }
   }
 
-  void _onSearchChanged2() async {
+  void onSearchChanged2() async {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 100), () {
       final query = _searchController2.text.trim();
@@ -322,7 +324,7 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
     }
   }
 
-  void _showSearchOverlay() async {
+  void showSearchOverlay(BuildContext context) async {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -332,10 +334,10 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) {
           // Listen to changes in the search controller and update overlay state
-          //  _searchController2.removeListener(_onSearchChanged2);
+          //  _searchController2.removeListener(onSearchChanged2);
           _searchController2.addListener(() {
             setModalState(() {}); // Rebuild overlay on text change
-            _onSearchChanged2();
+            onSearchChanged2();
           });
           return DraggableScrollableSheet(
             initialChildSize: 0.9,
@@ -372,7 +374,7 @@ class _AnimeGridScreenState extends State<AnimeGridScreen> {
                       ),
                       onChanged: (value) async {
                         setModalState(() {});
-                        _onSearchChanged2();
+                        onSearchChanged2();
                         triggerVibration(); // Vibrate on typing
                       },
                     ),
@@ -631,7 +633,7 @@ Widget _buildBody0(
     );
   }
 
-  final seriesList = seriesProvider.animeseriesForDisplay;
+  final seriesList = seriesProvider.filteredAndSortedContent;
   return MasonryGridView.count(
     padding: const EdgeInsets.all(5.0),
     crossAxisCount: 1 * gridSize, // Adjust number of

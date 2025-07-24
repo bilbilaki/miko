@@ -1,6 +1,8 @@
 // --- episode_detail_page.dart ---
 import 'package:flutter/material.dart';
-import 'package:miko/models/tv_series_anime.dart' as ss;
+
+import 'package:miko/providers/god_proovider.dart';
+import 'package:miko/providers/god_proovider.dart' as ss;
 import 'package:miko/screens/video_player_screen.dart';
 import 'package:miko/services/user_data_service.dart';
 import 'package:miko/utils/colors.dart' show AppColors, AppColors2;
@@ -8,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'model.dart';
 import 'movie_service.dart';
 import 'person_detail_page.dart'; // For navigating to crew/guest star details
-import '../providers/anime_provider.dart';
+
 
 class AnimeEpisodeDetailPage extends StatefulWidget {
   final int tvShowId;

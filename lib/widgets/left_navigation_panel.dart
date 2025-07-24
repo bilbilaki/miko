@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
-import 'package:miko/screens/filtrering_screen.dart';
 import 'package:miko/screens/genre_detail_screen.dart';
 import 'package:miko/screens/grid.dart';
 import 'package:miko/screens/http.dart';
-import 'package:miko/screens/unisearch_screen.dart';
 import 'package:miko/screens/watchlist_screen.dart';
 import 'package:miko/showcases/keyword_search_page.dart';
 import 'package:miko/showcases/movie_page_copy.dart';
@@ -149,14 +147,7 @@ class LeftNavigationPanel extends ConsumerWidget {
           ),
           const Divider(color: AppColors.dividerColor, height: 1),
     
-          _buildNavigationItem(
-            context,
-            ref,
-            icon: Icons.settings_outlined,
-            title: 'Search Local',
-            showText:showText,
-            onTap: () => _navigateTo(context, const UnifiedSearchScreen(), isMobileLayout),
-          ),
+
           _buildNavigationItem(
             context,
             ref,
@@ -222,14 +213,7 @@ _buildNavigationItem(
  showText: showText,
  onTap: () => _navigateTo(context, const KeywordSearchPage(), isMobileLayout),
 ),
-_buildNavigationItem(
- context,
- ref,
- icon: Icons.send_and_archive_outlined,
- title: 'Filtering Page',
- showText: showText,
- onTap: () => _navigateTo(context, const MovieListPage(), isMobileLayout),
-),
+
 
 // _buildNavigationItem(
 //  context,

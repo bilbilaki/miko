@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:miko/models/tv_series_anime.dart' as og;
+import 'package:miko/providers/god_proovider.dart' as ss;
 import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/showcases/movie_service.dart';
 import 'package:miko/showcases/tv_detail_page_anime.dart';
@@ -15,7 +15,7 @@ import 'package:provider/provider.dart';
 import '../showcases/model.dart'; // For accessing UserDataService
 import 'package:miko/showcases/model.dart' as mmd;
 import 'package:miko/showcases/movie_detail_page_copy.dart';
-import 'package:miko/models/tv_series_anime.dart' as ss;
+
 
 //import 'package:myapp/screens/video_player_screen.dart'; // Your player screen
 
@@ -68,7 +68,7 @@ class EpisodeTileNew extends StatelessWidget {
     final displayTitle = 'Episode ${episode.episodeNumber}'; // Simple display
     // Or use the identifier: final displayTitle = episode.episodeIdentifier;
     bool isInWatchlist =
-        userDataService.isWatchedEpisode(seriesname, id, episode, season);
+        userDataService.isWatchedEpisode(seriesname, id, episode.episodeNumber, season.seasonNumber);
     return Padding(
       // Add padding instead of using Card margin for better control with dividers
       padding: const EdgeInsets.symmetric(
@@ -153,7 +153,7 @@ class EpisodeTileNew extends StatelessWidget {
 }
 
 class MovieCard extends StatelessWidget {
-  final og.Movie movie;
+  final ss.Movie movie;
   final typec;
   const MovieCard({required this.typec, required this.movie, super.key});
 
@@ -404,7 +404,7 @@ class MovieCard extends StatelessWidget {
 }
 
 class AnimeSeriesCard extends StatelessWidget {
-  final og.TvSeriesAnime series;
+  final ss.TvSeriesAnime series;
   final String typec;
   const AnimeSeriesCard({required this.series, required this.typec, super.key});
 

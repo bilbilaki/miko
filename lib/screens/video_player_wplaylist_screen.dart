@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-import 'package:miko/models/tv_series_anime.dart' as ss;
+
 import 'package:miko/services/user_data_service.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:provider/provider.dart';
+
+import '../providers/god_proovider.dart' as ss;
 
 
 final userdata = UserDataService().decoderPreference;
@@ -92,7 +94,7 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {});
  _userDataService.toggleIsWatchedLink(
-        widget.seriesname, widget.tvSeriesId, widget.initialIndex, widget.season);
+        widget.seriesname, widget.tvSeriesId, widget.initialIndex, widget.season.seasonNumber);
             setState(() {
     });
 
@@ -169,6 +171,8 @@ void firstDialog() async {
     final urlToPlay = episodeToPlay.getAvailableQualityUrls();
     
     final up = urlToPlay.values.first;
+        userDataService.toggleIsWatchedLink(
+        widget.seriesname, widget.tvSeriesId, currentIndex, widget.season.seasonNumber);
     await player.open(
       Media(Uri.decodeComponent(up)),
       play: true,
@@ -176,8 +180,7 @@ void firstDialog() async {
     if (seekToPosition != null) {
       await player.seek(seekToPosition);
     }
-    userDataService.toggleIsWatchedLink(
-        widget.seriesname, widget.tvSeriesId, currentIndex, urlToPlay);
+
   }
 
 
@@ -240,11 +243,19 @@ void firstDialog() async {
         content: Text('You previously stopped watching at ${formatDuration(savedPosition)}. Would you like to resume?'),
         actions: [
           TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('START OVER')),
-          ElevatedButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('RESUME')),
-        ],
+          ElevatedButton(onPressed: ()async { Navigator.of(context).pop(true); 
+          await player.seek(
+            Duration(
+              seconds: savedPosition.inSeconds > 10 ? savedPosition.inSeconds : 0,
+            ),
+          );
+          await player.play(); // Ensure playback starts
+        }, child: const Text('RESUME')),
+      ],
       ),
     );
   }
+  
 
   // Helper to format duration strings
   String formatDuration(Duration duration) {
@@ -545,7 +556,7 @@ void firstDialog() async {
 
     final displayTitle = 'Episode ${episode.episodeNumber}'; 
     bool isInWatchlist =
-        userDataService.isWatchedEpisode(seriesname, id, episode, season);
+        userDataService.isWatchedEpisode(widget.seriesname, widget.tvSeriesId, episode.episodeNumber, season.seasonNumber);
     return Padding(
       padding: const EdgeInsets.symmetric(
           vertical: 8.0, horizontal: 16.0),

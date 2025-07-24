@@ -2,8 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:miko/app_keeper.dart';
-import 'package:miko/providers/anime_provider.dart';
+
 import 'package:miko/providers/csv_detail_process_provider.dart';
+import 'package:miko/providers/god_proovider.dart';
 import 'package:miko/providers/settings_provider.dart';
 import 'package:miko/services/user_data_service.dart'; // Import UserDataService
 import 'package:miko/utils/colors.dart';
@@ -11,7 +12,6 @@ import 'package:provider/provider.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as pr;
-import 'models/advancedfiltering.dart' as ad;
 
 // This function must be a top-level function.
 Future<void> main() async {
@@ -32,13 +32,13 @@ Future<void> main() async {
             create: (context) =>
                 MovieProvider()), // Initialize MovieProvider directly
         ChangeNotifierProvider(create: (context) => TvSeriesProvider()),
-    ChangeNotifierProvider(
-            create: (context) =>
-                ad.AnimeProvider()), // Initialize AnimeProvider directly
-        ChangeNotifierProvider(
-            create: (context) =>
-                ad.MovieProvider()), // Initialize MovieProvider directly
-        ChangeNotifierProvider(create: (context) => ad.TvSeriesProvider()),
+    // ChangeNotifierProvider(
+    //         create: (context) =>
+    //             ad.AnimeProvider()), // Initialize AnimeProvider directly
+    //     ChangeNotifierProvider(
+    //         create: (context) =>
+    //             ad.MovieProvider()), // Initialize MovieProvider directly
+    //     ChangeNotifierProvider(create: (context) => ad.TvSeriesProvider()),
         ChangeNotifierProvider(
             create: (context) => UserDataService()), // Add UserDataService
         ChangeNotifierProvider(create: (_) => ProcessingProvider()),

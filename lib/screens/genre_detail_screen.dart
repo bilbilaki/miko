@@ -1,12 +1,13 @@
 // lib/screens/genre_detail_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:miko/providers/anime_provider.dart';
+
+import 'package:miko/providers/god_proovider.dart';
 import 'package:miko/utils/utils.dart';
 import 'package:miko/widgets/anime_series_card.dart'; // Assuming you have AnimeCard
 import 'package:provider/provider.dart';
 //import 'package:miko/models/movie.dart' as movie;
-import 'package:miko/models/tv_series_anime.dart';
+
 
 import 'package:miko/utils/colors.dart';
 
@@ -23,19 +24,19 @@ class GenreDetailScreen extends StatelessWidget {
     final animeProvider =
         Provider.of<AnimeProvider>(context, listen: false); // If you have anime
 
-    final List<Movie> moviesInGenre = movieProvider.animeseriesForDisplay
+    final List<Movie> moviesInGenre = movieProvider.filteredAndSortedContent
         .where(
             (m) => m.genres.any((g) => g.toLowerCase() == genre.toLowerCase()))
         .toList();
 
     final List<TvSeriesAnime> tvSeriesInGenre = tvProvider
-        .animeseriesForDisplay // Use seriesForDisplay to respect potential sorting/filtering
+        .filteredAndSortedContent // Use seriesForDisplay to respect potential sorting/filtering
         .where(
             (s) => s.genres.any((g) => g.toLowerCase() == genre.toLowerCase()))
         .toList();
 
     final List<TvSeriesAnime> animeInGenre = animeProvider
-        .animeseriesForDisplay // Adjust for your Anime model/provider
+        .filteredAndSortedContent // Adjust for your Anime model/provider
         .where(
             (a) => a.genres.any((g) => g.toLowerCase() == genre.toLowerCase()))
         .toList();
@@ -107,13 +108,13 @@ class GenreListScreen extends StatelessWidget {
 
     // Combine genres from all sources and make unique
     final Set<String> allGenres = {};
-    allGenres.addAll(movieProvider.animeseriesForDisplay
+    allGenres.addAll(movieProvider.filteredAndSortedContent
         .expand((m) => m.genres)
         .where((g) => g.isNotEmpty));
-    allGenres.addAll(tvProvider.animeseriesForDisplay
+    allGenres.addAll(tvProvider.filteredAndSortedContent
         .expand((s) => s.genres)
         .where((g) => g.isNotEmpty));
-    allGenres.addAll(animeProvider.animeseriesForDisplay
+    allGenres.addAll(animeProvider.filteredAndSortedContent
         .expand((a) => a.genres)
         .where((g) => g.isNotEmpty)); // Adapt for Anime model
 

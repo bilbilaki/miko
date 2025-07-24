@@ -566,11 +566,20 @@ class MovieService {
         final Map<String, dynamic> data = json.decode(response.body);
         return TVCredits.fromJson(data);
       } else {
-        throw Exception('Failed to get TV credits: ${response.statusCode}');
+        final response = await getMovieCredits(movieId: tvId, language: language);
+return TVCredits(
+          cast: response.cast,
+          crew: response.crew,
+        );
       }
     } catch (e) {
-      throw Exception('Error getting TV credits: $e');
-    }
+ final response = await getMovieCredits(movieId: tvId, language: language);
+return TVCredits(
+          cast: response.cast,
+          crew: response.crew,
+        );
+      }
+
   }
 
   void dispose() {

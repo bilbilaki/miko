@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:miko/providers/anime_provider.dart' as mm;
+import 'package:miko/providers/god_proovider.dart' as mm;
 import 'package:miko/showcases/movie_detail_page_copy.dart';
 import 'package:miko/showcases/tv_detail_page_anime.dart';
 //import '../widgets/search_overlay.dart';
@@ -620,7 +620,7 @@ class _MoviePageState extends State<MoviePage1> {
 
   Widget _buildMovieGrid() {
     mm.MovieProvider movieProvider = mm.MovieProvider();
-    final listmovies = movieProvider.animeseriesForDisplay;
+    final listmovies = movieProvider.filteredAndSortedContent;
     return GridView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.all(16),
