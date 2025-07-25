@@ -36,11 +36,10 @@ app.*.symbols
 
 # Obfuscation related
 app.*.map.json
-.*.csv
 .*.png
 .*.jpg
-.*.json
 .*.lock
+.*/consts.dart
 # Android Studio will place build artifacts here
 
 

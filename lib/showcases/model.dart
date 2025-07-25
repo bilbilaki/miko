@@ -891,8 +891,8 @@ class TVSearchResponse {
 }
 
 class TVCredits {
-  final List<Cast> cast;
-  final List<Crew> crew;
+  final List<TVCast> cast;
+  final List<TVCrew> crew;
 
   TVCredits({
     required this.cast,
@@ -902,11 +902,11 @@ class TVCredits {
   factory TVCredits.fromJson(Map<String, dynamic> json) {
     return TVCredits(
       cast: (json['cast'] as List?)
-              ?.map((castJson) => Cast.fromJson(castJson))
+              ?.map((castJson) => TVCast.fromJson(castJson))
               .toList() ??
           [],
       crew: (json['crew'] as List?)
-              ?.map((crewJson) => Crew.fromJson(crewJson))
+              ?.map((crewJson) => TVCrew.fromJson(crewJson))
               .toList() ??
           [],
     );
@@ -1167,17 +1167,18 @@ class Person {
 }
 
 class Cast {
-   final int id;
+  final bool adult;
+  final int gender;
+  final int id;
+  final String knownForDepartment;
   final String name;
   final String originalName;
-  final String profilePath;
-  final String character;
-  final int order;
-  final String creditId;
-  final String knownForDepartment;
-  final int gender;
-  final bool adult;
   final double popularity;
+  final String? profilePath;
+  final int castId;
+  final String character;
+  final String creditId;
+  final int order;
 
   Cast({
     required this.adult,
@@ -1187,8 +1188,8 @@ class Cast {
     required this.name,
     required this.originalName,
     required this.popularity,
-    required this.profilePath,
-   // required this.castId,
+    this.profilePath,
+    required this.castId,
     required this.character,
     required this.creditId,
     required this.order,
@@ -1204,7 +1205,7 @@ class Cast {
       originalName: json['original_name'] ?? '',
       popularity: (json['popularity'] ?? 0.0).toDouble(),
       profilePath: json['profile_path'],
-     // castId: json['cast_id'] ?? 0,
+      castId: json['cast_id'] ?? 0,
       character: json['character'] ?? '',
       creditId: json['credit_id'] ?? '',
       order: json['order'] ?? 0,

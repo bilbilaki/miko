@@ -116,7 +116,7 @@ class _InteractiveVideoCardState extends State<InteractiveVideoCard> {
                 child: _isPlayingPreview
                     ? Video(
                         controller: controller,
-                        fit: BoxFit.fitWidth,
+                        fit: BoxFit.cover,
                         controls: null,
                         filterQuality: FilterQuality.high,
                         

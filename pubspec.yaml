@@ -64,6 +64,9 @@ dependencies:
   shimmer: ^3.0.0
   tmdb_api: ^2.2.3
   file_picker: ^10.2.0
+  flutter_gemini: any
+  image_picker: ^1.1.2
+  flutter_markdown: ^0.7.7+1
   # gpt_markdown: ^1.1.2
   # audioplayers: ^6.5.0
   # flutter_markdown: ^0.7.7+1

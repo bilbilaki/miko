@@ -1,11 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_gemini/flutter_gemini.dart';
+import 'package:miko/aiconfig/consts.dart';
 import 'package:miko/app_keeper.dart';
+import 'package:miko/providers/ai_chat_provider.dart';
 
 import 'package:miko/providers/csv_detail_process_provider.dart';
 import 'package:miko/providers/god_proovider.dart';
 import 'package:miko/providers/settings_provider.dart';
+import 'package:miko/services/ai_chat_service.dart';
 import 'package:miko/services/user_data_service.dart'; // Import UserDataService
 import 'package:miko/utils/colors.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +22,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   MediaKit.ensureInitialized();
+Gemini.init(apiKey: kApiKey);
 
   // Register all your adapters
   // IMPORTANT: Call this before the app runs
@@ -43,6 +48,8 @@ Future<void> main() async {
             create: (context) => UserDataService()), // Add UserDataService
         ChangeNotifierProvider(create: (_) => ProcessingProvider()),
         ChangeNotifierProvider(create: (_) => TextToolProvider()),
+        ChangeNotifierProvider(
+            create: (context) => FloatingButtonVisibilityNotifier()),
       ],
 
       child: const MyApp(), // Use const if MyApp is stateless

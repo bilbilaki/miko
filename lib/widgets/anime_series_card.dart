@@ -58,6 +58,7 @@ class EpisodeTileNew extends StatelessWidget {
                 .episodes, // Pass the whole list of episodes for the season
             initialIndex: initialIndex,
             url: url,
+            episode: episode
           ),
         ),
       );
@@ -75,35 +76,42 @@ class EpisodeTileNew extends StatelessWidget {
           vertical: 8.0, horizontal: 16.0), // Adjust padding as needed
       child: Row(
         children: [
-          // Episode Number/Identifier
           Expanded(
-            flex: 3, // Give reasonable space to title/identifier
+            flex: 3, 
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  displayTitle, // Use the generated display title
-                  style: const TextStyle(
-                      color: AppColors.primaryText,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500),
-                  maxLines: 2, // Allow wrapping
-                  overflow: TextOverflow.ellipsis,
-                ),
-                // Optionally show the SxxExx identifier below if different
-                if (episode.episodeIdentifier != displayTitle)
-                  Text(
-                    episode.episodeIdentifier,
-                    style: const TextStyle(
-                        color: AppColors.secondaryText, fontSize: 11),
+                      Text(
+                        'Episode ${episode.episodeNumber}',
+                        style: const TextStyle(color: AppColors.primaryText, fontSize: 14, fontWeight: FontWeight.w500),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (episode.episodeIdentifier != 'Episode ${episode.episodeNumber}')
+                        Text(
+                          episode.episodeIdentifier,
+                          style: const TextStyle(color: AppColors.secondaryText, fontSize: 11),
+                        ),
+                    ],
                   ),
-              ],
-            ),
-          ),
+                ),
+                // --- ADDED THIS: The watched icon ---
+                if (isInWatchlist)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Icon(
+                      Icons.check_circle,
+                      color: AppColors.accentColor,
+                      size: 18.0,
+                    ),
+                  ),
+              
+            
+    
           const SizedBox(width: 12),
 
           // Quality Buttons
-          if (availableQualities.isNotEmpty)
+            if (availableQualities.isNotEmpty)
             Expanded(
               flex: 4,
               child: Wrap(
@@ -115,36 +123,25 @@ class EpisodeTileNew extends StatelessWidget {
                   final url = entry.value;
                   return ElevatedButton(
                     onPressed: () => playEpisode(context, url),
-                    style: ElevatedButton.styleFrom(
+                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.accentColor.withOpacity(0.7),
                       foregroundColor: AppColors.primaryText,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       minimumSize: const Size(45, 28),
-                      textStyle: const TextStyle(
-                          fontSize: 11, fontWeight: FontWeight.bold),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
+                      textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                       elevation: 1,
                     ),
-                    child: Text(
-                      isInWatchlist
-                          ? "${quality.toUpperCase()} (Watched)"
-                          : quality.toUpperCase(),
-                    ),
+                    // --- REMOVED: The "(Watched)" text logic ---
+                    child: Text(entry.key.toUpperCase()),
                   );
                 }).toList(),
               ),
             )
           else
-            // Show something if no qualities are found for this episode
             const Text(
               'No links',
-              style: TextStyle(
-                  color: AppColors.secondaryText,
-                  fontSize: 12,
-                  fontStyle: FontStyle.italic),
+              style: TextStyle(color: AppColors.secondaryText, fontSize: 12, fontStyle: FontStyle.italic),
             ),
         ],
       ),

@@ -566,19 +566,17 @@ class MovieService {
         final Map<String, dynamic> data = json.decode(response.body);
         return TVCredits.fromJson(data);
       } else {
-        final response = await getMovieCredits(movieId: tvId, language: language);
-return TVCredits(
-          cast: response.cast,
-          crew: response.crew,
-        );
+//         final response = await getMovieCredits(movieId: tvId, language: language);
+// return TVCredits(
+//           cast: response.cast,
+//           crew: response.crew,
+//         );
+throw Exception('Error fetching TV credits: ');
+
       }
     } catch (e) {
- final response = await getMovieCredits(movieId: tvId, language: language);
-return TVCredits(
-          cast: response.cast,
-          crew: response.crew,
-        );
-      }
+throw Exception('Error fetching TV credits: $e');
+    }
 
   }
 

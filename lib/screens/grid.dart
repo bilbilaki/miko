@@ -121,7 +121,7 @@ class _GridWallState extends State<GridWall> {
     Widget _buildSceneGrid(List<Scene> scenes) {
     return MasonryGridView.count(
    //   padding: const EdgeInsets.all(5.0),
-      crossAxisCount: 3,
+      crossAxisCount: 2,
       mainAxisSpacing: 0.0, // A bit more spacing looks nice
       crossAxisSpacing: 0.0,
       itemCount: scenes.length,

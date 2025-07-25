@@ -127,10 +127,10 @@ class UserDataService extends ChangeNotifier {
   Future<Duration?> getEpisodeProgress(int seriesId, int seasonNumber, int episodeNumber) async {
     final key = _getEpisodeProgressKey(seriesId, seasonNumber, episodeNumber);
     final seconds = _prefs!.getInt(key);
-    if (seconds != null) {
+    if (seconds != null && seconds!= seconds-seconds) {
       return Duration(seconds: seconds);
     }
-    return null;
+    return null; // Return zero duration if no progress is saved
   }
 
   /// Clears the saved progress for an episode (e.g., after it's fully watched).

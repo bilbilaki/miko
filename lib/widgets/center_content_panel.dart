@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:miko/providers/god_proovider.dart';
+import 'package:miko/providers/settings_provider.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/screens/filtrering_screen.dart';
 import 'package:miko/screens/genre_detail_screen.dart';
@@ -8,9 +9,11 @@ import 'package:miko/screens/unisearch_screen.dart';
 import 'package:miko/screens/watchlist_screen.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:miko/utils/utils.dart';
+import 'package:miko/widgets/ai_chat_dialog.dart';
 import 'package:miko/widgets/alienswapbutton.dart';
 import 'package:miko/widgets/bottom_nav_bar.dart';
 import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as pp;
 
 class CenterContentPanel extends ConsumerStatefulWidget {
   final bool isMobileLayout;
@@ -77,23 +80,26 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
           currentIndex: _currentIndex,
           onTap: _onNavBarTap,
         ),
-        floatingActionButton: 
- AlienFloatSwapMenu(
-                OnAskAi: () {
-                  // Now simply show the new AiChatDialog widget
-                  // showDialog(
-                  //   context: context,
-                  //   builder: (ctx) {
-                  //     // It is critical to wrap the dialog with ProviderScope
-                  //     // if the dialog (or its children) will consume Riverpod providers,
-                  //     // and it's being shown outside of the main widget tree's ProviderScope.
-                  //     // ProviderScope.containerOf(context) ensures it uses the existing Riverpod container.
-                  //     return ProviderScope(
-                  //       parent: ProviderScope.containerOf(context),
-                  //       child: const AiChatDialog(),
-                  //     );
-                  //   },
-                  // );
+        floatingActionButton: pp.Consumer<FloatingButtonVisibilityNotifier>(
+    builder: (context, visibilityNotifier, child) {
+      // Conditionally return the button or an empty container
+      return visibilityNotifier.isVisible ?
+         AlienFloatSwapMenu(
+            OnAskAi: () {
+              // Now simply show the new AiChatDialog widget
+              showDialog(
+                    context: context,
+                    builder: (ctx) {
+                      // It is critical to wrap the dialog with ProviderScope
+                      // if the dialog (or its children) will consume Riverpod providers,
+                      // and it's being shown outside of the main widget tree's ProviderScope.
+                      // ProviderScope.containerOf(context) ensures it uses the existing Riverpod container.
+                      return ProviderScope(
+                        parent: ProviderScope.containerOf(context),
+                        child: const AiChatDialog(),
+                      );
+                    },
+                  );
                 },
                 onFilter: () {
                 showModalBottomSheet(
@@ -124,7 +130,9 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
                 // onUndo: () => print("Undo"), // Consistent naming
                 // onRedo: () => print("Redo"), // Consistent naming
 
+          ) : Container(); // Return an empty container if not visible
+        }),
       ),
-      )  );
+    );
   }
 }

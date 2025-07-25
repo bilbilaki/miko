@@ -963,7 +963,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: CachedNetworkImage(
-                          imageUrl: member.fullProfilePath,
+                          imageUrl: member.profileImageUrl,
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Shimmer.fromColors(
                             baseColor: Colors.grey[800]!,

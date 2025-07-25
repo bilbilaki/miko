@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:miko/providers/god_proovider.dart' show MovieProvider;
+import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/showcases/cast_page.dart';
 import 'package:miko/showcases/recommendations_page.dart';
 import 'package:miko/utils/utils.dart';
@@ -253,10 +254,11 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
 
   Widget _buildErrorView(BuildContext context, String errorMessage,userDataService) {
     return Column(
-      children: [
-        _buildDetailView(context, widget.movie, null,userDataService, showDetailedInfo: false),
-        Expanded(
-          child: Container(
+  children: [
+    Expanded(
+      child: _buildDetailView(context, widget.movie, null, userDataService, showDetailedInfo: false),
+    ),
+           Container(
             color: Colors.black87,
             child: Center(
               child: Padding(
@@ -289,14 +291,32 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                       },
                       child: const Text('Try Again'),
                     ),
+                                        const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        _performHapticFeedback();
+                       Navigator.of(context).push(MaterialPageRoute(
+                         builder: (context) => MovieDetailsScreen(movieId: widget.movie.id, typec: "movie",),
+                       ));
+                      },
+                      child: const Text('Try Loading using old interface'),
+                    ),
+                                        ElevatedButton(
+                      onPressed: () {
+                        _performHapticFeedback();
+                       Navigator.of(context).push(MaterialPageRoute(
+                         builder: (context) => MovieDetailsScreen(movieId: widget.movie.id, typec: "movie",),
+                       ));
+                      },
+                      child: const Text('Try Loading using old interface'),
+                    ),
                   ],
                 ),
               ),
             ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
   }
 
   Widget _buildDetailView(
@@ -808,7 +828,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                                     child: SizedBox(
                                       width: 100,
                                       height: 100,
-                                      child: castMember.profilePath != null
+                                      child: castMember.profilePath == castMember.profilePath
                                           ? CachedNetworkImage(
                                               imageUrl:
                                                   castMember.fullProfilePath,
