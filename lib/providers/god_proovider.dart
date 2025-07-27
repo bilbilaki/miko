@@ -305,7 +305,10 @@ class TvSeriesAnime {
 
   // --- Data structure for combined data ---
   final List<Season> seasons; // Populated by provider
-
+  final List<String> networks;
+final List<String> createdBy;
+final Map<String, dynamic>? lastEpisodeToAir;
+final String? sourceName;
   // --- Base URL for images (keep this) ---
   static const String _imageBaseUrl = 'https://inosdb.worker-inosuke.workers.dev/w500';
   static const String _backdropBaseUrl = 'https://inosdb.worker-inosuke.workers.dev/w780'; // Use a higher res for backdrop
@@ -334,8 +337,11 @@ class TvSeriesAnime {
     required this.crew,
     required this.videos,
     required this.seasons,
-    this.rawVideos, // Add to constructor
-  });
+required this.networks,
+  required this.createdBy,
+  this.lastEpisodeToAir,
+  this.sourceName,
+  this.rawVideos,  });
   /// Serialize this instance to JSON
   Map<String, dynamic> toJson() => {
         'tmdbId': tmdbId,
@@ -361,6 +367,10 @@ class TvSeriesAnime {
         'crew': crew,
         'videos': videos,
         'rawVideos': rawVideos,
+        'networks': networks,
+        'createdBy': createdBy,
+        'lastEpisodeToAir': lastEpisodeToAir,
+        'sourceName': sourceName,
         'seasons': seasons.map((s) => s.toJson()).toList(),
       };
   /// Deserialize from JSON
@@ -387,6 +397,10 @@ class TvSeriesAnime {
         cast: List<String>.from(m['cast'] as List<dynamic>),
         crew: List<String>.from(m['crew'] as List<dynamic>),
         videos: List<String>.from(m['videos'] as List<dynamic>),
+         networks: List<String>.from(m['networks'] as List<dynamic>),
+  createdBy: List<String>.from(m['createdBy'] as List<dynamic>),
+  lastEpisodeToAir: m['lastEpisodeToAir'] as Map<String, dynamic>?,
+  sourceName: m['sourceName'] as String?,
         seasons: (m['seasons'] as List<dynamic>).map((e) => Season.fromJson(e as Map<String, dynamic>)).toList(),
         rawVideos: m['rawVideos'] as String?,
       );
@@ -411,40 +425,63 @@ class TvSeriesAnime {
 
   // Factory constructor to create from CSV row data
   factory TvSeriesAnime.fromCsvRow(List<dynamic> row) {
-    // Ensure row has enough columns to avoid RangeError
-    dynamic safeGet(int index, [dynamic defaultValue]) {
-      return (row.length > index && row[index] != null) ? row[index] : defaultValue;
-    }
-
-    DateTime? parsedDate = tryParseDate(safeGet(3)); // Column 3: release_date
-
-    return TvSeriesAnime(
-      tmdbId: tryParseInt(safeGet(0)) ?? 0, // Column 0: tmdb_id - Default to 0 if invalid
-      name: safeGet(1)?.toString() ?? 'Unknown Series', // Column 1: series
-      status: safeGet(2)?.toString() ?? 'Unknown', // Column 2: status
-      firstAirDate: parsedDate, // Column 3: release_date
-      runtime: tryParseInt(safeGet(4)), // Column 4: runtime
-      overview: safeGet(5)?.toString() ?? '', // Column 5: overview
-      voteAverage: tryParseDouble(safeGet(6)) ?? 0.0, // Column 6: vote_average
-      voteCount: tryParseInt(safeGet(7)) ?? 0, // Column 7: vote_count
-      genres: splitStringList(safeGet(8)), // Column 8: genres
-      keywords: splitStringList(safeGet(9)), // Column 9: keywords
-      originalName: safeGet(10)?.toString() ?? 'Unknown Original Name', // Column 10: original_name
-      posterPath: safeGet(11)?.toString(), // Column 11: poster_path
-      backdropPath: safeGet(12)?.toString(), // Column 12: backdrop_path
-      popularity: tryParseDouble(safeGet(13)) ?? 0.0, // Column 13: popularity
-      originalLanguage: safeGet(14)?.toString() ?? 'N/A', // Column 14: original_language
-      type: safeGet(15)?.toString() ?? 'Unknown', // Column 15: type
-      numberOfEpisodes: tryParseInt(safeGet(16)), // Column 16: number_of_episodes
-      numberOfSeasons: tryParseInt(safeGet(17)), // Column 17: number_of_seasons
-      homepage: safeGet(18)?.toString(), // Column 18: homepage
-      cast: splitStringList(safeGet(19), separator: '|'), // Example if needed
-      crew: splitStringList(safeGet(20), separator: '|'), // Example if needed
-      videos: splitStringList(safeGet(21), separator: '|'), // Example if needed
-      rawVideos: safeGet(21)?.toString(),
-      seasons: [], // Initially empty, added by provider
-    );
+  dynamic safeGet(int index, [dynamic defaultValue]) {
+    if (index >= row.length) return defaultValue;
+    var value = row[index];
+    return value.toString().toLowerCase() == 'nan' ? defaultValue : value;
   }
+
+  // Parse the date from first_air_date
+  DateTime? parsedDate = tryParseDate(safeGet(3));
+  
+  // Parse networks and created_by as lists
+  List<String> parseNetworks = splitStringList(safeGet(19, ''));
+  List<String> parseCreatedBy = splitStringList(safeGet(20, ''));
+  
+  // Parse last_episode_to_air as Map
+  Map<String, dynamic>? lastEpisode;
+  try {
+    String lastEpData = safeGet(21, '');
+    if (lastEpData.isNotEmpty) {
+      lastEpisode = json.decode(lastEpData);
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print("Error parsing last_episode_to_air: $e");
+    }
+  }
+
+  return TvSeriesAnime(
+    tmdbId: tryParseInt(safeGet(0)) ?? 0,
+    name: safeGet(1, 'Unknown Name'),
+    status: safeGet(2, 'Unknown'),
+    firstAirDate: parsedDate,
+    runtime: tryParseInt(safeGet(4)),
+    overview: safeGet(5, ''),
+    voteAverage: tryParseDouble(safeGet(6)) ?? 0.0,
+    voteCount: tryParseInt(safeGet(7)) ?? 0,
+    genres: splitStringList(safeGet(8)),
+    keywords: splitStringList(safeGet(9)),
+    originalName: safeGet(10, 'Unknown Original Name'),
+    posterPath: safeGet(11)?.toString().nullIfEmpty,
+    backdropPath: safeGet(12)?.toString().nullIfEmpty,
+    popularity: tryParseDouble(safeGet(13)) ?? 0.0,
+    originalLanguage: safeGet(14, 'unknown'),
+    type: safeGet(15, 'unknown'),
+    numberOfEpisodes: tryParseInt(safeGet(16)),
+    numberOfSeasons: tryParseInt(safeGet(17)),
+    homepage: safeGet(18)?.toString().nullIfEmpty,
+    networks: parseNetworks,
+    createdBy: parseCreatedBy,
+    lastEpisodeToAir: lastEpisode,
+    cast: splitStringList(safeGet(22)),
+    crew: splitStringList(safeGet(23)),
+    videos: splitStringList(safeGet(24)),
+    sourceName: safeGet(25)?.toString().nullIfEmpty,
+    rawVideos: safeGet(24)?.toString().nullIfEmpty,
+  );
+}
+id,name,status,first_air_date,episode_run_time,overview,vote_average,vote_count,genres,keywords,original_name,poster_path,backdrop_path,popularity,original_language,type,number_of_episodes,number_of_seasons,homepage,networks,created_by,last_episode_to_air,Cast_Summary,Crew_Summary,Video_Summary,source_series_name
 
   // Method to create a new TvSeries instance by adding seasons to an existing one
   TvSeriesAnime copyWith({
@@ -477,7 +514,9 @@ class TvSeriesAnime {
       cast: cast,
       crew: crew,
       videos: videos,
-      seasons: sortedSeasons, // Use the new or existing sorted list
+      seasons: sortedSeasons,
+      networks: networks,
+      createdBy: createdBy,
     );
   }
 
