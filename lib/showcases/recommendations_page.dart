@@ -167,7 +167,7 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => MovieDetailPage(movie: movie),
+            builder: (context) => MovieDetailPage(id: movie.id),
           ),
         );
       },

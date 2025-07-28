@@ -522,25 +522,25 @@ class _TvShowPageState extends State<TvShowPage1> {
             context,
             MaterialPageRoute(
               builder: (context) => MovieDetailPage(
-                movie: Movie(
+            //    movie: Movie(
                   id: result.id,
-                  title: result.name,
-                  originalTitle: result.originalName,
-                  posterPath: result.posterPath,
-                  backdropPath: result.backdropPath,
-                  adult: result.adult,
-                  genreIds: result.genreIds,
-                  originalLanguage: result.originalLanguage.toString(),
-                  overview: result.overview.toString(),
-                  popularity: result.popularity,
-                  voteAverage: result.voteAverage,
-                  voteCount: result.voteCount,
-                  releaseDate: result.releaseDate.toString(),
-                  video: result.video,
+                  // title: result.name,
+                  // originalTitle: result.originalName,
+                  // posterPath: result.posterPath,
+                  // backdropPath: result.backdropPath,
+                  // adult: result.adult,
+                  // genreIds: result.genreIds,
+                  // originalLanguage: result.originalLanguage.toString(),
+                  // overview: result.overview.toString(),
+                  // popularity: result.popularity,
+                  // voteAverage: result.voteAverage,
+                  // voteCount: result.voteCount,
+                  // releaseDate: result.releaseDate.toString(),
+                  // video: result.video,
                   // Add other necessary fields from the multi search result
                 ),
               ),
-            ),
+       //     ),
           );
         }
         break;
@@ -550,7 +550,7 @@ class _TvShowPageState extends State<TvShowPage1> {
             context,
             MaterialPageRoute(
               builder: (context) => TvShowDetailPageAnime(
-                tvShow: TvShow(
+               tvShow: TvShow(
                   id: result.id,
                   name: result.name,
                   originalName: result.originalName,
@@ -579,9 +579,9 @@ class _TvShowPageState extends State<TvShowPage1> {
             MaterialPageRoute(
               builder: (context) => PersonDetailPage(
                   personId: result.id,
-                  initialName: result.name,
-                  initialProfilePath: result.profilePath),
-            ),
+            //      initialName: result.name,
+              //    initialProfilePath: result.profilePath),
+             ) ),
           );
         }
         break;

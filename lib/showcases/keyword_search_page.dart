@@ -374,7 +374,7 @@ class _KeywordMoviesPageState extends State<KeywordMoviesPage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => MovieDetailPage(movie: movie),
+              builder: (context) => MovieDetailPage(id: movie.id),
             ),
           );
         },

@@ -72,7 +72,9 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
           controller: _pageController,
           onPageChanged: _onPageChanged,
           physics: const BouncingScrollPhysics(),
+          allowImplicitScrolling: true,
           children: _pages,
+
         ),
         bottomNavigationBar: BottomNavBar(
           currentIndex: _currentIndex,

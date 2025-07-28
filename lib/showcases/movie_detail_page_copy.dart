@@ -53,9 +53,9 @@ class _FadeInState extends State<FadeIn> with SingleTickerProviderStateMixin {
 }
 
 class MovieDetailPage extends StatefulWidget {
-  final Movie movie;
+  final int id;
 
-  const MovieDetailPage({super.key, required this.movie});
+  const MovieDetailPage({super.key, required this.id});
 
   @override
   State<MovieDetailPage> createState() => _MovieDetailPageState();
@@ -66,7 +66,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   late Future<Map<String, dynamic>> _movieDataFuture;
   MovieResponse? recommendations;
   List<Keyword> _movieKeywords = [];
-
+Movie? movie;
   // Helper for haptic feedback
   void _performHapticFeedback() {
     if (Platform.isAndroid) {
@@ -87,12 +87,16 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
     super.dispose();
   }
 
-  void _loadMovieData() {
+  void _loadMovieData() async {
     _movieDataFuture =
-        _movieService.getMovieDetailsWithCredits(movieId: widget.movie.id);
+        _movieService.getMovieDetailsWithCredits(movieId: widget.id);
+        
     _movieDataFuture.then((_) {
       if (mounted) {
-        setState(() {});
+        setState(() async {
+
+          movie = await _movieService.getMovieDetails(movieId: widget.id);
+        });
       }
     }).catchError((error) {
       if (mounted) {
@@ -256,7 +260,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
     return Column(
   children: [
     Expanded(
-      child: _buildDetailView(context, widget.movie, null, userDataService, showDetailedInfo: false),
+      child: _buildDetailView(context, movie!, null, userDataService, showDetailedInfo: false),
     ),
            Container(
             color: Colors.black87,
@@ -296,7 +300,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                       onPressed: () {
                         _performHapticFeedback();
                        Navigator.of(context).push(MaterialPageRoute(
-                         builder: (context) => MovieDetailsScreen(movieId: widget.movie.id, typec: "movie",),
+                         builder: (context) => MovieDetailsScreen(movieId: widget.id, typec: "movie",),
                        ));
                       },
                       child: const Text('Try Loading using old interface'),
@@ -305,7 +309,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                       onPressed: () {
                         _performHapticFeedback();
                        Navigator.of(context).push(MaterialPageRoute(
-                         builder: (context) => MovieDetailsScreen(movieId: widget.movie.id, typec: "movie",),
+                         builder: (context) => MovieDetailsScreen(movieId: widget.id, typec: "movie",),
                        ));
                       },
                       child: const Text('Try Loading using old interface'),
@@ -548,11 +552,11 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   Widget _buildMovieDetails(BuildContext context, Movie movie,
       MovieCredits? credits, bool showDetailedInfo,userDataService) {
     final mmovie = Provider.of<MovieProvider>(context, listen: false)
-        .getMovieById(widget.movie.id);
+        .getMovieById(widget.id);
         final downloadLinks = mmovie!.getDownloadLinksList();
 
-    bool isWatched = userDataService.isWatchedEpisode(widget.movie.id,
-        widget.movie.id, widget.movie.id, downloadLinks.toString());
+    bool isWatched = userDataService.isWatchedEpisode(widget.id,
+        widget.id, widget.id, downloadLinks.toString());
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -1395,7 +1399,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                 tVmedium(); // Haptic feedback on dialog option tap
                 Navigator.pop(dialogContext); // Close the dialog
                 userDataService.toggleIsWatchedLink(
-                    widget.movie.id, widget.movie.id,widget.movie.id, links.toString());
+                    widget.id, widget.id,widget.id, links.toString());
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -1498,8 +1502,8 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => RecommendationsPage(
-                          movieId: widget.movie.id,
-                          movieTitle: widget.movie.title,
+                          movieId: widget.id,
+                          movieTitle: movie!.title,
                           typec: "movie",
                         ),
                       ),
@@ -1553,7 +1557,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => MovieDetailPage(movie: movie),
+            builder: (context) => MovieDetailPage(id: movie.id),
           ),
         );
       },

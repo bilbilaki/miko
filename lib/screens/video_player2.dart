@@ -140,7 +140,7 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
           Video(
             controller: controller,
             controls: AdaptiveVideoControls,
-            fit: BoxFit.fitWidth,
+            fit: _currentFit,
             filterQuality: FilterQuality.high,
             wakelock: true,
             subtitleViewConfiguration: SubtitleViewConfiguration(

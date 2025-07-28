@@ -57,7 +57,7 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
           },
           child: GestureDetector(
             // Added GestureDetector for general touch/drag vibration
-            onTapDown: (_) => triggerVibration(), // Vibrate on touch/tap down
+          //  onTapDown: (_) => triggerVibration(), // Vibrate on touch/tap down
             //        onPanDown: (_) => triggerVibration(), // Vibrate on pan/drag down
             child: Stack(
               children: [
@@ -155,12 +155,14 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
 
   @override
   void dispose() {
-    _scrollController.dispose();
     _searchScrollController2.dispose(); // Dispose the correct controller
-    _movieService.dispose();
     _searchController2.removeListener(onSearchChanged2);
-    _searchController2.dispose();
+  //  _searchController2.dispose();
     _debounce?.cancel();
+        _movieService.dispose();
+
+        _scrollController.dispose();
+
     super.dispose();
   }
 
@@ -177,7 +179,7 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
   void onSearchChanged2() async {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 100), () {
-      final query = _searchController2.text.trim();
+   late   final query = _searchController2.text.trim();
       if (query != _currentQuery2) {
         _currentQuery2 = query;
         _searchPage2 = 1;
@@ -258,25 +260,25 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => MovieDetailPage(
-                movie: mo.Movie(
+                
                   id: result.id,
-                  title: result.name,
-                  originalTitle: result.originalName,
-                  posterPath: result.posterPath,
-                  backdropPath: result.backdropPath,
-                  adult: result.adult,
-                  genreIds: result.genreIds,
-                  originalLanguage: result.originalLanguage.toString(),
-                  overview: result.overview.toString(),
-                  popularity: result.popularity,
-                  voteAverage: result.voteAverage,
-                  voteCount: result.voteCount,
-                  releaseDate: result.releaseDate.toString(),
-                  video: result.video,
+                  // title: result.name,
+                  // originalTitle: result.originalName,
+                  // posterPath: result.posterPath,
+                  // backdropPath: result.backdropPath,
+                  // adult: result.adult,
+                  // genreIds: result.genreIds,
+                  // originalLanguage: result.originalLanguage.toString(),
+                  // overview: result.overview.toString(),
+                  // popularity: result.popularity,
+                  // voteAverage: result.voteAverage,
+                  // voteCount: result.voteCount,
+                  // releaseDate: result.releaseDate.toString(),
+                  // video: result.video,
                   // Add other necessary fields from the multi search result
                 ),
               ),
-            ),
+          //  ),
           );
         }
         break;
@@ -286,7 +288,7 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => TvShowDetailPageAnime(
-                tvShow: TvShow(
+               tvShow: mo.TvShow(
                   id: result.id,
                   name: result.name,
                   originalName: result.originalName,
@@ -300,8 +302,8 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
                   popularity: result.popularity,
                   voteAverage: result.voteAverage,
                   voteCount: result.voteCount,
-                  // Add other necessary fields from the multi search result
-                ),
+                 // Add other necessary fields from the multi search result
+               ),
                 typec: "tvseries",
               ),
             ),
@@ -317,7 +319,8 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
                   personId: result.id,
                   initialName: result.name,
                   initialProfilePath: result.profilePath),
-            ),
+            // ),
+                )
           );
         }
         break;

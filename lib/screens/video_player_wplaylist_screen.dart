@@ -128,7 +128,10 @@ StreamSubscription? _completedSubscription;
               return ListTile(
                 title: Text(entry.key),
                 onTap: () {
-                  Navigator.of(context).pop(entry.key);
+   _changeQuality( entry.key);
+                     Navigator.of(context).pop(entry.key);
+
+
                 },
               );
             }).toList(),
@@ -157,6 +160,7 @@ String _cycleQuality(String currentQuality) {
     setState(() {
       currentQuality = newQuality;
     });
+    playEpisodeByUrl(currentQuality,currentIndex);
   }
 
   late final UserDataService _userDataService;
@@ -726,6 +730,7 @@ currentEpisode!.episodeNumber      );
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                IconButton(onPressed: _showQualitySelectionDialog, icon: Icon(Icons.hd_rounded)),
                 IconButton(
                   icon: Icon(_fitIcons[_currentFit] ?? Icons.aspect_ratio,
                       color: Colors.white),

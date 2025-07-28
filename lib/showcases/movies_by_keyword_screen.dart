@@ -82,7 +82,7 @@ class _MoviesByKeywordScreenState extends State<MoviesByKeywordScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => MovieDetailPage(movie: movie),
+            builder: (context) => MovieDetailPage(id: movie.id),
           ),
         );
       },

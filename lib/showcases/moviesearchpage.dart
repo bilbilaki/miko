@@ -212,7 +212,7 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => MovieDetailPage(movie: movie)),
+                builder: (context) => MovieDetailPage(id: movie.id)),
           );
         },
         child: Row(
