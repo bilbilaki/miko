@@ -67,6 +67,7 @@ dependencies:
   flutter_gemini: any
   image_picker: ^1.1.2
   flutter_markdown: ^0.7.7+1
+  google_generative_ai: ^0.4.7
   # gpt_markdown: ^1.1.2
   # audioplayers: ^6.5.0
   # flutter_markdown: ^0.7.7+1

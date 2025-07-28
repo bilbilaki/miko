@@ -43,3 +43,4 @@ app.*.map.json
 # Android Studio will place build artifacts here
 
 
+/home/n/Documents/flapps/miko/lib/aiconfig/consts.dart

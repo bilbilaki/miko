@@ -8,8 +8,8 @@ import 'package:miko/utils/utils.dart'; // Ensure these service files exist
 enum GeminiChatMode {
   textChat,
   multiModal,
-  toolCalling, // Retained for mode-switching UI, though implementation is simplified
-  structuredOutput,
+//  toolCalling, // Retained for mode-switching UI, though implementation is simplified
+ // structuredOutput,
 }
 
 // 1. Define the State for AI Chat, updated for Gemini
@@ -81,12 +81,12 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
       case GeminiChatMode.multiModal:
         _currentService = GeminiMultiModalService();
         break;
-      case GeminiChatMode.toolCalling:
-        _currentService = GeminiToolCallingService();
-        break;
-      case GeminiChatMode.structuredOutput:
-        _currentService = GeminiStructuredOutputService();
-        break;
+      // case GeminiChatMode.toolCalling:
+      //   _currentService = GeminiToolCallingService();
+      //   break;
+      // case GeminiChatMode.structuredOutput:
+      //   _currentService = GeminiStructuredOutputService();
+      //   break;
     }
   }
 

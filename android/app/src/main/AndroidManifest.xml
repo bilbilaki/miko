@@ -4,36 +4,11 @@ xml_permissions.txt
 <uses-permission android:name="android.permission.INTERNET" />
 <uses-permission android:name="android.permission.STORAGE_INTERNAL" />
 <uses-permission android:name="android.permission.VIBRATE" />
-<uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" />
-  <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-        <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
-    <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
-    <uses-permission android:name="android.permission.WRITE_APN_SETTINGS" />
-    <uses-permission android:name="android.permission.MOUNT_FORMAT_FILESYSTEMS" />
-    <uses-permission android:name="android.permission.GLOBAL_SEARCH" />
     <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
-    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
-    <uses-permission android:name="android.permission.REBOOT" />
-    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
-    <uses-permission android:name="android.permission.RESTART_PACKAGES" />
-    <uses-permission android:name="android.permission.MANAGE_DOCUMENTS" />
-    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
-    <uses-permission android:name="android.permission.BIND_VPN_SERVICE" />
-    <uses-permission android:name="android.permission.BIND_AUTOFILL_SERVICE" />
-    <uses-permission android:name="android.permission.BIND_REMOTEVIEWS" />
-    <uses-permission android:name="android.permission.CAMERA" />
-        <uses-permission android:name="android.permission.INSTALL_SHORTCUT" />
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
           
 <uses-permission android:name="android.permission.WAKE_LOCK"/>
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 <!-- For Android 13 (API 33) and above, you need this to show the notification -->
-<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     
 

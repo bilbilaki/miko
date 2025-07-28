@@ -20,7 +20,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   MediaKit.ensureInitialized();
-Gemini.init(apiKey: kApiKey);
 
   // Register all your adapters
   // IMPORTANT: Call this before the app runs
@@ -56,8 +55,9 @@ Gemini.init(apiKey: kApiKey);
 }
 
 // ignore: must_be_immutable
-class MyApp extends StatelessWidget {
+class MyApp extends pr.ConsumerWidget {
   const MyApp({super.key});
+
   void loading(context) async {
     Provider.of<MovieProvider>(context, listen: false);
     Provider.of<TvSeriesProvider>(context, listen: false);
@@ -65,7 +65,7 @@ class MyApp extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, pr.WidgetRef ref) {
     // Scroll to the bottom after receiving a new message
     loading(context);
 
@@ -74,13 +74,13 @@ class MyApp extends StatelessWidget {
         settingsServiceProvider.overrideWith((ref) => settingsService),
       ],
       child: MaterialApp(
-          theme: AppThemes.netflixDarkTheme, home: const SplashScreen2()),
+          theme: AppThemes.netflixDarkTheme, home:  SplashScreen2(ref)),
     );
   }
 }
 
 class SplashScreen2 extends StatefulWidget {
-  const SplashScreen2({super.key});
+  const SplashScreen2(pr.WidgetRef ref, {super.key});
 
   @override
   State<SplashScreen2> createState() => _SplashScreen2State();
@@ -104,7 +104,7 @@ class _SplashScreen2State extends State<SplashScreen2> {
     Navigator.of(
       context,
     ).pushReplacement(
-        MaterialPageRoute(builder: (context) => const SplashScreen()));
+        MaterialPageRoute(builder: (context) =>  SplashScreen()));
   }
 
   @override
@@ -114,7 +114,7 @@ class _SplashScreen2State extends State<SplashScreen2> {
 }
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  const SplashScreen( {super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
