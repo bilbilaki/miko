@@ -5,7 +5,6 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:miko/providers/god_proovider.dart' as ss;
 import 'package:miko/services/user_data_service.dart';
-import 'package:miko/showcases/model.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:provider/provider.dart';
 
@@ -96,7 +95,7 @@ StreamSubscription? _completedSubscription;
     'DUBBED'
   ];
 
-  Map<String, String?> getAvailableQualityUrls() {
+  Map<String, String?> getAvailableQualityUrl() {
     final episodeToPlay = widget.playlist[currentIndex];
   
     final Map<String, String?> currentchoice = {};
@@ -116,7 +115,12 @@ StreamSubscription? _completedSubscription;
   }
   Future<String> _showQualitySelectionDialog() async {
     // Get the available quality URLs
-  final Map<String, String?> qualityOptions = getAvailableQualityUrls();
+  final Map<String, String?> currentSelectedOptions = getAvailableQualityUrl();
+      final episodeToPlay = widget.playlist[currentIndex];
+
+   final availableQualities= episodeToPlay.getAvailableQualityUrls();
+  
+
   final selectedQuality = await showDialog<String>(
     context: context,
     builder: (context) {
@@ -124,9 +128,11 @@ StreamSubscription? _completedSubscription;
         title: const Text('Select Quality'),
         content: SingleChildScrollView(
           child: ListBody(
-            children: qualityOptions.entries.map((entry) {
+            children: availableQualities.entries.map((entry) {
               return ListTile(
                 title: Text(entry.key),
+                selected: entry.key ==currentSelectedOptions, 
+                selectedColor: Colors.purple,
                 onTap: () {
    _changeQuality( entry.key);
                      Navigator.of(context).pop(entry.key);
@@ -138,16 +144,16 @@ StreamSubscription? _completedSubscription;
           ),
         ),
       );
-    },
+     },
   );
-  if (selectedQuality != null && qualityOptions.containsKey(selectedQuality)) {
-    urlToPlayQuality = qualityOptions[selectedQuality]!;
+  if (selectedQuality != null && availableQualities.containsKey(selectedQuality)) {
+    urlToPlayQuality = availableQualities[selectedQuality]!;
     currentQuality = selectedQuality;
     return _cycleQuality(currentQuality);
   } else {
     return 'Invalid selection';
-  }
-}
+  }}
+
 
 String _cycleQuality(String currentQuality) {
   final List<String> qualityList = ['Auto', '1080p', '720p', '540p', '480p', 'DUBBED'];
@@ -181,13 +187,13 @@ String _cycleQuality(String currentQuality) {
       }
     });
 
-    _errorSubscription = player.stream.error.listen((error) {
-      setState(() {
-        streamHasError = true;
-      });
-      _showTryOtherUrlDialog(error);
-      debugPrint("Player Error: $error");
-    });
+    // _errorSubscription = player.stream.error.listen((error) {
+    //   setState(() {
+    //     streamHasError = true;
+    //   });
+    //  // _showTryOtherUrlDialog(error);
+    //   debugPrint("Player Error: $error");
+    
 
     // --- REFACTORED: Start the periodic progress saver ---
     _progressSaveTimer = Timer.periodic(const Duration(seconds: 15), (_) {
@@ -203,7 +209,7 @@ String _cycleQuality(String currentQuality) {
       _loadAndPlayEpisode(widget.initialIndex, isInitialPlay: true);
     });
   }
-   Future<void> _loadAndPlayEpisode(int index, {bool isInitialPlay = false, String? specificUrl}) async {
+   Future<void> _loadAndPlayEpisode(int index, {bool isInitialPlay = true, String? specificUrl}) async {
     // 1. Validate index
     if (index < 0 || index >= widget.playlist.length) {
       debugPrint("Invalid episode index: $index. Not playing.");
@@ -215,7 +221,7 @@ String _cycleQuality(String currentQuality) {
     // 2. Update state
     setState(() {
       currentIndex = index;
-      streamHasError = false; // Reset error state for new episode
+   //   streamHasError = false; // Reset error state for new episode
     });
 
     final episodeToPlay = widget.playlist[currentIndex];
@@ -229,7 +235,7 @@ String _cycleQuality(String currentQuality) {
       final availableUrls = episodeToPlay.getAvailableQualityUrls();
       if (availableUrls.isEmpty) {
         debugPrint('No URLs found for this episode. Cannot play.');
-        _showTryOtherUrlDialog("No playable URL found for this episode.");
+       /// _showTryOtherUrlDialog("No playable URL found for this episode.");
         return;
       }
       urlToPlay = availableUrls.values.first;
@@ -254,125 +260,128 @@ String _cycleQuality(String currentQuality) {
       currentIndex + 1,
     );
 
-    if (!isInitialPlay) {
+    if (isInitialPlay) {
       // If it's not the first video (i.e., we auto-played next), just start from the beginning.
-      await player.play();
-    } else if (savedPosition != null && savedPosition.inSeconds > 10) {
-      final bool? shouldResume = await _showResumeDialog(savedPosition);
+      //await player.play();
+      if (savedPosition != null ) {
+      final  shouldResume = await _showResumeDialog(savedPosition);
       if (shouldResume == true) {
         await player.seek(savedPosition);
-      } else {
+              await player.play();
+
+      } else if (shouldResume == false){
         await _clearPlaybackProgress();
-      }
-      await player.play();
-    } else {
+      
+} } }  
       // Default case: play from the beginning
+           //   await player.seek(savedPosition!);
+
       await player.play();
-    }
-  }
+     } 
+  
 
-  void firstDial() async {
-    bool isBeforeWatched = _userDataService.isWatchedEpisode(
-      widget.seriesname,
-      widget.tvSeriesId,
-      currentIndex + 1,
-      widget.season.seasonNumber,
-    );
+//   void firstDial() async {
+//     bool isBeforeWatched = _userDataService.isWatchedEpisode(
+//       widget.seriesname,
+//       widget.tvSeriesId,
+//       currentIndex + 1,
+//       widget.season.seasonNumber,
+//     );
 
-    if (!isBeforeWatched) {
-      _userDataService.toggleIsWatchedLink(
-        widget.seriesname,
-        widget.tvSeriesId,
-        currentIndex + 1,
-        widget.season.seasonNumber,
-      );
-    } else if (isBeforeWatched) {
-      final savedPosition = await _userDataService.getEpisodeProgress(
-        widget.tvSeriesId,
-        widget.season.seasonNumber,
-        currentIndex + 1,
-      );
-
-
-      if (savedPosition != null && savedPosition.inSeconds > 10) {
-        final bool? shouldResume = await _showResumeDialog(savedPosition);
-
-        if (shouldResume == true) {
-          player.seek(Duration(seconds: savedPosition.inSeconds));
-    await player.play();
-    debugPrint('VideoPlayerScreenState: player.play() called.');
-
-        } else {
-          await _clearPlaybackProgress();
-          await player.play();
-    debugPrint('VideoPlayerScreenState: player.play() called.');
-        }
-      } 
-                  await player.play();
-
-    player.stream.error.listen((error){
-
-      setState(() {
-        streamHasError = true;
-_showTryOtherUrlDialog(error);
-      });
-      ////TODO ADD Error Handler
-    });
-if (!streamHasError){
-_progressSaveTimer = Timer.periodic(const Duration(seconds: 15), (_) {
-      debugPrint('VideoPlayerScreenState: _progressSaveTimer tick. Saving playback progress.');
-      _savePlaybackProgress();
-    });
-    debugPrint('VideoPlayerScreenState: _progressSaveTimer started.');
-}
-                  await player.play();
-
-    player.stream.completed.listen((completed) {
-      debugPrint('VideoPlayerScreenState: Player completed stream event: $completed');
-      if (completed) {
-        _clearPlaybackProgress();
-        debugPrint('VideoPlayerScreenState: Video completed. Clearing progress and playing next.');
-        playNext();
-      }
-    });
-
-  }
-                  await player.play();
-
-  }
+//     if (!isBeforeWatched) {
+//       _userDataService.toggleIsWatchedLink(
+//         widget.seriesname,
+//         widget.tvSeriesId,
+//         currentIndex + 1,
+//         widget.season.seasonNumber,
+//       );
+//     } else if (isBeforeWatched) {
+//       final savedPosition = await _userDataService.getEpisodeProgress(
+//         widget.tvSeriesId,
+//         widget.season.seasonNumber,
+//         currentIndex + 1,
+//       );
 
 
-Future<bool?> _showTryOtherUrlDialog( error) {
-    return showDialog<bool>(
-      context: context,
-      barrierDismissible: false, // User must make a choice
-      builder: (context) => AlertDialog(
-        title: const Text('do you want app try load another url?'),
-        content: Text(
-            'App recogonized this error $error. Would you like to try playing other url?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false); // Return false
-            },
-            child: const Text('No'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop(true); // Return true
-            },
-            child: const Text('Yes'),
-          ),
-        ],
-      ),
-    );
-  }
+//       if (savedPosition != null && savedPosition.inSeconds > 10) {
+//         final bool? shouldResume = await _showResumeDialog(savedPosition);
+
+//         if (shouldResume == true) {
+//           player.seek(Duration(seconds: savedPosition.inSeconds));
+//     await player.play();
+//     debugPrint('VideoPlayerScreenState: player.play() called.');
+
+//         } else {
+//           await _clearPlaybackProgress();
+//           await player.play();
+//     debugPrint('VideoPlayerScreenState: player.play() called.');
+//         }
+//       } 
+//                   await player.play();
+
+//     player.stream.error.listen((error){
+
+//       setState(() {
+//         streamHasError = true;
+// _showTryOtherUrlDialog(error);
+//       });
+//       ////TODO ADD Error Handler
+//     });
+// if (!streamHasError){
+// _progressSaveTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+//       debugPrint('VideoPlayerScreenState: _progressSaveTimer tick. Saving playback progress.');
+//       _savePlaybackProgress();
+//     });
+//     debugPrint('VideoPlayerScreenState: _progressSaveTimer started.');
+// }
+//                   await player.play();
+
+//     player.stream.completed.listen((completed) {
+//       debugPrint('VideoPlayerScreenState: Player completed stream event: $completed');
+//       if (completed) {
+//         _clearPlaybackProgress();
+//         debugPrint('VideoPlayerScreenState: Video completed. Clearing progress and playing next.');
+//         playNext();
+//       }
+//     });
+
+//   }
+//                   await player.play();
+
+//   }
+
+
+// Future<bool?> _showTryOtherUrlDialog( error) {
+//     return showDialog<bool>(
+//       context: context,
+//       barrierDismissible: false, // User must make a choice
+//       builder: (context) => AlertDialog(
+//         title: const Text('do you want app try load another url?'),
+//         content: Text(
+//             'App recogonized this error $error. Would you like to try playing other url?'),
+//         actions: [
+//           TextButton(
+//             onPressed: () {
+//               Navigator.of(context).pop(false); // Return false
+//             },
+//             child: const Text('No'),
+//           ),
+//           ElevatedButton(
+//             onPressed: () {
+//               Navigator.of(context).pop(true); // Return true
+//             },
+//             child: const Text('Yes'),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
  void playNext() {
-    _loadAndPlayEpisode(currentIndex + 1);
+    _loadAndPlayEpisode(currentIndex + 1, isInitialPlay: true);
   }
 
   void playPrevious() {
-    _loadAndPlayEpisode(currentIndex - 1);
+    _loadAndPlayEpisode(currentIndex - 1,isInitialPlay: true);
   }
 
   // --- REFACTORED to use the new method ---
@@ -465,7 +474,7 @@ currentEpisode!.episodeNumber      );
 //   }
 
   // Helper for resume dialog
-  Future<bool?> _showResumeDialog(Duration savedPosition) {
+  Future<bool?> _showResumeDialog(Duration savedPosition) async {
     debugPrint('VideoPlayerScreenState: _showResumeDialog called with savedPosition: $savedPosition');
     return showDialog<bool>(
       context: context,

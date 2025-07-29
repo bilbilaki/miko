@@ -37,7 +37,6 @@ class _MoviePageState extends State<MoviePage1> {
 
   final ScrollController _searchScrollController = ScrollController();
   final ScrollController _searchScrollController2 = ScrollController();
-
   Timer? _debounce;
   mmmm.MultiSearchResponse? _searchResponse;
   bool _isFetchingMore2 = false;

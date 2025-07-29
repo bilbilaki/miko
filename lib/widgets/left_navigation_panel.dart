@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:miko/jackett/ui/screens/home_screen.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/screens/genre_detail_screen.dart';
 import 'package:miko/screens/grid.dart';
@@ -10,6 +11,7 @@ import 'package:miko/showcases/movie_page_copy.dart';
 import 'package:miko/showcases/moviesearchpage.dart';
 import 'package:miko/showcases/tvsearchpage.dart';
 import 'package:miko/utils/colors.dart';
+import 'package:miko/yt-dlp/ui/screens/home_screen.dart';
 
 import '../providers/settings_provider.dart';
 class LeftNavigationPanel extends ConsumerWidget {
@@ -112,6 +114,23 @@ class LeftNavigationPanel extends ConsumerWidget {
     padding: EdgeInsets.zero,
     shrinkWrap: true,
     children: [
+      
+      _buildNavigationItem(
+        context,
+        ref,
+        icon: Icons.tornado_rounded, 
+        title: 'Jackett Search',
+        showText: showText,
+        onTap: () => _navigateTo(context, JackettHome(), isMobileLayout),
+      ),
+      _buildNavigationItem(
+        context,
+        ref,
+        icon: Icons.play_lesson_rounded, 
+        title: 'Yt-dlp',
+        showText: showText,
+        onTap: () => _navigateTo(context, YTDLPHomeScreen(), isMobileLayout),
+      ),
       _buildNavigationItem(
         context,
         ref,

@@ -1,6 +1,6 @@
 // --- season_detail_page.dart ---
 import 'package:flutter/material.dart';
-import 'package:miko/showcases/animeepisodedetailpage.dart';
+import 'package:miko/showcases/episodedetailpage.dart';
 import 'model.dart';
 import 'movie_service.dart';
 // For navigation
@@ -113,14 +113,14 @@ class _SeasonDetailPageAnimeState extends State<SeasonDetailPageAnime> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AnimeEpisodeDetailPage(
+              builder: (context) => EpisodeDetailPage(
                 tvShowId: widget
                     .tvShowId, // or episode.showId if available and correct
                 seasonNumber: episode.seasonNumber,
                 episodeNumber: episode.episodeNumber,
                 episodeName: episode.name,
                 movieService: widget.movieService,
-                typec: widget.typec,
+             //   typec: widget.typec,
               ),
             ),
           );

@@ -2,8 +2,8 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://artifacts.arthenica.com/maven' }
-    }
+ }
+
 }
 
 val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
@@ -20,3 +20,4 @@ subprojects {
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
+   

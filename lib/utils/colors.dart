@@ -5,8 +5,9 @@ class AppThemes {
   // Netflix Dark Theme
   static final ThemeData netflixDarkTheme = ThemeData(
     brightness: Brightness.dark,
-    useMaterial3: true,
-    scaffoldBackgroundColor: Colors.black,
+   useMaterial3: true,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+            scaffoldBackgroundColor: Colors.black,
     primaryColor: const Color(0xFFE50914), // Netflix Red
     hintColor: Colors.grey[600],
     colorScheme: ColorScheme.dark(

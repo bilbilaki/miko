@@ -136,7 +136,7 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
           imageBytes: state.imageBytes,
         ).listen(
           (chunk) {
-            state = state.copyWith(response: state.response + chunk);
+            state = state.copyWith(response: chunk);
           },
           onDone: () {
             state = state.copyWith(isLoading: false);

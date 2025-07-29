@@ -3,7 +3,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:miko/aiconfig/consts.dart';
+import 'package:http/http.dart' as http;
+import 'package:miko/configs/consts.dart';
 import 'package:miko/services/ai_tools.dart';
 
 
@@ -12,6 +13,10 @@ const double temperature = 0.7;
 
 abstract class GeminiServiceBase {
 final GenerativeModel model;
+final customClient = http.Client();
+
+  // 2. Define custom request options (e.g., different API endpoint)
+  
 
   // Your actual app functions that the AI can call
   final Map<String, Function> _availableFunctions = {

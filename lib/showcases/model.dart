@@ -1456,7 +1456,7 @@ class Movie {
     this.keywords = const [],
   });
 
-  factory Movie.fromJson(Map<String, dynamic> json) {
+  factory Movie.fromJson(Map<dynamic, dynamic> json) {
     // Check if this is a detailed response
     final bool hasDetails =
         json.containsKey('runtime') || json.containsKey('genres');

@@ -157,16 +157,16 @@ class Episode {
         episodeNum = int.parse(match.group(2)!);
       } else {
         if (kDebugMode) {
-          print(
-            "Could not parse S/E numbers from '$episodeId' for series '$seriesNameFromCsv'. Defaulting to S0/E0.",
-          );
+        //  print(
+         //   "Could not parse S/E numbers from '$episodeId' for series '$seriesNameFromCsv'. Defaulting to S0/E0.",
+         // );
         }
       }
     } catch (e) {
       if (kDebugMode) {
-        print(
-          "Error parsing episode numbers from '$episodeId' for series '$seriesNameFromCsv': $e",
-        );
+        //print(
+        //  "Error parsing episode numbers from '$episodeId' for series '$seriesNameFromCsv': $e",
+       // );
       }
       // Keep default S0/E0 on error
     }
@@ -176,9 +176,9 @@ class Episode {
     if (seasonNum == 0 && episodeNum == 0 && episodeId != 'S00E00') {
       // Log a warning if parsing failed but the ID wasn't literally S00E00
       if (kDebugMode) {
-        print(
-          "Warning: Episode identifier '$episodeId' for '$seriesNameFromCsv' parsed as S0E0.",
-        );
+      //  print(
+         // "Warning: Episode identifier '$episodeId' for '$seriesNameFromCsv' parsed as S0E0.",
+        //);
       }
     }
 
@@ -245,7 +245,7 @@ T? tryParse<T>(dynamic value, T Function(String) parser) {
     return parser(value.toString().trim());
   } catch (e) {
     if (kDebugMode) {
-      print("CSV Parsing Error for value '$value' as type $T: $e");
+     // print("CSV Parsing Error for value '$value' as type $T: $e");
     }
     return null;
   }
@@ -504,7 +504,7 @@ class TvSeriesAnime {
           results.add(VideoInfo(title: title, key: key, type: type));
         }
       } else {
-        if (kDebugMode) print("Could not parse video entry: $entry");
+        if (kDebugMode){}// print("Could not parse video entry: $entry");
       }
     }
     return results;
@@ -519,10 +519,10 @@ class TvSeriesAnime {
       } else if (await canLaunchUrl(youtubeUrl)) {
         await launchUrl(youtubeUrl, mode: LaunchMode.externalApplication);
       } else {
-        if (kDebugMode) print("Could not launch YouTube URL for key: $key");
+        if (kDebugMode){}// print("Could not launch YouTube URL for key: $key");
       }
     } catch (e) {
-      if (kDebugMode) print("Error launching url: $e");
+      if (kDebugMode){}// print("Error launching url: $e");
     }
   }
 
@@ -704,7 +704,7 @@ class Movie {
         return parser(value.toString());
       } catch (e) {
         if (kDebugMode) {
-          print("CSV Parsing Error for value '$value': $e");
+         // print("CSV Parsing Error for value '$value': $e");
         }
         return null;
       }
@@ -862,11 +862,11 @@ Future<void> launchVideo(String key) async {
     else if (await canLaunchUrl(youtubeUrl)) {
       await launchUrl(youtubeUrl, mode: LaunchMode.externalApplication);
     } else {
-      if (kDebugMode) print("Could not launch YouTube URL for key: $key");
+      if (kDebugMode){}// print("Could not launch YouTube URL for key: $key");
       // Optionally show a message to the user
     }
   } catch (e) {
-    if (kDebugMode) print("Error launching url: $e");
+    if (kDebugMode){}// print("Error launching url: $e");
     // Optionally show a message to the user
   }
 }
@@ -1271,8 +1271,8 @@ class MovieProvider extends ContentProvider<Movie> {
       _status = LoadingStatus.error;
       _errorMessage = "Failed to load or parse CSV: $e";
       if (kDebugMode) {
-        print("CSV Loading Error (MovieProvider): $e");
-        print(stacktrace);
+    //    print("CSV Loading Error (MovieProvider): $e");
+    //    print(stacktrace);
       }
       _masterList = [];
     } finally {
@@ -1400,13 +1400,13 @@ class TvSeriesProvider extends ContentProvider<TvSeriesAnime> {
             }
           } else {
             if (kDebugMode) {
-              print("Skipping series due to missing or invalid TMDB ID in row: $row");
+           //   print("Skipping series due to missing or invalid TMDB ID in row: $row");
             }
           }
         } catch (e, stacktrace) {
           if (kDebugMode) {
-            print("Error parsing TV Series details row: $row -> $e");
-            print(stacktrace);
+        //    print("Error parsing TV Series details row: $row -> $e");
+         //   print(stacktrace);
           }
           // Decide if you want to stop loading or just skip the row
         }
@@ -1443,16 +1443,16 @@ class TvSeriesProvider extends ContentProvider<TvSeriesAnime> {
               tempEpisodesByTmdbId[targetTmdbId]!.add(episode);
             } catch (e) {
               if (kDebugMode) {
-                print(
-                    "Error parsing episode from row for series '$animeseriesNameFromEpisodeCsv' (mapped to $targetTmdbId): $row -> $e");
+              //  print(
+                  //  "Error parsing episode from row for series '$animeseriesNameFromEpisodeCsv' (mapped to $targetTmdbId): $row -> $e");
               }
             }
           } else {
             // If the name wasn't found in the map
             if (kDebugMode) {
               // This indicates a mismatch or missing series in the details CSV
-              print(
-                  "Warning: Could not find matching TMDB ID for series name '$animeseriesNameFromEpisodeCsv' from episodes CSV.");
+            //  print(
+           //       "Warning: Could not find matching TMDB ID for series name '$animeseriesNameFromEpisodeCsv' from episodes CSV.");
               // Optionally, try a fallback or log more prominently
             }
           }
@@ -1509,7 +1509,7 @@ class TvSeriesProvider extends ContentProvider<TvSeriesAnime> {
       _allAvailableLanguages = _masterList.map((series) => series.originalLanguage).toSet();
 
       if (kDebugMode) {
-        print("Successfully loaded and combined data for ${_masterList.length} TV series.");
+     //   print("Successfully loaded and combined data for ${_masterList.length} TV series.");
       }
 
       _status = LoadingStatus.loaded;
@@ -1518,8 +1518,8 @@ class TvSeriesProvider extends ContentProvider<TvSeriesAnime> {
       _status = LoadingStatus.error;
       _errorMessage = "Failed to load TV series data: $e";
       if (kDebugMode) {
-        print("TV Series Loading Error: $e");
-        print(stacktrace);
+     //   print("TV Series Loading Error: $e");
+      //  print(stacktrace);
       }
       _animeseriesMap = {};
       _masterList = [];
@@ -1651,7 +1651,7 @@ class AnimeProvider extends ContentProvider<TvSeriesAnime> {
         return;
       }
     } catch (e) {
-      if (kDebugMode) print('Cache load failed, parsing CSV: $e');
+      if (kDebugMode) {}//print('Cache load failed, parsing CSV: $e');
     }
 
     try {
@@ -1676,8 +1676,8 @@ class AnimeProvider extends ContentProvider<TvSeriesAnime> {
           }
         } catch (e, stacktrace) {
           if (kDebugMode) {
-            print("Error parsing TV Series details row: $row -> $e");
-            print(stacktrace);
+          //  print("Error parsing TV Series details row: $row -> $e");
+         //   print(stacktrace);
           }
         }
       }
@@ -1700,14 +1700,14 @@ class AnimeProvider extends ContentProvider<TvSeriesAnime> {
               tempEpisodesByTmdbId.putIfAbsent(targetTmdbId, () => []).add(episode);
             } catch (e) {
               if (kDebugMode) {
-                print(
-                    "Error parsing episode from row for series '$animeseriesNameFromEpisodeCsv' (mapped to $targetTmdbId): $row -> $e");
+               // print(
+                 //   "Error parsing episode from row for series '$animeseriesNameFromEpisodeCsv' (mapped to $targetTmdbId): $row -> $e");
               }
             }
           } else {
             if (kDebugMode) {
-              print(
-                  "Warning: Could not find matching TMDB ID for series name '$animeseriesNameFromEpisodeCsv' from episodes CSV.");
+             // print(
+             //     "Warning: Could not find matching TMDB ID for series name '$animeseriesNameFromEpisodeCsv' from episodes CSV.");
             }
           }
         }
@@ -1753,22 +1753,22 @@ class AnimeProvider extends ContentProvider<TvSeriesAnime> {
         final cacheFile = File('${dir.path}/anime_cache.json');
         final List<Map<String, dynamic>> jsonData = _masterList.map((s) => s.toJson()).toList();
         await cacheFile.writeAsString(jsonEncode(jsonData));
-        if (kDebugMode) print('Cached anime data to ${cacheFile.path}');
+        if (kDebugMode){} //print('Cached anime data to ${cacheFile.path}');
       } catch (e) {
-        if (kDebugMode) print('Failed to write anime cache: $e');
+        if (kDebugMode){  }// print('Failed to write anime cache: $e');
       }
 
       _status = LoadingStatus.loaded;
       _isInitialized = true;
       if (kDebugMode) {
-        print("Successfully loaded and combined data for ${_masterList.length} anime series.");
+      //  print("Successfully loaded and combined data for ${_masterList.length} anime series.");
       }
     } catch (e, stacktrace) {
       _status = LoadingStatus.error;
       _errorMessage = "Failed to load anime data: $e";
       if (kDebugMode) {
-        print("Anime Loading Error: $e");
-        print(stacktrace);
+     //   print("Anime Loading Error: $e");
+     //   print(stacktrace);
       }
       _animeseriesMap = {};
       _masterList = [];

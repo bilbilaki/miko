@@ -1,11 +1,13 @@
 
 library;
+
+import 'package:miko/configs/consts.dart';
+enum YtdlpChannel { stable, nightly, master }
+
 class AppConstants {
-  static const String tmdbImageBaseUrl =
-      'https://inosdb.worker-inosuke.workers.dev';
-  static const String tmdbapitokens =
-      'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2MDdlNDBhZjViYjY2NTc2ZjZmZDcyNTJkNTUyOWUyNCIsIm5iZiI6MTcyNTMxNjQ1OC4yNCwic3ViIjoiNjZkNjNkNmEzZTFhYjQ1Y2U1YjFiN2NmIiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.N701knycQaKNMmYbdRnF3ag0dl9i28cL4oZBC-c42OY';
-  static const String tmdbapikey = '607e40af5bb66576f6fd7252d5529e24'; 
+  static const String tmdbImageBaseUrl = tmdbImageBaseUrlc;
+  static const String tmdbapitokens =tmdbapitokensc;
+  static const String tmdbapikey = tmdbapiv3; 
   static const String youtubeBaseUrl = 'https://www.youtube.com/watch?v=';
   static const String youtubeThumbnailBaseUrl =
       'https://img.youtube.com/vi/'; 
@@ -21,7 +23,18 @@ class AppConstants {
   static const String imageSizeW1280 = 'w1280';
   static const String imageSizeOriginal = 'original';
 
-  
+   static const String githubRepo = 'yt-dlp/yt-dlp';
+  static const String nightlyRepo = 'yt-dlp/yt-dlp-nightly-builds';
+  static const String masterRepo = 'yt-dlp/yt-dlp-master-builds';
+
+  static String getReleaseUrl(YtdlpChannel channel, String tag) {
+    final repo = switch (channel) {
+      YtdlpChannel.stable => githubRepo,
+      YtdlpChannel.nightly => nightlyRepo,
+      YtdlpChannel.master => masterRepo,
+    };
+    return 'https://api.github.com/repos/$repo/releases/$tag';
+  }
 }
 
 
@@ -43,7 +56,7 @@ class AppConstants {
 // --- API Authentication & Base URLs ---
 
 /// The raw TMDB API key (v3). **Should be stored securely in a real application.**
-const String tmdbRawApiKey = '607e40af5bb66576f6fd7252d5529e24';
+const String tmdbRawApiKey = tmdbapiv3;
 
 /// The TMDB API key formatted as a query parameter string.
 /// This matches your initial provided setup for [nowPlayingMoviesEndpoint], etc.
@@ -51,10 +64,10 @@ const String tmdbRawApiKey = '607e40af5bb66576f6fd7252d5529e24';
 const String tmdbApiKeyQuery = 'api_key=$tmdbRawApiKey';
 
 /// The TMDB API Read Access Token (v4 auth), used in the Authorization header.
-const String tmdbAuthToken = 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2MDdlNDBhZjViYjY2NTc2ZjZmZDcyNTJkNTUyOWUyNCIsIm5iZiI6MTcyNTMxNjQ1OC4yNCwic3ViIjoiNjZkNjNkNmEzZTFhYjQ1Y2U1YjFiN2NmIiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.N701knycQaKNMmYbdRnF3ag0dl9i28cL4oZBC-c42OY';
+const String tmdbAuthToken = 'Bearer $tmdbapitokensc';
 
 /// The base URL for the TMDB API v3.
-const String tmdbBaseUrl = 'https://api.themoviedb.org/3';
+const String tmdbBaseUrl = 'https://linod.worker-inosuke.workers.dev/3';
 
 // --- Image Base URLs & Sizes (from /3/configuration response) ---
 
@@ -83,7 +96,6 @@ const List<String> tmdbStillSizes = ['w92', 'w185', 'w300', 'original'];
 ///
 /// [path] should be the `file_path` returned by TMDB API (e.g., `/hZkgoQYus5vegHoetLkCJzb17zJ.jpg`).
 /// [size] is the desired image size (e.g., 'w500', 'original'). Defaults to 'original'.
-/// [secure] specifies whether to use HTTPS. Defaults to true.
 String getTmdbImageUrl(String? path, {String size = 'original', bool secure = true}) {
   if (path == null || path.isEmpty) return '';
   final baseUrl = secure ? tmdbSecureImageBaseUrl : tmdbImageBaseUrl;
@@ -152,7 +164,7 @@ abstract class TmdbMovieEndpoints {
     List<int>? withPeople,
     int? withRuntimeGte,
     int? withRuntimeLte,
-    bool? includeAdult,
+    bool includeAdult = true,
   }) {
     Map<String, dynamic> params = {
       'sort_by': sortBy,
@@ -265,7 +277,7 @@ abstract class TmdbTvEndpoints {
     List<int>? withPeople,
     int? withRuntimeGte,
     int? withRuntimeLte,
-    bool? includeAdult,
+    bool includeAdult=true,
     String? withOriginCountry,
   }) {
     Map<String, dynamic> params = {
@@ -465,7 +477,7 @@ abstract class TmdbTvEpisodeEndpoints {
 /// All endpoints for Search operations (Movie, TV, Multi, Person).
 abstract class TmdbSearchEndpoints {
   /// GET /3/search/movie - Search for movies by their original, translated and alternative titles.
-  static String movie({required String query, String language = 'en-US', bool includeAdult = false, int page = 1}) =>
+  static String movie({required String query, String language = 'en-US', bool includeAdult = true, int page = 1}) =>
       _buildUrl('/search/movie', language: language, additionalParams: {
         'query': Uri.encodeComponent(query),
         'include_adult': includeAdult,
@@ -473,7 +485,7 @@ abstract class TmdbSearchEndpoints {
       });
 
   /// GET /3/search/tv - Search for TV shows by their original, translated and also known as names.
-  static String tv({required String query, String language = 'en-US', bool includeAdult = false, int page = 1}) =>
+  static String tv({required String query, String language = 'en-US', bool includeAdult = true, int page = 1}) =>
       _buildUrl('/search/tv', language: language, additionalParams: {
         'query': Uri.encodeComponent(query),
         'include_adult': includeAdult,
@@ -481,7 +493,7 @@ abstract class TmdbSearchEndpoints {
       });
 
   /// GET /3/search/multi - Use multi search when you want to search for movies, TV shows and people in a single request.
-  static String multi({required String query, String language = 'en-US', bool includeAdult = false, int page = 1}) =>
+  static String multi({required String query, String language = 'en-US', bool includeAdult = true, int page = 1}) =>
       _buildUrl('/search/multi', language: language, additionalParams: {
         'query': Uri.encodeComponent(query),
         'include_adult': includeAdult,
@@ -489,7 +501,7 @@ abstract class TmdbSearchEndpoints {
       });
 
   /// GET /3/search/person - Search for people by their name and also known as names.
-  static String person({required String query, String language = 'en-US', bool includeAdult = false, int page = 1}) =>
+  static String person({required String query, String language = 'en-US', bool includeAdult = true, int page = 1}) =>
       _buildUrl('/search/person', language: language, additionalParams: {
         'query': Uri.encodeComponent(query),
         'include_adult': includeAdult,
@@ -657,7 +669,7 @@ abstract class TmdbCreditEndpoints {
 abstract class TmdbFindEndpoints {
   /// GET /3/find/{external_id} - Find data by external ID's.
   /// [externalSource] is the source of the ID (e.g., 'imdb_id', 'tvdb_id', 'facebook_id', 'twitter_id').
-  static String byId(String externalId, String externalSource, {String language = 'en-US', bool includeAdult = false}) =>
+  static String byId(String externalId, String externalSource, {String language = 'en-US', bool includeAdult = true}) =>
       _buildUrl('/find/$externalId', language: language, additionalParams: {
         'external_source': externalSource,
         'include_adult': includeAdult,
@@ -703,7 +715,7 @@ abstract class TmdbKeywordEndpoints {
   static String details(int keywordId) => _buildUrl('/keyword/$keywordId');
 
   /// GET /3/keyword/{keyword_id}/movies - Get the movies that belong to a keyword.
-  static String movies(int keywordId, {bool includeAdult = false, String language = 'en-US', int page = 1}) =>
+  static String movies(int keywordId, {bool includeAdult = true, String language = 'en-US', int page = 1}) =>
       _buildUrl('/keyword/$keywordId/movies', language: language, additionalParams: {
         'include_adult': includeAdult,
         'page': page,

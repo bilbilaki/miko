@@ -67,6 +67,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   MovieResponse? recommendations;
   List<Keyword> _movieKeywords = [];
 Movie? movie;
+List<String> downloadLinks = [''];
   // Helper for haptic feedback
   void _performHapticFeedback() {
     if (Platform.isAndroid) {
@@ -349,11 +350,12 @@ Movie? movie;
 
   Widget _buildAppBar(BuildContext context, Movie movie, userDataService) {
     bool isFavorite = userDataService.isFavoriteMovie(movie.id);
-    final movieM = Provider.of<MovieProvider>(context, listen: false)
-        .getMovieById(movie.id);
+    //final movieM = Provider.of<MovieProvider>(context, listen: false)
+       // .getMovieById(movie.id);
     final backdropUrl = movie.fullBackdropPath;
     final posterUrl = movie.fullPosterPath;
-    movieM!.getDownloadLinksList();
+   // if (movieM != null){
+  //  movieM!.getDownloadLinksList();}
     bool isInWatchlist = userDataService.isOnWatchlistMovie(movie.id);
 
     return SliverAppBar(
@@ -548,16 +550,23 @@ Movie? movie;
       ),
     );
   }
+void dllink (BuildContext context){
 
+      final mmovie = Provider.of<MovieProvider>(context, listen: false)
+        .getMovieById(widget.id);
+        if (mmovie !=null){
+
+final downloadLink = mmovie.getDownloadLinksList();
+  downloadLinks = downloadLink;
+
+        }
+
+}
   Widget _buildMovieDetails(BuildContext context, Movie movie,
       MovieCredits? credits, bool showDetailedInfo,userDataService) {
-    final mmovie = Provider.of<MovieProvider>(context, listen: false)
-        .getMovieById(widget.id);
-        final downloadLinks = mmovie!.getDownloadLinksList();
-
+dllink(context);
     bool isWatched = userDataService.isWatchedEpisode(widget.id,
-        widget.id, widget.id, downloadLinks.toString());
-
+        widget.id, widget.id, widget.id);
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -702,11 +711,11 @@ Movie? movie;
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                (mmovie== mmovie)
-                    ? ElevatedButton.icon(
+                        (downloadLinks != [''])?
+                     ElevatedButton.icon(
                         icon: const Icon(Icons.play_arrow),
                         label: Text(
-                          isWatched ? 'Played Before' : 'Play',
+                           'Play',
                         ),
                         style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.accentColor,
@@ -717,26 +726,13 @@ Movie? movie;
                           _performHapticFeedback();
                           _showDownloadLinkSelection(
                               context, downloadLinks);
-                          //   downloadLinks.toString());
+                           // downloadLinks.toString());
                         },
                       )
-                    : const SizedBox(height: 4),
-                const Text("No Playing Link Exist"),
-                // ElevatedButton.icon(
-                //   icon: const Icon(Icons.download_outlined),
-                //   label: const Text('Download'),
-                //   style: ElevatedButton.styleFrom(
-                //       backgroundColor: AppColors.secondaryBackground,
-                //       foregroundColor: AppColors.primaryText,
-                //       padding: const EdgeInsets.symmetric(
-                //           horizontal: 25, vertical: 12)),
-                //   onPressed: () async {
-                //     _performHapticFeedback();
-                //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                //         content: Text('Download not implemented yet.'),
-                //         duration: Duration(seconds: 2)));
-                //   },
-                // ),
+                  :
+                SizedBox(child:  Text("No Playing Link Exist")),
+               
+                       
               ],
             ),
             const SizedBox(height: 4),

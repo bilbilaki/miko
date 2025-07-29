@@ -756,7 +756,7 @@ class TmdbApiService {
         withPeople: withPeople,
         withRuntimeGte: withRuntimeGte,
         withRuntimeLte: withRuntimeLte,
-        includeAdult: includeAdult,
+        includeAdult: true,
       ),
       //, (itemJson) => MovieResult.fromJson(itemJson as Map<String, dynamic>)
 
@@ -916,7 +916,7 @@ class TmdbApiService {
         withPeople: withPeople,
         withRuntimeGte: withRuntimeGte,
         withRuntimeLte: withRuntimeLte,
-        includeAdult: includeAdult,
+        includeAdult: true,
         withOriginCountry: withOriginCountry,
       ),
       //, (itemJson) => TvShowResult.fromJson(itemJson as Map<String, dynamic>)
