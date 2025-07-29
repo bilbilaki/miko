@@ -2,6 +2,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://artifacts.arthenica.com/maven' }
     }
 }
 
