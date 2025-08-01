@@ -147,6 +147,7 @@ class TmdbDatailsProcess extends StatelessWidget {
               child: ListTile(
                 leading: item.posterPath.isNotEmpty
                     ? CachedNetworkImage(
+                        filterQuality: FilterQuality.high,
                         imageUrl:
                             'https://image.tmdb.org/t/p/w200${item.posterPath}',
                         placeholder: (context, url) => const SizedBox(

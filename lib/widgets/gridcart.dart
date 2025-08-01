@@ -1,5 +1,7 @@
 // Can be in its own file, e.g., 'interactive_video_card.dart'
 
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
@@ -48,7 +50,7 @@ class _InteractiveVideoCardState extends State<InteractiveVideoCard> {
 
     if (mounted) {
       setState(() => _isPlayingPreview = true);
-     await player.play();
+      await player.play();
     }
   }
 
@@ -96,49 +98,53 @@ class _InteractiveVideoCardState extends State<InteractiveVideoCard> {
 
         // _stopPreview();
       },
-      child: MouseRegion(
-        // On hover, start the preview (for mouse devices).
-        onEnter: (_) => _startPreview(),
-        // When hover ends, stop the preview.
-        onExit: (_) => _stopPreview(),
-        child: Card(
-          //   elevation: _isPlayingPreview ? 12 : 2, // More elevation when active
-                margin: EdgeInsets.zero,
-          clipBehavior: Clip
-              .antiAlias, // Ensures the video stays within the card's rounded corners
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(6.0),
-          ),
-          child: AspectRatio(
-              aspectRatio: 2 / 3,
-              // Use a ternary operator to switch between the video and the image
-              child: SizedBox(
-                child: _isPlayingPreview
-                    ? Video(
-                        controller: controller,
-                        fit: BoxFit.cover,
-                        controls: null,
-                        filterQuality: FilterQuality.high,
-                        
-                      )
-                    : Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          CachedNetworkImage(
-                            imageUrl: widget.scene.screenshot,
+      child: Platform.isLinux
+          ? MouseRegion(
+              // On hover, start the preview (for mouse devices).
+              onEnter: (_) => _startPreview(),
+              // When hover ends, stop the preview.
+              onExit: (_) => _stopPreview())
+          : Card(
+              //   elevation: _isPlayingPreview ? 12 : 2, // More elevation when active
+              margin: EdgeInsets.zero,
+              clipBehavior: Clip
+                  .antiAlias, // Ensures the video stays within the card's rounded corners
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6.0),
+              ),
+              child: AspectRatio(
+                  aspectRatio: 2 / 3,
+                  // Use a ternary operator to switch between the video and the image
+                  child: SizedBox(
+                    child: _isPlayingPreview
+                        ? Video(
+                            wakelock: true,
+                            controller: controller,
                             fit: BoxFit.cover,
-                            placeholder: (context, url) =>
-                                Container(color: const Color.fromARGB(255, 0, 0, 0)),
-                            errorWidget: (context, url, error) => const Center(
-                              child: Icon(Icons.no_adult_content),
-                            ),
+                            controls: null,
+                            filterQuality: FilterQuality.high,
+                          )
+                        : Stack(
+                            textDirection: TextDirection.ltr,
+                            alignment: Alignment.center,
+                            fit: StackFit.expand,
+                            children: [
+                              CachedNetworkImage(
+                                filterQuality: FilterQuality.high,
+                                imageUrl: widget.scene.screenshot,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Container(
+                                    color: const Color.fromARGB(255, 0, 0, 0)),
+                                errorWidget: (context, url, error) =>
+                                    const Center(
+                                  child: Icon(Icons.no_adult_content),
+                                ),
+                              ),
+                              // Optional: Add a subtle play icon over the poster
+                            ],
                           ),
-                          // Optional: Add a subtle play icon over the poster
-                        ],
-                      ),
-              )),
-        ),
-      ),
+                  )),
+            ),
     );
   }
 }

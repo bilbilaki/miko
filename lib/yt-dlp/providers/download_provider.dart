@@ -56,7 +56,7 @@ class DownloadNotifier extends StateNotifier<List<DownloadTask>> {
     if (Platform.isAndroid) {
       if (task.androidTaskId != null) {
         final client = _ref.read(ytdlpClientProvider);
-        await client.cancelDownload(task.androidTaskId!);
+       // await client.cancelDownload(task.androidTaskId!);
         // Event listener will update state to 'stopped'
       }
     } else {

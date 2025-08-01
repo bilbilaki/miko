@@ -1,15 +1,28 @@
 // lib/providers/ai_chat_provider.dart
+import 'dart:async';
 import 'dart:typed_data';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:miko/services/ai_chat_service.dart';
-import 'package:miko/utils/utils.dart'; // Ensure these service files exist
-
+import 'package:miko/showcases/model.dart';
+import 'package:miko/showcases/movie_service.dart';
+import 'package:miko/utils/utils.dart';
+import 'package:miko/widgets/ai_chat_dialog.dart';
 // Enum for AI chat modes, updated for Gemini
 enum GeminiChatMode {
   textChat,
   multiModal,
 //  toolCalling, // Retained for mode-switching UI, though implementation is simplified
  // structuredOutput,
+}
+final MovieService _movieService = MovieService();
+
+sealed class AIChatUIEvent {}
+
+// An event to signal that a movie popup should be shown
+class ShowMoviePopupEvent extends AIChatUIEvent {
+  final List<Map<String, dynamic>> movieList;
+  ShowMoviePopupEvent(this.movieList);
 }
 
 // 1. Define the State for AI Chat, updated for Gemini
@@ -48,20 +61,44 @@ class AIChatState {
 
 // Providers for external services (can be kept as is)
 final fileUtilsProvider = Provider.autoDispose((ref) => FileUtils());
-
 // 2. Create the StateNotifier to manage AI Chat logic and state
 final aiChatProvider = StateNotifierProvider.autoDispose<AIChatNotifier, AIChatState>((ref) {
-  final fileUtils = ref.watch(fileUtilsProvider);
-  return AIChatNotifier(fileUtils, ref);
+  return AIChatNotifier( ref);
+});
+final aiChatEventsProvider = StreamProvider.autoDispose<AIChatUIEvent>((ref) {
+  return ref.watch(aiChatProvider.notifier).uiEventController.stream;
 });
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
+final navigatorKeyProvider = Provider((ref) => navigatorKey);
+
+final aiChatObserverProvider = Provider.autoDispose<void>((ref) {
+  
+  // Listen to the events stream we already created
+  ref.listen<AsyncValue<AIChatUIEvent>>(aiChatEventsProvider, (previous, next) {
+    
+    // Make sure we have a valid event
+    if (next.hasValue && !next.isLoading) {
+      final event = next.value;
+
+      // Get the navigator's context using the GlobalKey
+      final context = ref.read(navigatorKeyProvider).currentContext;
+
+      // If we have a context, we can show the dialog
+      if (context != null && event is ShowMoviePopupEvent) {
+          print("Observer caught event! Showing movie popup."); // For debugging
+        //  showMoviePopup(context, event.movieList);
+      }
+    }
+  });
+});
 class AIChatNotifier extends StateNotifier<AIChatState> {
-  final FileUtils _fileUtils;
   final Ref _ref;
-
   late GeminiServiceBase _currentService;
-
-  AIChatNotifier(this._fileUtils, this._ref) : super(AIChatState()) {
+  final uiEventController = StreamController<AIChatUIEvent>.broadcast();
+  AIChatNotifier( this._ref) : super(AIChatState()) {
+        final context = _ref.read(navigatorKeyProvider).currentContext;
     _setCurrentGeminiService(state.currentMode); // Initialize with default service
   }
 
@@ -76,10 +113,10 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
     // Instantiate the correct service based on the mode
     switch (mode) {
       case GeminiChatMode.textChat:
-        _currentService = GeminiTextChatService();
+        _currentService = GeminiTextChatService(_ref);
         break;
       case GeminiChatMode.multiModal:
-        _currentService = GeminiMultiModalService();
+        _currentService = GeminiMultiModalService(_ref);
         break;
       // case GeminiChatMode.toolCalling:
       //   _currentService = GeminiToolCallingService();
@@ -145,14 +182,14 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
             state = state.copyWith(response: 'Stream Error: $e', isLoading: false);
           },
         );
-      } else {
-        state = state.copyWith(response: 'Fetching response...');
-        final String textResponse = await _currentService.getResponse(
-          prompt,
-          imageBytes: state.imageBytes,
-        );
-        state = state.copyWith(response: textResponse, isLoading: false);
-        // Audio generation logic is removed
+      // } else {
+      //   state = state.copyWith(response: 'Fetching response...');
+      //   final String textResponse = await _currentService.getResponse(
+      //     prompt,
+      //     imageBytes: state.imageBytes,
+      //   );
+      //   state = state.copyWith(response: textResponse, isLoading: false);
+      //   // Audio generation logic is removed
       }
     } catch (e) {
       state = state.copyWith(response: 'General Request Error: $e', isLoading: false);

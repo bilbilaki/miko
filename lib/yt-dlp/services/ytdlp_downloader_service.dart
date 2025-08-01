@@ -26,15 +26,14 @@ class YtdlpDownloaderService {
       return "flutter_yt_dlp (Bundled)";
     }
     if (!File(ytdlpPath).existsSync()) return null;
-    try {
+   // try {
       final result = await Process.run(ytdlpPath, ['--version']);
-      if (result.exitCode == 0) {
+     // if (result.exitCode == 0) {
         return (result.stdout as String).trim();
-      }
-    } catch (e) {
-      debugPrint('Error getting version: $e');
-    }
-    return null;
+     // }
+   // } catch (e) {
+    //  debugPrint('Error getting version: $e');
+  // }
   }
 
   Future<String?> findOrDownloadYtdlp(YtdlpChannel channel,

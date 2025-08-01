@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:miko/showcases/model.dart' as TmdbApiModels;
 import '../providers/god_proovider.dart' as CsvModels;
 
@@ -12,6 +14,129 @@ import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as p;
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
+
+class ShareItem {
+  final String? name;
+  final num? vote;
+  final String? releaseDate;
+  final String? overview;
+  final String? posterUrl; // Remote URL for the image
+  final String? internalUrl;
+
+  ShareItem( {
+     this.name,
+     this.vote,
+   this.releaseDate,
+     this.overview,
+    this.posterUrl,
+ this.internalUrl
+  });
+}
+final item = ShareItem();
+      final String shareContent = '''
+Check out this: ${item.name}
+Rating: ${item.vote}
+Release Date: ${item.releaseDate}
+Overview: ${item.overview}
+Open in miko by click on ${item.internalUrl}
+''';
+
+
+/// Displays a modal bottom sheet to let the user select a social sharing platform.
+///
+/// It constructs the sharing content from the provided [item] and attempts
+/// to download the [item.posterUrl] to use as media.
+///
+/// Parameters:
+/// - [context]: The BuildContext.
+/// - [item]: The [ShareItem] containing the data to be shared.
+
+
+      // return SafeArea(
+      //   child: Wrap(
+      //     children: <Widget>[
+      //       const ListTile(
+      //         title: Text(
+      //           'Share using...',
+      //           style: TextStyle(fontWeight: FontWeight.bold),
+      //         ),
+      //       ),
+      //       _buildShareOption(
+      //         context,
+      //         platform: SocialPlatform.facebook,
+      //         icon: Icons.facebook,
+      //         label: 'Facebook',
+      //         content: shareContent,
+      //         item: item,
+      //       ),
+      //       _buildShareOption(
+      //         context,
+      //         platform: SocialPlatform.whatsapp,
+      //         icon: Icons.chat, // A suitable icon for chat/WhatsApp
+      //         label: 'WhatsApp',
+      //         content: shareContent,
+      //         item: item,
+      //       ),
+      //       _buildShareOption(
+      //         context,
+      //         platform: SocialPlatform.telegram,
+      //         icon: Icons.sms,
+      //         label: 'SMS',
+      //         content: shareContent,
+      //         item: item,
+      //       ),
+      //       _buildShareOption(
+      //         context,
+      //         platform: SocialPlatform.twitter,
+      //         icon: Icons.search, // A suitable icon for Twitter
+      //         label: 'Twitter',
+      //         content: shareContent,
+      //         item: item,
+      //       ),
+      //       _buildShareOption(
+      //         context,
+      //         platform: SocialPlatform.reddit,
+      //         icon: Icons.camera_alt, // A suitable icon for Instagram
+      //         label: 'Instagram',
+      //         content: shareContent,
+      //         item: item,
+      //       ),
+            // Add more platforms as needed from SocialPlatform enum
+            // For example:
+            // _buildShareOption(
+            //   context,
+            //   platform: SocialPlatform.telegram,
+            //   icon: Icons.send,
+            //   label: 'Telegram',
+            //   content: shareContent,
+            //   item: item,
+            // ),
+            // _buildShareOption(
+            //   context,
+            //   platform: SocialPlatform.linkedin,
+            //   icon: Icons.cases,
+            //   label: 'LinkedIn',
+            //   content: shareContent,
+            //   item: item,
+            // ),
+            // _buildShareOption(
+            //   context,
+            //   platform: SocialPlatform.snapchat,
+            //   icon: Icons.snapchat, // You might need a custom icon for Snapchat
+            //   label: 'Snapchat',
+            //   content: shareContent,
+            //   item: item,
+//             // ),
+//           ],
+//         ),
+//       );
+//     },
+//   );
+// }
+
+/// Helper method to build individual share option list tiles.
+
+
 void triggerVibration() {
     if (Platform.isAndroid) {
       HapticFeedback.lightImpact();

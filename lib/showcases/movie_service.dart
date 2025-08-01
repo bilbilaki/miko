@@ -139,19 +139,13 @@ class MovieService {
 
   Future<Movie> getMovieDetails(
       {required int movieId, String language = 'en-US'}) async {
-    try {
       final url = Uri.parse('$_baseUrl/movie/$movieId?language=$language');
 
       final response = await _client.get(url, headers: _headers);
-      if (response.statusCode == 200) {
+     // if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
         return Movie.fromJson(data);
-      } else {
-        throw Exception('Failed to load movie details: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Error fetching movie details: $e');
-    }
+      
   }
 
   Future<MovieCredits> getMovieCredits(

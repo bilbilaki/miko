@@ -143,251 +143,277 @@ class EpisodeTileNew extends StatelessWidget {
 }
 
 class MovieCard extends StatelessWidget {
-  final ss.Movie movie;
-  final typec;
-  const MovieCard({required this.typec, required this.movie, super.key});
+ final ss.Movie movie;
+ final String typec; // Changed to String for clarity, though it might be dynamic
+ const MovieCard({required this.typec, required this.movie, super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    final MovieService mmm = MovieService();
+ @override
+ Widget build(BuildContext context) {
+ final MovieService mmm = MovieService();
 
-    final posterUrl = movie.getPosterUrl();
-    final releaseYear = movie.releaseDate?.year.toString() ?? 'N/A';
-    final userDataService = Provider.of<UserDataService>(context);
-    bool isFavorite = userDataService.isFavoriteMovie(movie.id);
-    bool isInWatchlist = userDataService.isOnWatchlistMovie(movie.id);
-    return FutureBuilder<mmd.Movie>(
-        future: mmm.mtm(movie.id),
-        builder: (context, snapshot) {
-          mmd.Movie? nms = snapshot.data;
-          return InkWell(
-            onTap: () {
-              if (nms == null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => MovieDetailsScreen(
-                      movieId: movie.id,
-                      typec: "movie",
-                    ), // Pass movie ID
-                  ),
-                );
-              } else {
-                // Navigate to Movie Details Screen
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        MovieDetailPage(id: nms.id), 
-                  ),
-                );
-              }
-            },
-            child: Card(
-                color: AppColors2
-                    .blackbackground, 
-                elevation: 0,
-                margin:
-                    const EdgeInsets.symmetric(vertical: 1.0, horizontal: 1.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AspectRatio(
-                      aspectRatio: 2 / 3,
+ final posterUrl = movie.getPosterUrl();
+ final releaseYear = movie.releaseDate?.year.toString() ?? 'N/A';
+ final userDataService = Provider.of<UserDataService>(context, listen: true);
+ bool isFavorite = userDataService.isFavoriteMovie(movie.id);
+ bool isInWatchlist = userDataService.isOnWatchlistMovie(movie.id);
 
-                      child: Stack(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12.0),
-                            child: posterUrl != null
-                                ? CachedNetworkImage(
-                                    imageUrl: posterUrl,
-                                    fit: BoxFit.cover,
-                                    placeholder: (context, url) => Container(
-                                      color: AppColors2.onSurface,
-                                      child: const Center(
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: AppColors2.accentColor,
-                                        ),
-                                      ),
-                                    ),
-                                    errorWidget: (context, url, error) =>
-                                        Container(
-                                      color: AppColors2.onSecondary,
-                                      child: const Center(
-                                        child: Icon(
-                                          Icons.error_outline,
-                                          color: AppColors2.error,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                : Container(
-                                    // Placeholder if no poster
-                                    color: AppColors2.onBackground,
-                                    child: const Center(
-                                      child: Icon(
-                                        Icons.movie_filter_outlined,
-                                        color: AppColors2.error,
-                                        size: 40,
-                                      ),
-                                    ),
-                                  ),
-                          ),
-                          // Positioned buttons on top of the poster
-                          Positioned(
-                            top: 8.0,
-                            right: 8.0,
-                            child: Row(
-                              children: [
-                                // Favorite Button
-                                IconButton(
-                                  icon: Icon(
-                                    isFavorite
-                                        ? Icons.favorite
-                                        : Icons.favorite_border,
-                                    color: isFavorite
-                                        ? const Color.fromARGB(255, 255, 17, 0)
-                                        : Colors.white,
-                                    size: 20,
-                                  ),
-                                  onPressed: () async {
-                                    await userDataService
-                                        .toggleFavoriteMovie(movie.id);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          isFavorite
-                                              ? 'Removed from Favorites'
-                                              : 'Added to Favorites',
-                                        ),
-                                        duration: const Duration(seconds: 1),
-                                      ),
-                                    );
-                                  },
-                                  style: IconButton.styleFrom(
-                                    backgroundColor: Colors.black
-                                        .withOpacity(0.5), // Cute backdrop
-                                    padding: const EdgeInsets.all(4.0),
-                                  ),
-                                ),
-                                const SizedBox(width: 4.0),
-                                // Watchlist Button
-                                IconButton(
-                                  icon: Icon(
-                                    isInWatchlist
-                                        ? Icons.bookmark
-                                        : Icons.bookmark_border,
-                                    color: isInWatchlist
-                                        ? const Color.fromARGB(255, 65, 220, 38)
-                                        : Colors.white,
-                                    size: 20,
-                                  ),
-                                  onPressed: () async {
-                                    await userDataService
-                                        .toggleWatchlistMovie(movie.id);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          isInWatchlist
-                                              ? 'Removed from Watchlist'
-                                              : 'Added to Watchlist',
-                                        ),
-                                        duration: const Duration(seconds: 1),
-                                      ),
-                                    );
-                                  },
-                                  style: IconButton.styleFrom(
-                                    backgroundColor: AppColors2.onSurface
-                                        .withOpacity(0.5), // Cute backdrop
-                                    padding: const EdgeInsets.all(0.5),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8.0),
+ return FutureBuilder<mmd.Movie>(
+ future: mmm.mtm(movie.id),
+ builder: (context, snapshot) {
+ mmd.Movie? nms = snapshot.data;
+ return InkWell(
+ onTap: () {
+ if (nms == null) {
+ Navigator.push(
+ context,
+ MaterialPageRoute(
+ builder: (_) => MovieDetailsScreen(
+ movieId: movie.id,
+ typec: "movie",
+ ),
+ ),
+ );
+ } else {
+ Navigator.push(
+ context,
+ MaterialPageRoute(
+ builder: (_) => MovieDetailPage(id: nms.id),
+ ),
+ );
+ }
+ },
+ child: Card(
+ color: Colors.transparent, // Maintain transparent card background
+ elevation: 0,
+ margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0), // Slightly more margin
+ clipBehavior: Clip.antiAlias, // Ensures content respects card boundaries
+ child: Column(
+ mainAxisSize: MainAxisSize.min,
+ crossAxisAlignment: CrossAxisAlignment.start,
+ children: [
+ AspectRatio(
+ aspectRatio: 2 / 3,
+ child: Stack(
+ children: [
+ ClipRRect(
+ borderRadius: BorderRadius.circular(10.0), // Consistent border radius
+ child: Container(
+ decoration: BoxDecoration(
+ color: AppColors2.onBackground.withOpacity(0.6), // Subtle background for image
+ ),
+ child: posterUrl != null && posterUrl.isNotEmpty
+ ? CachedNetworkImage(
+ imageUrl: posterUrl,
+ fit: BoxFit.cover,
+ fadeInDuration: const Duration(milliseconds: 300),
+ fadeOutDuration: const Duration(milliseconds: 100),
+ placeholder: (context, url) => Center(
+ child: SizedBox(
+ width: 28,
+ height: 28,
+ child: CircularProgressIndicator(
+ strokeWidth: 2.5,
+ color: AppColors2.accentColor.withOpacity(0.8),
+ ),
+ ),
+ ),
+ errorWidget: (context, url, error) => const Center(
+ child: Icon(
+ Icons.broken_image_outlined,
+ color: AppColors2.tinytext,
+ size: 36,
+ ),
+ ),
+ )
+ : const Center(
+ child: Icon(
+ Icons.movie_filter_outlined,
+ color: AppColors2.tinytext,
+ size: 40,
+ ),
+ ),
+ ),
+ ),
+ Positioned(
+ top: 8.0,
+ right: 8.0,
+ child: Row(
+ children: [
+ _buildActionButton(
+ context: context,
+ isToggled: isFavorite,
+ icon: isFavorite ? Icons.favorite : Icons.favorite_border,
+ color: isFavorite ? Colors.redAccent : Colors.white70,
+ onPressed: () async {
+ await userDataService.toggleFavoriteMovie(movie.id);
+ ScaffoldMessenger.of(context).showSnackBar(
+ SnackBar(
+ content: Text(
+ isFavorite ? 'Removed from Favorites' : 'Added to Favorites',
+ style: const TextStyle(color: Colors.white),
+ ),
+ backgroundColor: isFavorite ? Colors.red.shade700 : Colors.green.shade700,
+ duration: const Duration(seconds: 1),
+ ),
+ );
+ },
+ ),
+ const SizedBox(width: 8.0),
+ _buildActionButton(
+ context: context,
+ isToggled: isInWatchlist,
+ icon: isInWatchlist ? Icons.bookmark : Icons.bookmark_border,
+ color: isInWatchlist ? Colors.lightGreenAccent : Colors.white70,
+ onPressed: () async {
+ await userDataService.toggleWatchlistMovie(movie.id);
+ ScaffoldMessenger.of(context).showSnackBar(
+ SnackBar(
+ content: Text(
+ isInWatchlist ? 'Removed from Watchlist' : 'Added to Watchlist',
+ style: const TextStyle(color: Colors.white),
+ ),
+ backgroundColor: isInWatchlist ? Colors.red.shade700 : Colors.green.shade700,
+ duration: const Duration(seconds: 1),
+ ),
+ );
+ },
+ ),
+ ],
+ ),
+ ),
+ ],
+ ),
+ ),
+ const SizedBox(height: 8.0), // Space between image and text
 
-                    // Movie Info
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            movie.title,
-                            style: const TextStyle(
-                              color: AppColors2.onPrimary,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14.0,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2.0),
-                          Row(
-                            children: [
-                              const Icon(Icons.star,
-                                  color: Colors.amber, size: 14),
-                              const SizedBox(width: 2),
-                              Text(
-                                '${movie.voteAverage.toStringAsFixed(1)} • $releaseYear',
-                                style: const TextStyle(
-                                  color: AppColors2.tinytext,
-                                  fontSize: 12.0,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 2.0),
-                          Text(
-                            'Runtime: ${movie.runtime != null ? "${movie.runtime} min" : 'N/A'}',
-                            style: const TextStyle(
-                              color: AppColors2.tinytext,
-                              fontSize: 10.0,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2.0),
-                          Text(
-                            'Language: ${movie.originalLanguage.toUpperCase()}',
-                            style: const TextStyle(
-                              color: AppColors2.tinytext,
-                              fontSize: 10.0,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2.0),
-                          Text(
-                            'Popularity: ${movie.popularity.toStringAsFixed(1)}',
-                            style: const TextStyle(
-                              color: AppColors2.tinytext,
-                              fontSize: 10.0,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 2.0), // Space below card
-                  ],
-                )),
-          );
-        });
-  }
+ // Movie Info
+ Padding(
+ padding: const EdgeInsets.symmetric(horizontal: 4.0),
+ child: Column(
+ crossAxisAlignment: CrossAxisAlignment.start,
+ mainAxisSize: MainAxisSize.min,
+ children: [
+ Text(
+ movie.title,
+ style: const TextStyle(
+ color: AppColors2.onPrimary,
+ fontWeight: FontWeight.bold, // Slightly bolder for title
+ fontSize: 14.0,
+ ),
+ maxLines: 2,
+ overflow: TextOverflow.ellipsis,
+ ),
+ const SizedBox(height: 4.0), // More space before rating/year
+ Row(
+ children: [
+ const Icon(Icons.star_rounded, color: Colors.amber, size: 14), // Rounded star icon
+ const SizedBox(width: 4), // Consistent spacing
+ Expanded(
+ child: Text(
+ '${movie.voteAverage.toStringAsFixed(1)} • $releaseYear',
+ style: const TextStyle(
+ color: AppColors2.tinytext,
+ fontSize: 12.0,
+ ),
+ maxLines: 1,
+ overflow: TextOverflow.ellipsis,
+ ),
+ ),
+ ],
+ ),
+ if (movie.runtime != null && movie.runtime! > 0)
+ Column(
+ crossAxisAlignment: CrossAxisAlignment.start,
+ children: [
+ const SizedBox(height: 4.0),
+ Text(
+ 'Runtime: ${movie.runtime} min',
+ style: const TextStyle(
+ color: AppColors2.tinytext,
+ fontSize: 10.5, // Consistent font size
+ ),
+ maxLines: 1,
+ overflow: TextOverflow.ellipsis,
+ ),
+ ],
+ ),
+ if (movie.originalLanguage != null && movie.originalLanguage.isNotEmpty)
+ Column(
+ crossAxisAlignment: CrossAxisAlignment.start,
+ children: [
+ const SizedBox(height: 4.0),
+ Text(
+ 'Language: ${movie.originalLanguage.toUpperCase()}',
+ style: const TextStyle(
+ color: AppColors2.tinytext,
+ fontSize: 10.5,
+ ),
+ maxLines: 1,
+ overflow: TextOverflow.ellipsis,
+ ),
+ ],
+ ),
+ if (movie.popularity != null && movie.popularity! > 0)
+ Column(
+ crossAxisAlignment: CrossAxisAlignment.start,
+ children: [
+ const SizedBox(height: 4.0),
+ Text(
+ 'Popularity: ${movie.popularity.toStringAsFixed(1)}',
+ style: const TextStyle(
+ color: AppColors2.tinytext,
+ fontSize: 10.5,
+ ),
+ maxLines: 1,
+ overflow: TextOverflow.ellipsis,
+ ),
+ ],
+ ),
+ ],
+ ),
+ ),
+ ],
+ ),
+ ),
+ );
+ },
+ );
+ }
+
+ Widget _buildActionButton({
+ required BuildContext context,
+ required bool isToggled,
+ required IconData icon,
+ required Color color,
+ required VoidCallback onPressed,
+ }) {
+ return Container(
+ decoration: BoxDecoration(
+ color: Colors.black.withOpacity(0.6), // Darker, well-defined background
+ shape: BoxShape.circle,
+ border: Border.all(
+ color: color.withOpacity(0.5), // Subtle border based on icon color
+ width: 0.5,
+ ),
+ ),
+ child: Material(
+ color: Colors.transparent, // Necessary for InkWell's ripple effect
+ child: InkWell(
+ borderRadius: BorderRadius.circular(20), // Circular ripple
+ onTap: onPressed,
+ child: Padding(
+ padding: const EdgeInsets.all(6.0), // Consistent padding
+ child: Icon(
+ icon,
+ color: color,
+ size: 18,
+ ),
+ ),
+ ),
+ ),
+ );
+ }
 }
-
 class AnimeSeriesCard extends StatelessWidget {
   final ss.TvSeriesAnime series;
   final String typec;
@@ -396,8 +422,9 @@ class AnimeSeriesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final posterUrl = series.fullPosterUrl;
-    final userDataService = Provider.of<UserDataService>(context);
+    final userDataService = Provider.of<UserDataService>(context, listen: true);
     final MovieService mmm = MovieService();
+
     String displayYear = 'N/A';
     if (series.firstAirDate != null) {
       try {
@@ -413,217 +440,242 @@ class AnimeSeriesCard extends StatelessWidget {
     bool isInWatchlist = userDataService.isOnWatchlistAnime(series.tmdbId);
 
     return FutureBuilder<TvShow>(
-        future: mmm.tmtm(series.tmdbId),
-        builder: (context, snapshot) {
-          TvShow? nms = snapshot.data;
-          return InkWell(
-              onTap: () {
-                if (nms == null) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => AnimeDetailsScreen(
-                        typec: typec,
-                        tvSeriesId: series.tmdbId,
-                      ), // Pass movie ID
-                    ),
-                  );
-                } else {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => TvShowDetailPageAnime(
-                          tvShow: nms, typec: typec), // Pass movie ID
-                    ),
-                  );
-                }
-              },
-              child: Card(
-                color: Colors.transparent,
-                elevation: 0,
-                margin: EdgeInsets.zero,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AspectRatio(
-                      aspectRatio: 2 / 3,
-                      child: Stack(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(6.0),
-                            child: Container(
-                              color: const Color.fromARGB(255, 0, 0, 0)
-                                  .withOpacity(0.3),
-                              child: posterUrl != null
-                                  ? CachedNetworkImage(
-                                      imageUrl: posterUrl,
-                                      fit: BoxFit.cover,
-                                      placeholder: (context, url) =>
-                                          const Center(
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 1,
-                                          color: AppColors.accentColor,
-                                        ),
-                                      ),
-                                      errorWidget: (context, url, error) =>
-                                          const Center(
-                                        child: Icon(
-                                          Icons.image_not_supported_outlined,
-                                          color: AppColors.secondaryText,
-                                          size: 30,
-                                        ),
-                                      ),
-                                      fadeInDuration:
-                                          const Duration(milliseconds: 300),
-                                      fadeOutDuration:
-                                          const Duration(milliseconds: 100),
-                                    )
-                                  : const Center(
-                                      child: Icon(
-                                        Icons.tv_off_outlined,
-                                        color: AppColors.secondaryText,
-                                        size: 40,
+      future: mmm.tmtm(series.tmdbId),
+      builder: (context, snapshot) {
+        TvShow? nms = snapshot.data;
+        return InkWell(
+          onTap: () {
+            if (nms == null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AnimeDetailsScreen(
+                    typec: typec,
+                    tvSeriesId: series.tmdbId,
+                  ),
+                ),
+              );
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TvShowDetailPageAnime(
+                    tvShow: nms,
+                    typec: typec,
+                  ),
+                ),
+              );
+            }
+          },
+          child: Card(
+            color: Colors.transparent,
+            elevation: 0,
+            margin: EdgeInsets.zero,
+            clipBehavior: Clip.antiAlias, // Ensures content respects card boundaries
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AspectRatio(
+                  aspectRatio: 2 / 3,
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0), // Slightly larger radius
+                        child: Container(
+                          color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.4),
+                          child: posterUrl != null && posterUrl.isNotEmpty
+                              ? CachedNetworkImage(
+                                  imageUrl: posterUrl,
+                                  fit: BoxFit.cover,
+                                  fadeInDuration: const Duration(milliseconds: 300),
+                                  fadeOutDuration: const Duration(milliseconds: 100),
+                                  placeholder: (context, url) => Center(
+                                    child: SizedBox(
+                                      width: 28,
+                                      height: 28,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        color: AppColors.accentColor.withOpacity(0.8),
                                       ),
                                     ),
-                            ),
-                          ),
-                          Positioned(
-                            top: 3.0,
-                            right: 3.0,
-                            child: Row(
-                              children: [
-                                IconButton(
-                                  icon: Icon(
-                                    isFavorite
-                                        ? Icons.favorite
-                                        : Icons.favorite_border,
-                                    color:
-                                        isFavorite ? Colors.red : Colors.white,
-                                    size: 20,
                                   ),
-                                  onPressed: () async {
-                                    await userDataService
-                                        .toggleFavoriteAnime(series.tmdbId);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          isFavorite
-                                              ? 'Removed from Favorites'
-                                              : 'Added to Favorites',
-                                        ),
-                                        duration: const Duration(seconds: 1),
-                                      ),
-                                    );
-                                  },
-                                  style: IconButton.styleFrom(
-                                    backgroundColor: Colors.black
-                                        .withOpacity(0.5), // Cute backdrop
-                                    padding: const EdgeInsets.all(0.0),
+                                  errorWidget: (context, url, error) => const Center(
+                                    child: Icon(
+                                      Icons.broken_image_outlined,
+                                      color: AppColors.secondaryText,
+                                      size: 36,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 10.0),
-                                // Watchlist Button
-                                IconButton(
-                                  icon: Icon(
-                                    isInWatchlist
-                                        ? Icons.bookmark
-                                        : Icons.bookmark_border,
-                                    color: isInWatchlist
-                                        ? Colors.green
-                                        : Colors.white,
-                                    size: 20,
-                                  ),
-                                  onPressed: () async {
-                                    await userDataService
-                                        .toggleWatchlistAnime(series.tmdbId);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          isInWatchlist
-                                              ? 'Removed from Watchlist'
-                                              : 'Added to Watchlist',
-                                        ),
-                                        duration: const Duration(seconds: 1),
-                                      ),
-                                    );
-                                  },
-                                  style: IconButton.styleFrom(
-                                    backgroundColor: Colors.black
-                                        .withOpacity(0.5), // Cute backdrop
-                                    padding: const EdgeInsets.all(0.5),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8.0),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            series.name,
-                            style: const TextStyle(
-                              color: AppColors.primaryText,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13.0,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2.0),
-                          // Rating and Year
-                          Row(
-                            children: [
-                              const Icon(Icons.star,
-                                  color: Colors.amber, size: 13),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  '${series.voteAverage.toStringAsFixed(1)} • $displayYear',
-                                  style: const TextStyle(
+                                )
+                              : const Center(
+                                  child: Icon(
+                                    Icons.image_not_supported_outlined,
                                     color: AppColors.secondaryText,
-                                    fontSize: 11.5,
+                                    size: 40,
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                 ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 8.0,
+                        right: 8.0,
+                        child: Row(
+                          children: [
+                            _buildActionButton(
+                              context: context,
+                              isToggled: isFavorite,
+                              icon: isFavorite ? Icons.favorite : Icons.favorite_border,
+                              color: isFavorite ? Colors.redAccent : Colors.white70,
+                              onPressed: () async {
+                                await userDataService.toggleFavoriteAnime(series.tmdbId);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      isFavorite ? 'Removed from Favorites' : 'Added to Favorites',
+                                      style: const TextStyle(color: Colors.white),
+                                    ),
+                                    backgroundColor: isFavorite ? Colors.red.shade700 : Colors.green.shade700,
+                                    duration: const Duration(seconds: 1),
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(width: 8.0),
+                            _buildActionButton(
+                              context: context,
+                              isToggled: isInWatchlist,
+                              icon: isInWatchlist ? Icons.bookmark : Icons.bookmark_border,
+                              color: isInWatchlist ? Colors.lightGreenAccent : Colors.white70,
+                              onPressed: () async {
+                                await userDataService.toggleWatchlistAnime(series.tmdbId);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      isInWatchlist ? 'Removed from Watchlist' : 'Added to Watchlist',
+                                      style: const TextStyle(color: Colors.white),
+                                    ),
+                                    backgroundColor: isInWatchlist ? Colors.red.shade700 : Colors.green.shade700,
+                                    duration: const Duration(seconds: 1),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8.0),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        series.name,
+                        style: const TextStyle(
+                          color: AppColors.primaryText,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14.0,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4.0),
+                      Row(
+                        children: [
+                          const Icon(Icons.star_rounded, color: Colors.amber, size: 14),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              '${series.voteAverage.toStringAsFixed(1)} • $displayYear',
+                              style: const TextStyle(
+                                color: AppColors.secondaryText,
+                                fontSize: 12.0,
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 2.0),
-                          // Additional Info: Episodes, Seasons, Language
-                          Text(
-                            'Seasons: ${series.numberOfSeasons ?? 'N/A'} • Episodes: ${series.numberOfEpisodes ?? 'N/A'}',
-                            style: const TextStyle(
-                              color: Color.fromARGB(255, 186, 179, 179),
-                              fontSize: 10.0,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2.0),
-                          Text(
-                            'Language: ${series.originalLanguage.toUpperCase()}',
-                            style: const TextStyle(
-                              color: AppColors.secondaryText,
-                              fontSize: 10.0,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
-                    ),
-                  ],
+                      if (series.numberOfSeasons != null && series.numberOfEpisodes != null)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 4.0),
+                            Text(
+                              'Seasons: ${series.numberOfSeasons} • Episodes: ${series.numberOfEpisodes}',
+                              style: const TextStyle(
+                                color: AppColors.secondaryText,
+                                fontSize: 10.5,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      if (series.originalLanguage != null && series.originalLanguage.isNotEmpty)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 4.0),
+                            Text(
+                              'Language: ${series.originalLanguage.toUpperCase()}',
+                              style: const TextStyle(
+                                color: AppColors.secondaryText,
+                                fontSize: 10.5,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
                 ),
-              ));
-        });
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildActionButton({
+    required BuildContext context,
+    required bool isToggled,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.6),
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: color.withOpacity(0.5),
+          width: 0.5,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onPressed,
+          child: Padding(
+            padding: const EdgeInsets.all(6.0),
+            child: Icon(
+              icon,
+              color: color,
+              size: 18,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -1,24 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:miko/utils/utils.dart';
 
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // For HapticFeedback
+
 class AlienFloatSwapMenu extends StatefulWidget {
   final Function OnAskAi;
   final Function onFilter;
   final Function search;
- // final Function searchOnline;
-  // final Function onNew;   // New function for 'New' button
-  // final Function onUndo;  // New function for 'Undo' button
-  // final Function onRedo;  // New function for 'Redo' button
 
   const AlienFloatSwapMenu({
     super.key,
     required this.OnAskAi,
     required this.onFilter,
     required this.search,
-   // required this.searchOnline,
-    // required this.onNew,   // Must be provided
-    // required this.onUndo,  // Must be provided
-    // required this.onRedo,  // Must be provided
   });
 
   @override
@@ -28,32 +23,17 @@ class AlienFloatSwapMenu extends StatefulWidget {
 class _AlienFloatSwapMenuState extends State<AlienFloatSwapMenu> {
   Offset centerOffset = Offset.zero;
   bool dragging = false;
+  String? _hoveredAction; // Tracks the action currently being hovered over by the main button
 
-  // Added new positions for 'New', 'Undo', and 'Redo' buttons
-  final Map<String, Offset> actions = {
-    "Ask AI": Offset(-50, -180),
-    "Search": Offset(-140, -110),
-    "Filter": Offset(-150, 0),
-   // "SearchOnline": Offset(-250, 10),
-    // "New": Offset(100, -150),   // Top-right quadrant
-    // "Undo": Offset(-100, 150),  // Bottom-left quadrant
-    // "Redo": Offset(150, 100),   // Bottom-right quadrant
+  // Refined 'actions' map to include icons for better UI
+  final Map<String, ({Offset offset, IconData icon})> actions = {
+    "Ask AI": (offset: Offset(-50, -180), icon: Icons.psychology_alt),
+    "Search": (offset: Offset(-140, -110), icon: Icons.search),
+    "Filter": (offset: Offset(-150, 0), icon: Icons.filter_list),
   };
 
-  // Added visibility states for the new buttons
-  final Map<String, bool> visibility = {
-    "Ask AI": false,
-    "Search": false,
-    "Filter": false,
-   // "SearchOnline": false,
-    // "New": false,
-    // "Undo": false,
-    // "Redo": false,
-  };
+  final double targetRadius = 90; // The radius within which an action becomes 'visible' and 'active'
 
-  final double targetRadius = 80;
-
-  // Extended the handleAction method to include the new buttons
   void handleAction(String action) {
     switch (action) {
       case "Ask AI":
@@ -65,25 +45,13 @@ class _AlienFloatSwapMenuState extends State<AlienFloatSwapMenu> {
       case "Filter":
         widget.onFilter();
         break;
-      // case "SearchOnline":
-      //   widget.searchOnline();
-      //   break;
-      // case "New":
-      //   widget.onNew();
-      //   break;
-      // case "Undo":
-      //   widget.onUndo();
-      //   break;
-      // case "Redo":
-      //   widget.onRedo();
-      //   break;
     }
   }
-  // Helper method to get an icon based on action name
- 
+
+  // Determines which action, if any, the main button is currently overlapping
   String? getOverlappingAction() {
     for (var entry in actions.entries) {
-      if ((centerOffset - entry.value).distance <= targetRadius) {
+      if ((centerOffset - entry.value.offset).distance <= targetRadius) {
         return entry.key;
       }
     }
@@ -93,92 +61,167 @@ class _AlienFloatSwapMenuState extends State<AlienFloatSwapMenu> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final centerStart =
-        Offset(screenSize.width / 1.15, screenSize.height / 1.24);
-    final position = centerStart + centerOffset;
+    // Calculate the initial center anchor position for the menu
+    final centerAnchor = Offset(screenSize.width / 1.15, screenSize.height / 1.24);
+    // Calculate the current position of the draggable main button
+    final currentButtonPosition = centerAnchor + centerOffset;
+
+    // Schedule a post-frame callback to update the hovered action state,
+    // preventing setState calls during the build phase itself.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final newHoveredAction = getOverlappingAction();
+      if (_hoveredAction != newHoveredAction) {
+        setState(() {
+          _hoveredAction = newHoveredAction;
+        });
+      }
+    });
+
     return GestureDetector(
-        // Added GestureDetector for general touch/drag vibration
-        onTapDown: (_) => triggerVibration(), // Vibrate on touch/tap down
-        onPanDown: (_) => triggerVibration(),
-        onTap: () => tVClick(),
-        onSecondaryTap: () => tVmedium(),
-        onSecondaryTapDown: (_) => tVmedium(),
-        onSecondaryLongPress: () => tVheavy(),
-        child: Stack(
-          children: [
-            ...actions.entries.map((entry) {
-              final textPosition = centerStart + entry.value;
-              final isVisible =
-                  (centerOffset - entry.value).distance < targetRadius;
+      // General touch/drag vibration
+      onTapDown: (_) => triggerVibration(),
+      onPanDown: (_) => triggerVibration(),
+      onTap: () => tVClick(),
+      onSecondaryTap: () => tVmedium(),
+      onSecondaryTapDown: (_) => tVmedium(),
+      onSecondaryLongPress: () => tVheavy(),
+      child: Stack(
+        children: [
+          // Render each menu item (Ask AI, Search, Filter)
+          ...actions.entries.map((entry) {
+            final itemTargetPosition = centerAnchor + entry.value.offset;
+            final isVisible = (centerOffset - entry.value.offset).distance < targetRadius;
+            final isHovered = _hoveredAction == entry.key;
 
-              return AnimatedPositioned(
-                duration: const Duration(milliseconds: 100),
-                left: textPosition.dx - 50,
-                top: textPosition.dy - 20,
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 150),
-                  opacity: isVisible ? 1 : 0,
+            return AnimatedPositioned(
+              duration: const Duration(milliseconds: 150),
+              curve: Curves.easeOutCubic,
+              // Adjust position to center the larger menu item container
+              left: itemTargetPosition.dx - 60,
+              top: itemTargetPosition.dy - 30,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: isVisible ? 1 : 0,
+                // Scale animation for menu items
+                child: AnimatedScale(
+                  scale: isVisible ? (isHovered ? 1.1 : 1.0) : 0.8, // Pop out slightly on hover
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOutBack,
                   child: Container(
-                    padding: const EdgeInsets.all(3),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 76, 2, 78),
-                      borderRadius: BorderRadius.circular(13),
+                      color: isHovered
+                          ? Colors.deepPurple.shade700 // Different color when hovered
+                          : const Color.fromARGB(255, 76, 2, 78).withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(30), // Pill shape
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(isHovered ? 0.4 : 0.2),
+                          blurRadius: isHovered ? 12 : 6,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                      border: Border.all(
+                        color: isHovered ? Colors.greenAccent : Colors.transparent,
+                        width: isHovered ? 2 : 0,
+                      ),
                     ),
-                    child:
-                        Text(entry.key, style: const TextStyle(fontSize: 18)),
-                  ),
-                ),
-              );
-            }),
-            Positioned(
-              left: position.dx - 30,
-              top: position.dy - 30,
-              child: GestureDetector(
-                onPanStart: (_) {
-                  triggerVibration();
-                  setState(() => dragging = true);
-                },
-                onPanUpdate: (details) { 
-                                    triggerVibration();
-
-                  setState(() {
-                  centerOffset += details.delta;
-                });},
-                onPanEnd: (_) {
-                  tVClick();
-                  final action = getOverlappingAction();
-                  if (action != null) handleAction(action);
-
-                  setState(() {
-                    centerOffset = Offset.zero;
-                    dragging = false;
-                  });
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 100),
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: Colors.greenAccent.shade400,
-                    shape: BoxShape.circle,
-                    boxShadow: dragging
-                        ? [
-                            BoxShadow(
-                              color: Colors.greenAccent.shade100,
-                              blurRadius: 30,
-                              spreadRadius: 5,
-                            )
-                          ]
-                        : [],
-                  ),
-                  child: const Center(
-                    child:
-                        Icon(Icons.bubble_chart, size: 30, color: Colors.white),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(entry.value.icon, color: Colors.white70, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          entry.key,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            )
-          ],
-        ));
+            );
+          }).toList(),
+          // The main draggable floating action button
+          Positioned(
+            left: currentButtonPosition.dx - 35, // Adjust for 70px button size
+            top: currentButtonPosition.dy - 35, // Adjust for 70px button size
+            child: GestureDetector(
+              onPanStart: (_) {
+                triggerVibration();
+                setState(() => dragging = true);
+              },
+              onPanUpdate: (details) {
+                // Vibration on every update can be too much, removed for smoother feel.
+                setState(() {
+                  centerOffset += details.delta;
+                });
+              },
+              onPanEnd: (_) {
+                tVClick(); // Vibrate on release
+                final action = getOverlappingAction();
+                if (action != null) {
+                  tVheavy(); // Vibrate heavily if an action is performed
+                  handleAction(action);
+                }
+
+                setState(() {
+                  centerOffset = Offset.zero; // Snap back to original position
+                  dragging = false;
+                  _hoveredAction = null; // Clear hovered state
+                });
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutBack,
+                width: dragging ? 75 : 70, // Slightly expand when dragging
+                height: dragging ? 75 : 70, // Slightly expand when dragging
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: dragging
+                        ? [Colors.greenAccent.shade400, Colors.tealAccent.shade700] // More vibrant when dragging
+                        : [Colors.greenAccent.shade700, Colors.tealAccent.shade400],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: dragging
+                      ? [
+                          BoxShadow(
+                            color: Colors.greenAccent.shade100.withOpacity(0.6),
+                            blurRadius: 40,
+                            spreadRadius: 10,
+                          ),
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.4),
+                            blurRadius: 15,
+                            offset: const Offset(0, 8),
+                          ),
+                        ]
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.bubble_chart,
+                    size: dragging ? 36 : 32, // Icon size slightly larger when dragging
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
   }
 }

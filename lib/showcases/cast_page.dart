@@ -122,20 +122,24 @@ class _CastCard extends StatelessWidget {
                 tag: 'person-${castMember.id}',
                 child: castMember.profilePath != null
                     ? CachedNetworkImage(
+                        filterQuality: FilterQuality.high,
                         imageUrl: castMember.fullProfilePath,
                         fit: BoxFit.cover,
                         placeholder: (context, url) => Container(
                           color: Colors.grey[800],
-                          child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                          child: const Center(
+                              child: CircularProgressIndicator(strokeWidth: 2)),
                         ),
                         errorWidget: (context, url, error) => Container(
                           color: Colors.grey[800],
-                          child: const Icon(Icons.person, size: 40, color: AppColors.secondaryText),
+                          child: const Icon(Icons.person,
+                              size: 40, color: AppColors.secondaryText),
                         ),
                       )
                     : Container(
                         color: Colors.grey[800],
-                        child: const Icon(Icons.person, size: 40, color: AppColors.secondaryText),
+                        child: const Icon(Icons.person,
+                            size: 40, color: AppColors.secondaryText),
                       ),
               ),
             ),
@@ -148,7 +152,8 @@ class _CastCard extends StatelessWidget {
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 13),
                   ),
                   const SizedBox(height: 2),
                   Text(

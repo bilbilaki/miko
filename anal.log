@@ -1,0 +1,1066 @@
+Analyzing miko...
+
+  error - lib/llm/llm_dart.dart:87:36 - The argument type 'String' can't be assigned to the parameter type 'int'.  - argument_type_not_assignable
+  error - lib/llm/llm_dart.dart:88:37 - The argument type 'String' can't be assigned to the parameter type 'int'.  - argument_type_not_assignable
+  error - lib/llm/llm_dart.dart:89:41 - The argument type 'String' can't be assigned to the parameter type 'int'.  - argument_type_not_assignable
+  error - lib/llm/llm_dart.dart:90:43 - The argument type 'String' can't be assigned to the parameter type 'int'.  - argument_type_not_assignable
+  error - lib/llm/llm_dart.dart:104:38 - The method 'tool' isn't defined for the type 'ChatMessage'. Try correcting the name to the name of an existing method, or defining a method named 'tool'. - undefined_method
+  error - lib/llm/llm_dart.dart:108:38 - The method 'tool' isn't defined for the type 'ChatMessage'. Try correcting the name to the name of an existing method, or defining a method named 'tool'. - undefined_method
+  error - lib/llm/llm_dart.dart:113:36 - The method 'tool' isn't defined for the type 'ChatMessage'. Try correcting the name to the name of an existing method, or defining a method named 'tool'. - undefined_method
+warning - lib/llm/llm_dart.dart:5:8 - Unused import: 'dart:io'. Try removing the import directive. - unused_import
+warning - lib/llm/llm_dart.dart:108:62 - The '!' will have no effect because the receiver can't be null. Try removing the '!' operator. - unnecessary_non_null_assertion
+warning - lib/llm/llm_dart.dart:113:60 - The '!' will have no effect because the receiver can't be null. Try removing the '!' operator. - unnecessary_non_null_assertion
+warning - lib/main.dart:1:8 - Unused import: 'dart:io'. Try removing the import directive. - unused_import
+warning - lib/main.dart:3:8 - Unused import: 'package:audio_service/audio_service.dart'. Try removing the import directive. - unused_import
+warning - lib/main.dart:75:7 - The declaration '_router' isn't referenced. Try removing the declaration of '_router'. - unused_element
+warning - lib/models/tmdb/movies_model.dart:121:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/movies_model.dart:122:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/movies_model.dart:124:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/movies_model.dart:127:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/movies_model.dart:128:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/movies_model.dart:131:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/movies_model.dart:132:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/movies_model.dart:133:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/movies_model.dart:136:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/movies_model.dart:138:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/movies_model.dart:140:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/movies_model.dart:142:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/movies_model.dart:144:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/movies_model.dart:146:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/movies_model.dart:149:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/series_model.dart:88:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/series_model.dart:91:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/series_model.dart:92:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/series_model.dart:94:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/series_model.dart:96:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/series_model.dart:98:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/series_model.dart:99:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/series_model.dart:100:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/series_model.dart:102:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/series_model.dart:104:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/series_model.dart:105:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/series_model.dart:107:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/series_model.dart:109:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/series_model.dart:111:3 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:15:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:16:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:26:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:27:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:38:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:47:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:48:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:49:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:50:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:51:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:52:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:53:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:62:20 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:64:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:65:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:66:20 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:67:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:69:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:148:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:149:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:151:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:171:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:172:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:179:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:228:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:229:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:230:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:248:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:249:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:250:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:251:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:292:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:294:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:295:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:296:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:298:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:309:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:320:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:322:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:324:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:358:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:359:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:391:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:392:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:393:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:394:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:405:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:406:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:416:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:417:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:419:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:420:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:422:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:423:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:425:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:428:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:429:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:441:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:442:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:456:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:458:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:459:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:498:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:502:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:514:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:518:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:519:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:520:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:522:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:523:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:524:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:526:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:527:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:528:20 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:530:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:545:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:546:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:549:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:550:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:559:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:560:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:561:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:562:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:563:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:573:22 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:582:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:584:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:587:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:588:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:590:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:602:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:603:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:605:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:606:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:609:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:610:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:613:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:614:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:615:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:626:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:627:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:629:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:630:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:633:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:634:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:637:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:638:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:639:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:650:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:651:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:656:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:657:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:658:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:661:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:662:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:663:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:664:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:667:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:672:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:673:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:683:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:686:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:696:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:698:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:707:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:717:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:718:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:728:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:750:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:751:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:752:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:753:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:754:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:773:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:774:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:785:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:787:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:800:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:801:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:813:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:814:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:834:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:835:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:840:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:841:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:842:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:845:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:846:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:847:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:848:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:851:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:856:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:857:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:869:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:870:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:872:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:873:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:874:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:877:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:878:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:880:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:881:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:882:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:892:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:893:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:895:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:896:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:897:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:900:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:901:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:903:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:904:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:905:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:916:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:919:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:931:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:932:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:933:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:934:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:935:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:937:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:938:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:939:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:949:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:951:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:960:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:961:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:965:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:966:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:967:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:977:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:978:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:979:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:980:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:984:22 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:986:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:987:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:989:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:991:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:992:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:993:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:994:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:995:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:998:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:999:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1000:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1002:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1006:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1007:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1017:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1022:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1024:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1026:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1035:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1037:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1038:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1042:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1044:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1045:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1046:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1047:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1048:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1057:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1058:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1063:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1064:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1065:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1077:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1079:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1081:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1083:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1093:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1095:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1107:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1109:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1111:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1114:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1123:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1125:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1145:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1167:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1188:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1189:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1213:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1214:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1215:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1216:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1217:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1218:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1219:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1220:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1221:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1231:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1232:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1252:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1253:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1254:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1255:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1259:22 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1261:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1262:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1264:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1266:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1267:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1268:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1269:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1270:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1273:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1274:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1275:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1277:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1281:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1282:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1291:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1293:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1294:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1298:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1300:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1301:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1302:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1303:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1304:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1325:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1345:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1346:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1347:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1348:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1349:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1359:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1360:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1361:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1362:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1363:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1364:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1378:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1380:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1382:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1383:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1384:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1394:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1401:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1402:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1404:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1406:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1427:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1431:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1433:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1435:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1436:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1448:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1450:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1452:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1453:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1455:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1457:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1469:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1479:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1480:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1482:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1483:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1486:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1487:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1490:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1491:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1493:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1497:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1518:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1519:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1521:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1522:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1523:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1526:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1527:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1529:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1530:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1532:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1536:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1568:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1569:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1570:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1571:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1572:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1573:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1574:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1575:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1576:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1577:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1587:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1590:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1591:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1593:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1594:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1595:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1597:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1599:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1600:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1610:20 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1611:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1614:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1615:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1616:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1618:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1620:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1632:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1633:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1643:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1644:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1654:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1665:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1666:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1668:22 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_m.dart:1697:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:15:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:16:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:26:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:27:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:38:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:47:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:48:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:49:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:50:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:51:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:52:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:53:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:62:20 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:64:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:65:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:66:20 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:67:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:146:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:147:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:149:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:169:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:170:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:177:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:226:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:227:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:228:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:246:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:247:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:248:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:249:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:290:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:292:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:293:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:294:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:296:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:307:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:318:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:320:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:322:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:356:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:357:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:389:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:390:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:392:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:403:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:404:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:414:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:415:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:417:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:418:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:420:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:421:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:423:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:426:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:427:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:439:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:440:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:454:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:456:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:457:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:496:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:500:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:512:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:516:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:517:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:518:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:520:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:521:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:522:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:524:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:525:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:526:20 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:527:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:528:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:543:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:544:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:547:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:548:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:557:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:558:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:559:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:560:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:561:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:571:22 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:580:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:582:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:585:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:586:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:588:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:600:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:601:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:603:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:604:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:607:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:608:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:611:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:612:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:613:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:624:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:625:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:627:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:628:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:631:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:632:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:635:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:636:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:637:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:669:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:670:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:675:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:676:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:677:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:680:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:681:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:682:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:683:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:686:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:691:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:692:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:702:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:705:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:715:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:717:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:726:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:736:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:737:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:747:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:769:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:770:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:771:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:772:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:773:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:792:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:793:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:804:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:806:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:819:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:820:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:832:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:833:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:853:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:854:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:859:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:860:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:861:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:864:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:865:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:866:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:867:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:870:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:875:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:876:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:888:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:889:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:891:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:892:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:893:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:896:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:897:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:899:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:900:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:901:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:911:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:912:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:914:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:915:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:916:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:919:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:920:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:922:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:923:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:924:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:956:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:959:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:971:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:972:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:973:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:974:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:975:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:977:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:978:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:979:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:989:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:991:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1000:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1001:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1005:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1006:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1007:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1017:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1018:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1019:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1020:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1024:22 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1026:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1027:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1029:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1031:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1032:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1033:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1034:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1035:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1038:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1039:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1040:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1042:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1046:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1047:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1057:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1062:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1064:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1066:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1075:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1077:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1078:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1082:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1084:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1085:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1086:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1087:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1088:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1097:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1098:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1103:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1104:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1105:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1117:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1119:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1121:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1123:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1133:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1135:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1147:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1149:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1151:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1154:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1163:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1165:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1185:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1207:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1228:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1229:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1253:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1254:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1255:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1256:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1257:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1258:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1259:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1260:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1261:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1271:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1272:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1292:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1293:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1294:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1295:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1299:22 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1301:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1302:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1304:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1306:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1307:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1308:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1309:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1310:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1313:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1314:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1315:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1317:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1321:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1322:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1331:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1333:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1334:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1338:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1340:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1341:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1342:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1343:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1344:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1385:18 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1396:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1397:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1398:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1399:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1400:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1410:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1411:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1412:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1413:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1414:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1415:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1429:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1431:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1433:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1434:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1435:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1445:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1452:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1453:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1455:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1457:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1478:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1482:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1484:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1486:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1487:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1499:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1501:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1503:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1504:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1506:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1508:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1520:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1530:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1531:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1533:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1534:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1537:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1538:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1541:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1542:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1544:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1548:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1569:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1570:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1572:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1573:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1574:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1577:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1578:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1580:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1581:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1583:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1587:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1619:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1620:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1621:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1622:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1623:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1624:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1625:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1626:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1627:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1628:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1638:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1641:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1642:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1644:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1645:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1646:19 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1648:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1650:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1651:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1661:20 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1662:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1665:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1666:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1667:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1669:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1671:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1683:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1684:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1694:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1695:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1705:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1716:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1717:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1719:22 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/tmdb/tmdb_models.dart:1748:6 - The annotation 'JsonKey.new' can only be used on fields or getters. - invalid_annotation_target
+warning - lib/models/user_order.dart:3:8 - Unused import: 'package:flutter/foundation.dart'. Try removing the import directive. - unused_import
+warning - lib/providers/local_provider.dart:5:8 - Unused import: 'package:just_audio/just_audio.dart'. Try removing the import directive. - unused_import
+warning - lib/providers/local_provider.dart:11:8 - Duplicate import. Try removing all but one import of the library. - duplicate_import
+warning - lib/providers/local_provider.dart:16:8 - Unused import: 'package:smb_connect/smb_connect.dart'. Try removing the import directive. - unused_import
+warning - lib/screens/extractor.dart:2279:77 - The operand can't be 'null', so the condition is always 'true'. Remove the condition. - unnecessary_null_comparison
+warning - lib/screens/local_screen.dart:4:8 - Unused import: 'package:miko/widgets/alienswapbutton.dart'. Try removing the import directive. - unused_import
+warning - lib/screens/manual_execution_screen.dart:166:2 - This default clause is covered by the previous cases. Try removing the default clause, or restructuring the preceding patterns. - unreachable_switch_default
+warning - lib/screens/order_detail_screen.dart:4:8 - Unused import: 'package:go_router/go_router.dart'. Try removing the import directive. - unused_import
+warning - lib/screens/order_detail_screen.dart:275:2 - This default clause is covered by the previous cases. Try removing the default clause, or restructuring the preceding patterns. - unreachable_switch_default
+warning - lib/screens/order_detail_screen.dart:298:2 - This default clause is covered by the previous cases. Try removing the default clause, or restructuring the preceding patterns. - unreachable_switch_default
+warning - lib/screens/order_queue_screen.dart:4:8 - Unused import: 'package:go_router/go_router.dart'. Try removing the import directive. - unused_import
+warning - lib/screens/preset_editor_screen.dart:170:2 - This default clause is covered by the previous cases. Try removing the default clause, or restructuring the preceding patterns. - unreachable_switch_default
+warning - lib/screens/settings_screen.dart:10:29 - The declaration '_basePathController' isn't referenced. Try removing the declaration of '_basePathController'. - unused_element
+warning - lib/screens/settings_screen.dart:11:12 - The declaration '_isProcessing' isn't referenced. Try removing the declaration of '_isProcessing'. - unused_element
+warning - lib/screens/settings_screen.dart:13:20 - The declaration '_foundUrls' isn't referenced. Try removing the declaration of '_foundUrls'. - unused_element
+warning - lib/screens/settings_screen.dart:17:6 - The declaration '_log' isn't referenced. Try removing the declaration of '_log'. - unused_element
+warning - lib/screens/settings_screen.dart:21:14 - The declaration '_requestStoragePermission' isn't referenced. Try removing the declaration of '_requestStoragePermission'. - unused_element
+warning - lib/screens/settings_screen.dart:73:65 - The left operand can't be null, so the right operand is never executed. Try removing the operator and the right operand. - dead_null_aware_expression
+warning - lib/screens/settings_screen.dart:442:8 - The declaration '_buildSectionTitle' isn't referenced. Try removing the declaration of '_buildSectionTitle'. - unused_element
+warning - lib/screens/settings_screen.dart:453:8 - The declaration '_buildSliderSetting' isn't referenced. Try removing the declaration of '_buildSliderSetting'. - unused_element
+warning - lib/screens/settings_screen.dart:485:8 - The declaration '_buildIntInputSetting' isn't referenced. Try removing the declaration of '_buildIntInputSetting'. - unused_element
+warning - lib/screens/settings_screen.dart:539:8 - The declaration '_buildDropdownSetting' isn't referenced. Try removing the declaration of '_buildDropdownSetting'. - unused_element
+warning - lib/screens/settings_screen.dart:603:6 - The declaration '_showResetConfirmationDialog' isn't referenced. Try removing the declaration of '_showResetConfirmationDialog'. - unused_element
+warning - lib/services/puppeteer_service.dart:2:8 - Unused import: 'dart:io'. Try removing the import directive. - unused_import
+warning - lib/services/puppeteer_service.dart:9:8 - Unused import: '../models/user_order.dart'. Try removing the import directive. - unused_import
+warning - lib/services/puppeteer_service.dart:12:8 - Duplicate import. Try removing all but one import of the library. - duplicate_import
+warning - lib/services/puppeteer_service.dart:13:8 - Duplicate import. Try removing all but one import of the library. - duplicate_import
+warning - lib/services/puppeteer_service.dart:213:11 - This default clause is covered by the previous cases. Try removing the default clause, or restructuring the preceding patterns. - unreachable_switch_default
+warning - lib/services/puppeteer_service.dart:292:51 - The left operand can't be null, so the right operand is never executed. Try removing the operator and the right operand. - dead_null_aware_expression
+warning - lib/services/user_data_service.dart:22:23 - The value of the field '_myListKey' isn't used. Try removing the field, or using it. - unused_field
+warning - lib/showcases/keyword_search_page.dart:422:41 - The left operand can't be null, so the right operand is never executed. Try removing the operator and the right operand. - dead_null_aware_expression
+warning - lib/showcases/model.dart:960:24 - The operand can't be 'null', so the condition is always 'true'. Remove the condition. - unnecessary_null_comparison
+warning - lib/showcases/movie_detail_page_copy.dart:1330:23 - The value of the local variable 'encodedUrl' isn't used. Try removing the variable or using it. - unused_local_variable
+warning - lib/showcases/person_detail_page.dart:60:6 - The declaration '_performHapticFeedback' isn't referenced. Try removing the declaration of '_performHapticFeedback'. - unused_element
+warning - lib/state/order_queue_providers.dart:18:13 - The value of the field '_uuid' isn't used. Try removing the field, or using it. - unused_field
+warning - lib/widgets/action_form.dart:35:24 - The declaration '_getParamController' isn't referenced. Try removing the declaration of '_getParamController'. - unused_element
+warning - lib/widgets/alienswapbutton.dart:83:12 - The declaration '_getIconForAction' isn't referenced. Try removing the declaration of '_getIconForAction'. - unused_element
+   info - lib/app_keeper.dart:152:31 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/app_keeper.dart:153:26 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/app_keeper.dart:154:25 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/app_keeper.dart:155:27 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/app_keeper.dart:155:57 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/app_keeper.dart:155:89 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/app_keeper.dart:155:121 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/app_keeper.dart:322:31 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/app_keeper.dart:323:26 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/app_keeper.dart:324:25 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/app_keeper.dart:325:37 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/app_keeper.dart:325:68 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/app_keeper.dart:325:100 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/app_keeper.dart:325:132 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/llm/llm_dart.dart:25:3 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/llm/llm_dart.dart:71:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/llm/llm_dart.dart:83:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/llm/llm_dart.dart:101:13 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/llm/llm_dart.dart:107:13 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/llm/llm_dart.dart:112:11 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/llm/llm_dart.dart:123:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/llm/llm_dart.dart:131:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/llm/llm_dart.dart:134:11 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/llm/llm_dart.dart:141:15 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/llm/llm_dart.dart:145:15 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/llm/llm_dart.dart:148:13 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/llm/llm_dart.dart:153:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/models/tv_series_anime.dart:6:37 - The prefix 'TmdbApiMovieModel' isn't a lower_case_with_underscores identifier. Try changing the prefix to follow the lower_case_with_underscores style. - library_prefixes
+   info - lib/providers/csv_detail_process_provider.dart:144:11 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/providers/csv_detail_process_provider.dart:147:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/providers/local_provider.dart:12:8 - The import of 'dart:io' is unnecessary because all of the used elements are also provided by the import of 'dart:io'. Try removing the import directive. - unnecessary_import
+   info - lib/providers/local_provider.dart:19:3 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/providers/local_provider.dart:32:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/providers/local_provider.dart:39:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/providers/local_provider.dart:42:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/providers/local_provider.dart:45:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/providers/local_provider.dart:48:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/providers/local_provider.dart:49:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/providers/local_provider.dart:53:3 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/screens/anime_grid_screen.dart:100:49 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:398:50 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:399:55 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:612:50 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:613:55 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:758:64 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:816:42 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:817:57 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:849:52 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/screens/anime_grid_screen.dart:861:61 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:871:51 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:910:61 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:998:61 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:1003:62 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:1008:60 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:1125:40 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:1197:11 - The variable name 'TvseriesId' isn't a lowerCamelCase identifier. Try changing the name to follow the lowerCamelCase style. - non_constant_identifier_names
+   info - lib/screens/anime_grid_screen.dart:1215:18 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:1253:47 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:1279:9 - An uninitialized field should have an explicit type annotation. Try adding a type annotation. - prefer_typing_uninitialized_variables
+   info - lib/screens/anime_grid_screen.dart:1396:48 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:1397:63 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:1429:56 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/screens/anime_grid_screen.dart:1442:52 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:1452:55 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:1481:56 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/screens/anime_grid_screen.dart:1494:52 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:1517:51 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:1588:61 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:1593:62 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:1598:60 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/anime_grid_screen.dart:1796:15 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/screens/anime_grid_screen.dart:1798:15 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/screens/anime_grid_screen.dart:1800:15 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/screens/anime_grid_screen.dart:1802:15 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/screens/anime_grid_screen.dart:1803:45 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/screens/genre_detail_screen.dart:187:36 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/genre_detail_screen.dart:194:36 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/genre_detail_screen.dart:196:36 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/http.dart:935:35 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/http_main.dart:562:33 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/http_rest.dart:13:3 - Invalid use of a private type in a public API. Try making the private type public, or making the API that uses the private type also be private. - library_private_types_in_public_api
+   info - lib/screens/local_screen.dart:717:7 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/screens/local_screen.dart:749:32 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/screens/local_screen.dart:772:34 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/screens/local_screen.dart:1334:36 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/screens/manual_execution_screen.dart:23:20 - The private field _actions could be 'final'. Try making the field 'final'. - prefer_final_fields
+   info - lib/screens/manual_execution_screen.dart:189:23 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/screens/manual_execution_screen.dart:215:23 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/screens/nethttp.dart:906:31 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/nethttp2.dart:960:31 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/order_detail_screen.dart:105:31 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/order_detail_screen.dart:233:73 - Unnecessary use of 'toList' in a spread. Try removing the invocation of 'toList'. - unnecessary_to_list_in_spreads
+   info - lib/screens/order_detail_screen.dart:241:5 - Unnecessary use of 'toList' in a spread. Try removing the invocation of 'toList'. - unnecessary_to_list_in_spreads
+   info - lib/screens/order_queue_screen.dart:160:27 - Unnecessary braces in a string interpolation. Try removing the braces. - unnecessary_brace_in_string_interps
+   info - lib/screens/order_queue_screen.dart:160:40 - Unnecessary braces in a string interpolation. Try removing the braces. - unnecessary_brace_in_string_interps
+   info - lib/screens/preset_editor_screen.dart:193:23 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/screens/preset_editor_screen.dart:219:23 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/screens/puppeteer.dart:64:50 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/screens/settings_screen.dart:629:28 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/screens/shorts_screen.dart:228:39 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/test_http.dart:668:31 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/unisearch_screen.dart:153:52 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/unisearch_screen.dart:172:60 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/video_player2.dart:141:37 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/video_player_screen.dart:111:37 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/video_player_wplaylist_screen.dart:326:39 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/video_player_wplaylist_screen.dart:475:58 - The variable name 'TvseriesId' isn't a lowerCamelCase identifier. Try changing the name to follow the lowerCamelCase style. - non_constant_identifier_names
+   info - lib/screens/video_player_wplaylist_screen.dart:494:20 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/video_player_wplaylist_screen.dart:531:49 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/video_player_wplaylist_screen.dart:576:35 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/screens/video_player_wplaylist_screen.dart:763:62 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/services/files_service.dart:35:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/files_service.dart:53:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/files_service.dart:56:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/puppeteer_service.dart:54:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/puppeteer_service.dart:59:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/puppeteer_service.dart:61:27 - The type of the right operand ('List<Type>') isn't a subtype or a supertype of the left operand ('Future<List<Page>>'). Try changing one or both of the operands. - unrelated_type_equality_checks
+   info - lib/services/puppeteer_service.dart:66:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/puppeteer_service.dart:70:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/puppeteer_service.dart:79:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/puppeteer_service.dart:85:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/puppeteer_service.dart:89:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/puppeteer_service.dart:99:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/puppeteer_service.dart:101:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/puppeteer_service.dart:119:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/puppeteer_service.dart:127:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/puppeteer_service.dart:214:13 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/puppeteer_service.dart:220:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/puppeteer_service.dart:226:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/puppeteer_service.dart:230:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/puppeteer_service.dart:290:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/puppeteer_service.dart:298:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/storage_service.dart:16:2 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/showcases/animeepisodedetailpage.dart:19:9 - An uninitialized field should have an explicit type annotation. Try adding a type annotation. - prefer_typing_uninitialized_variables
+   info - lib/showcases/animeepisodedetailpage.dart:85:11 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/showcases/animeepisodedetailpage.dart:149:29 - Unnecessary instance of 'Container'. Try removing the 'Container' (but not its children) from the widget tree. - avoid_unnecessary_containers
+   info - lib/showcases/animeepisodedetailpage.dart:187:46 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/animeepisodedetailpage.dart:206:45 - Use interpolation to compose strings and values. Try using string interpolation to build the composite string. - prefer_interpolation_to_compose_strings
+   info - lib/showcases/keyword_search_page.dart:150:54 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/movie_detail_page_copy.dart:312:39 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/movie_detail_page_copy.dart:317:40 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/movie_detail_page_copy.dart:322:38 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/movie_detail_page_copy.dart:389:34 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/movie_detail_page_copy.dart:390:49 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/movie_detail_page_copy.dart:416:42 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/showcases/movie_detail_page_copy.dart:428:51 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/movie_detail_page_copy.dart:437:41 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/movie_detail_page_copy.dart:459:42 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/showcases/movie_detail_page_copy.dart:471:51 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/movie_detail_page_copy.dart:483:41 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/movie_detail_page_copy.dart:514:41 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/movie_detail_page_copy.dart:523:45 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/movie_detail_page_copy.dart:528:44 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/movie_detail_page_copy.dart:1317:15 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/showcases/movie_detail_page_copy.dart:1319:15 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/showcases/movie_detail_page_copy.dart:1321:15 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/showcases/movie_detail_page_copy.dart:1323:15 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/showcases/movie_detail_page_copy.dart:1324:45 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/showcases/movie_page_copy.dart:378:43 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/movie_page_copy.dart:724:44 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/movie_page_copy.dart:738:47 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/movie_page_copy.dart:760:47 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/movie_page_copy.dart:807:52 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/movie_service.dart:89:26 - The argument type 'int' isn't related to 'String'. Try changing the argument or element type to match. - collection_methods_unrelated_type
+   info - lib/showcases/movie_service.dart:90:26 - The argument type 'int' isn't related to 'String'. Try changing the argument or element type to match. - collection_methods_unrelated_type
+   info - lib/showcases/movie_service.dart:91:34 - The argument type 'int' isn't related to 'String'. Try changing the argument or element type to match. - collection_methods_unrelated_type
+   info - lib/showcases/movie_service.dart:610:17 - 'printTime' is deprecated and shouldn't be used. Use `dateTimeFormat` with `DateTimeFormat.onlyTimeAndSinceStart` or `DateTimeFormat.none` instead. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/moviesearchpage.dart:140:54 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/multi_search_page.dart:215:54 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/seasondetailpage_anime.dart:14:9 - An uninitialized field should have an explicit type annotation. Try adding a type annotation. - prefer_typing_uninitialized_variables
+   info - lib/showcases/tv_detail_page_anime.dart:22:9 - An uninitialized field should have an explicit type annotation. Try adding a type annotation. - prefer_typing_uninitialized_variables
+   info - lib/showcases/tv_detail_page_anime.dart:23:9 - An uninitialized field should have an explicit type annotation. Try adding a type annotation. - prefer_typing_uninitialized_variables
+   info - lib/showcases/tv_detail_page_anime.dart:300:41 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_detail_page_anime.dart:305:42 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_detail_page_anime.dart:310:40 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_detail_page_anime.dart:394:50 - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check. Guard a 'State.context' use with a 'mounted' check on the State, and other BuildContext use with a 'mounted' check on the BuildContext. - use_build_context_synchronously
+   info - lib/showcases/tv_detail_page_anime.dart:407:57 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_detail_page_anime.dart:417:47 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_detail_page_anime.dart:444:50 - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check. Guard a 'State.context' use with a 'mounted' check on the State, and other BuildContext use with a 'mounted' check on the BuildContext. - use_build_context_synchronously
+   info - lib/showcases/tv_detail_page_anime.dart:457:57 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_detail_page_anime.dart:1103:51 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_detail_page_anime.dart:1133:58 - The variable name 'TvseriesId' isn't a lowerCamelCase identifier. Try changing the name to follow the lowerCamelCase style. - non_constant_identifier_names
+   info - lib/showcases/tv_detail_page_anime.dart:1153:18 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_detail_page_anime.dart:1188:47 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_detail_page_anime.dart:1209:53 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_detail_page_anime.dart:1278:32 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_page_anime.dart:197:43 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_page_anime.dart:722:44 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_page_anime.dart:736:47 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_page_anime.dart:758:48 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_page_anime.dart:783:51 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_page_anime.dart:808:41 - The type of the right operand ('List<String>') isn't a subtype or a supertype of the left operand ('List<int>'). Try changing one or both of the operands. - unrelated_type_equality_checks
+   info - lib/showcases/tv_page_anime.dart:820:53 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_page_grid.dart:13:9 - An uninitialized field should have an explicit type annotation. Try adding a type annotation. - prefer_typing_uninitialized_variables
+   info - lib/showcases/tv_page_grid.dart:14:9 - An uninitialized field should have an explicit type annotation. Try adding a type annotation. - prefer_typing_uninitialized_variables
+   info - lib/showcases/tv_page_grid.dart:213:43 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_page_grid.dart:737:44 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_page_grid.dart:751:47 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_page_grid.dart:773:48 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_page_grid.dart:798:51 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tv_page_grid.dart:823:41 - The type of the right operand ('List<String>') isn't a subtype or a supertype of the left operand ('List<int>'). Try changing one or both of the operands. - unrelated_type_equality_checks
+   info - lib/showcases/tv_page_grid.dart:835:53 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/showcases/tvsearchpage.dart:139:54 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/state/order_queue_providers.dart:33:17 - Uses 'await' on an instance of 'List<UserOrder>', which is not a subtype of 'Future'. Try removing the 'await' or changing the expression. - await_only_futures
+   info - lib/state/order_queue_providers.dart:42:2 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/state/order_queue_providers.dart:48:2 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/state/order_queue_providers.dart:64:2 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/state/order_queue_providers.dart:70:2 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/state/order_queue_providers.dart:72:2 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/state/order_queue_providers.dart:87:2 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/state/order_queue_providers.dart:114:2 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/state/order_queue_providers.dart:114:73 - Unnecessary braces in a string interpolation. Try removing the braces. - unnecessary_brace_in_string_interps
+   info - lib/state/order_queue_providers.dart:131:2 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/state/order_queue_providers.dart:134:2 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/state/preset_task_providers.dart:16:18 - Uses 'await' on an instance of 'List<PresetTask>', which is not a subtype of 'Future'. Try removing the 'await' or changing the expression. - await_only_futures
+   info - lib/state/preset_task_providers.dart:18:2 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/state/preset_task_providers.dart:21:2 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/utils/colors.dart:283:41 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/utils/colors.dart:288:42 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/utils/colors.dart:293:40 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/widgets/anime_series_card.dart:119:62 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/widgets/anime_series_card.dart:157:9 - An uninitialized field should have an explicit type annotation. Try adding a type annotation. - prefer_typing_uninitialized_variables
+   info - lib/widgets/anime_series_card.dart:273:58 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/widgets/anime_series_card.dart:286:42 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/widgets/anime_series_card.dart:305:58 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/widgets/anime_series_card.dart:318:42 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/widgets/anime_series_card.dart:476:36 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/widgets/anime_series_card.dart:529:58 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/widgets/anime_series_card.dart:542:42 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/widgets/anime_series_card.dart:561:58 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/widgets/anime_series_card.dart:574:42 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/widgets/photoeditor.dart:46:13 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/widgets/photoeditor.dart:49:38 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/widgets/photoeditor.dart:51:13 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/widgets/photoeditor.dart:82:11 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/widgets/photoeditor.dart:87:24 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/widgets/photoeditor.dart:96:22 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/widgets/photoeditor.dart:98:22 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/widgets/photoeditor.dart:159:36 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+   info - lib/widgets/photoeditor.dart:161:36 - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check. - use_build_context_synchronously
+
+1062 issues found.

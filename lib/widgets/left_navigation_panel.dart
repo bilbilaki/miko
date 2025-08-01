@@ -5,12 +5,14 @@ import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/screens/genre_detail_screen.dart';
 import 'package:miko/screens/grid.dart';
 import 'package:miko/screens/http.dart';
+import 'package:miko/screens/iptv_screen.dart';
 import 'package:miko/screens/watchlist_screen.dart';
 import 'package:miko/showcases/keyword_search_page.dart';
 import 'package:miko/showcases/movie_page_copy.dart';
 import 'package:miko/showcases/moviesearchpage.dart';
 import 'package:miko/showcases/tvsearchpage.dart';
 import 'package:miko/utils/colors.dart';
+import 'package:miko/utils/utils.dart';
 import 'package:miko/yt-dlp/ui/screens/home_screen.dart';
 
 import '../providers/settings_provider.dart';
@@ -122,6 +124,14 @@ class LeftNavigationPanel extends ConsumerWidget {
         title: 'Jackett Search',
         showText: showText,
         onTap: () => _navigateTo(context, JackettHome(), isMobileLayout),
+      ),
+       _buildNavigationItem(
+        context,
+        ref,
+        icon: Icons.tv, 
+        title: 'IPTV Player',
+        showText: showText,
+        onTap: () => _navigateTo(context, IptvScreen(), isMobileLayout),
       ),
       _buildNavigationItem(
         context,
@@ -263,6 +273,7 @@ _buildNavigationItem(
   
 // New helper methods
 void _navigateTo(BuildContext context, Widget screen, bool isMobileLayout) {
+  tVClick();
   if (isMobileLayout) Navigator.pop(context);
   Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
 }

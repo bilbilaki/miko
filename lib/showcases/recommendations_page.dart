@@ -18,7 +18,7 @@ class RecommendationsPage extends StatefulWidget {
     super.key,
     required this.movieId,
     required this.movieTitle,
-    required this.typec,  
+    required this.typec,
   });
 
   @override
@@ -37,10 +37,13 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
 
   void _fetchRecommendations() async {
     widget.typec == "movie"
-        ? _recommendationsFuture = _movieService.getMovieRecommendations(movieId: widget.movieId)
-        : _tvRecommendationsFuture = _movieService.getTvShowRecommendations(tvShowId: widget.movieId);
+        ? _recommendationsFuture =
+            _movieService.getMovieRecommendations(movieId: widget.movieId)
+        : _tvRecommendationsFuture =
+            _movieService.getTvShowRecommendations(tvShowId: widget.movieId);
     setState(() {});
   }
+
   @override
   void dispose() {
     _movieService.dispose();
@@ -63,51 +66,50 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Failed to load recommendations.'),
-                  const SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: () => setState(() {
-                      _fetchRecommendations();
-                    }),
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            );
-          } else if (snapshot.hasData && snapshot.data!.results.isNotEmpty) {
-            final movies = snapshot.data!.results;
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text('Failed to load recommendations.'),
+                        const SizedBox(height: 8),
+                        ElevatedButton(
+                          onPressed: () => setState(() {
+                            _fetchRecommendations();
+                          }),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  );
+                } else if (snapshot.hasData &&
+                    snapshot.data!.results.isNotEmpty) {
+                  final movies = snapshot.data!.results;
                   return MasonryGridView.count(
-    padding: const EdgeInsets.all(5.0),
-    crossAxisCount: 1 * 3, // Adjust number of
-    mainAxisSpacing: 1.5,
-    controller: ScrollController(keepScrollOffset: true),
-    shrinkWrap: true,
-    physics: const BouncingScrollPhysics(),
-    crossAxisSpacing: 1.5,
-    cacheExtent: 100,
-                        itemCount: movies.length,
+                    padding: const EdgeInsets.all(5.0),
+                    crossAxisCount: 1 * 3, // Adjust number of
+                    mainAxisSpacing: 1.5,
+                    controller: ScrollController(keepScrollOffset: true),
+                    shrinkWrap: true,
+                    physics: const BouncingScrollPhysics(),
+                    crossAxisSpacing: 1.5,
+                    cacheExtent: 100,
+                    itemCount: movies.length,
                     itemBuilder: (context, index) {
-      return GestureDetector(
-        // Wrap card for tap vibration if the card itself does not handle
-        onTap: () {
-          tVmedium();
-        },
-        child: _buildRecommendationCard(context, movies[index]),
-      );
-        
-        },
-      );
+                      return GestureDetector(
+                        // Wrap card for tap vibration if the card itself does not handle
+                        onTap: () {
+                          tVmedium();
+                        },
+                        child: _buildRecommendationCard(context, movies[index]),
+                      );
+                    },
+                  );
                 } else {
                   return const Center(child: Text('No recommendations found.'));
                 }
               },
             )
-          :
-      FutureBuilder<TvShowResponse>(
+          : FutureBuilder<TvShowResponse>(
               future: _tvRecommendationsFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -128,28 +130,30 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                       ],
                     ),
                   );
-                } else if (snapshot.hasData && snapshot.data!.results.isNotEmpty) {
+                } else if (snapshot.hasData &&
+                    snapshot.data!.results.isNotEmpty) {
                   final tvShows = snapshot.data!.results;
                   return MasonryGridView.count(
-    padding: const EdgeInsets.all(5.0),
-    crossAxisCount: 1 * 3, // Adjust number of
-    mainAxisSpacing: 1.5,
-    controller: ScrollController(keepScrollOffset: true),
-    shrinkWrap: true,
-    physics: const BouncingScrollPhysics(),
-    crossAxisSpacing: 1.5,
-    cacheExtent: 100,
-                        itemCount: tvShows.length,
+                    padding: const EdgeInsets.all(5.0),
+                    crossAxisCount: 1 * 3, // Adjust number of
+                    mainAxisSpacing: 1.5,
+                    controller: ScrollController(keepScrollOffset: true),
+                    shrinkWrap: true,
+                    physics: const BouncingScrollPhysics(),
+                    crossAxisSpacing: 1.5,
+                    cacheExtent: 100,
+                    itemCount: tvShows.length,
                     itemBuilder: (context, index) {
-      return GestureDetector(
-        // Wrap card for tap vibration if the card itself does not handle
-        onTap: () {
-          tVmedium();
-        },
-        child: _buildTvRecommendationCard(context, tvShows[index]),
-      );
+                      return GestureDetector(
+                        // Wrap card for tap vibration if the card itself does not handle
+                        onTap: () {
+                          tVmedium();
+                        },
+                        child:
+                            _buildTvRecommendationCard(context, tvShows[index]),
+                      );
                       // We can reuse the same card widget from your detail page logic
-                    //  return _buildTvRecommendationCard(context, tvShows[index]);
+                      //  return _buildTvRecommendationCard(context, tvShows[index]);
                     },
                   );
                 } else {
@@ -184,26 +188,33 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                 children: [
                   movie.fullPosterPath.isNotEmpty
                       ? CachedNetworkImage(
+                          filterQuality: FilterQuality.high,
                           imageUrl: movie.fullPosterPath,
                           width: double.infinity,
                           height: 200, // Adjust height for grid view
                           fit: BoxFit.cover,
                           errorWidget: (context, url, error) => Container(
-                        //    height: 200,
+                            //    height: 200,
                             color: Colors.grey[800],
-                            child: const Center(child: Icon(Icons.movie, size: 40, color: AppColors.secondaryText)),
+                            child: const Center(
+                                child: Icon(Icons.movie,
+                                    size: 40, color: AppColors.secondaryText)),
                           ),
                         )
                       : Container(
-                        //  height: 200,
+                          //  height: 200,
                           color: Colors.grey[800],
-                          child: const Center(child: Icon(Icons.movie, size: 40, color: AppColors.secondaryText)),
+                          child: const Center(
+                              child: Icon(Icons.movie,
+                                  size: 40, color: AppColors.secondaryText)),
                         ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
                       color: _getRatingColor(movie.voteAverage),
-                      borderRadius: const BorderRadius.only(topLeft: Radius.circular(8)),
+                      borderRadius:
+                          const BorderRadius.only(topLeft: Radius.circular(8)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -212,7 +223,10 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                         const SizedBox(width: 2),
                         Text(
                           movie.voteAverage.toStringAsFixed(1),
-                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -226,7 +240,8 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                 movie.title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -248,7 +263,10 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => TvShowDetailPageAnime(tvShow: series, typec: widget.typec,),
+            builder: (context) => TvShowDetailPageAnime(
+              tvShow: series,
+              typec: widget.typec,
+            ),
           ),
         );
       },
@@ -265,6 +283,7 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                 children: [
                   series.fullPosterPath.isNotEmpty
                       ? CachedNetworkImage(
+                          filterQuality: FilterQuality.high,
                           imageUrl: series.fullPosterPath,
                           width: double.infinity,
                           height: 200, // Adjust height for grid view
@@ -272,19 +291,25 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                           errorWidget: (context, url, error) => Container(
                             height: 200,
                             color: Colors.grey[800],
-                            child: const Center(child: Icon(Icons.movie, size: 40, color: AppColors.secondaryText)),
+                            child: const Center(
+                                child: Icon(Icons.movie,
+                                    size: 40, color: AppColors.secondaryText)),
                           ),
                         )
                       : Container(
                           height: 200,
                           color: Colors.grey[800],
-                          child: const Center(child: Icon(Icons.movie, size: 40, color: AppColors.secondaryText)),
+                          child: const Center(
+                              child: Icon(Icons.movie,
+                                  size: 40, color: AppColors.secondaryText)),
                         ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
                       color: _getRatingColor(series.voteAverage),
-                      borderRadius: const BorderRadius.only(topLeft: Radius.circular(8)),
+                      borderRadius:
+                          const BorderRadius.only(topLeft: Radius.circular(8)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -293,7 +318,10 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                         const SizedBox(width: 2),
                         Text(
                           series.voteAverage.toStringAsFixed(1),
-                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -307,7 +335,8 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                 series.name,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
             ),
           ],

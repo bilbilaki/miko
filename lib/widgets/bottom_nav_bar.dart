@@ -50,9 +50,9 @@ class BottomNavBar extends StatelessWidget {
           label: 'WatchList',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.video_library_outlined),
-          activeIcon: Icon(Icons.video_library),
-          label: 'Favorites',
+          icon: Icon(Icons.tv),
+          activeIcon: Icon(Icons.system_update_tv_outlined),
+          label: 'IPTV',
         ),
       ],
     );

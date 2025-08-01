@@ -5,6 +5,8 @@ import 'package:flutter/services.dart'; // Import for HapticFeedback
 import 'package:miko/providers/god_proovider.dart' as ss;
 import 'package:miko/services/user_data_service.dart';
 import 'package:miko/showcases/recommendations_page.dart';
+import 'package:miko/utils/utils.dart';
+import 'package:share_plus/share_plus.dart';
 import '../widgets/anime_series_card.dart'; // Keep if used elsewhere
 import 'seasondetailpage_anime.dart';
 import 'package:miko/utils/colors.dart';
@@ -38,7 +40,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
   TvShow? _detailedTvShow; // Store the fully loaded TvShow object
 
   // Futures for tab-specific data
-  Future<TVCredits>? _creditsFuture;
+  Future<TVCredits>? creditsFuture;
   Future<YoutubeVideoForSeries>? _videosFuture;
 
   final List<Tab> _tabs = const [
@@ -72,7 +74,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
         final loadedShow = data['details'] as TvShow;
         setState(() {
           _detailedTvShow = loadedShow;
-          _creditsFuture = _movieService.getTVCredits(tvId: loadedShow.id);
+          creditsFuture = _movieService.getTVCredits(tvId: loadedShow.id);
           _videosFuture =
               _movieService.getTvShowVideos(tvShowId: loadedShow.id);
         });
@@ -457,6 +459,47 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
                           padding: const EdgeInsets.all(4.0),
                         ),
                       ),
+                                        const SizedBox(width: 4),
+                IconButton(
+                  icon: Icon(
+                   Icons.share,
+                    color: Colors.purpleAccent,
+                    size: 20,
+                  ),
+                  onPressed: () async {
+                    tVheavy();
+final myItem = ShareItem(
+  name: tvShow.name,
+  vote: tvShow.voteAverage,
+  releaseDate: tvShow.firstAirDate.toString(),
+  overview: tvShow.overview,
+  posterUrl: tvShow.fullPosterPath, internalUrl: 'https://iinos.site/series${tvShow.id}', // Replace with a real URL
+);
+final String shareContent = '''
+Check out this: ${myItem.name}
+Rating: ${myItem.vote}
+Release Date: ${myItem.releaseDate}
+Overview: ${myItem.overview}
+Open in miko by click on ${myItem.internalUrl}
+''';
+SharePlus.instance.share(
+  ShareParams(text: shareContent)
+);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                        'Share item ...'
+                        ),
+                        duration: const Duration(seconds: 1),
+                      ),
+                    );
+                  },
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.black.withOpacity(0.5),
+                    padding: const EdgeInsets.all(4.0),
+                  ),
+                ),
                     ],
                   ),
                 ),
@@ -899,9 +942,9 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
   }
 
   Widget _buildCastTab(BuildContext context, int tvShowId) {
-    _creditsFuture ??= _movieService.getTVCredits(tvId: tvShowId);
+  final  creditsFuture = _movieService.getTVCredits(tvId: tvShowId);
     return FutureBuilder<TVCredits>(
-      future: _creditsFuture,
+      future: creditsFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return GridView.builder(
@@ -970,13 +1013,13 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
                             highlightColor: Colors.grey[700]!,
                             child: Container(color: Colors.black),
                           ),
-                          errorWidget: (context, url, error) => const Center(
-                            child: Icon(
-                              Icons.person,
-                              color: AppColors.secondaryText,
-                              size: 30,
-                            ),
-                          ),
+                          // errorWidget: (context, url, error) => const Center(
+                          //   child: Icon(
+                          //     Icons.person,
+                          //     color: AppColors.secondaryText,
+                          //     size: 30,
+                          //   ),
+                          //),
                           fadeInDuration: const Duration(milliseconds: 200),
                           fadeOutDuration: const Duration(milliseconds: 100),
                         ),
@@ -985,13 +1028,13 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
                     const SizedBox(height: 6),
                     Text(member.name,
                         textAlign: TextAlign.center,
-                        maxLines: 3,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 16)),
                     Text(member.character,
                         textAlign: TextAlign.center,
-                        maxLines: 3,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style:
                             TextStyle(fontSize: 14, color: Colors.grey[400])),

@@ -14,7 +14,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:miko/providers/csv_detail_process_provider.dart';
 import 'package:provider/provider.dart';
 
-
 class CrawlerHomePage4 extends StatefulWidget {
   const CrawlerHomePage4({super.key});
 
@@ -198,7 +197,10 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
       final uri = Uri.parse(item.url);
       final response = await http.get(uri).timeout(const Duration(seconds: 20));
 
-      if (response.statusCode == 200||response.statusCode == 201||response.statusCode == 301||response.statusCode == 303) {
+      if (response.statusCode == 200 ||
+          response.statusCode == 201 ||
+          response.statusCode == 301 ||
+          response.statusCode == 303) {
         BeautifulSoup bs = BeautifulSoup(response.body);
         List<Bs4Element> links = bs.findAll('a', attrs: {'href': true});
 
@@ -325,35 +327,35 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
       return;
     }
 
-  //   _log("💾 Saving session: $sessionName...");
-  //   final session = CrawlSession(
-  //     sessionName: sessionName,
-  //     savedAt: DateTime.now(),
-  //     rootUrls: _urlController.text,
-  //     baseName: _fileNameController.text,
-  //     selectedExtension: _selectedExtension,
-  //     processAsSeries: _processAsSeries ? 1 : 0,
-  //     crawlQueueJson:
-  //         jsonEncode(_crawlQueue.map((item) => item.toJson()).toList()),
-  //     visitedUrlsJson: jsonEncode(_visitedUrls.toList()),
-  //     foundUrlsJson: jsonEncode(_foundUrls.toList()),
-  //   );
+    //   _log("💾 Saving session: $sessionName...");
+    //   final session = CrawlSession(
+    //     sessionName: sessionName,
+    //     savedAt: DateTime.now(),
+    //     rootUrls: _urlController.text,
+    //     baseName: _fileNameController.text,
+    //     selectedExtension: _selectedExtension,
+    //     processAsSeries: _processAsSeries ? 1 : 0,
+    //     crawlQueueJson:
+    //         jsonEncode(_crawlQueue.map((item) => item.toJson()).toList()),
+    //     visitedUrlsJson: jsonEncode(_visitedUrls.toList()),
+    //     foundUrlsJson: jsonEncode(_foundUrls.toList()),
+    //   );
 
-  //   await SessionDatabase.instance.create(session);
-  //   _log("✅ Session '$sessionName' saved successfully.");
-  //   if (mounted) {
-  //     setState(() {});
-  //   }
-  // }
+    //   await SessionDatabase.instance.create(session);
+    //   _log("✅ Session '$sessionName' saved successfully.");
+    //   if (mounted) {
+    //     setState(() {});
+    //   }
+    // }
 
-  // Future<void> _loadSession(CrawlSession session) async {
-  //   _log("🔄 Loading session: ${session.sessionName}...");
-  //   _urlController.text = session.rootUrls;
-  //   _fileNameController.text = session.baseName;
+    // Future<void> _loadSession(CrawlSession session) async {
+    //   _log("🔄 Loading session: ${session.sessionName}...");
+    //   _urlController.text = session.rootUrls;
+    //   _fileNameController.text = session.baseName;
 
-  //   final queueList = jsonDecode(session.crawlQueueJson) as List;
-  //   final visitedList = jsonDecode(session.visitedUrlsJson) as List;
-  //   final foundList = jsonDecode(session.foundUrlsJson) as List;
+    //   final queueList = jsonDecode(session.crawlQueueJson) as List;
+    //   final visitedList = jsonDecode(session.visitedUrlsJson) as List;
+    //   final foundList = jsonDecode(session.foundUrlsJson) as List;
 
     setState(() {
       // _selectedExtension = session.selectedExtension;
@@ -361,7 +363,7 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
 
       _crawlQueue.clear();
       // _crawlQueue
-          // .addAll(queueList.map((item) => CrawlItem.fromJson(item)).toList());
+      // .addAll(queueList.map((item) => CrawlItem.fromJson(item)).toList());
 
       _visitedUrls.clear();
       // _visitedUrls.addAll(List<String>.from(visitedList));
@@ -370,10 +372,10 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
       // _foundUrls.addAll(List<String>.from(foundList));
 
       // _basePaths = session.rootUrls
-          // .split('\n')
-          // .map((s) => s.trim())
-          // .where((s) => s.isNotEmpty)
-          // .toList();
+      // .split('\n')
+      // .map((s) => s.trim())
+      // .where((s) => s.isNotEmpty)
+      // .toList();
 
       _isProcessing = true;
       _isPaused = true;
@@ -856,21 +858,20 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
             child: const Text("Run Task"),
           ),
         ),
-            ListTile(
+        ListTile(
           leading: const Icon(Icons.perm_contact_calendar_sharp),
           title: const Text("Data Import from Tmdb"),
           subtitle: const Text(
               "Import Data for Each series from TMDB with selected CSV file."),
           trailing: ElevatedButton(
-            onPressed: () =>
-                _navigateTo(context, TmdbDatailsProcess(),true),
+            onPressed: () => _navigateTo(context, TmdbDatailsProcess(), true),
             child: const Text("Open page"),
           ),
         ),
-  
-    ]),
+      ]),
     );
   }
+
   void _navigateTo(BuildContext context, Widget screen, bool isMobileLayout) {
     if (isMobileLayout) Navigator.pop(context);
     Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
@@ -879,7 +880,6 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
   Widget _buildRestTab() {
     return const SizedBox(child: HttpClientPage());
   }
-
 
   Future<void> _runFixAndCleanTask() async {
     _log("🔧 Starting 'Fix & Clean' task...");
@@ -954,7 +954,6 @@ class MovieData {
 
   MovieData(this.name);
 }
-
 
 class TmdbDatailsProcess extends StatelessWidget {
   const TmdbDatailsProcess({super.key});
@@ -1100,6 +1099,7 @@ class TmdbDatailsProcess extends StatelessWidget {
               child: ListTile(
                 leading: item.posterPath.isNotEmpty
                     ? CachedNetworkImage(
+                        filterQuality: FilterQuality.high,
                         imageUrl:
                             'https://image.tmdb.org/t/p/w200${item.posterPath}',
                         placeholder: (context, url) => const SizedBox(

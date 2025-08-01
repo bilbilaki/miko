@@ -6,7 +6,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-
 import 'package:miko/providers/god_proovider.dart';
 import 'package:miko/screens/video_player_screen.dart';
 import 'package:miko/services/user_data_service.dart';
@@ -20,7 +19,7 @@ import 'package:miko/utils/utils.dart';
 //import 'package:miko/showcases/tv_detail_page_anime.dart';
 import 'package:miko/widgets/anime_series_card.dart';
 import 'package:provider/provider.dart';
- // Ensure correct provider import
+// Ensure correct provider import
 import 'package:miko/utils/colors.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:shimmer/shimmer.dart';
@@ -57,7 +56,7 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
           },
           child: GestureDetector(
             // Added GestureDetector for general touch/drag vibration
-          //  onTapDown: (_) => triggerVibration(), // Vibrate on touch/tap down
+            //  onTapDown: (_) => triggerVibration(), // Vibrate on touch/tap down
             //        onPanDown: (_) => triggerVibration(), // Vibrate on pan/drag down
             child: Stack(
               children: [
@@ -157,11 +156,11 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
   void dispose() {
     _searchScrollController2.dispose(); // Dispose the correct controller
     _searchController2.removeListener(onSearchChanged2);
-  //  _searchController2.dispose();
+    //  _searchController2.dispose();
     _debounce?.cancel();
-        _movieService.dispose();
+    _movieService.dispose();
 
-        _scrollController.dispose();
+    _scrollController.dispose();
 
     super.dispose();
   }
@@ -179,7 +178,7 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
   void onSearchChanged2() async {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 100), () {
-   late   final query = _searchController2.text.trim();
+      late final query = _searchController2.text.trim();
       if (query != _currentQuery2) {
         _currentQuery2 = query;
         _searchPage2 = 1;
@@ -260,25 +259,24 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => MovieDetailPage(
-                
-                  id: result.id,
-                  // title: result.name,
-                  // originalTitle: result.originalName,
-                  // posterPath: result.posterPath,
-                  // backdropPath: result.backdropPath,
-                  // adult: result.adult,
-                  // genreIds: result.genreIds,
-                  // originalLanguage: result.originalLanguage.toString(),
-                  // overview: result.overview.toString(),
-                  // popularity: result.popularity,
-                  // voteAverage: result.voteAverage,
-                  // voteCount: result.voteCount,
-                  // releaseDate: result.releaseDate.toString(),
-                  // video: result.video,
-                  // Add other necessary fields from the multi search result
-                ),
+                id: result.id,
+                // title: result.name,
+                // originalTitle: result.originalName,
+                // posterPath: result.posterPath,
+                // backdropPath: result.backdropPath,
+                // adult: result.adult,
+                // genreIds: result.genreIds,
+                // originalLanguage: result.originalLanguage.toString(),
+                // overview: result.overview.toString(),
+                // popularity: result.popularity,
+                // voteAverage: result.voteAverage,
+                // voteCount: result.voteCount,
+                // releaseDate: result.releaseDate.toString(),
+                // video: result.video,
+                // Add other necessary fields from the multi search result
               ),
-          //  ),
+            ),
+            //  ),
           );
         }
         break;
@@ -288,7 +286,7 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => TvShowDetailPageAnime(
-               tvShow: mo.TvShow(
+                tvShow: mo.TvShow(
                   id: result.id,
                   name: result.name,
                   originalName: result.originalName,
@@ -302,8 +300,8 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
                   popularity: result.popularity,
                   voteAverage: result.voteAverage,
                   voteCount: result.voteCount,
-                 // Add other necessary fields from the multi search result
-               ),
+                  // Add other necessary fields from the multi search result
+                ),
                 typec: "tvseries",
               ),
             ),
@@ -313,15 +311,14 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
       case MediaType.person:
         if (result is MultiSearchPerson) {
           Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => PersonDetailPage(
-                  personId: result.id,
-                  initialName: result.name,
-                  initialProfilePath: result.profilePath),
-            // ),
-                )
-          );
+              context,
+              MaterialPageRoute(
+                builder: (context) => PersonDetailPage(
+                    personId: result.id,
+                    initialName: result.name,
+                    initialProfilePath: result.profilePath),
+                // ),
+              ));
         }
         break;
     }
@@ -528,6 +525,7 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
               height: 150,
               child: posterUrl.isNotEmpty // check if posterUrl is not empty
                   ? CachedNetworkImage(
+                      filterQuality: FilterQuality.high,
                       imageUrl: posterUrl,
                       fit: BoxFit.cover,
                       placeholder: (context, url) => const Center(
@@ -745,6 +743,7 @@ class AnimeDetailsScreen extends StatelessWidget {
                 children: [
                   backdropUrl != null
                       ? CachedNetworkImage(
+                          filterQuality: FilterQuality.high,
                           imageUrl: backdropUrl,
                           fit: BoxFit.cover,
                           placeholder: (context, url) =>
@@ -762,6 +761,7 @@ class AnimeDetailsScreen extends StatelessWidget {
                           child: posterUrl !=
                                   null // Try poster as fallback background
                               ? CachedNetworkImage(
+                                  filterQuality: FilterQuality.high,
                                   imageUrl: posterUrl,
                                   fit: BoxFit.contain,
                                   alignment: Alignment.center,
@@ -913,6 +913,7 @@ class AnimeDetailsScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                           child: posterUrl != null
                               ? CachedNetworkImage(
+                                  filterQuality: FilterQuality.high,
                                   imageUrl: posterUrl,
                                   fit: BoxFit.cover,
                                   height: 190,
@@ -1316,6 +1317,7 @@ class MovieDetailsScreen extends StatelessWidget {
               background: backdropUrl != null
                   ? Stack(fit: StackFit.expand, children: [
                       CachedNetworkImage(
+                        filterQuality: FilterQuality.high,
                         imageUrl: backdropUrl,
                         fit: BoxFit.cover,
                         placeholder: (context, url) => const Center(
@@ -1327,6 +1329,7 @@ class MovieDetailsScreen extends StatelessWidget {
                         errorWidget: (context, url, error) => Center(
                           child: posterUrl != null
                               ? CachedNetworkImage(
+                                  filterQuality: FilterQuality.high,
                                   imageUrl: posterUrl,
                                   fit: BoxFit.contain, // Fallback to poster
                                   placeholder: (context, url) => const Center(
@@ -1501,6 +1504,7 @@ class MovieDetailsScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                         child: posterUrl != null
                             ? CachedNetworkImage(
+                                filterQuality: FilterQuality.high,
                                 imageUrl: posterUrl,
                                 fit: BoxFit.cover,
                                 placeholder: (context, url) => const Center(

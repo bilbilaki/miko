@@ -12,7 +12,7 @@ class GridWall extends StatefulWidget {
 
 class _GridWallState extends State<GridWall> {
   Future<List<Scene>>? _scenesFuture;
-
+String baseurl='';
   @override
   void initState() {
     super.initState();
@@ -57,9 +57,12 @@ class _GridWallState extends State<GridWall> {
   }
 
   Future<List<Scene>> getBase(BuildContext context) async {
-    final baseurl = await gridMaker(context, '192.168.0.0:9999', 'Base Url');
+    final baseurlget = await gridMaker(context, '192.168.49.182:9999', 'Base Url');
+    setState(() {
+      baseurl = baseurlget.toString();
+    });
     final List<Scene> scenes = [];
-    if (baseurl != null && baseurl.isNotEmpty) {
+    if (baseurl.isNotEmpty) {
       final howmany = await gridMaker(context, '600', 'how many?');
       if (howmany == null) return scenes; // Exit if user cancels the second dialog
       final howManyInt = int.tryParse(howmany) ?? 1;
@@ -127,7 +130,8 @@ class _GridWallState extends State<GridWall> {
       itemCount: scenes.length,
       // --- THE ONLY CHANGE IS HERE ---
       itemBuilder: (context, index) => InteractiveVideoCard(
-        scene: scenes[index],
+        scene: scenes[index]
+
       ),
       // --- END OF CHANGE ---
     );

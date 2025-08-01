@@ -19,10 +19,16 @@ import '../screens/video_player_screen.dart';
 import 'model.dart';
 import 'movie_service.dart';
 import 'person_detail_page.dart';
+import 'package:share_plus/share_plus.dart';
+
 class FadeIn extends StatefulWidget {
   final Widget child;
   final Duration duration;
-  const FadeIn({Key? key, required this.child, this.duration = const Duration(milliseconds: 300)}) : super(key: key);
+  const FadeIn(
+      {Key? key,
+      required this.child,
+      this.duration = const Duration(milliseconds: 300)})
+      : super(key: key);
 
   @override
   _FadeInState createState() => _FadeInState();
@@ -66,8 +72,8 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   late Future<Map<String, dynamic>> _movieDataFuture;
   MovieResponse? recommendations;
   List<Keyword> _movieKeywords = [];
-Movie? movie;
-List<String> downloadLinks = [''];
+  Movie? movie;
+  List<String> downloadLinks = [''];
   // Helper for haptic feedback
   void _performHapticFeedback() {
     if (Platform.isAndroid) {
@@ -91,11 +97,10 @@ List<String> downloadLinks = [''];
   void _loadMovieData() async {
     _movieDataFuture =
         _movieService.getMovieDetailsWithCredits(movieId: widget.id);
-        
+
     _movieDataFuture.then((_) {
       if (mounted) {
         setState(() async {
-
           movie = await _movieService.getMovieDetails(movieId: widget.id);
         });
       }
@@ -108,7 +113,7 @@ List<String> downloadLinks = [''];
 
   @override
   Widget build(BuildContext context) {
-  final userDataService = Provider.of<UserDataService>(context);
+    final userDataService = Provider.of<UserDataService>(context);
 
     return Scaffold(
       body: FutureBuilder<Map<String, dynamic>>(
@@ -117,7 +122,7 @@ List<String> downloadLinks = [''];
           if (snapshot.connectionState == ConnectionState.waiting) {
             return _buildLoadingView();
           } else if (snapshot.hasError) {
-            return _buildRetryableView(context,userDataService);
+            return _buildRetryableView(context, userDataService);
           } else if (snapshot.hasData) {
             final detailedMovie = snapshot.data!['details'] as Movie;
             final credits = snapshot.data!['credits'] as MovieCredits;
@@ -126,9 +131,10 @@ List<String> downloadLinks = [''];
 
             _movieKeywords = detailedMovie.keywords;
 
-            return _buildDetailView(context, detailedMovie, credits,userDataService);
+            return _buildDetailView(
+                context, detailedMovie, credits, userDataService);
           } else {
-            return _buildRetryableView(context,userDataService);
+            return _buildRetryableView(context, userDataService);
           }
         },
       ),
@@ -146,8 +152,8 @@ List<String> downloadLinks = [''];
       });
       return _buildLoadingView();
     } else {
-      return _buildErrorView(
-          context, "Error when We Try to Load Data From TMDB!!",userDataService);
+      return _buildErrorView(context,
+          "Error when We Try to Load Data From TMDB!!", userDataService);
     }
   }
 
@@ -257,75 +263,82 @@ List<String> downloadLinks = [''];
     );
   }
 
-  Widget _buildErrorView(BuildContext context, String errorMessage,userDataService) {
+  Widget _buildErrorView(
+      BuildContext context, String errorMessage, userDataService) {
     return Column(
-  children: [
-    Expanded(
-      child: _buildDetailView(context, movie!, null, userDataService, showDetailedInfo: false),
-    ),
-           Container(
-            color: Colors.black87,
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error_outline,
-                        size: 60, color: Colors.red),
-                    const SizedBox(height: 16),
-                    SelectableText('Error loading movie details',
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleLarge
-                            ?.copyWith(color: Colors.white)),
-                    const SizedBox(height: 8),
-                    SelectableText(errorMessage,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium
-                            ?.copyWith(color: Colors.white70)),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        _performHapticFeedback();
-                        setState(() {
-                          _loadMovieData();
-                        });
-                      },
-                      child: const Text('Try Again'),
-                    ),
-                                        const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        _performHapticFeedback();
-                       Navigator.of(context).push(MaterialPageRoute(
-                         builder: (context) => MovieDetailsScreen(movieId: widget.id, typec: "movie",),
-                       ));
-                      },
-                      child: const Text('Try Loading using old interface'),
-                    ),
-                                        ElevatedButton(
-                      onPressed: () {
-                        _performHapticFeedback();
-                       Navigator.of(context).push(MaterialPageRoute(
-                         builder: (context) => MovieDetailsScreen(movieId: widget.id, typec: "movie",),
-                       ));
-                      },
-                      child: const Text('Try Loading using old interface'),
-                    ),
-                  ],
-                ),
+      children: [
+        Expanded(
+          child: _buildDetailView(context, movie!, null, userDataService,
+              showDetailedInfo: false),
+        ),
+        Container(
+          color: Colors.black87,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 60, color: Colors.red),
+                  const SizedBox(height: 16),
+                  SelectableText('Error loading movie details',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.copyWith(color: Colors.white)),
+                  const SizedBox(height: 8),
+                  SelectableText(errorMessage,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(color: Colors.white70)),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      _performHapticFeedback();
+                      setState(() {
+                        _loadMovieData();
+                      });
+                    },
+                    child: const Text('Try Again'),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      _performHapticFeedback();
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => MovieDetailsScreen(
+                          movieId: widget.id,
+                          typec: "movie",
+                        ),
+                      ));
+                    },
+                    child: const Text('Try Loading using old interface'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      _performHapticFeedback();
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => MovieDetailsScreen(
+                          movieId: widget.id,
+                          typec: "movie",
+                        ),
+                      ));
+                    },
+                    child: const Text('Try Loading using old interface'),
+                  ),
+                ],
               ),
             ),
           ),
-        ],
-      );
+        ),
+      ],
+    );
   }
 
   Widget _buildDetailView(
-      BuildContext context, Movie movie, MovieCredits? credits,userDataService,
+      BuildContext context, Movie movie, MovieCredits? credits, userDataService,
       {bool showDetailedInfo = true}) {
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification scrollInfo) {
@@ -338,10 +351,10 @@ List<String> downloadLinks = [''];
       },
       child: CustomScrollView(
         slivers: [
-          _buildAppBar(context, movie,userDataService),
+          _buildAppBar(context, movie, userDataService),
           SliverToBoxAdapter(
-            child:
-                _buildMovieDetails(context, movie, credits, showDetailedInfo,userDataService),
+            child: _buildMovieDetails(
+                context, movie, credits, showDetailedInfo, userDataService),
           ),
         ],
       ),
@@ -351,11 +364,11 @@ List<String> downloadLinks = [''];
   Widget _buildAppBar(BuildContext context, Movie movie, userDataService) {
     bool isFavorite = userDataService.isFavoriteMovie(movie.id);
     //final movieM = Provider.of<MovieProvider>(context, listen: false)
-       // .getMovieById(movie.id);
+    // .getMovieById(movie.id);
     final backdropUrl = movie.fullBackdropPath;
     final posterUrl = movie.fullPosterPath;
-   // if (movieM != null){
-  //  movieM!.getDownloadLinksList();}
+    // if (movieM != null){
+    //  movieM!.getDownloadLinksList();}
     bool isInWatchlist = userDataService.isOnWatchlistMovie(movie.id);
 
     return SliverAppBar(
@@ -401,6 +414,7 @@ List<String> downloadLinks = [''];
         background: Stack(fit: StackFit.expand, children: [
           backdropUrl.isNotEmpty
               ? CachedNetworkImage(
+                  filterQuality: FilterQuality.high,
                   imageUrl: backdropUrl,
                   fit: BoxFit.cover,
                   placeholder: (context, url) => const Center(
@@ -410,6 +424,7 @@ List<String> downloadLinks = [''];
                       // Custom fallback logic: try poster if backdrop fails
                       posterUrl.isNotEmpty
                           ? CachedNetworkImage(
+                              filterQuality: FilterQuality.high,
                               imageUrl: posterUrl,
                               fit: BoxFit.contain,
                               placeholder: (context, url) => const Center(
@@ -536,6 +551,45 @@ List<String> downloadLinks = [''];
                     padding: const EdgeInsets.all(4.0),
                   ),
                 ),
+                const SizedBox(width: 4),
+                IconButton(
+                  icon: Icon(
+                    Icons.share,
+                    color: Colors.purpleAccent,
+                    size: 20,
+                  ),
+                  onPressed: () async {
+                    _performHapticFeedback();
+                    final myItem = ShareItem(
+                      name: movie.title,
+                      vote: movie.voteAverage,
+                      releaseDate: movie.releaseDate,
+                      overview: movie.overview,
+                      posterUrl: movie.fullPosterPath,
+                      internalUrl:
+                          'https://iinos.site/movie${movie.id}', // Replace with a real URL
+                    );
+                    final String shareContent = '''
+Check out this: ${myItem.name}
+Rating: ${myItem.vote}
+Release Date: ${myItem.releaseDate}
+Overview: ${myItem.overview}
+Open in miko by click on ${myItem.internalUrl}
+''';
+                    SharePlus.instance.share(ShareParams(text: shareContent));
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Share item ...'),
+                        duration: const Duration(seconds: 1),
+                      ),
+                    );
+                  },
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.black.withOpacity(0.5),
+                    padding: const EdgeInsets.all(4.0),
+                  ),
+                ),
               ],
             ),
           )
@@ -550,23 +604,21 @@ List<String> downloadLinks = [''];
       ),
     );
   }
-void dllink (BuildContext context){
 
-      final mmovie = Provider.of<MovieProvider>(context, listen: false)
+  void dllink(BuildContext context) {
+    final mmovie = Provider.of<MovieProvider>(context, listen: false)
         .getMovieById(widget.id);
-        if (mmovie !=null){
+    if (mmovie != null) {
+      final downloadLink = mmovie.getDownloadLinksList();
+      downloadLinks = downloadLink;
+    }
+  }
 
-final downloadLink = mmovie.getDownloadLinksList();
-  downloadLinks = downloadLink;
-
-        }
-
-}
   Widget _buildMovieDetails(BuildContext context, Movie movie,
-      MovieCredits? credits, bool showDetailedInfo,userDataService) {
-dllink(context);
-    bool isWatched = userDataService.isWatchedEpisode(widget.id,
-        widget.id, widget.id, widget.id);
+      MovieCredits? credits, bool showDetailedInfo, userDataService) {
+    dllink(context);
+    bool isWatched = userDataService.isWatchedEpisode(
+        widget.id, widget.id, widget.id, widget.id);
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -612,6 +664,7 @@ dllink(context);
                     height: 180,
                     child: movie.fullPosterPath.isNotEmpty
                         ? CachedNetworkImage(
+                            filterQuality: FilterQuality.high,
                             imageUrl: movie.fullPosterPath,
                             fit: BoxFit.cover,
                             placeholder: (context, url) => const Center(
@@ -711,11 +764,11 @@ dllink(context);
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                        (downloadLinks != [''])?
-                     ElevatedButton.icon(
+                (downloadLinks != [''])
+                    ? ElevatedButton.icon(
                         icon: const Icon(Icons.play_arrow),
                         label: Text(
-                           'Play',
+                          'Play',
                         ),
                         style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.accentColor,
@@ -724,15 +777,11 @@ dllink(context);
                                 horizontal: 30, vertical: 12)),
                         onPressed: () {
                           _performHapticFeedback();
-                          _showDownloadLinkSelection(
-                              context, downloadLinks);
-                           // downloadLinks.toString());
+                          _showDownloadLinkSelection(context, downloadLinks);
+                          // downloadLinks.toString());
                         },
                       )
-                  :
-                SizedBox(child:  Text("No Playing Link Exist")),
-               
-                       
+                    : SizedBox(child: Text("No Playing Link Exist")),
               ],
             ),
             const SizedBox(height: 4),
@@ -766,7 +815,7 @@ dllink(context);
                 ),
                 TextButton(
                   onPressed: () {
-                                        _performHapticFeedback();
+                    _performHapticFeedback();
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -828,8 +877,10 @@ dllink(context);
                                     child: SizedBox(
                                       width: 100,
                                       height: 100,
-                                      child: castMember.profilePath == castMember.profilePath
+                                      child: castMember.profilePath ==
+                                              castMember.profilePath
                                           ? CachedNetworkImage(
+                                              filterQuality: FilterQuality.high,
                                               imageUrl:
                                                   castMember.fullProfilePath,
                                               fit: BoxFit.cover,
@@ -954,6 +1005,7 @@ dllink(context);
                                     height: 80,
                                     child: director.profilePath != null
                                         ? CachedNetworkImage(
+                                            filterQuality: FilterQuality.high,
                                             imageUrl: director.fullProfilePath,
                                             fit: BoxFit.cover,
                                             imageBuilder:
@@ -1049,6 +1101,7 @@ dllink(context);
                     child: Chip(
                       avatar: writer.profilePath != null
                           ? CachedNetworkImage(
+                              filterQuality: FilterQuality.high,
                               imageUrl: writer.fullProfilePath,
                               imageBuilder: (context, imageProvider) =>
                                   CircleAvatar(
@@ -1105,6 +1158,7 @@ dllink(context);
                     child: Chip(
                       avatar: producer.profilePath != null
                           ? CachedNetworkImage(
+                              filterQuality: FilterQuality.high,
                               imageUrl: producer.fullProfilePath,
                               imageBuilder: (context, imageProvider) =>
                                   CircleAvatar(
@@ -1194,6 +1248,7 @@ dllink(context);
                                 height: 40,
                                 width: 80,
                                 child: CachedNetworkImage(
+                                  filterQuality: FilterQuality.high,
                                   imageUrl: company.fullLogoPath,
                                   fit: BoxFit.contain,
                                   placeholder: (context, url) => const Center(
@@ -1328,24 +1383,25 @@ dllink(context);
                     OutlinedButton.icon(
                       icon: const Icon(Icons.language),
                       label: const Text('Official Website'),
-                      onPressed: () async{
+                      onPressed: () async {
                         // TODO: Launch URL (would need url_launcher package)
                         // import 'package:url_launcher/url_launcher.dart';
-                         if (await canLaunchUrl(Uri.parse(movie.homepage!))) {
-                           await launchUrl(Uri.parse(movie.homepage!));
-                         }
+                        if (await canLaunchUrl(Uri.parse(movie.homepage!))) {
+                          await launchUrl(Uri.parse(movie.homepage!));
+                        }
                       },
                     ),
                   if (movie.imdbId != null)
                     OutlinedButton.icon(
                       icon: const Icon(Icons.movie),
                       label: const Text('IMDb'),
-                      onPressed: () async{
+                      onPressed: () async {
                         // TODO: Launch IMDb URL
-                         final imdbUrl = 'https://www.imdb.com/title/${movie.imdbId}/';
-                         if (await canLaunchUrl(Uri.parse(imdbUrl))) {
-                           await launchUrl(Uri.parse(imdbUrl));
-                         }
+                        final imdbUrl =
+                            'https://www.imdb.com/title/${movie.imdbId}/';
+                        if (await canLaunchUrl(Uri.parse(imdbUrl))) {
+                          await launchUrl(Uri.parse(imdbUrl));
+                        }
                       },
                     ),
                 ],
@@ -1358,6 +1414,7 @@ dllink(context);
       ),
     );
   }
+
   void _showDownloadLinkSelection(
       BuildContext context, List<String> links) async {
     final userDataService =
@@ -1378,9 +1435,9 @@ dllink(context);
           children: links.map((link) {
             // Try to guess quality from URL (very basic)
             String qualityGuess = "Unknown";
-            if (link.contains('1080p')) 
+            if (link.contains('1080p'))
               qualityGuess = "1080p ";
-             else if (link.contains('720p'))
+            else if (link.contains('720p'))
               qualityGuess = "720p ";
             else if (link.contains('480p'))
               qualityGuess = "480p ";
@@ -1395,7 +1452,7 @@ dllink(context);
                 tVmedium(); // Haptic feedback on dialog option tap
                 Navigator.pop(dialogContext); // Close the dialog
                 userDataService.toggleIsWatchedLink(
-                    widget.id, widget.id,widget.id, links.toString());
+                    widget.id, widget.id, widget.id, links.toString());
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -1418,7 +1475,6 @@ dllink(context);
       },
     );
   }
-
 
   Widget _buildKeywordsSection(BuildContext context, List<Keyword> keywords) {
     return Column(
@@ -1493,7 +1549,7 @@ dllink(context);
               if (recommendations!.results.length > 10)
                 TextButton(
                   onPressed: () {
-                        _performHapticFeedback();
+                    _performHapticFeedback();
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -1503,7 +1559,8 @@ dllink(context);
                           typec: "movie",
                         ),
                       ),
-                    );},
+                    );
+                  },
                   child: Text(
                     'See All',
                     style: TextStyle(
@@ -1571,6 +1628,7 @@ dllink(context);
                   children: [
                     movie.fullPosterPath.isNotEmpty
                         ? CachedNetworkImage(
+                            filterQuality: FilterQuality.high,
                             imageUrl: movie.fullPosterPath,
                             height: 170,
                             width: 130,

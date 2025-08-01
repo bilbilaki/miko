@@ -1,13 +1,15 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:miko/app_keeper.dart';
+import 'package:miko/data/iptv_repository.dart';
 import 'package:miko/jackett/models/jackett_config.dart';
 import 'package:miko/jackett/services/config_service.dart';
+import 'package:miko/providers/ai_chat_provider.dart';
 
 import 'package:miko/providers/csv_detail_process_provider.dart';
 import 'package:miko/providers/god_proovider.dart';
+import 'package:miko/providers/iptv_providers.dart';
 import 'package:miko/providers/settings_provider.dart';
 import 'package:miko/services/user_data_service.dart'; // Import UserDataService
 import 'package:miko/utils/colors.dart';
@@ -18,7 +20,6 @@ import 'package:media_kit/media_kit.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as pr;
 import 'package:hive_flutter/hive_flutter.dart';
-
 // This function must be a top-level function.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +33,8 @@ await Hive.initFlutter();
 final container = pr.ProviderContainer();
   await container.read(ytdlpDownloaderServiceProvider).initialize();
   await container.read(settingsProvider.notifier).loadSettings();
+
+// 2. Create a provider so Riverpod can access the key
 
 
   runApp(
@@ -84,6 +87,7 @@ class MyApp extends pr.ConsumerWidget {
         settingsServiceProvider.overrideWith((ref) => settingsService),
       ],
       child: MaterialApp(
+        navigatorKey: navigatorKey,
           theme: AppThemes.netflixDarkTheme, home:  SplashScreen2(ref)),
     );
   }
