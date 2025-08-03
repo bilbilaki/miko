@@ -96,7 +96,7 @@ class SettingsScreen extends ConsumerWidget {
                   decoration: const InputDecoration(labelText: 'Jackett URL', hintText: 'http://127.0.0.1:9117'),
                    validator: (value) {
                     if (value == null || value.isEmpty) return 'Please enter a URL';
-                    if (!Uri.tryParse(value)!.isAbsolute ?? true) return 'Please enter a valid URL';
+                    if (!Uri.tryParse(value)!.isAbsolute) return 'Please enter a valid URL';
                     return null;
                    },
                 ),

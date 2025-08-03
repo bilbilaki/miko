@@ -4,10 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:miko/services/ai_chat_service.dart';
-import 'package:miko/showcases/model.dart';
-import 'package:miko/showcases/movie_service.dart';
 import 'package:miko/utils/utils.dart';
-import 'package:miko/widgets/ai_chat_dialog.dart';
 // Enum for AI chat modes, updated for Gemini
 enum GeminiChatMode {
   textChat,
@@ -15,7 +12,6 @@ enum GeminiChatMode {
 //  toolCalling, // Retained for mode-switching UI, though implementation is simplified
  // structuredOutput,
 }
-final MovieService _movieService = MovieService();
 
 sealed class AIChatUIEvent {}
 
@@ -98,7 +94,7 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
   late GeminiServiceBase _currentService;
   final uiEventController = StreamController<AIChatUIEvent>.broadcast();
   AIChatNotifier( this._ref) : super(AIChatState()) {
-        final context = _ref.read(navigatorKeyProvider).currentContext;
+    //    final context = _ref.read(navigatorKeyProvider).currentContext;
     _setCurrentGeminiService(state.currentMode); // Initialize with default service
   }
 

@@ -13,6 +13,7 @@ import 'package:miko/showcases/moviesearchpage.dart';
 import 'package:miko/showcases/tvsearchpage.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:miko/utils/utils.dart';
+import 'package:miko/webviewai/main.dart';
 import 'package:miko/yt-dlp/ui/screens/home_screen.dart';
 
 import '../providers/settings_provider.dart';
@@ -132,6 +133,14 @@ class LeftNavigationPanel extends ConsumerWidget {
         title: 'IPTV Player',
         showText: showText,
         onTap: () => _navigateTo(context, IptvScreen(), isMobileLayout),
+      ),
+             _buildNavigationItem(
+        context,
+        ref,
+        icon: Icons.assistant, 
+        title: 'AI Browser',
+        showText: showText,
+        onTap: () => _navigateTo(context, AdvancedWebViewer(), isMobileLayout),
       ),
       _buildNavigationItem(
         context,

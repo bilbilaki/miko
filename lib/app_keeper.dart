@@ -16,19 +16,19 @@ class _AppKeeperConsumerState extends ConsumerState<AppKeeper>
     with TickerProviderStateMixin {
   // Tab controllers remain for layout
   late TabController _leftDrawerTabController;
-  late TabController _rightDrawerTabController;
+ // late TabController _rightDrawerTabController;
 
   @override
   void initState() {
     super.initState();
     _leftDrawerTabController = TabController(length: 1, vsync: this);
-    _rightDrawerTabController = TabController(length: 1, vsync: this);
+   // _rightDrawerTabController = TabController(length: 1, vsync: this);
   }
 
   @override
   void dispose() {
     _leftDrawerTabController.dispose();
-    _rightDrawerTabController.dispose();
+  //  _rightDrawerTabController.dispose();
     super.dispose();
   }
 
@@ -127,7 +127,7 @@ class _AppKeeperConsumerState extends ConsumerState<AppKeeper>
                     ),
 
                     const Expanded(
-                      flex: 3,
+                      flex: 2,
                       child: CenterContentPanel(
                           isMobileLayout: false), 
                     ),

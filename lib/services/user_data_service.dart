@@ -19,7 +19,7 @@ class UserDataService extends ChangeNotifier {
   static const String _isWatchedSeasonKey = 'isWatchedSeason';
   static const String _isWatchedMovieKey = 'isWatchedMovie';
   static const String _isWatchedSeriesKey = 'isWatchedSeries';
-  static const String _myListKey = 'myList';
+  static const String myListKey = 'myList';
 
   // Add keys for history, downloads if implemented later
   String _custoombaseurl = '';

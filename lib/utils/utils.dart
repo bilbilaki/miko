@@ -1,9 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:miko/showcases/model.dart' as TmdbApiModels;
 import '../providers/god_proovider.dart' as CsvModels;
 
@@ -209,11 +207,11 @@ T? _tryParse<T>(dynamic value, T Function(String) parser) {
   }
 }
 
-int? _tryParseInt(dynamic value) => _tryParse(value, int.parse);
-double? _tryParseDouble(dynamic value) => _tryParse(value, double.parse);
-DateTime? _tryParseDate(dynamic value) => _tryParse(value, DateTime.parse);
+int? tryParseInt(dynamic value) => _tryParse(value, int.parse);
+double? tryParseDouble(dynamic value) => _tryParse(value, double.parse);
+DateTime? tryParseDate(dynamic value) => _tryParse(value, DateTime.parse);
 
-List<String> _splitStringList(dynamic value, {String separator = ','}) {
+List<String> splitStringList(dynamic value, {String separator = ','}) {
   if (value == null ||
       value.toString().isEmpty ||
       value.toString().toLowerCase() == 'nan' ||
@@ -333,7 +331,7 @@ Future<TmdbApiModels.Movie?> toTmdbMovie(CsvModels.Movie? csvMovie) async {
       voteCount: tmdbMovie.voteCount,
       status: tmdbMovie.status ?? 'Unknown',
       // Convert String to DateTime
-      releaseDate: _tryParseDate(tmdbMovie.releaseDate),
+      releaseDate: tryParseDate(tmdbMovie.releaseDate),
       revenue: tmdbMovie.revenue ?? 0,
       runtime: tmdbMovie.runtime,
       adult: tmdbMovie.adult,
@@ -352,7 +350,7 @@ Future<TmdbApiModels.Movie?> toTmdbMovie(CsvModels.Movie? csvMovie) async {
       productionCompanies: tmdbMovie.productionCompanies?.map((pc) => pc.name).toList() ?? [],
       productionCountries: tmdbMovie.productionCountries?.map((pc) => pc.name).toList() ?? [],
       spokenLanguages: tmdbMovie.spokenLanguages?.map((sl) => sl.englishName).toList() ?? [],
-      keywords: tmdbMovie.keywords?.map((k) => k.name).toList() ?? [], // Ensure keywords are handled, added null check as TMDB may omit
+      keywords: tmdbMovie.keywords.map((k) => k.name).toList(), // Ensure keywords are handled, added null check as TMDB may omit
       source: null, // Not applicable from TMDB API
       rawDownloadLinks: null, // Not applicable from TMDB API
       rawVideos: null, // Not applicable from TMDB API
@@ -368,7 +366,7 @@ Future<TmdbApiModels.TvShow?> toTmdbTvSeries(CsvModels.TvSeriesAnime? csvTvSerie
     if (csvTvSeries == null) return null;
 
     final List<TmdbApiModels.Season> tmdbSeasons = csvTvSeries.seasons.map((csvSeason) {
-      final List<TmdbApiModels.Episode> tmdbEpisodes = csvSeason.episodes.map((csvEpisode) {
+      csvSeason.episodes.map((csvEpisode) {
         return TmdbApiModels.Episode(
           id: csvEpisode.episodeIdentifier.hashCode, // Synthetic ID for episodes from CSV
           name: 'Episode ${csvEpisode.episodeNumber}',
@@ -455,7 +453,7 @@ Future<TmdbApiModels.TvShow?> toTmdbTvSeries(CsvModels.TvSeriesAnime? csvTvSerie
       tmdbId: tmdbTvShow.id,
       name: tmdbTvShow.name,
       status: tmdbTvShow.status ?? 'Unknown',
-      firstAirDate: _tryParseDate(tmdbTvShow.firstAirDate),
+      firstAirDate: tryParseDate(tmdbTvShow.firstAirDate),
       runtime: tmdbTvShow.episodeRunTime?.isNotEmpty == true ? tmdbTvShow.episodeRunTime!.first : null,
       overview: tmdbTvShow.overview,
       voteAverage: tmdbTvShow.voteAverage,

@@ -102,21 +102,21 @@ class SearchResultTile extends ConsumerWidget {
         ));
   }
 
-  void _showPreviewDialog(BuildContext context, String url) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
+  Stream<void> _showPreviewDialog(BuildContext context, String url) async*{
+    
+  
+        AlertDialog(
         contentPadding: const EdgeInsets.all(8),
         content: SizedBox(
           width: MediaQuery.of(context).size.width,
           child: LinkPreview(
             enableAnimation: true,
             text: url,
-            maxWidth: MediaQuery.of(context).size.width,
-            onLinkPreviewDataFetched: (data) {},
+            
+             onPreviewDataFetched: (previewdata ) {  }, width: MediaQuery.of(context).size.width, previewData:  await getPreviewData(url),
           ),
-        ),
-      ),
+                ),
+      
     );
-  }
+    }
 }

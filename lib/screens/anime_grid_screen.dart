@@ -636,14 +636,14 @@ Widget _buildBody0(
 
   final seriesList = seriesProvider.filteredAndSortedContent;
   return MasonryGridView.count(
-    padding: const EdgeInsets.all(5.0),
+    padding: const EdgeInsets.all(3.0),
     crossAxisCount: 1 * gridSize, // Adjust number of
-    mainAxisSpacing: 1.5,
+    mainAxisSpacing: 1.05,
     controller: ScrollController(keepScrollOffset: true),
     shrinkWrap: true,
     physics: const BouncingScrollPhysics(),
-    crossAxisSpacing: 1.5,
-    cacheExtent: 100,
+    crossAxisSpacing: 1.1,
+  //  cacheExtent: 100,
     itemCount: seriesList.length,
     itemBuilder: (context, index) {
       final series = seriesList[index];

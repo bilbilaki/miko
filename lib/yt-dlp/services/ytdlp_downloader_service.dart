@@ -1,6 +1,4 @@
 // lib/services/ytdlp_downloader_service.dart
-import 'dart:convert';
-import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

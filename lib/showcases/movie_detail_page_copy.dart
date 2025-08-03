@@ -766,7 +766,7 @@ Open in miko by click on ${myItem.internalUrl}
               children: [
                 (downloadLinks != [''])
                     ? ElevatedButton.icon(
-                        icon: const Icon(Icons.play_arrow),
+                        icon: isWatched? Icon(Icons.done):Icon(Icons.play_arrow),
                         label: Text(
                           'Play',
                         ),

@@ -36,7 +36,7 @@ class JackettApiService {
       {String indexer = 'all', required SearchParams params}) async {
     final uri = _buildUri(indexer, queryParameters: params.toMap());
     try {
-      final response = await _client.get(uri).timeout(const Duration(seconds: 30));
+      final response = await _client.get(uri).timeout(const Duration(seconds: 120));
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final document = XmlDocument.parse(response.body);

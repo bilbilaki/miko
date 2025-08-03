@@ -16,7 +16,6 @@ import '../showcases/model.dart'; // For accessing UserDataService
 import 'package:miko/showcases/model.dart' as mmd;
 import 'package:miko/showcases/movie_detail_page_copy.dart';
 
-
 //import 'package:myapp/screens/video_player_screen.dart'; // Your player screen
 
 import '../screens/video_player_wplaylist_screen.dart';
@@ -54,59 +53,59 @@ class EpisodeTileNew extends StatelessWidget {
             seriesname: seriesname,
             tvSeriesId: id,
             season: season,
-            playlist: season
-                .episodes, 
+            playlist: season.episodes,
             initialIndex: initialIndex,
             url: url,
-          //  episode: episode
+            //  episode: episode
           ),
         ),
       );
     }
 
-    bool isInWatchlist =
-        userDataService.isWatchedEpisode(seriesname, id, episode.episodeNumber, season.seasonNumber);
+    bool isInWatchlist = userDataService.isWatchedEpisode(
+        seriesname, id, episode.episodeNumber, season.seasonNumber);
     return Padding(
-
-      padding: const EdgeInsets.symmetric(
-          vertical: 8.0, horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       child: Row(
         children: [
           Expanded(
-            flex: 3, 
+            flex: 3,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                      Text(
-                        'Episode ${episode.episodeNumber}',
-                        style: const TextStyle(color: AppColors.primaryText, fontSize: 14, fontWeight: FontWeight.w500),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (episode.episodeIdentifier != 'Episode ${episode.episodeNumber}')
-                        Text(
-                          episode.episodeIdentifier,
-                          style: const TextStyle(color: AppColors.secondaryText, fontSize: 11),
-                        ),
-                    ],
-                  ),
+                Text(
+                  'Episode ${episode.episodeNumber}',
+                  style: const TextStyle(
+                      color: AppColors.primaryText,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                // --- ADDED THIS: The watched icon ---
-                if (isInWatchlist)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: Icon(
-                      Icons.check_circle,
-                      color: AppColors.accentColor,
-                      size: 18.0,
-                    ),
+                if (episode.episodeIdentifier !=
+                    'Episode ${episode.episodeNumber}')
+                  Text(
+                    episode.episodeIdentifier,
+                    style: const TextStyle(
+                        color: AppColors.secondaryText, fontSize: 11),
                   ),
-              
-            
-    
+              ],
+            ),
+          ),
+          // --- ADDED THIS: The watched icon ---
+          if (isInWatchlist)
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Icon(
+                Icons.check_circle,
+                color: AppColors.accentColor,
+                size: 18.0,
+              ),
+            ),
+
           const SizedBox(width: 12),
 
-            if (availableQualities.isNotEmpty)
+          if (availableQualities.isNotEmpty)
             Expanded(
               flex: 4,
               child: Wrap(
@@ -117,13 +116,16 @@ class EpisodeTileNew extends StatelessWidget {
                   final url = entry.value;
                   return ElevatedButton(
                     onPressed: () => playEpisode(context, url),
-                     style: ElevatedButton.styleFrom(
+                    style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.accentColor.withOpacity(0.7),
                       foregroundColor: AppColors.primaryText,
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
                       minimumSize: const Size(45, 28),
-                      textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                      textStyle: const TextStyle(
+                          fontSize: 11, fontWeight: FontWeight.bold),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6)),
                       elevation: 1,
                     ),
                     child: Text(entry.key.toUpperCase()),
@@ -134,7 +136,10 @@ class EpisodeTileNew extends StatelessWidget {
           else
             const Text(
               'No links',
-              style: TextStyle(color: AppColors.secondaryText, fontSize: 12, fontStyle: FontStyle.italic),
+              style: TextStyle(
+                  color: AppColors.secondaryText,
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic),
             ),
         ],
       ),
@@ -143,277 +148,312 @@ class EpisodeTileNew extends StatelessWidget {
 }
 
 class MovieCard extends StatelessWidget {
- final ss.Movie movie;
- final String typec; // Changed to String for clarity, though it might be dynamic
- const MovieCard({required this.typec, required this.movie, super.key});
+  final ss.Movie movie;
+  final String
+      typec; // Changed to String for clarity, though it might be dynamic
+  const MovieCard({required this.typec, required this.movie, super.key});
 
- @override
- Widget build(BuildContext context) {
- final MovieService mmm = MovieService();
+  @override
+  Widget build(BuildContext context) {
+    final MovieService mmm = MovieService();
 
- final posterUrl = movie.getPosterUrl();
- final releaseYear = movie.releaseDate?.year.toString() ?? 'N/A';
- final userDataService = Provider.of<UserDataService>(context, listen: true);
- bool isFavorite = userDataService.isFavoriteMovie(movie.id);
- bool isInWatchlist = userDataService.isOnWatchlistMovie(movie.id);
+    final posterUrl = movie.getPosterUrl();
+    final releaseYear = movie.releaseDate?.year.toString() ?? 'N/A';
+    final userDataService = Provider.of<UserDataService>(context, listen: true);
+    bool isFavorite = userDataService.isFavoriteMovie(movie.id);
+    bool isInWatchlist = userDataService.isOnWatchlistMovie(movie.id);
 
- return FutureBuilder<mmd.Movie>(
- future: mmm.mtm(movie.id),
- builder: (context, snapshot) {
- mmd.Movie? nms = snapshot.data;
- return InkWell(
- onTap: () {
- if (nms == null) {
- Navigator.push(
- context,
- MaterialPageRoute(
- builder: (_) => MovieDetailsScreen(
- movieId: movie.id,
- typec: "movie",
- ),
- ),
- );
- } else {
- Navigator.push(
- context,
- MaterialPageRoute(
- builder: (_) => MovieDetailPage(id: nms.id),
- ),
- );
- }
- },
- child: Card(
- color: Colors.transparent, // Maintain transparent card background
- elevation: 0,
- margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0), // Slightly more margin
- clipBehavior: Clip.antiAlias, // Ensures content respects card boundaries
- child: Column(
- mainAxisSize: MainAxisSize.min,
- crossAxisAlignment: CrossAxisAlignment.start,
- children: [
- AspectRatio(
- aspectRatio: 2 / 3,
- child: Stack(
- children: [
- ClipRRect(
- borderRadius: BorderRadius.circular(10.0), // Consistent border radius
- child: Container(
- decoration: BoxDecoration(
- color: AppColors2.onBackground.withOpacity(0.6), // Subtle background for image
- ),
- child: posterUrl != null && posterUrl.isNotEmpty
- ? CachedNetworkImage(
- imageUrl: posterUrl,
- fit: BoxFit.cover,
- fadeInDuration: const Duration(milliseconds: 300),
- fadeOutDuration: const Duration(milliseconds: 100),
- placeholder: (context, url) => Center(
- child: SizedBox(
- width: 28,
- height: 28,
- child: CircularProgressIndicator(
- strokeWidth: 2.5,
- color: AppColors2.accentColor.withOpacity(0.8),
- ),
- ),
- ),
- errorWidget: (context, url, error) => const Center(
- child: Icon(
- Icons.broken_image_outlined,
- color: AppColors2.tinytext,
- size: 36,
- ),
- ),
- )
- : const Center(
- child: Icon(
- Icons.movie_filter_outlined,
- color: AppColors2.tinytext,
- size: 40,
- ),
- ),
- ),
- ),
- Positioned(
- top: 8.0,
- right: 8.0,
- child: Row(
- children: [
- _buildActionButton(
- context: context,
- isToggled: isFavorite,
- icon: isFavorite ? Icons.favorite : Icons.favorite_border,
- color: isFavorite ? Colors.redAccent : Colors.white70,
- onPressed: () async {
- await userDataService.toggleFavoriteMovie(movie.id);
- ScaffoldMessenger.of(context).showSnackBar(
- SnackBar(
- content: Text(
- isFavorite ? 'Removed from Favorites' : 'Added to Favorites',
- style: const TextStyle(color: Colors.white),
- ),
- backgroundColor: isFavorite ? Colors.red.shade700 : Colors.green.shade700,
- duration: const Duration(seconds: 1),
- ),
- );
- },
- ),
- const SizedBox(width: 8.0),
- _buildActionButton(
- context: context,
- isToggled: isInWatchlist,
- icon: isInWatchlist ? Icons.bookmark : Icons.bookmark_border,
- color: isInWatchlist ? Colors.lightGreenAccent : Colors.white70,
- onPressed: () async {
- await userDataService.toggleWatchlistMovie(movie.id);
- ScaffoldMessenger.of(context).showSnackBar(
- SnackBar(
- content: Text(
- isInWatchlist ? 'Removed from Watchlist' : 'Added to Watchlist',
- style: const TextStyle(color: Colors.white),
- ),
- backgroundColor: isInWatchlist ? Colors.red.shade700 : Colors.green.shade700,
- duration: const Duration(seconds: 1),
- ),
- );
- },
- ),
- ],
- ),
- ),
- ],
- ),
- ),
- const SizedBox(height: 8.0), // Space between image and text
+    return FutureBuilder<mmd.Movie>(
+      future: mmm.mtm(movie.id),
+      builder: (context, snapshot) {
+        mmd.Movie? nms = snapshot.data;
+        return InkWell(
+          onTap: () {
+            if (nms == null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MovieDetailsScreen(
+                    movieId: movie.id,
+                    typec: "movie",
+                  ),
+                ),
+              );
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MovieDetailPage(id: nms.id),
+                ),
+              );
+            }
+          },
+          child: Card(
+            color: Colors.transparent, // Maintain transparent card background
+            elevation: 0,
+            margin: const EdgeInsets.symmetric(
+                vertical: 4.0, horizontal: 4.0), // Slightly more margin
+            clipBehavior:
+                Clip.antiAlias, // Ensures content respects card boundaries
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AspectRatio(
+                  aspectRatio: 2 / 3,
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(
+                            10.0), // Consistent border radius
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppColors2.onBackground.withOpacity(
+                                0.6), // Subtle background for image
+                          ),
+                          child: posterUrl != null && posterUrl.isNotEmpty
+                              ? CachedNetworkImage(
+                                  imageUrl: posterUrl,
+                                  fit: BoxFit.cover,
+                                  fadeInDuration:
+                                      const Duration(milliseconds: 300),
+                                  fadeOutDuration:
+                                      const Duration(milliseconds: 100),
+                                  placeholder: (context, url) => Center(
+                                    child: SizedBox(
+                                      width: 28,
+                                      height: 28,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        color: AppColors2.accentColor
+                                            .withOpacity(0.8),
+                                      ),
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      const Center(
+                                    child: Icon(
+                                      Icons.broken_image_outlined,
+                                      color: AppColors2.tinytext,
+                                      size: 36,
+                                    ),
+                                  ),
+                                )
+                              : const Center(
+                                  child: Icon(
+                                    Icons.movie_filter_outlined,
+                                    color: AppColors2.tinytext,
+                                    size: 40,
+                                  ),
+                                ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 8.0,
+                        right: 8.0,
+                        child: Row(
+                          children: [
+                            _buildActionButton(
+                              context: context,
+                              isToggled: isFavorite,
+                              icon: isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: isFavorite
+                                  ? Colors.redAccent
+                                  : Colors.white70,
+                              onPressed: () async {
+                                await userDataService
+                                    .toggleFavoriteMovie(movie.id);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      isFavorite
+                                          ? 'Removed from Favorites'
+                                          : 'Added to Favorites',
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                    ),
+                                    backgroundColor: isFavorite
+                                        ? Colors.red.shade700
+                                        : Colors.green.shade700,
+                                    duration: const Duration(seconds: 1),
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(width: 8.0),
+                            _buildActionButton(
+                              context: context,
+                              isToggled: isInWatchlist,
+                              icon: isInWatchlist
+                                  ? Icons.bookmark
+                                  : Icons.bookmark_border,
+                              color: isInWatchlist
+                                  ? Colors.lightGreenAccent
+                                  : Colors.white70,
+                              onPressed: () async {
+                                await userDataService
+                                    .toggleWatchlistMovie(movie.id);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      isInWatchlist
+                                          ? 'Removed from Watchlist'
+                                          : 'Added to Watchlist',
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                    ),
+                                    backgroundColor: isInWatchlist
+                                        ? Colors.red.shade700
+                                        : Colors.green.shade700,
+                                    duration: const Duration(seconds: 1),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8.0), // Space between image and text
 
- // Movie Info
- Padding(
- padding: const EdgeInsets.symmetric(horizontal: 4.0),
- child: Column(
- crossAxisAlignment: CrossAxisAlignment.start,
- mainAxisSize: MainAxisSize.min,
- children: [
- Text(
- movie.title,
- style: const TextStyle(
- color: AppColors2.onPrimary,
- fontWeight: FontWeight.bold, // Slightly bolder for title
- fontSize: 14.0,
- ),
- maxLines: 2,
- overflow: TextOverflow.ellipsis,
- ),
- const SizedBox(height: 4.0), // More space before rating/year
- Row(
- children: [
- const Icon(Icons.star_rounded, color: Colors.amber, size: 14), // Rounded star icon
- const SizedBox(width: 4), // Consistent spacing
- Expanded(
- child: Text(
- '${movie.voteAverage.toStringAsFixed(1)} • $releaseYear',
- style: const TextStyle(
- color: AppColors2.tinytext,
- fontSize: 12.0,
- ),
- maxLines: 1,
- overflow: TextOverflow.ellipsis,
- ),
- ),
- ],
- ),
- if (movie.runtime != null && movie.runtime! > 0)
- Column(
- crossAxisAlignment: CrossAxisAlignment.start,
- children: [
- const SizedBox(height: 4.0),
- Text(
- 'Runtime: ${movie.runtime} min',
- style: const TextStyle(
- color: AppColors2.tinytext,
- fontSize: 10.5, // Consistent font size
- ),
- maxLines: 1,
- overflow: TextOverflow.ellipsis,
- ),
- ],
- ),
- if (movie.originalLanguage != null && movie.originalLanguage.isNotEmpty)
- Column(
- crossAxisAlignment: CrossAxisAlignment.start,
- children: [
- const SizedBox(height: 4.0),
- Text(
- 'Language: ${movie.originalLanguage.toUpperCase()}',
- style: const TextStyle(
- color: AppColors2.tinytext,
- fontSize: 10.5,
- ),
- maxLines: 1,
- overflow: TextOverflow.ellipsis,
- ),
- ],
- ),
- if (movie.popularity != null && movie.popularity! > 0)
- Column(
- crossAxisAlignment: CrossAxisAlignment.start,
- children: [
- const SizedBox(height: 4.0),
- Text(
- 'Popularity: ${movie.popularity.toStringAsFixed(1)}',
- style: const TextStyle(
- color: AppColors2.tinytext,
- fontSize: 10.5,
- ),
- maxLines: 1,
- overflow: TextOverflow.ellipsis,
- ),
- ],
- ),
- ],
- ),
- ),
- ],
- ),
- ),
- );
- },
- );
- }
+                // Movie Info
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        movie.title,
+                        style: const TextStyle(
+                          color: AppColors2.onPrimary,
+                          fontWeight:
+                              FontWeight.bold, // Slightly bolder for title
+                          fontSize: 14.0,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(
+                          height: 4.0), // More space before rating/year
+                      Row(
+                        children: [
+                          const Icon(Icons.star_rounded,
+                              color: Colors.amber,
+                              size: 14), // Rounded star icon
+                          const SizedBox(width: 4), // Consistent spacing
+                          Expanded(
+                            child: Text(
+                              '${movie.voteAverage.toStringAsFixed(1)} • $releaseYear',
+                              style: const TextStyle(
+                                color: AppColors2.tinytext,
+                                fontSize: 12.0,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (movie.runtime != null && movie.runtime! > 0)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 4.0),
+                            Text(
+                              'Runtime: ${movie.runtime} min',
+                              style: const TextStyle(
+                                color: AppColors2.tinytext,
+                                fontSize: 10.5, // Consistent font size
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      if (
+                          movie.originalLanguage.isNotEmpty)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 4.0),
+                            Text(
+                              'Language: ${movie.originalLanguage.toUpperCase()}',
+                              style: const TextStyle(
+                                color: AppColors2.tinytext,
+                                fontSize: 10.5,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      if (movie.popularity > 0)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 4.0),
+                            Text(
+                              'Popularity: ${movie.popularity.toStringAsFixed(1)}',
+                              style: const TextStyle(
+                                color: AppColors2.tinytext,
+                                fontSize: 10.5,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
- Widget _buildActionButton({
- required BuildContext context,
- required bool isToggled,
- required IconData icon,
- required Color color,
- required VoidCallback onPressed,
- }) {
- return Container(
- decoration: BoxDecoration(
- color: Colors.black.withOpacity(0.6), // Darker, well-defined background
- shape: BoxShape.circle,
- border: Border.all(
- color: color.withOpacity(0.5), // Subtle border based on icon color
- width: 0.5,
- ),
- ),
- child: Material(
- color: Colors.transparent, // Necessary for InkWell's ripple effect
- child: InkWell(
- borderRadius: BorderRadius.circular(20), // Circular ripple
- onTap: onPressed,
- child: Padding(
- padding: const EdgeInsets.all(6.0), // Consistent padding
- child: Icon(
- icon,
- color: color,
- size: 18,
- ),
- ),
- ),
- ),
- );
- }
+  Widget _buildActionButton({
+    required BuildContext context,
+    required bool isToggled,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.6), // Darker, well-defined background
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: color.withOpacity(0.5), // Subtle border based on icon color
+          width: 0.5,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent, // Necessary for InkWell's ripple effect
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20), // Circular ripple
+          onTap: onPressed,
+          child: Padding(
+            padding: const EdgeInsets.all(6.0), // Consistent padding
+            child: Icon(
+              icon,
+              color: color,
+              size: 18,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
+
 class AnimeSeriesCard extends StatelessWidget {
   final ss.TvSeriesAnime series;
   final String typec;
@@ -471,7 +511,8 @@ class AnimeSeriesCard extends StatelessWidget {
             color: Colors.transparent,
             elevation: 0,
             margin: EdgeInsets.zero,
-            clipBehavior: Clip.antiAlias, // Ensures content respects card boundaries
+            clipBehavior:
+                Clip.antiAlias, // Ensures content respects card boundaries
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -481,26 +522,32 @@ class AnimeSeriesCard extends StatelessWidget {
                   child: Stack(
                     children: [
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(8.0), // Slightly larger radius
+                        borderRadius: BorderRadius.circular(
+                            8.0), // Slightly larger radius
                         child: Container(
-                          color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.4),
+                          color: const Color.fromARGB(255, 0, 0, 0)
+                              .withOpacity(0.4),
                           child: posterUrl != null && posterUrl.isNotEmpty
                               ? CachedNetworkImage(
                                   imageUrl: posterUrl,
                                   fit: BoxFit.cover,
-                                  fadeInDuration: const Duration(milliseconds: 300),
-                                  fadeOutDuration: const Duration(milliseconds: 100),
+                                  fadeInDuration:
+                                      const Duration(milliseconds: 300),
+                                  fadeOutDuration:
+                                      const Duration(milliseconds: 100),
                                   placeholder: (context, url) => Center(
                                     child: SizedBox(
                                       width: 28,
                                       height: 28,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2.5,
-                                        color: AppColors.accentColor.withOpacity(0.8),
+                                        color: AppColors.accentColor
+                                            .withOpacity(0.8),
                                       ),
                                     ),
                                   ),
-                                  errorWidget: (context, url, error) => const Center(
+                                  errorWidget: (context, url, error) =>
+                                      const Center(
                                     child: Icon(
                                       Icons.broken_image_outlined,
                                       color: AppColors.secondaryText,
@@ -525,17 +572,27 @@ class AnimeSeriesCard extends StatelessWidget {
                             _buildActionButton(
                               context: context,
                               isToggled: isFavorite,
-                              icon: isFavorite ? Icons.favorite : Icons.favorite_border,
-                              color: isFavorite ? Colors.redAccent : Colors.white70,
+                              icon: isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: isFavorite
+                                  ? Colors.redAccent
+                                  : Colors.white70,
                               onPressed: () async {
-                                await userDataService.toggleFavoriteAnime(series.tmdbId);
+                                await userDataService
+                                    .toggleFavoriteAnime(series.tmdbId);
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                      isFavorite ? 'Removed from Favorites' : 'Added to Favorites',
-                                      style: const TextStyle(color: Colors.white),
+                                      isFavorite
+                                          ? 'Removed from Favorites'
+                                          : 'Added to Favorites',
+                                      style:
+                                          const TextStyle(color: Colors.white),
                                     ),
-                                    backgroundColor: isFavorite ? Colors.red.shade700 : Colors.green.shade700,
+                                    backgroundColor: isFavorite
+                                        ? Colors.red.shade700
+                                        : Colors.green.shade700,
                                     duration: const Duration(seconds: 1),
                                   ),
                                 );
@@ -545,17 +602,27 @@ class AnimeSeriesCard extends StatelessWidget {
                             _buildActionButton(
                               context: context,
                               isToggled: isInWatchlist,
-                              icon: isInWatchlist ? Icons.bookmark : Icons.bookmark_border,
-                              color: isInWatchlist ? Colors.lightGreenAccent : Colors.white70,
+                              icon: isInWatchlist
+                                  ? Icons.bookmark
+                                  : Icons.bookmark_border,
+                              color: isInWatchlist
+                                  ? Colors.lightGreenAccent
+                                  : Colors.white70,
                               onPressed: () async {
-                                await userDataService.toggleWatchlistAnime(series.tmdbId);
+                                await userDataService
+                                    .toggleWatchlistAnime(series.tmdbId);
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                      isInWatchlist ? 'Removed from Watchlist' : 'Added to Watchlist',
-                                      style: const TextStyle(color: Colors.white),
+                                      isInWatchlist
+                                          ? 'Removed from Watchlist'
+                                          : 'Added to Watchlist',
+                                      style:
+                                          const TextStyle(color: Colors.white),
                                     ),
-                                    backgroundColor: isInWatchlist ? Colors.red.shade700 : Colors.green.shade700,
+                                    backgroundColor: isInWatchlist
+                                        ? Colors.red.shade700
+                                        : Colors.green.shade700,
                                     duration: const Duration(seconds: 1),
                                   ),
                                 );
@@ -587,7 +654,8 @@ class AnimeSeriesCard extends StatelessWidget {
                       const SizedBox(height: 4.0),
                       Row(
                         children: [
-                          const Icon(Icons.star_rounded, color: Colors.amber, size: 14),
+                          const Icon(Icons.star_rounded,
+                              color: Colors.amber, size: 14),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
@@ -602,7 +670,8 @@ class AnimeSeriesCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      if (series.numberOfSeasons != null && series.numberOfEpisodes != null)
+                      if (series.numberOfSeasons != null &&
+                          series.numberOfEpisodes != null)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -618,7 +687,8 @@ class AnimeSeriesCard extends StatelessWidget {
                             ),
                           ],
                         ),
-                      if (series.originalLanguage != null && series.originalLanguage.isNotEmpty)
+                      if (
+                          series.originalLanguage.isNotEmpty)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

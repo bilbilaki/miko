@@ -2,14 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:miko/app_keeper.dart';
-import 'package:miko/data/iptv_repository.dart';
 import 'package:miko/jackett/models/jackett_config.dart';
 import 'package:miko/jackett/services/config_service.dart';
 import 'package:miko/providers/ai_chat_provider.dart';
 
 import 'package:miko/providers/csv_detail_process_provider.dart';
 import 'package:miko/providers/god_proovider.dart';
-import 'package:miko/providers/iptv_providers.dart';
 import 'package:miko/providers/settings_provider.dart';
 import 'package:miko/services/user_data_service.dart'; // Import UserDataService
 import 'package:miko/utils/colors.dart';

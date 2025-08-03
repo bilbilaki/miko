@@ -92,7 +92,7 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                     shrinkWrap: true,
                     physics: const BouncingScrollPhysics(),
                     crossAxisSpacing: 1.5,
-                    cacheExtent: 100,
+                  //  cacheExtent: 100,
                     itemCount: movies.length,
                     itemBuilder: (context, index) {
                       return GestureDetector(
@@ -140,8 +140,8 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                     controller: ScrollController(keepScrollOffset: true),
                     shrinkWrap: true,
                     physics: const BouncingScrollPhysics(),
-                    crossAxisSpacing: 1.5,
-                    cacheExtent: 100,
+                    crossAxisSpacing: 1.1,
+                   // cacheExtent: 100,
                     itemCount: tvShows.length,
                     itemBuilder: (context, index) {
                       return GestureDetector(

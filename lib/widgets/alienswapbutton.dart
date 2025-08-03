@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:miko/utils/utils.dart';
 
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // For HapticFeedback
+// For HapticFeedback
 
 class AlienFloatSwapMenu extends StatefulWidget {
   final Function OnAskAi;
@@ -27,7 +26,7 @@ class _AlienFloatSwapMenuState extends State<AlienFloatSwapMenu> {
 
   // Refined 'actions' map to include icons for better UI
   final Map<String, ({Offset offset, IconData icon})> actions = {
-    "Ask AI": (offset: Offset(-50, -180), icon: Icons.psychology_alt),
+    "Ask AI": (offset: Offset(-60, -180), icon: Icons.psychology_alt),
     "Search": (offset: Offset(-140, -110), icon: Icons.search),
     "Filter": (offset: Offset(-150, 0), icon: Icons.filter_list),
   };
@@ -97,8 +96,8 @@ class _AlienFloatSwapMenuState extends State<AlienFloatSwapMenu> {
               duration: const Duration(milliseconds: 150),
               curve: Curves.easeOutCubic,
               // Adjust position to center the larger menu item container
-              left: itemTargetPosition.dx - 60,
-              top: itemTargetPosition.dy - 30,
+              left: itemTargetPosition.dx - (60),
+              top: itemTargetPosition.dy - (30),
               child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 200),
                 opacity: isVisible ? 1 : 0,
@@ -118,12 +117,12 @@ class _AlienFloatSwapMenuState extends State<AlienFloatSwapMenu> {
                         BoxShadow(
                           color: Colors.black.withOpacity(isHovered ? 0.4 : 0.2),
                           blurRadius: isHovered ? 12 : 6,
-                          offset: const Offset(0, 4),
+                          offset:  Offset(1, 4),
                         ),
                       ],
                       border: Border.all(
                         color: isHovered ? Colors.greenAccent : Colors.transparent,
-                        width: isHovered ? 2 : 0,
+                        width: isHovered ? 2 : 1,
                       ),
                     ),
                     child: Row(
@@ -133,7 +132,7 @@ class _AlienFloatSwapMenuState extends State<AlienFloatSwapMenu> {
                         const SizedBox(width: 8),
                         Text(
                           entry.key,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
@@ -199,14 +198,14 @@ class _AlienFloatSwapMenuState extends State<AlienFloatSwapMenu> {
                           BoxShadow(
                             color: Colors.black.withOpacity(0.4),
                             blurRadius: 15,
-                            offset: const Offset(0, 8),
+                            offset: const Offset(1, 8),
                           ),
                         ]
                       : [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.3),
                             blurRadius: 10,
-                            offset: const Offset(0, 5),
+                            offset: const Offset(1, 5),
                           ),
                         ],
                 ),

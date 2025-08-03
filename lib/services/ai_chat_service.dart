@@ -8,11 +8,11 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:miko/configs/consts.dart';
-import 'package:miko/services/ai_chat_service.dart';
+//import 'package:miko/services/ai_chat_service.dart';
 import 'package:tmdb_api/tmdb_api.dart';
 import 'dart:convert';
 import 'package:miko/showcases/model.dart';
-import '../providers/ai_chat_provider.dart';
+//import '../providers/ai_chat_provider.dart';
 import '../showcases/movie_service.dart';
 part '../configs/ai_tools_schema.dart';
 part '../configs/ai_tools_dialers.dart';
@@ -65,8 +65,8 @@ abstract class GeminiServiceBase {
   Future<Map<String, dynamic>> _callFunction(
       Function function, Map<String, Object?> args) {
     // Convert the model's arguments to a format our functions expect
-    final positionalArgs = [];
-    final namedArgs = <Symbol, dynamic>{};
+    //final positionalArgs = [];
+    //final namedArgs = <Symbol, dynamic>{};
 
     // This is a simplified dynamic invoker. For your specific functions:
     if (function == webSearchToolCall) {
