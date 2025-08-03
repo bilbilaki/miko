@@ -1,5 +1,5 @@
 const String kApiBaseUrl = "https://api.example.com";
-const String kApiKey = "AIzaSyCvT2Pj99Tp46UMmGSM_H9sS-1tETH2XHs";
+const String kApiKey = "AIzaSyDcyOL2KB03QbX2hsvpIxvu93d_DvSdKOo";
 const String kUserAgent = "Miko/1.0";
 const String tmdbapiv3 = '607e40af5bb66576f6fd7252d5529e24';
 const String opensubtitle = 'QzQbc287Kp5h64jhVEMPHxHg3xjkL06T';

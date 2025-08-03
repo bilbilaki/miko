@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:ui';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:miko/app_keeper.dart';
 import 'package:miko/jackett/models/jackett_config.dart';
@@ -23,6 +26,15 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   MediaKit.ensureInitialized();
+  await Firebase.initializeApp();
+    FlutterError.onError = (errorDetails) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    };
+    // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
 await Hive.initFlutter();
   Hive.registerAdapter(JackettConfigAdapter());
   await Hive.openBox<JackettConfig>(ConfigService.boxName);
