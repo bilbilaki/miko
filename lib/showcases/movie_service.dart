@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
 import 'package:http/http.dart' as http;
+import 'package:miko/configs/consts.dart';
 import 'package:miko/constants.dart';
 import '../models/tmdb/tmdb_m.dart'
     show
@@ -71,9 +72,9 @@ import 'package:logger/logger.dart';
 
 class MovieService {
   static const String _baseUrl =
-      'https://odd-cloud-55fe.worker-inosuke.workers.dev';
+      'https://linod.worker-inosuke.workers.dev/3';
   static const String _apiKey =
-      'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2MDdlNDBhZjViYjY2NTc2ZjZmZDcyNTJkNTUyOWUyNCIsIm5iZiI6MTcyNTMxNjQ1OC4yNCwic3ViIjoiNjZkNjNkNmEzZTFhYjQ1Y2U1YjFiN2NmIiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.N701knycQaKNMmYbdRnF3ag0dl9i28cL4oZBC-c42OY';
+      tmdbapitokensc;
 
   final http.Client _client;
   MovieService({http.Client? client}) : _client = client ?? http.Client();

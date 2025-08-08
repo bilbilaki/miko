@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:miko/services/user_data_service.dart';
+import 'package:miko/utils/ai_translator.dart';
+import 'package:miko/utils/utils.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'model.dart'; // Assume this contains Person model
 import 'movie_service.dart'; // Assume this contains MovieService
@@ -25,7 +29,8 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
   late Future<Person> _personDetailsFuture;
   bool _hasError = false;
   String _errorMessage = '';
-
+  String oveview= '';
+  bool tr=false;
   @override
   void initState() {
     super.initState();
@@ -218,7 +223,17 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
     );
   }
 
+void dllink() async{
+ 
+    final ov =      await   _movieService.getPersonDetails(personId: widget.personId);
+if (tr == false){
+  oveview=ov.biography.toString();
+}
+}
+
   Widget _buildPersonDetailView(BuildContext context, Person person) {
+            final userDataService = Provider.of<UserDataService>(context);
+
     return CustomScrollView(
       slivers: [
         SliverAppBar(
@@ -271,9 +286,18 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 8),
+                 IconButton(
+                iconSize: 20.0,
+                icon: const Icon(Icons.assistant),
+                tooltip: 'translate overview',
+                onPressed: ()async {
+                  tVClick();
+                 gentranslate();},
+                 onLongPress:(){showTextInputDialog(context,userDataService);
+  }),
                 Text(
-                  person.biography?.isNotEmpty == true
-                      ? person.biography!
+                  oveview.isNotEmpty == true
+                      ? oveview
                       : 'No biography available for ${person.name}.',
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
@@ -366,6 +390,71 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
       ],
     );
   }
+    void gentranslate() async {
+  final translator = MovieTvTranslator();
+  debugPrint(oveview);
+final translatedOverView = await translator.translateTextForMoviesAndTV(oveview);
+debugPrint(translatedOverView);
+  debugPrint(oveview);
+  setState(() {  
+    tr = true;
+        oveview = translatedOverView;
+  
+
+  debugPrint(oveview);
+  });
+  }
+Future<String?> showTextInputDialog(
+  BuildContext context, userDataService,{
+  String title = 'Enter Your Prefred Language',
+  String? initialText,
+  String hintText = 'Like Arabic , Ar ...',
+  TextCapitalization textCapitalization = TextCapitalization.sentences,
+  TextInputType keyboardType = TextInputType.text,
+}) async {
+  final TextEditingController textEditingController =
+      TextEditingController(text: initialText);
+
+  return showDialog<String>(
+    context: context,
+    builder: (BuildContext dialogContext) {
+      return AlertDialog(
+        title: Text(title),
+        content: TextField(
+          controller: textEditingController,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: hintText,
+            border: const OutlineInputBorder(),
+          ),
+          textCapitalization: textCapitalization,
+          keyboardType: keyboardType,
+          onSubmitted: (value) {
+            // Allow submitting by pressing Enter/Done on keyboard
+            Navigator.of(dialogContext).pop(value);
+          },
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop(null); // Return null on cancel
+            },
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+        await  userDataService.setCustoombaseurl(textEditingController.text);
+
+              Navigator.of(dialogContext)
+                  .pop(textEditingController.text); // Return entered text
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      );
+    },
+  );
+}
 
   Widget _buildProfileImage(BuildContext context, String? imageUrl,
       {required String heroTag}) {

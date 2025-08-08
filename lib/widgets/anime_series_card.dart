@@ -213,6 +213,7 @@ class MovieCard extends StatelessWidget {
                           ),
                           child: posterUrl != null && posterUrl.isNotEmpty
                               ? CachedNetworkImage(
+                                filterQuality: FilterQuality.high,
                                   imageUrl: posterUrl,
                                   fit: BoxFit.cover,
                                   fadeInDuration:
@@ -529,6 +530,7 @@ class AnimeSeriesCard extends StatelessWidget {
                               .withOpacity(0.4),
                           child: posterUrl != null && posterUrl.isNotEmpty
                               ? CachedNetworkImage(
+                                filterQuality: FilterQuality.high,
                                   imageUrl: posterUrl,
                                   fit: BoxFit.cover,
                                   fadeInDuration:

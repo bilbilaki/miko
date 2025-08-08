@@ -31,7 +31,6 @@ class _InteractiveVideoCardState extends State<InteractiveVideoCard> {
     super.initState();
     // Create a player instance.
     // Mute the preview video and set it to loop.
-    player.setVolume(30.0);
     // Open the preview URL but don't start playing yet.
     // _startPreview();
   }
@@ -47,21 +46,20 @@ class _InteractiveVideoCardState extends State<InteractiveVideoCard> {
   void _startPreview() async {
     tVheavy();
     await player.open(Media(widget.scene.preview), play: false);
+      await player.play();
 
     if (mounted) {
       setState(() => _isPlayingPreview = true);
-      await player.play();
     }
   }
 
   void _stopPreview() async {
     tVheavy();
-    if (mounted) {
       await player.pause();
 
       // Optional: Rewind the video to the beginning
       setState(() => _isPlayingPreview = false);
-    }
+    
   }
 
   @override
@@ -80,6 +78,11 @@ class _InteractiveVideoCardState extends State<InteractiveVideoCard> {
         );
       },
       // On long press, start the preview (for touch devices).
+      onForcePressStart: (_) async {tVheavy();
+       _startPreview();},
+       onForcePressEnd: (_) {tVheavy();
+       _stopPreview();},
+      
       onLongPressStart: (_) {
         tVmedium();
         _startPreview();
@@ -100,6 +103,8 @@ class _InteractiveVideoCardState extends State<InteractiveVideoCard> {
       },
       child: Platform.isLinux
           ? MouseRegion(
+            onHover: (_){_startPreview();},
+            
               // On hover, start the preview (for mouse devices).
               onEnter: (_) => _startPreview(),
               // When hover ends, stop the preview.

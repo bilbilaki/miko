@@ -1,4 +1,5 @@
 // TODO Implement this library.
+
 import 'package:hive/hive.dart';
 
 part 'jackett_config.g.dart';

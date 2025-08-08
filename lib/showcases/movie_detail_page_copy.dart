@@ -6,6 +6,7 @@ import 'package:miko/providers/god_proovider.dart' show MovieProvider;
 import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/showcases/cast_page.dart';
 import 'package:miko/showcases/recommendations_page.dart';
+import 'package:miko/utils/ai_translator.dart';
 import 'package:miko/utils/utils.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -72,16 +73,17 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   late Future<Map<String, dynamic>> _movieDataFuture;
   MovieResponse? recommendations;
   List<Keyword> _movieKeywords = [];
-  Movie? movie;
+  late Movie movie;
   List<String> downloadLinks = [''];
   // Helper for haptic feedback
+  bool tr = false;
   void _performHapticFeedback() {
     if (Platform.isAndroid) {
       // Provides a subtle vibration
       HapticFeedback.lightImpact;
     }
   }
-
+String oveview='';
   @override
   void initState() {
     super.initState();
@@ -97,11 +99,11 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   void _loadMovieData() async {
     _movieDataFuture =
         _movieService.getMovieDetailsWithCredits(movieId: widget.id);
-
+final _movie = await _movieService.getMovieDetails(movieId: widget.id);
     _movieDataFuture.then((_) {
       if (mounted) {
         setState(() async {
-          movie = await _movieService.getMovieDetails(movieId: widget.id);
+          movie = _movie;
         });
       }
     }).catchError((error) {
@@ -114,7 +116,6 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   @override
   Widget build(BuildContext context) {
     final userDataService = Provider.of<UserDataService>(context);
-
     return Scaffold(
       body: FutureBuilder<Map<String, dynamic>>(
         future: _movieDataFuture,
@@ -567,13 +568,13 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                       overview: movie.overview,
                       posterUrl: movie.fullPosterPath,
                       internalUrl:
-                          'https://iinos.site/movie${movie.id}', // Replace with a real URL
+                          'https://inosuke.page.link/miko/movie${movie.id}', // Replace with a real URL
                     );
                     final String shareContent = '''
 Check out this: ${myItem.name}
 Rating: ${myItem.vote}
 Release Date: ${myItem.releaseDate}
-Overview: ${myItem.overview}
+Overview: ${oveview}
 Open in miko by click on ${myItem.internalUrl}
 ''';
                     SharePlus.instance.share(ShareParams(text: shareContent));
@@ -605,12 +606,14 @@ Open in miko by click on ${myItem.internalUrl}
     );
   }
 
-  void dllink(BuildContext context) {
+  void dllink(BuildContext context) async{
     final mmovie = Provider.of<MovieProvider>(context, listen: false)
         .getMovieById(widget.id);
     if (mmovie != null) {
       final downloadLink = mmovie.getDownloadLinksList();
       downloadLinks = downloadLink;
+     if (tr== false){
+      oveview = movie.overview; }
     }
   }
 
@@ -790,14 +793,28 @@ Open in miko by click on ${myItem.internalUrl}
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],
+
+      
+              
           const SizedBox(height: 24),
           Text(
             'Overview',
             style: Theme.of(context).textTheme.titleLarge,
           ),
+             IconButton(
+                iconSize: 20.0,
+                icon: const Icon(Icons.assistant),
+                tooltip: 'translate overview',
+                onPressed: ()async {
+                  tVClick();
+                 gentranslate();},
+                 onLongPress:(){showTextInputDialog(context,userDataService);
+
+
+                 }),
           const SizedBox(height: 8),
           SelectableText(
-            movie.overview.isEmpty ? 'No overview available.' : movie.overview,
+           oveview, // movie.overview.isEmpty ? 'No overview available.' : movie.overview,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           if (showDetailedInfo && _movieKeywords.isNotEmpty)
@@ -1765,4 +1782,72 @@ Open in miko by click on ${myItem.internalUrl}
       ),
     );
   }
+  
+  void gentranslate() async {
+  final translator = MovieTvTranslator();
+  debugPrint(oveview);
+final translatedOverView = await translator.translateTextForMoviesAndTV(oveview);
+debugPrint(translatedOverView);
+  debugPrint(oveview);
+  setState(() {  
+    tr = true;
+        oveview = translatedOverView;
+  
+
+  debugPrint(oveview);
+  });
+  }
+Future<String?> showTextInputDialog(
+  BuildContext context, userDataService,{
+  String title = 'Enter Your Prefred Language',
+  String? initialText,
+  String hintText = 'Like Arabic , Ar ...',
+  TextCapitalization textCapitalization = TextCapitalization.sentences,
+  TextInputType keyboardType = TextInputType.text,
+}) async {
+  final TextEditingController textEditingController =
+      TextEditingController(text: initialText);
+
+  return showDialog<String>(
+    context: context,
+    builder: (BuildContext dialogContext) {
+      return AlertDialog(
+        title: Text(title),
+        content: TextField(
+          controller: textEditingController,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: hintText,
+            border: const OutlineInputBorder(),
+          ),
+          textCapitalization: textCapitalization,
+          keyboardType: keyboardType,
+          onSubmitted: (value) {
+            // Allow submitting by pressing Enter/Done on keyboard
+            Navigator.of(dialogContext).pop(value);
+          },
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop(null); // Return null on cancel
+            },
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+        await  userDataService.setCustoombaseurl(textEditingController.text);
+
+              Navigator.of(dialogContext)
+                  .pop(textEditingController.text); // Return entered text
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      );
+    },
+  );
 }
+
+  }
+

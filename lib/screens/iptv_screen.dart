@@ -174,7 +174,10 @@ class _ChannelListView extends ConsumerWidget {
       data: (allChannels) {
         // Apply search filter
         final filteredChannels = allChannels.where((channel) {
-          return channel.name.toLowerCase().contains(uiState.searchQuery.toLowerCase());
+          final query = uiState.searchQuery.toLowerCase();
+          return channel.name.toLowerCase().contains(query) ||
+                 channel.country.toLowerCase().contains(query) ||
+                 channel.category.toLowerCase().contains(query);
         }).toList();
 
         if (filteredChannels.isEmpty) {

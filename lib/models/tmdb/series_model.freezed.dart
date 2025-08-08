@@ -12,8 +12,7 @@ part of 'series_model.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 Series _$SeriesFromJson(Map<String, dynamic> json) {
   return _Series.fromJson(json);
@@ -31,7 +30,8 @@ mixin _$Series {
   @JsonKey(name: 'vote_average')
   double get voteAverage => throw _privateConstructorUsedError;
   @JsonKey(name: 'vote_count')
-  int get voteCount => throw _privateConstructorUsedError; // Now referencing the top-level functions
+  int get voteCount =>
+      throw _privateConstructorUsedError; // Now referencing the top-level functions
   @JsonKey(fromJson: genresFromJson, toJson: genresToJson)
   List<GenreObject> get genres => throw _privateConstructorUsedError;
   @JsonKey(fromJson: keywordsFromJson, toJson: keywordsToJson)
@@ -73,33 +73,34 @@ abstract class $SeriesCopyWith<$Res> {
   factory $SeriesCopyWith(Series value, $Res Function(Series) then) =
       _$SeriesCopyWithImpl<$Res, Series>;
   @useResult
-  $Res call({
-    int id,
-    String title,
-    String status,
-    @JsonKey(name: 'release_date') DateTime? releaseDate,
-    int? runtime,
-    String overview,
-    @JsonKey(name: 'vote_average') double voteAverage,
-    @JsonKey(name: 'vote_count') int voteCount,
-    @JsonKey(fromJson: genresFromJson, toJson: genresToJson)
-    List<GenreObject> genres,
-    @JsonKey(fromJson: keywordsFromJson, toJson: keywordsToJson)
-    List<KeywordObject> keywords,
-    @JsonKey(name: 'original_name') String originalName,
-    @JsonKey(name: 'poster_path') String? posterPath,
-    @JsonKey(name: 'backdrop_path') String? backdropPath,
-    double popularity,
-    @JsonKey(name: 'original_language') String originalLanguage,
-    String type,
-    @JsonKey(name: 'episodes_number') int? episodesNumber,
-    @JsonKey(name: 'seasons_number') int? seasonsNumber,
-    String? homepage,
-    @JsonKey(fromJson: castFromJson, toJson: castToJson) List<CastMember> cast,
-    @JsonKey(fromJson: crewFromJson, toJson: crewToJson) List<EpisodeCrew> crew,
-    @JsonKey(fromJson: videosFromJson, toJson: videosToJson)
-    List<VideoObject> videos,
-  });
+  $Res call(
+      {int id,
+      String title,
+      String status,
+      @JsonKey(name: 'release_date') DateTime? releaseDate,
+      int? runtime,
+      String overview,
+      @JsonKey(name: 'vote_average') double voteAverage,
+      @JsonKey(name: 'vote_count') int voteCount,
+      @JsonKey(fromJson: genresFromJson, toJson: genresToJson)
+      List<GenreObject> genres,
+      @JsonKey(fromJson: keywordsFromJson, toJson: keywordsToJson)
+      List<KeywordObject> keywords,
+      @JsonKey(name: 'original_name') String originalName,
+      @JsonKey(name: 'poster_path') String? posterPath,
+      @JsonKey(name: 'backdrop_path') String? backdropPath,
+      double popularity,
+      @JsonKey(name: 'original_language') String originalLanguage,
+      String type,
+      @JsonKey(name: 'episodes_number') int? episodesNumber,
+      @JsonKey(name: 'seasons_number') int? seasonsNumber,
+      String? homepage,
+      @JsonKey(fromJson: castFromJson, toJson: castToJson)
+      List<CastMember> cast,
+      @JsonKey(fromJson: crewFromJson, toJson: crewToJson)
+      List<EpisodeCrew> crew,
+      @JsonKey(fromJson: videosFromJson, toJson: videosToJson)
+      List<VideoObject> videos});
 }
 
 /// @nodoc
@@ -140,137 +141,134 @@ class _$SeriesCopyWithImpl<$Res, $Val extends Series>
     Object? crew = null,
     Object? videos = null,
   }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as int,
-            title: null == title
-                ? _value.title
-                : title // ignore: cast_nullable_to_non_nullable
-                      as String,
-            status: null == status
-                ? _value.status
-                : status // ignore: cast_nullable_to_non_nullable
-                      as String,
-            releaseDate: freezed == releaseDate
-                ? _value.releaseDate
-                : releaseDate // ignore: cast_nullable_to_non_nullable
-                      as DateTime?,
-            runtime: freezed == runtime
-                ? _value.runtime
-                : runtime // ignore: cast_nullable_to_non_nullable
-                      as int?,
-            overview: null == overview
-                ? _value.overview
-                : overview // ignore: cast_nullable_to_non_nullable
-                      as String,
-            voteAverage: null == voteAverage
-                ? _value.voteAverage
-                : voteAverage // ignore: cast_nullable_to_non_nullable
-                      as double,
-            voteCount: null == voteCount
-                ? _value.voteCount
-                : voteCount // ignore: cast_nullable_to_non_nullable
-                      as int,
-            genres: null == genres
-                ? _value.genres
-                : genres // ignore: cast_nullable_to_non_nullable
-                      as List<GenreObject>,
-            keywords: null == keywords
-                ? _value.keywords
-                : keywords // ignore: cast_nullable_to_non_nullable
-                      as List<KeywordObject>,
-            originalName: null == originalName
-                ? _value.originalName
-                : originalName // ignore: cast_nullable_to_non_nullable
-                      as String,
-            posterPath: freezed == posterPath
-                ? _value.posterPath
-                : posterPath // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            backdropPath: freezed == backdropPath
-                ? _value.backdropPath
-                : backdropPath // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            popularity: null == popularity
-                ? _value.popularity
-                : popularity // ignore: cast_nullable_to_non_nullable
-                      as double,
-            originalLanguage: null == originalLanguage
-                ? _value.originalLanguage
-                : originalLanguage // ignore: cast_nullable_to_non_nullable
-                      as String,
-            type: null == type
-                ? _value.type
-                : type // ignore: cast_nullable_to_non_nullable
-                      as String,
-            episodesNumber: freezed == episodesNumber
-                ? _value.episodesNumber
-                : episodesNumber // ignore: cast_nullable_to_non_nullable
-                      as int?,
-            seasonsNumber: freezed == seasonsNumber
-                ? _value.seasonsNumber
-                : seasonsNumber // ignore: cast_nullable_to_non_nullable
-                      as int?,
-            homepage: freezed == homepage
-                ? _value.homepage
-                : homepage // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            cast: null == cast
-                ? _value.cast
-                : cast // ignore: cast_nullable_to_non_nullable
-                      as List<CastMember>,
-            crew: null == crew
-                ? _value.crew
-                : crew // ignore: cast_nullable_to_non_nullable
-                      as List<EpisodeCrew>,
-            videos: null == videos
-                ? _value.videos
-                : videos // ignore: cast_nullable_to_non_nullable
-                      as List<VideoObject>,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as int,
+      title: null == title
+          ? _value.title
+          : title // ignore: cast_nullable_to_non_nullable
+              as String,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      releaseDate: freezed == releaseDate
+          ? _value.releaseDate
+          : releaseDate // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      runtime: freezed == runtime
+          ? _value.runtime
+          : runtime // ignore: cast_nullable_to_non_nullable
+              as int?,
+      overview: null == overview
+          ? _value.overview
+          : overview // ignore: cast_nullable_to_non_nullable
+              as String,
+      voteAverage: null == voteAverage
+          ? _value.voteAverage
+          : voteAverage // ignore: cast_nullable_to_non_nullable
+              as double,
+      voteCount: null == voteCount
+          ? _value.voteCount
+          : voteCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      genres: null == genres
+          ? _value.genres
+          : genres // ignore: cast_nullable_to_non_nullable
+              as List<GenreObject>,
+      keywords: null == keywords
+          ? _value.keywords
+          : keywords // ignore: cast_nullable_to_non_nullable
+              as List<KeywordObject>,
+      originalName: null == originalName
+          ? _value.originalName
+          : originalName // ignore: cast_nullable_to_non_nullable
+              as String,
+      posterPath: freezed == posterPath
+          ? _value.posterPath
+          : posterPath // ignore: cast_nullable_to_non_nullable
+              as String?,
+      backdropPath: freezed == backdropPath
+          ? _value.backdropPath
+          : backdropPath // ignore: cast_nullable_to_non_nullable
+              as String?,
+      popularity: null == popularity
+          ? _value.popularity
+          : popularity // ignore: cast_nullable_to_non_nullable
+              as double,
+      originalLanguage: null == originalLanguage
+          ? _value.originalLanguage
+          : originalLanguage // ignore: cast_nullable_to_non_nullable
+              as String,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as String,
+      episodesNumber: freezed == episodesNumber
+          ? _value.episodesNumber
+          : episodesNumber // ignore: cast_nullable_to_non_nullable
+              as int?,
+      seasonsNumber: freezed == seasonsNumber
+          ? _value.seasonsNumber
+          : seasonsNumber // ignore: cast_nullable_to_non_nullable
+              as int?,
+      homepage: freezed == homepage
+          ? _value.homepage
+          : homepage // ignore: cast_nullable_to_non_nullable
+              as String?,
+      cast: null == cast
+          ? _value.cast
+          : cast // ignore: cast_nullable_to_non_nullable
+              as List<CastMember>,
+      crew: null == crew
+          ? _value.crew
+          : crew // ignore: cast_nullable_to_non_nullable
+              as List<EpisodeCrew>,
+      videos: null == videos
+          ? _value.videos
+          : videos // ignore: cast_nullable_to_non_nullable
+              as List<VideoObject>,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$SeriesImplCopyWith<$Res> implements $SeriesCopyWith<$Res> {
   factory _$$SeriesImplCopyWith(
-    _$SeriesImpl value,
-    $Res Function(_$SeriesImpl) then,
-  ) = __$$SeriesImplCopyWithImpl<$Res>;
+          _$SeriesImpl value, $Res Function(_$SeriesImpl) then) =
+      __$$SeriesImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    int id,
-    String title,
-    String status,
-    @JsonKey(name: 'release_date') DateTime? releaseDate,
-    int? runtime,
-    String overview,
-    @JsonKey(name: 'vote_average') double voteAverage,
-    @JsonKey(name: 'vote_count') int voteCount,
-    @JsonKey(fromJson: genresFromJson, toJson: genresToJson)
-    List<GenreObject> genres,
-    @JsonKey(fromJson: keywordsFromJson, toJson: keywordsToJson)
-    List<KeywordObject> keywords,
-    @JsonKey(name: 'original_name') String originalName,
-    @JsonKey(name: 'poster_path') String? posterPath,
-    @JsonKey(name: 'backdrop_path') String? backdropPath,
-    double popularity,
-    @JsonKey(name: 'original_language') String originalLanguage,
-    String type,
-    @JsonKey(name: 'episodes_number') int? episodesNumber,
-    @JsonKey(name: 'seasons_number') int? seasonsNumber,
-    String? homepage,
-    @JsonKey(fromJson: castFromJson, toJson: castToJson) List<CastMember> cast,
-    @JsonKey(fromJson: crewFromJson, toJson: crewToJson) List<EpisodeCrew> crew,
-    @JsonKey(fromJson: videosFromJson, toJson: videosToJson)
-    List<VideoObject> videos,
-  });
+  $Res call(
+      {int id,
+      String title,
+      String status,
+      @JsonKey(name: 'release_date') DateTime? releaseDate,
+      int? runtime,
+      String overview,
+      @JsonKey(name: 'vote_average') double voteAverage,
+      @JsonKey(name: 'vote_count') int voteCount,
+      @JsonKey(fromJson: genresFromJson, toJson: genresToJson)
+      List<GenreObject> genres,
+      @JsonKey(fromJson: keywordsFromJson, toJson: keywordsToJson)
+      List<KeywordObject> keywords,
+      @JsonKey(name: 'original_name') String originalName,
+      @JsonKey(name: 'poster_path') String? posterPath,
+      @JsonKey(name: 'backdrop_path') String? backdropPath,
+      double popularity,
+      @JsonKey(name: 'original_language') String originalLanguage,
+      String type,
+      @JsonKey(name: 'episodes_number') int? episodesNumber,
+      @JsonKey(name: 'seasons_number') int? seasonsNumber,
+      String? homepage,
+      @JsonKey(fromJson: castFromJson, toJson: castToJson)
+      List<CastMember> cast,
+      @JsonKey(fromJson: crewFromJson, toJson: crewToJson)
+      List<EpisodeCrew> crew,
+      @JsonKey(fromJson: videosFromJson, toJson: videosToJson)
+      List<VideoObject> videos});
 }
 
 /// @nodoc
@@ -278,9 +276,8 @@ class __$$SeriesImplCopyWithImpl<$Res>
     extends _$SeriesCopyWithImpl<$Res, _$SeriesImpl>
     implements _$$SeriesImplCopyWith<$Res> {
   __$$SeriesImplCopyWithImpl(
-    _$SeriesImpl _value,
-    $Res Function(_$SeriesImpl) _then,
-  ) : super(_value, _then);
+      _$SeriesImpl _value, $Res Function(_$SeriesImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of Series
   /// with the given fields replaced by the non-null parameter values.
@@ -310,137 +307,135 @@ class __$$SeriesImplCopyWithImpl<$Res>
     Object? crew = null,
     Object? videos = null,
   }) {
-    return _then(
-      _$SeriesImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as int,
-        title: null == title
-            ? _value.title
-            : title // ignore: cast_nullable_to_non_nullable
-                  as String,
-        status: null == status
-            ? _value.status
-            : status // ignore: cast_nullable_to_non_nullable
-                  as String,
-        releaseDate: freezed == releaseDate
-            ? _value.releaseDate
-            : releaseDate // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-        runtime: freezed == runtime
-            ? _value.runtime
-            : runtime // ignore: cast_nullable_to_non_nullable
-                  as int?,
-        overview: null == overview
-            ? _value.overview
-            : overview // ignore: cast_nullable_to_non_nullable
-                  as String,
-        voteAverage: null == voteAverage
-            ? _value.voteAverage
-            : voteAverage // ignore: cast_nullable_to_non_nullable
-                  as double,
-        voteCount: null == voteCount
-            ? _value.voteCount
-            : voteCount // ignore: cast_nullable_to_non_nullable
-                  as int,
-        genres: null == genres
-            ? _value._genres
-            : genres // ignore: cast_nullable_to_non_nullable
-                  as List<GenreObject>,
-        keywords: null == keywords
-            ? _value._keywords
-            : keywords // ignore: cast_nullable_to_non_nullable
-                  as List<KeywordObject>,
-        originalName: null == originalName
-            ? _value.originalName
-            : originalName // ignore: cast_nullable_to_non_nullable
-                  as String,
-        posterPath: freezed == posterPath
-            ? _value.posterPath
-            : posterPath // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        backdropPath: freezed == backdropPath
-            ? _value.backdropPath
-            : backdropPath // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        popularity: null == popularity
-            ? _value.popularity
-            : popularity // ignore: cast_nullable_to_non_nullable
-                  as double,
-        originalLanguage: null == originalLanguage
-            ? _value.originalLanguage
-            : originalLanguage // ignore: cast_nullable_to_non_nullable
-                  as String,
-        type: null == type
-            ? _value.type
-            : type // ignore: cast_nullable_to_non_nullable
-                  as String,
-        episodesNumber: freezed == episodesNumber
-            ? _value.episodesNumber
-            : episodesNumber // ignore: cast_nullable_to_non_nullable
-                  as int?,
-        seasonsNumber: freezed == seasonsNumber
-            ? _value.seasonsNumber
-            : seasonsNumber // ignore: cast_nullable_to_non_nullable
-                  as int?,
-        homepage: freezed == homepage
-            ? _value.homepage
-            : homepage // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        cast: null == cast
-            ? _value._cast
-            : cast // ignore: cast_nullable_to_non_nullable
-                  as List<CastMember>,
-        crew: null == crew
-            ? _value._crew
-            : crew // ignore: cast_nullable_to_non_nullable
-                  as List<EpisodeCrew>,
-        videos: null == videos
-            ? _value._videos
-            : videos // ignore: cast_nullable_to_non_nullable
-                  as List<VideoObject>,
-      ),
-    );
+    return _then(_$SeriesImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as int,
+      title: null == title
+          ? _value.title
+          : title // ignore: cast_nullable_to_non_nullable
+              as String,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      releaseDate: freezed == releaseDate
+          ? _value.releaseDate
+          : releaseDate // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      runtime: freezed == runtime
+          ? _value.runtime
+          : runtime // ignore: cast_nullable_to_non_nullable
+              as int?,
+      overview: null == overview
+          ? _value.overview
+          : overview // ignore: cast_nullable_to_non_nullable
+              as String,
+      voteAverage: null == voteAverage
+          ? _value.voteAverage
+          : voteAverage // ignore: cast_nullable_to_non_nullable
+              as double,
+      voteCount: null == voteCount
+          ? _value.voteCount
+          : voteCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      genres: null == genres
+          ? _value._genres
+          : genres // ignore: cast_nullable_to_non_nullable
+              as List<GenreObject>,
+      keywords: null == keywords
+          ? _value._keywords
+          : keywords // ignore: cast_nullable_to_non_nullable
+              as List<KeywordObject>,
+      originalName: null == originalName
+          ? _value.originalName
+          : originalName // ignore: cast_nullable_to_non_nullable
+              as String,
+      posterPath: freezed == posterPath
+          ? _value.posterPath
+          : posterPath // ignore: cast_nullable_to_non_nullable
+              as String?,
+      backdropPath: freezed == backdropPath
+          ? _value.backdropPath
+          : backdropPath // ignore: cast_nullable_to_non_nullable
+              as String?,
+      popularity: null == popularity
+          ? _value.popularity
+          : popularity // ignore: cast_nullable_to_non_nullable
+              as double,
+      originalLanguage: null == originalLanguage
+          ? _value.originalLanguage
+          : originalLanguage // ignore: cast_nullable_to_non_nullable
+              as String,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as String,
+      episodesNumber: freezed == episodesNumber
+          ? _value.episodesNumber
+          : episodesNumber // ignore: cast_nullable_to_non_nullable
+              as int?,
+      seasonsNumber: freezed == seasonsNumber
+          ? _value.seasonsNumber
+          : seasonsNumber // ignore: cast_nullable_to_non_nullable
+              as int?,
+      homepage: freezed == homepage
+          ? _value.homepage
+          : homepage // ignore: cast_nullable_to_non_nullable
+              as String?,
+      cast: null == cast
+          ? _value._cast
+          : cast // ignore: cast_nullable_to_non_nullable
+              as List<CastMember>,
+      crew: null == crew
+          ? _value._crew
+          : crew // ignore: cast_nullable_to_non_nullable
+              as List<EpisodeCrew>,
+      videos: null == videos
+          ? _value._videos
+          : videos // ignore: cast_nullable_to_non_nullable
+              as List<VideoObject>,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$SeriesImpl with DiagnosticableTreeMixin implements _Series {
-  const _$SeriesImpl({
-    required this.id,
-    required this.title,
-    this.status = '',
-    @JsonKey(name: 'release_date') this.releaseDate,
-    this.runtime,
-    this.overview = '',
-    @JsonKey(name: 'vote_average') this.voteAverage = 0.0,
-    @JsonKey(name: 'vote_count') this.voteCount = 0,
-    @JsonKey(fromJson: genresFromJson, toJson: genresToJson)
-    final List<GenreObject> genres = const [],
-    @JsonKey(fromJson: keywordsFromJson, toJson: keywordsToJson)
-    final List<KeywordObject> keywords = const [],
-    @JsonKey(name: 'original_name') this.originalName = '',
-    @JsonKey(name: 'poster_path') this.posterPath,
-    @JsonKey(name: 'backdrop_path') this.backdropPath,
-    this.popularity = 0.0,
-    @JsonKey(name: 'original_language') this.originalLanguage = '',
-    this.type = '',
-    @JsonKey(name: 'episodes_number') this.episodesNumber,
-    @JsonKey(name: 'seasons_number') this.seasonsNumber,
-    this.homepage,
-    @JsonKey(fromJson: castFromJson, toJson: castToJson)
-    final List<CastMember> cast = const [],
-    @JsonKey(fromJson: crewFromJson, toJson: crewToJson)
-    final List<EpisodeCrew> crew = const [],
-    @JsonKey(fromJson: videosFromJson, toJson: videosToJson)
-    final List<VideoObject> videos = const [],
-  }) : _genres = genres,
-       _keywords = keywords,
-       _cast = cast,
-       _crew = crew,
-       _videos = videos;
+  const _$SeriesImpl(
+      {required this.id,
+      required this.title,
+      this.status = '',
+      @JsonKey(name: 'release_date') this.releaseDate,
+      this.runtime,
+      this.overview = '',
+      @JsonKey(name: 'vote_average') this.voteAverage = 0.0,
+      @JsonKey(name: 'vote_count') this.voteCount = 0,
+      @JsonKey(fromJson: genresFromJson, toJson: genresToJson)
+      final List<GenreObject> genres = const [],
+      @JsonKey(fromJson: keywordsFromJson, toJson: keywordsToJson)
+      final List<KeywordObject> keywords = const [],
+      @JsonKey(name: 'original_name') this.originalName = '',
+      @JsonKey(name: 'poster_path') this.posterPath,
+      @JsonKey(name: 'backdrop_path') this.backdropPath,
+      this.popularity = 0.0,
+      @JsonKey(name: 'original_language') this.originalLanguage = '',
+      this.type = '',
+      @JsonKey(name: 'episodes_number') this.episodesNumber,
+      @JsonKey(name: 'seasons_number') this.seasonsNumber,
+      this.homepage,
+      @JsonKey(fromJson: castFromJson, toJson: castToJson)
+      final List<CastMember> cast = const [],
+      @JsonKey(fromJson: crewFromJson, toJson: crewToJson)
+      final List<EpisodeCrew> crew = const [],
+      @JsonKey(fromJson: videosFromJson, toJson: videosToJson)
+      final List<VideoObject> videos = const []})
+      : _genres = genres,
+        _keywords = keywords,
+        _cast = cast,
+        _crew = crew,
+        _videos = videos;
 
   factory _$SeriesImpl.fromJson(Map<String, dynamic> json) =>
       _$$SeriesImplFromJson(json);
@@ -466,9 +461,9 @@ class _$SeriesImpl with DiagnosticableTreeMixin implements _Series {
   @override
   @JsonKey(name: 'vote_count')
   final int voteCount;
-  // Now referencing the top-level functions
+// Now referencing the top-level functions
   final List<GenreObject> _genres;
-  // Now referencing the top-level functions
+// Now referencing the top-level functions
   @override
   @JsonKey(fromJson: genresFromJson, toJson: genresToJson)
   List<GenreObject> get genres {
@@ -504,7 +499,7 @@ class _$SeriesImpl with DiagnosticableTreeMixin implements _Series {
   @override
   @JsonKey()
   final String type;
-  // e.g., "TV Series", "Movie"
+// e.g., "TV Series", "Movie"
   @override
   @JsonKey(name: 'episodes_number')
   final int? episodesNumber;
@@ -618,30 +613,30 @@ class _$SeriesImpl with DiagnosticableTreeMixin implements _Series {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hashAll([
-    runtimeType,
-    id,
-    title,
-    status,
-    releaseDate,
-    runtime,
-    overview,
-    voteAverage,
-    voteCount,
-    const DeepCollectionEquality().hash(_genres),
-    const DeepCollectionEquality().hash(_keywords),
-    originalName,
-    posterPath,
-    backdropPath,
-    popularity,
-    originalLanguage,
-    type,
-    episodesNumber,
-    seasonsNumber,
-    homepage,
-    const DeepCollectionEquality().hash(_cast),
-    const DeepCollectionEquality().hash(_crew),
-    const DeepCollectionEquality().hash(_videos),
-  ]);
+        runtimeType,
+        id,
+        title,
+        status,
+        releaseDate,
+        runtime,
+        overview,
+        voteAverage,
+        voteCount,
+        const DeepCollectionEquality().hash(_genres),
+        const DeepCollectionEquality().hash(_keywords),
+        originalName,
+        posterPath,
+        backdropPath,
+        popularity,
+        originalLanguage,
+        type,
+        episodesNumber,
+        seasonsNumber,
+        homepage,
+        const DeepCollectionEquality().hash(_cast),
+        const DeepCollectionEquality().hash(_crew),
+        const DeepCollectionEquality().hash(_videos)
+      ]);
 
   /// Create a copy of Series
   /// with the given fields replaced by the non-null parameter values.
@@ -653,40 +648,41 @@ class _$SeriesImpl with DiagnosticableTreeMixin implements _Series {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SeriesImplToJson(this);
+    return _$$SeriesImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _Series implements Series {
-  const factory _Series({
-    required final int id,
-    required final String title,
-    final String status,
-    @JsonKey(name: 'release_date') final DateTime? releaseDate,
-    final int? runtime,
-    final String overview,
-    @JsonKey(name: 'vote_average') final double voteAverage,
-    @JsonKey(name: 'vote_count') final int voteCount,
-    @JsonKey(fromJson: genresFromJson, toJson: genresToJson)
-    final List<GenreObject> genres,
-    @JsonKey(fromJson: keywordsFromJson, toJson: keywordsToJson)
-    final List<KeywordObject> keywords,
-    @JsonKey(name: 'original_name') final String originalName,
-    @JsonKey(name: 'poster_path') final String? posterPath,
-    @JsonKey(name: 'backdrop_path') final String? backdropPath,
-    final double popularity,
-    @JsonKey(name: 'original_language') final String originalLanguage,
-    final String type,
-    @JsonKey(name: 'episodes_number') final int? episodesNumber,
-    @JsonKey(name: 'seasons_number') final int? seasonsNumber,
-    final String? homepage,
-    @JsonKey(fromJson: castFromJson, toJson: castToJson)
-    final List<CastMember> cast,
-    @JsonKey(fromJson: crewFromJson, toJson: crewToJson)
-    final List<EpisodeCrew> crew,
-    @JsonKey(fromJson: videosFromJson, toJson: videosToJson)
-    final List<VideoObject> videos,
-  }) = _$SeriesImpl;
+  const factory _Series(
+      {required final int id,
+      required final String title,
+      final String status,
+      @JsonKey(name: 'release_date') final DateTime? releaseDate,
+      final int? runtime,
+      final String overview,
+      @JsonKey(name: 'vote_average') final double voteAverage,
+      @JsonKey(name: 'vote_count') final int voteCount,
+      @JsonKey(fromJson: genresFromJson, toJson: genresToJson)
+      final List<GenreObject> genres,
+      @JsonKey(fromJson: keywordsFromJson, toJson: keywordsToJson)
+      final List<KeywordObject> keywords,
+      @JsonKey(name: 'original_name') final String originalName,
+      @JsonKey(name: 'poster_path') final String? posterPath,
+      @JsonKey(name: 'backdrop_path') final String? backdropPath,
+      final double popularity,
+      @JsonKey(name: 'original_language') final String originalLanguage,
+      final String type,
+      @JsonKey(name: 'episodes_number') final int? episodesNumber,
+      @JsonKey(name: 'seasons_number') final int? seasonsNumber,
+      final String? homepage,
+      @JsonKey(fromJson: castFromJson, toJson: castToJson)
+      final List<CastMember> cast,
+      @JsonKey(fromJson: crewFromJson, toJson: crewToJson)
+      final List<EpisodeCrew> crew,
+      @JsonKey(fromJson: videosFromJson, toJson: videosToJson)
+      final List<VideoObject> videos}) = _$SeriesImpl;
 
   factory _Series.fromJson(Map<String, dynamic> json) = _$SeriesImpl.fromJson;
 

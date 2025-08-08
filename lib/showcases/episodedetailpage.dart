@@ -62,9 +62,8 @@ class _EpisodeDetailPageState extends State<EpisodeDetailPage> {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (snapshot.hasData) {
             final episode = snapshot.data!;
-            final String fullStillPath = episode.stillPath != null
-              ? 'https://image.tmdb.org/t/p/w500${episode.stillPath}' // Larger still
-              : 'https://image.tmdb.org/t/p/w500${episode.stillPath}';
+            final String fullStillPath ='https://image.tmdb.org/t/p/w500${episode.stillPath}' // Larger still
+              ;
 
             return CustomScrollView(
               slivers: [
@@ -160,9 +159,7 @@ class _EpisodeDetailPageState extends State<EpisodeDetailPage> {
             role = person.job;
           }
           
-          final String fullProfileUrl = profilePath != null
-            ? 'https://inosdb.worker-inosuke.workers.dev/w500$profilePath'
-            : 'https://inosdb.worker-inosuke.workers.dev/w500$profilePath';
+          final String fullProfileUrl ='https://inosdb.worker-inosuke.workers.dev/w500$profilePath';
           return GestureDetector(
             onTap: () => _navigateToPersonDetail(person.id, name, profilePath),
             child: Container(

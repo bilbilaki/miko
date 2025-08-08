@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:media_kit/media_kit.dart';
-import 'package:miko/data/iptv_repository.dart';
+import 'package:miko/models/iptv_repository.dart';
 import 'package:miko/models/channel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

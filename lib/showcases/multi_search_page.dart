@@ -301,9 +301,7 @@ class _MultiSearchPageState extends State<MultiSearchPage> {
         break;
     }
 
-    final String posterUrl = imagePath != null
-        ? 'https://inosdb.worker-inosuke.workers.dev/w500$imagePath'
-        : 'https://inosdb.worker-inosuke.workers.dev/w500$imagePath';
+    final String posterUrl =  'https://inosdb.worker-inosuke.workers.dev/w500$imagePath';
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),

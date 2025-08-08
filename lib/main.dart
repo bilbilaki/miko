@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:app_links/app_links.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,9 @@ import 'package:miko/providers/csv_detail_process_provider.dart';
 import 'package:miko/providers/god_proovider.dart';
 import 'package:miko/providers/settings_provider.dart';
 import 'package:miko/services/user_data_service.dart'; // Import UserDataService
+import 'package:miko/showcases/movie_detail_page_copy.dart';
+import 'package:miko/showcases/movie_service.dart';
+import 'package:miko/showcases/tv_detail_page_anime.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:miko/yt-dlp/providers/settings_provider.dart';
 import 'package:miko/yt-dlp/services/ytdlp_downloader_service.dart';
@@ -21,11 +25,12 @@ import 'package:media_kit/media_kit.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as pr;
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:universal_io/io.dart';
 // This function must be a top-level function.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   MediaKit.ensureInitialized();
+  if (Platform.isAndroid){
   await Firebase.initializeApp();
     FlutterError.onError = (errorDetails) {
       FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
@@ -34,18 +39,17 @@ Future<void> main() async {
     PlatformDispatcher.instance.onError = (error, stack) {
       FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
       return true;
-    };
+    };}
 await Hive.initFlutter();
   Hive.registerAdapter(JackettConfigAdapter());
   await Hive.openBox<JackettConfig>(ConfigService.boxName);
+
   // Register all your adapters
   // IMPORTANT: Call this before the app runs
 final container = pr.ProviderContainer();
   await container.read(ytdlpDownloaderServiceProvider).initialize();
   await container.read(settingsProvider.notifier).loadSettings();
-
 // 2. Create a provider so Riverpod can access the key
-
 
   runApp(
     MultiProvider(
@@ -57,6 +61,7 @@ final container = pr.ProviderContainer();
             create: (context) =>
                 MovieProvider()), // Initialize MovieProvider directly
         ChangeNotifierProvider(create: (context) => TvSeriesProvider()),
+ 
     //ChangeNotifierProvider(
         //    create: (context) =>
         //        TMDBApiService()), // Initialize AnimeProvider directly
@@ -74,8 +79,7 @@ final container = pr.ProviderContainer();
 
       child: const MyApp(), // Use const if MyApp is stateless
     ),
-  );
-}
+  );}
 
 // ignore: must_be_immutable
 class MyApp extends pr.ConsumerWidget {
@@ -98,8 +102,9 @@ class MyApp extends pr.ConsumerWidget {
       ],
       child: MaterialApp(
         navigatorKey: navigatorKey,
-          theme: AppThemes.netflixDarkTheme, home:  SplashScreen2(ref)),
-    );
+                  theme: AppThemes.netflixDarkTheme, home:  SplashScreen2(ref),
+
+    ));
   }
 }
 
@@ -111,14 +116,57 @@ class SplashScreen2 extends StatefulWidget {
 }
 
 class _SplashScreen2State extends State<SplashScreen2> {
+    StreamSubscription? _sub;
+    late final AppLinks _appLinks ;
+ late  final Stream<Uri> _uriStream;
+
   @override
   void initState() {
     super.initState();
     debugPrint("Splash screen initialized");
+        _initDeepLinking();
 
     _navigateToHome();
   }
+ void _initDeepLinking() async {
+    _appLinks = AppLinks();
+    _uriStream = _appLinks.uriLinkStream;
 
+    // Listen for incoming links (hot start)
+    _uriStream.listen((Uri uri) {
+      _handleDeepLink(uri);
+    });
+
+    // Check for cold start deep link
+    final initialUri = await _appLinks.getInitialLink();
+    if (initialUri != null) {
+      _handleDeepLink(initialUri);
+    }
+  }
+
+    void _handleDeepLink(Uri uri) async {
+    final path = uri.path;
+    final idStr = uri.queryParameters['id'];
+    final id = int.tryParse(idStr ?? '');
+
+
+
+    if (path == 'miko/movie' && id != null) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => MovieDetailPage(id: id),
+        ),
+      );
+    } else     if (path == 'miko/series' && id != null) {
+        final MovieService _movieService = MovieService();
+        final tvs = await _movieService.getTvShowDetails(tvShowId: id);
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => TvShowDetailPageAnime(tvShow: tvs,typec: "tvseries",),
+        ),
+      );
+    }
+  }
   Future<void> _navigateToHome() async {
     debugPrint("Waiting for 5 seconds before navigation...");
     await Future.delayed(const Duration(seconds: 5));

@@ -114,7 +114,7 @@ class FavoritesScreen extends StatelessWidget {
         .whereType<TvSeriesAnime>() // Filter out nulls if movie not found
         .toList();
 
-     final favoriteTvSeries = userData.favoriteTvSeriesIds
+     final favoriteTvSeries = userData.favoriteAnimeIds
         .map((id) => tvProvider.getAnimeByTmdbId(id))
          .whereType<TvSeriesAnime>() // Filter out nulls
         .toList();
@@ -178,7 +178,7 @@ class FavoritesScreen extends StatelessWidget {
                 }
 
                 else if (item is TvSeriesAnime) {
-                  return AnimeSeriesCard(series: item,typec: "tvseires",);
+                  return AnimeSeriesCard(series: item,typec: "tvseries",);
                 }
                 return const SizedBox.shrink(); // Should not happen
               },

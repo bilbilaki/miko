@@ -5,6 +5,7 @@ import 'package:flutter/services.dart'; // Import for HapticFeedback
 import 'package:miko/providers/god_proovider.dart' as ss;
 import 'package:miko/services/user_data_service.dart';
 import 'package:miko/showcases/recommendations_page.dart';
+import 'package:miko/utils/ai_translator.dart';
 import 'package:miko/utils/utils.dart';
 import 'package:share_plus/share_plus.dart';
 import '../widgets/anime_series_card.dart'; // Keep if used elsewhere
@@ -38,7 +39,8 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
   late TabController _tabController;
   TvShowResponse? recommendations;
   TvShow? _detailedTvShow; // Store the fully loaded TvShow object
-
+  bool tr = false;
+  String oveview= '';
   // Futures for tab-specific data
   Future<TVCredits>? creditsFuture;
   Future<YoutubeVideoForSeries>? _videosFuture;
@@ -110,8 +112,13 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
     }
   }
 
+void loader() async{
+if (tr== false){
+   oveview= widget.tvShow.overview;}
+}
   @override
   Widget build(BuildContext context) {
+    loader();
     return Scaffold(
       body: FutureBuilder<Map<String, dynamic>>(
         future: _tvShowDataFuture,
@@ -270,6 +277,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
             _buildCastTab(context, tvShow.id),
             _buildVideosTab(context, tvShow.id),
           ],
+          physics: PageScrollPhysics(),
         ),
       ),
     );
@@ -331,6 +339,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
               children: [
                 // Backdrop Image
                 CachedNetworkImage(
+                  filterQuality: FilterQuality.high,
                   imageUrl: backdropUrl,
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Container(
@@ -348,6 +357,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
                     color: AppColors.secondaryBackground,
                     child: posterUrl.isNotEmpty // Try poster as fallback
                         ? CachedNetworkImage(
+                          filterQuality: FilterQuality.high,
                             imageUrl: posterUrl,
                             fit: BoxFit.contain,
                             alignment: Alignment.center,
@@ -473,13 +483,13 @@ final myItem = ShareItem(
   vote: tvShow.voteAverage,
   releaseDate: tvShow.firstAirDate.toString(),
   overview: tvShow.overview,
-  posterUrl: tvShow.fullPosterPath, internalUrl: 'https://iinos.site/series${tvShow.id}', // Replace with a real URL
+  posterUrl: tvShow.fullPosterPath, internalUrl: 'https://inosuke.page.link/miko/series${tvShow.id}', // Replace with a real URL
 );
 final String shareContent = '''
 Check out this: ${myItem.name}
 Rating: ${myItem.vote}
 Release Date: ${myItem.releaseDate}
-Overview: ${myItem.overview}
+Overview: $oveview
 Open in miko by click on ${myItem.internalUrl}
 ''';
 SharePlus.instance.share(
@@ -534,6 +544,7 @@ SharePlus.instance.share(
       BuildContext context, TvShow tvShow, bool showShimmer) {
     Widget posterWidget = tvShow.fullPosterPath.isNotEmpty
         ? CachedNetworkImage(
+          filterQuality: FilterQuality.high,
             imageUrl: tvShow.fullPosterPath,
             fit: BoxFit.cover,
             placeholder: (context, url) => showShimmer
@@ -647,6 +658,8 @@ SharePlus.instance.share(
   }
 
   Widget _buildOverviewTab(BuildContext context, TvShow tvShow) {
+        final userDataService = Provider.of<UserDataService>(context);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -654,10 +667,21 @@ SharePlus.instance.share(
         children: [
           Text('Overview', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
+             IconButton(
+                iconSize: 20.0,
+                icon: const Icon(Icons.assistant),
+                tooltip: 'translate overview',
+                onPressed: ()async {
+                  tVClick();
+                 gentranslate();},
+                 onLongPress:(){showTextInputDialog(context,userDataService);
+
+
+                 }),
           Text(
-              tvShow.overview.isEmpty
+              oveview ==''
                   ? 'No overview available.'
-                  : tvShow.overview,
+                  : oveview,
               style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 24),
 
@@ -698,6 +722,7 @@ SharePlus.instance.share(
                               radius: 40,
                               child: creator.profilePath != null
                                   ? CachedNetworkImage(
+                                    filterQuality: FilterQuality.high,
                                       imageUrl: creator.fullProfilePath,
                                       fit: BoxFit.cover,
                                       width: 80,
@@ -777,6 +802,7 @@ SharePlus.instance.share(
                         children: [
                           if (network.logoPath != null)
                             CachedNetworkImage(
+                              filterQuality: FilterQuality.high,
                               imageUrl:
                                   'https://image.tmdb.org/t/p/h60${network.logoPath}',
                               height: 100,
@@ -880,6 +906,7 @@ SharePlus.instance.share(
                   width: 200,
                   height: 300,
                   child: CachedNetworkImage(
+                    filterQuality: FilterQuality.high,
                     imageUrl: season.fullPosterPath,
                     fit: BoxFit.cover,
                     placeholder: (context, url) => Shimmer.fromColors(
@@ -1006,6 +1033,7 @@ SharePlus.instance.share(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: CachedNetworkImage(
+                          filterQuality: FilterQuality.high,
                           imageUrl: member.profileImageUrl,
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Shimmer.fromColors(
@@ -1108,7 +1136,7 @@ SharePlus.instance.share(
             itemBuilder: (context, index) {
               final video = videos[index];
               final thumbnailUrl =
-                  'https://img.youtube.com/vi/${video.key}/hqdefault.jpg';
+                  'https://linod.worker-inosuke.workers.dev/youtube/${video.key}/hqdefault.jpg';
               return Card(
                 margin: const EdgeInsets.only(bottom: 16),
                 clipBehavior: Clip.antiAlias,
@@ -1122,6 +1150,7 @@ SharePlus.instance.share(
                         children: [
                           CachedNetworkImage(
                             imageUrl: thumbnailUrl,
+                            filterQuality: FilterQuality.high,
                             fit: BoxFit.cover,
                             width: double.infinity,
                             height: 500,
@@ -1330,6 +1359,7 @@ SharePlus.instance.share(
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: CachedNetworkImage(
+                    filterQuality: FilterQuality.high,
                     imageUrl: episode.fullStillPath,
                     fit: BoxFit.cover,
                     width: double.infinity,
@@ -1460,6 +1490,71 @@ SharePlus.instance.share(
       ],
     );
   }
+  void gentranslate() async {
+  final translator = MovieTvTranslator();
+  debugPrint(oveview);
+final translatedOverView = await translator.translateTextForMoviesAndTV(oveview);
+debugPrint(translatedOverView);
+  debugPrint(oveview);
+  setState(() {  
+    tr = true;
+        oveview = translatedOverView;
+  
+
+  debugPrint(oveview);
+  });
+  }
+Future<String?> showTextInputDialog(
+  BuildContext context, userDataService,{
+  String title = 'Enter Your Prefred Language',
+  String? initialText,
+  String hintText = 'Like Arabic , Ar ...',
+  TextCapitalization textCapitalization = TextCapitalization.sentences,
+  TextInputType keyboardType = TextInputType.text,
+}) async {
+  final TextEditingController textEditingController =
+      TextEditingController(text: initialText);
+
+  return showDialog<String>(
+    context: context,
+    builder: (BuildContext dialogContext) {
+      return AlertDialog(
+        title: Text(title),
+        content: TextField(
+          controller: textEditingController,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: hintText,
+            border: const OutlineInputBorder(),
+          ),
+          textCapitalization: textCapitalization,
+          keyboardType: keyboardType,
+          onSubmitted: (value) {
+            // Allow submitting by pressing Enter/Done on keyboard
+            Navigator.of(dialogContext).pop(value);
+          },
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop(null); // Return null on cancel
+            },
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+        await  userDataService.setCustoombaseurl(textEditingController.text);
+
+              Navigator.of(dialogContext)
+                  .pop(textEditingController.text); // Return entered text
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      );
+    },
+  );
+}
 
   Widget _buildRecommendationCard(BuildContext context, TvShow tvShow) {
     return GestureDetector(
@@ -1485,6 +1580,7 @@ SharePlus.instance.share(
                 child: Stack(
                   children: [
                     CachedNetworkImage(
+                      filterQuality: FilterQuality.high,
                       imageUrl: tvShow.fullPosterPath,
                       height: 170,
                       width: 130,

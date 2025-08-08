@@ -92,13 +92,13 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
 
 
 
-    if (path == '/movie' && id != null) {
+    if (path == 'miko/movie' && id != null) {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => MovieDetailPage(id: id),
         ),
       );
-    } else     if (path == '/series' && id != null) {
+    } else     if (path == 'miko/series' && id != null) {
         final MovieService _movieService = MovieService();
         final tvs = await _movieService.getTvShowDetails(tvShowId: id);
       Navigator.of(context).push(

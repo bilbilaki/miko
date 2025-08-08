@@ -12,6 +12,20 @@ xml_permissions.txt
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 <!-- For Android 13 (API 33) and above, you need this to show the notification -->
+<uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Needed for recording audio -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- Needed for reading images from storage (Gallery/File picker) -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"
+        android:required="false" />
+
+    <!-- Needed if you're saving captured photos or recordings -->
+
+    <!-- Declare features used (optional but recommended) -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
 
     
 
@@ -19,7 +33,8 @@ xml_permissions.txt
     <application
         android:label="miko"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:supportsPictureInPicture="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -29,6 +44,7 @@ xml_permissions.txt
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|screenLayout|density"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
+            
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
                  while the Flutter UI initializes. After that, this theme continues
@@ -44,16 +60,17 @@ xml_permissions.txt
 
 
             </intent-filter>
-<intent-filter>
-                 <action android:name="android.intent.action.VIEW" />
+<intent-filter android:autoVerify="true">
+    <action android:name="android.intent.action.VIEW" />
+
     <category android:name="android.intent.category.DEFAULT" />
     <category android:name="android.intent.category.BROWSABLE" />
 
-    <!-- This defines a custom scheme -->
     <data
-        android:scheme="https"
-        android:host="iinos" />
-        </intent-filter>
+        android:host="inosuke.page.link"
+        android:scheme="https" />
+</intent-filter>
+
         </activity>
 
 

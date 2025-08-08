@@ -22,7 +22,7 @@ class UserDataService extends ChangeNotifier {
   static const String myListKey = 'myList';
 
   // Add keys for history, downloads if implemented later
-  String _custoombaseurl = '';
+  String _custoombaseurl = 'Farsi';
   SharedPreferences? _prefs;
   bool _historyformodelsenabled = false;
   bool _historychatenabled = true;

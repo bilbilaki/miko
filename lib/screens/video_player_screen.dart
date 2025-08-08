@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart'; // Required.
 import 'package:media_kit_video/media_kit_video.dart'; // Required.
 import 'dart:async';
-
 class VideoPlayerScreen extends StatefulWidget {
   final String videoUrl;
   final List? playlistitem;
@@ -23,21 +22,21 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
   Color subtitleColor = const Color.fromARGB(255, 238, 230, 5);
   bool showSubtitleControls = false;
   Timer? _hideTimer;
-
   @override
   void initState() {
     super.initState();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {});
 
+
+
     player.open(Media(Uri.decodeComponent(widget.videoUrl)),
-        play: true); 
+        play: true);
+
 
     player.stream.error.listen((error) {
       debugPrint('Player error: $error');
     });
   }
-
 
   String currentQuality = 'Auto';
   final List<String> qualityOptions = ['Auto', '1080p', '720p', '480p', '360p'];
@@ -59,9 +58,11 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
   @override
   void dispose(){
+ // Release PiP plugin resources
     _hideTimer?.cancel();
 
  player.dispose();
+
     super.dispose();
   }
     final List<BoxFit> _fitOptions = [
@@ -88,92 +89,91 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    debugPrint('VideoPlayerScreenState build method called.');
+    return  Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          actions: [],
+        ),
         backgroundColor: Colors.black,
-        actions: [],
-      ),
-      backgroundColor: Colors.black, 
-      body: Stack(
-        children: [
-          Video(
-            controller: controller,
-            controls: AdaptiveVideoControls,
-            fit: _currentFit,
-            filterQuality: FilterQuality.high,
-            wakelock: true,
-            subtitleViewConfiguration:  SubtitleViewConfiguration(
-              visible: true,
-              style: TextStyle(
-                height: 1.4,
-                fontSize: subtitleSize,
-                letterSpacing: 0.0,
-                wordSpacing: 0.0,
-                color: subtitleColor,
-                fontWeight: FontWeight.w700,
-                backgroundColor: const Color(0xaa000000),
-              ),
-              padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 24.0),
-            ),
-          ),
-          Positioned(
-            top: 16,
-            right: 16,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (showSubtitleControls)
-                    Container(
-                      width: 200,
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.text_fields,
-                              color: Colors.white, size: 20),
-                          Expanded(
-                            child: Slider(
-                              value: subtitleSize,
-                              min: 16.0,
-                              max: 48.0,
-                              onChanged: (value) {
-                                setState(() {
-                                  subtitleSize = value;
-                                });
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                                     IconButton(
-                  icon: Icon(_fitIcons[_currentFit] ?? Icons.aspect_ratio, color: Colors.white),
-                  tooltip: 'Change display mode',
-                  onPressed: _cycleBoxFit,
+        body: Stack(
+          children: [
+            Video(
+              controller: controller,
+              controls: AdaptiveVideoControls,
+              fit: _currentFit,
+              filterQuality: FilterQuality.high,
+              wakelock: true,
+              subtitleViewConfiguration:  SubtitleViewConfiguration(
+                visible: true,
+                style: TextStyle(
+                  height: 1.4,
+                  fontSize: subtitleSize,
+                  letterSpacing: 0.0,
+                  wordSpacing: 0.0,
+                  color: subtitleColor,
+                  fontWeight: FontWeight.w700,
+                  backgroundColor: const Color(0xaa000000),
                 ),
-                  IconButton(
-                    icon: const Icon(Icons.picture_in_picture_outlined,
-                        color: Colors.white),
-                    onPressed: () {
-                      setState(() {
-                        isPiPEnabled = !isPiPEnabled;
-                      });
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.settings, color: Colors.white),
-                    onPressed: _showSubtitleControls,
-                  ),
-                ],
+                padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 24.0),
               ),
             ),
-          ),
-        ],
-      ),
+            Positioned(
+              top: 16,
+              right: 16,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (showSubtitleControls)
+                      Container(
+                        width: 200,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.text_fields,
+                                color: Colors.white, size: 20),
+                            Expanded(
+                              child: Slider(
+                                value: subtitleSize,
+                                min: 16.0,
+                                max: 48.0,
+                                onChanged: (value) {
+                                  setState(() {
+                                    subtitleSize = value;
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                                       IconButton(
+                    icon: Icon(_fitIcons[_currentFit] ?? Icons.aspect_ratio, color: Colors.white),
+                    tooltip: 'Change display mode',
+                    onPressed: _cycleBoxFit,
+                  ),
+                    IconButton(
+                      icon: const Icon(Icons.picture_in_picture_outlined,
+                          color: Colors.white),
+                      onPressed: ()async {
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.settings, color: Colors.white),
+                      onPressed: _showSubtitleControls,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+   
     );
   }
 }

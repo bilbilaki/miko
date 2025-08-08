@@ -267,7 +267,7 @@ class Season {
 
   String get fullPosterPath => posterPath != null
       ? 'https://inosdb.worker-inosuke.workers.dev/w500$posterPath'
-      : 'https://inosdb.worker-inosuke.workers.dev/w500$posterPath';
+      : '';
 
   String get formattedAirDate {
     if (airDate == null || airDate!.isEmpty) return 'TBA';
@@ -332,7 +332,7 @@ class Episode {
 
   String get fullStillPath => stillPath != null
       ? 'https://inosdb.worker-inosuke.workers.dev/w500$stillPath'
-      : 'https://inosdb.worker-inosuke.workers.dev/w500$stillPath';
+      : '';
 
   String get formattedAirDate {
     if (airDate == null || airDate!.isEmpty) return 'TBA';
@@ -398,7 +398,7 @@ class Creator {
 
   String get fullProfilePath => profilePath != null
       ? 'https://inosdb.worker-inosuke.workers.dev/w500$profilePath'
-      : 'https://inosdb.worker-inosuke.workers.dev/w500$profilePath';
+      : '';
 
   String get genderText {
     switch (gender) {
@@ -436,7 +436,7 @@ class Network {
 
   String get fullLogoPath => logoPath != null
       ? 'https://inosdb.worker-inosuke.workers.dev/w500$logoPath'
-      : 'https://inosdb.worker-inosuke.workers.dev/w300$logoPath';
+      : '';
 }
 
 class Genre {
@@ -480,7 +480,7 @@ class ProductionCompany {
 
   String get fullLogoPath => logoPath != null
       ? 'https://inosdb.worker-inosuke.workers.dev/w500$logoPath'
-      : 'https://inosdb.worker-inosuke.workers.dev/w500$logoPath';
+      : '';
 }
 
 class ProductionCountry {
@@ -957,7 +957,7 @@ class TVCast {
   }
 
   String get profileImageUrl {
-    return profilePath =
+    return
          'https://inosdb.worker-inosuke.workers.dev/w500$profilePath';  }
 
   String get genderString {
@@ -1013,9 +1013,8 @@ class TVCrew {
   }
 
   String get profileImageUrl {
-    return profilePath != null
-        ? 'https://inosdb.worker-inosuke.workers.dev/w500$profilePath'
-        : 'https://inosdb.worker-inosuke.workers.dev/w500$profilePath';
+    return 
+         'https://inosdb.worker-inosuke.workers.dev/w500$profilePath';
   }
 }
 
