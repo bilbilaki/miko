@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:miko/jackett/ui/screens/home_screen.dart';
-import 'package:miko/screens/ai_core_screen.dart';
+import 'package:miko/mycore/chat_page.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/screens/genre_detail_screen.dart';
 import 'package:miko/screens/grid.dart';
@@ -150,7 +150,7 @@ class LeftNavigationPanel extends ConsumerWidget {
         icon: Icons.assistant, 
         title: 'AI Studio ',
         showText: showText,
-        onTap: () => _navigateTo(context, AICoreScreen(), isMobileLayout),
+        onTap: () => _navigateTo(context, ChatPage(), isMobileLayout),
       ),
       _buildNavigationItem(
         context,
