@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:miko/ai/functions/ai_browser_functions.dart';
 import 'package:miko/ai/services/ai_browser_service.dart';
+import 'package:miko/webviewai/download_service.dart'; // Import the new download service
+import 'package:miko/webviewai/bookmark_service.dart'; // Import the new bookmark service
 
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:miko/webviewai/bookmarks_screen.dart'; // Import BookmarksScreen
 import 'dart:async';
 import 'dart:ui';
-
-
+import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 class AiBrowserApp extends StatelessWidget {
-   AiBrowserApp( {super.key});
+  AiBrowserApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,35 +33,34 @@ class AiBrowserApp extends StatelessWidget {
           onSurface: Color(0xFFCCD6F6),
         ),
         inputDecorationTheme: InputDecorationTheme(
-            filled: true,
-            fillColor: const Color(0xFF0A192F),
-            hintStyle: const TextStyle(color: Color(0xFF8892B0)),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: const BorderSide(color: Color(0xFF233554)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: const BorderSide(color: Color(0xFF233554)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: const BorderSide(color: Color(0xFF64FFDA)),
-            ),
+          filled: true,
+          fillColor: const Color(0xFF0A192F),
+          hintStyle: const TextStyle(color: Color(0xFF8892B0)),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: const BorderSide(color: Color(0xFF233554)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: const BorderSide(color: Color(0xFF233554)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: const BorderSide(color: Color(0xFF64FFDA)),
+          ),
         ),
         iconTheme: const IconThemeData(color: Color(0xFFCCD6F6)),
-        textTheme: Theme.of(context).textTheme.apply(
-          bodyColor: const Color(0xFFCCD6F6),
-          displayColor: const Color(0xFFCCD6F6),
-        ).copyWith(
-          titleMedium: const TextStyle(color: Color(0xFFCCD6F6)),
-        ),
+        textTheme: Theme.of(context).textTheme
+            .apply(
+              bodyColor: const Color(0xFFCCD6F6),
+              displayColor: const Color(0xFFCCD6F6),
+            )
+            .copyWith(titleMedium: const TextStyle(color: Color(0xFFCCD6F6))),
       ),
       home: AdvancedWebViewer(),
     );
   }
 }
-
 
 class AdvancedWebViewer extends StatefulWidget {
   const AdvancedWebViewer({super.key});
@@ -67,18 +69,24 @@ class AdvancedWebViewer extends StatefulWidget {
   State<AdvancedWebViewer> createState() => _AdvancedWebViewerState();
 }
 
-class _AdvancedWebViewerState extends State<AdvancedWebViewer> with WidgetsBindingObserver {
+class _AdvancedWebViewerState extends State<AdvancedWebViewer>
+    with WidgetsBindingObserver {
   late final WebViewController _webViewController;
   late final AssistantService _assistantService;
   late final TextEditingController _promptController;
   late final TextEditingController _urlController;
+  late final DownloadService _downloadService; // Correct declaration
+  late final BookmarkService _bookmarkService; // Declare BookmarkService
 
-  static const double _aiPanelHeight = 280.0;
-  
+  static const double _aiPanelHeight =
+      200.0; // Reduced height for a more minimal appearance
+
   final List<String> _chatMessages = [];
   int _loadingPercentage = 100;
   bool _isAssistantProcessing = false;
   bool _isAiPanelVisible = true;
+  bool _canGoBack = false;
+  bool _canGoForward = false;
 
   @override
   void initState() {
@@ -87,22 +95,50 @@ class _AdvancedWebViewerState extends State<AdvancedWebViewer> with WidgetsBindi
 
     _promptController = TextEditingController();
     _urlController = TextEditingController();
+    _downloadService = DownloadService(); // Correct initialization
+    _bookmarkService = BookmarkService(); // Initialize BookmarkService
 
-    _webViewController = WebViewController()
+    late final PlatformWebViewControllerCreationParams params;
+    if (WebViewPlatform.instance is WebKitWebViewPlatform) {
+      params = WebKitWebViewControllerCreationParams(
+        allowsInlineMediaPlayback: true,
+        mediaTypesRequiringUserAction: const <PlaybackMediaTypes>{},
+      );
+    } else {
+      params = const PlatformWebViewControllerCreationParams();
+    }
+
+    final WebViewController controller =
+        WebViewController.fromPlatformCreationParams(params);
+
+    controller
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setUserAgent("Mozilla/5.0 (Linux; Android 16; LM-Q720) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.7204.180 Mobile Safari/537.36")
+      ..setUserAgent(
+        "Mozilla/5.0 (Linux; Android 16; LM-Q720) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.7204.180 Mobile Safari/537.36",
+      )
       ..setNavigationDelegate(
         NavigationDelegate(
-          onPageStarted: (url) => setState(() {
-            _loadingPercentage = 0;
-            _urlController.text = url;
-          }),
-          onProgress: (progress) => setState(() => _loadingPercentage = progress),
-          onPageFinished: (url) => setState(() {
-            _loadingPercentage = 100;
-            _urlController.text = url;
-          }),
-          onWebResourceError: (error) {
+          onProgress: (int progress) {
+            debugPrint('WebView is loading (progress : $progress%)');
+            setState(() => _loadingPercentage = progress);
+          },
+          onPageStarted: (String url) async {
+            debugPrint('Page started loading: $url');
+            setState(() {
+              _loadingPercentage = 0;
+              _urlController.text = url;
+            });
+            _updateNavigationState();
+          },
+          onPageFinished: (String url) async {
+            debugPrint('Page finished loading: $url');
+            setState(() {
+              _loadingPercentage = 100;
+              _urlController.text = url;
+            });
+            _updateNavigationState();
+          },
+          onWebResourceError: (WebResourceError error) {
             debugPrint('''
               Page resource error:
               code: ${error.errorCode}
@@ -111,29 +147,85 @@ class _AdvancedWebViewerState extends State<AdvancedWebViewer> with WidgetsBindi
               isForMainFrame: ${error.isForMainFrame}
             ''');
           },
+          onNavigationRequest: (NavigationRequest request) {
+            if (request.url.startsWith('mailto:') ||
+                request.url.startsWith('tel:')) {
+              return NavigationDecision.prevent;
+            }
+            // Simple heuristic for downloads: check file extension
+            final uri = Uri.parse(request.url);
+            final path = uri.path;
+            final fileExtension = path.contains('.')
+                ? path.substring(path.lastIndexOf('.') + 1)
+                : '';
+            final downloadExtensions = [
+              'pdf',
+              'doc',
+              'docx',
+              'xls',
+              'xlsx',
+              'ppt',
+              'pptx',
+              'zip',
+              'rar',
+              'tar',
+              'gz',
+              'mp3',
+              'mp4',
+              'jpg',
+              'jpeg',
+              'png',
+              'gif',
+            ];
+
+            if (downloadExtensions.contains(fileExtension.toLowerCase())) {
+              final filename = path.substring(path.lastIndexOf('/') + 1);
+              _downloadService.downloadFile(request.url, filename, context);
+              return NavigationDecision
+                  .prevent; // Prevent WebView from navigating to the download URL
+            }
+            return NavigationDecision.navigate;
+          },
         ),
       )
       ..loadRequest(Uri.parse('https://duckduckgo.com/'));
+
+    if (controller.platform is AndroidWebViewController) {
+      AndroidWebViewController.enableDebugging(true);
+      (controller.platform as AndroidWebViewController)
+          .setMediaPlaybackRequiresUserGesture(false);
+    }
+
+    _webViewController = controller;
 
     _assistantService = AssistantService(
       webViewAIController: WebViewAIController(_webViewController),
       onNewMessage: _addChatMessage,
     );
   }
-  
+
   void _addChatMessage(String message) {
     setState(() => _chatMessages.insert(0, message));
   }
-  
+
   void _toggleAiPanel() {
     setState(() => _isAiPanelVisible = !_isAiPanelVisible);
+  }
+
+  void _updateNavigationState() async {
+    final canGoBack = await _webViewController.canGoBack();
+    final canGoForward = await _webViewController.canGoForward();
+    setState(() {
+      _canGoBack = canGoBack;
+      _canGoForward = canGoForward;
+    });
   }
 
   void _handleUrlSubmit(String url) {
     Uri? uri = Uri.tryParse(url);
     if (uri != null) {
       if (!uri.hasScheme) {
-        uri = Uri.parse('https://www.google.com/search?q=$url');
+        uri = Uri.parse('https://duckduckgo.com/search?q=$url');
       }
       _webViewController.loadRequest(uri);
       FocusScope.of(context).unfocus(); // Dismiss keyboard
@@ -163,7 +255,7 @@ class _AdvancedWebViewerState extends State<AdvancedWebViewer> with WidgetsBindi
     _urlController.dispose();
     super.dispose();
   }
-  
+
   @override
   Future<AppExitResponse> didRequestAppExit() async {
     // You can add logic here to ask the user for confirmation
@@ -181,12 +273,21 @@ class _AdvancedWebViewerState extends State<AdvancedWebViewer> with WidgetsBindi
         onUrlSubmit: _handleUrlSubmit,
         onToggleAiPanel: _toggleAiPanel,
         isAiPanelVisible: isPanelVisible,
+        canGoBack: _canGoBack,
+        canGoForward: _canGoForward,
+        downloadService: _downloadService, // Pass downloadService
+        bookmarkService: _bookmarkService, // Pass bookmarkService
       ),
-      drawer: const AppDrawer(),
+      drawer: AppDrawer(
+        webViewController: _webViewController,
+        bookmarkService: _bookmarkService,
+      ),
       body: Stack(
         children: [
           Padding(
-            padding: EdgeInsets.only(bottom: isPanelVisible ? _aiPanelHeight - 10 : 0),
+            padding: EdgeInsets.only(
+              bottom: isPanelVisible ? _aiPanelHeight - 10 : 0,
+            ),
             child: WebViewStack(
               controller: _webViewController,
               loadingPercentage: _loadingPercentage,
@@ -231,7 +332,9 @@ class WebViewStack extends StatelessWidget {
           LinearProgressIndicator(
             value: loadingPercentage / 100.0,
             backgroundColor: Colors.transparent,
-            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
+            valueColor: AlwaysStoppedAnimation<Color>(
+              Theme.of(context).colorScheme.primary,
+            ),
           ),
       ],
     );
@@ -245,6 +348,10 @@ class BrowserAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.onUrlSubmit,
     required this.onToggleAiPanel,
     required this.isAiPanelVisible,
+    required this.canGoBack,
+    required this.canGoForward,
+    required this.downloadService, // Add downloadService to constructor
+    required this.bookmarkService, // Add bookmarkService to constructor
     super.key,
   });
 
@@ -253,6 +360,10 @@ class BrowserAppBar extends StatelessWidget implements PreferredSizeWidget {
   final ValueChanged<String> onUrlSubmit;
   final VoidCallback onToggleAiPanel;
   final bool isAiPanelVisible;
+  final bool canGoBack;
+  final bool canGoForward;
+  final DownloadService downloadService; // Declare downloadService
+  final BookmarkService bookmarkService; // Declare BookmarkService
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -267,56 +378,118 @@ class BrowserAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading: IconButton(
         icon: const Icon(Icons.menu),
         onPressed: () => Scaffold.of(context).openDrawer(),
+        tooltip: 'Menu',
+        splashRadius: 20,
       ),
       titleSpacing: 0,
       title: Row(
         children: [
-          NavigationButton(
-              icon: Icons.arrow_back_ios_new,
-              onPressed: () async {
-                if (await webViewController.canGoBack()) {
-                  await webViewController.goBack();
-                }
-              }),
-          NavigationButton(
-              icon: Icons.arrow_forward_ios,
-              onPressed: () async {
-                if (await webViewController.canGoForward()) {
-                  await webViewController.goForward();
-                }
-              }),
-              SizedBox(width: 1),
-        ],
-      ),
-                           
-
-      flexibleSpace: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.only(left: 104, right: 56, top: 8, bottom: 8),
-          child: Center(
-            child: TextField(
-              controller: urlController,
-              onSubmitted: onUrlSubmit,
-              style: const TextStyle(fontSize: 14),
-              decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                hintText: 'Search or type a URL',
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.refresh, size: 20),
-                  onPressed: () => webViewController.reload(),
+          // Navigation buttons group (fixed compact widths)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 40,
+                child: IconButton(
+                  iconSize: 18,
+                  icon: const Icon(Icons.arrow_back_ios_new),
+                  onPressed: canGoBack
+                      ? () => webViewController.goBack()
+                      : null,
+                  tooltip: 'Back',
+                  splashRadius: 20,
+                ),
+              ),
+              SizedBox(
+                width: 40,
+                child: IconButton(
+                  iconSize: 18,
+                  icon: const Icon(Icons.arrow_forward_ios),
+                  onPressed: canGoForward
+                      ? () => webViewController.goForward()
+                      : null,
+                  tooltip: 'Forward',
+                  splashRadius: 20,
+                ),
+              ),
+              SizedBox(
+                width: 40,
+                child: IconButton(
+                  iconSize: 20,
+                  icon: const Icon(Icons.home),
+                  onPressed: () => webViewController.loadRequest(
+                    Uri.parse('https://duckduckgo.com/'),
+                  ),
+                  tooltip: 'Home',
+                  splashRadius: 20,
+                ),
+              ),
+            ],
+          ),
+          Expanded(
+            child: Container(
+              height: 40,
+              margin: const EdgeInsets.only(right: 8),
+              child: TextField(
+                controller: urlController,
+                onSubmitted: onUrlSubmit,
+                textAlignVertical: TextAlignVertical.center,
+                style: const TextStyle(fontSize: 14),
+                decoration: InputDecoration(
+                  isDense: true,
+                  filled: true,
+                  fillColor: theme.colorScheme.background,
+                  hintText: 'Search or type a URL',
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 0,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.refresh, size: 20),
+                    onPressed: () => webViewController.reload(),
+                    tooltip: 'Reload',
+                    splashRadius: 20,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+        ],
       ),
       actions: [
         IconButton(
+          icon: const Icon(Icons.bookmark_add),
+          onPressed: () async {
+            final currentUrl = await webViewController.currentUrl();
+            final currentTitle = await webViewController.getTitle();
+            if (currentUrl != null && currentTitle != null) {
+              bookmarkService.addBookmark(currentUrl, currentTitle);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Bookmark added: $currentTitle')),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Could not add bookmark.')),
+              );
+            }
+          },
+          tooltip: 'Add bookmark',
+          splashRadius: 20,
+        ),
+        IconButton(
           icon: Icon(
-            isAiPanelVisible ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_up,
+            isAiPanelVisible
+                ? Icons.keyboard_arrow_down
+                : Icons.keyboard_arrow_up,
             color: theme.colorScheme.primary,
           ),
           onPressed: onToggleAiPanel,
+          tooltip: 'Toggle AI panel',
+          splashRadius: 20,
         ),
       ],
     );
@@ -325,8 +498,8 @@ class BrowserAppBar extends StatelessWidget implements PreferredSizeWidget {
 
 class NavigationButton extends StatelessWidget {
   final IconData icon;
-  final VoidCallback onPressed;
-  const NavigationButton({required this.icon, required this.onPressed, super.key});
+  final VoidCallback? onPressed; // Make onPressed nullable
+  const NavigationButton({required this.icon, this.onPressed, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -338,7 +511,7 @@ class NavigationButton extends StatelessWidget {
   }
 }
 
-class AiChatPanel extends StatelessWidget {
+class AiChatPanel extends StatefulWidget {
   const AiChatPanel({
     super.key,
     required this.chatMessages,
@@ -351,6 +524,31 @@ class AiChatPanel extends StatelessWidget {
   final TextEditingController promptController;
   final bool isAssistantProcessing;
   final ValueChanged<String> onPromptSubmit;
+
+  @override
+  State<AiChatPanel> createState() => _AiChatPanelState();
+}
+
+class _AiChatPanelState extends State<AiChatPanel> {
+  bool _isPromptEmpty = true;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.promptController.addListener(_updatePromptEmptyState);
+  }
+
+  @override
+  void dispose() {
+    widget.promptController.removeListener(_updatePromptEmptyState);
+    super.dispose();
+  }
+
+  void _updatePromptEmptyState() {
+    setState(() {
+      _isPromptEmpty = widget.promptController.text.isEmpty;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -367,7 +565,10 @@ class AiChatPanel extends StatelessWidget {
           decoration: BoxDecoration(
             color: theme.colorScheme.surface.withOpacity(0.85),
             border: Border(
-                top: BorderSide(color: theme.colorScheme.primary.withOpacity(0.5), width: 1.5)
+              top: BorderSide(
+                color: theme.colorScheme.primary.withOpacity(0.5),
+                width: 1.5,
+              ),
             ),
           ),
           child: Column(
@@ -376,15 +577,23 @@ class AiChatPanel extends StatelessWidget {
                 child: ListView.builder(
                   reverse: true,
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  itemCount: chatMessages.length,
+                  itemCount: widget.chatMessages.length,
                   itemBuilder: (context, index) {
-                    final message = chatMessages[index];
+                    final message = widget.chatMessages[index];
                     final isUser = message.startsWith("User:");
                     return Align(
-                      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+                      alignment: isUser
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
                         constraints: BoxConstraints(
                           maxWidth: MediaQuery.of(context).size.width * 0.7,
                         ),
@@ -397,7 +606,9 @@ class AiChatPanel extends StatelessWidget {
                         child: Text(
                           message,
                           style: TextStyle(
-                            color: isUser ? Colors.black : theme.colorScheme.onSurface,
+                            color: isUser
+                                ? Colors.black
+                                : theme.colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -411,17 +622,21 @@ class AiChatPanel extends StatelessWidget {
                   children: [
                     Expanded(
                       child: TextField(
-                        controller: promptController,
+                        controller: widget.promptController,
                         style: const TextStyle(fontSize: 14),
                         decoration: const InputDecoration(
                           hintText: 'e.g., "summarize this page"',
-                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
                         ),
-                        onSubmitted: isAssistantProcessing ? null : onPromptSubmit,
+                        onSubmitted: widget.isAssistantProcessing
+                            ? null
+                            : widget.onPromptSubmit,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    isAssistantProcessing
+                    widget.isAssistantProcessing
                         ? const Padding(
                             padding: EdgeInsets.all(8.0),
                             child: SizedBox(
@@ -431,9 +646,17 @@ class AiChatPanel extends StatelessWidget {
                             ),
                           )
                         : IconButton(
-                            icon: const Icon(Icons.send),
+                            icon: _isPromptEmpty
+                                ? const Icon(Icons.mic)
+                                : const Icon(Icons.send),
                             color: theme.colorScheme.primary,
-                            onPressed: () => onPromptSubmit(promptController.text),
+                            onPressed: _isPromptEmpty
+                                ? () {
+                                    /* TODO: Implement record functionality */
+                                  }
+                                : () => widget.onPromptSubmit(
+                                    widget.promptController.text,
+                                  ),
                           ),
                   ],
                 ),
@@ -447,7 +670,14 @@ class AiChatPanel extends StatelessWidget {
 }
 
 class AppDrawer extends StatelessWidget {
-  const AppDrawer({super.key});
+  final WebViewController webViewController;
+  final BookmarkService bookmarkService;
+
+  const AppDrawer({
+    super.key,
+    required this.webViewController,
+    required this.bookmarkService,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -458,21 +688,29 @@ class AppDrawer extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-            ),
+            decoration: BoxDecoration(color: theme.colorScheme.surface),
             child: Text(
               'Miko Browser',
               style: theme.textTheme.headlineSmall?.copyWith(
-                  color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           ListTile(
             leading: const Icon(Icons.bookmark_border),
             title: const Text('Bookmarks'),
             onTap: () {
-              // TODO: Implement bookmark functionality
-              Navigator.pop(context);
+              Navigator.pop(context); // Close the drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BookmarksScreen(
+                    webViewController: webViewController,
+                    bookmarkService: bookmarkService,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(

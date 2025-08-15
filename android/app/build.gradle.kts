@@ -12,8 +12,8 @@ val keystoreProperties = Properties().apply {
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
+
+
     // END: FlutterFire Configuration
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -23,7 +23,7 @@ plugins {
 android {
     namespace = "com.example.miko"
         compileSdk = 36
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "29.0.13846066"
 signingConfigs {
         create("release") {
             storeFile = file(keystoreProperties["storeFile"] as String)

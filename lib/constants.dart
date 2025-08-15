@@ -1,7 +1,7 @@
 
 library;
 
-import 'package:miko/configs/consts.dart';
+import 'package:miko/configs/consts2.dart';
 enum YtdlpChannel { stable, nightly, master }
 
 class AppConstants {

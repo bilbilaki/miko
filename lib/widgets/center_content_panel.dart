@@ -34,16 +34,17 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
   final PageController _pageController = PageController();
   int _currentIndex = 0;
   StreamSubscription? _sub;
-    late final AppLinks _appLinks;
+  late final AppLinks _appLinks;
   late final Stream<Uri> _uriStream;
   final List<Widget> _pages = [
     const AnimeGridScreen(typec: "movie"),
     const AnimeGridScreen(typec: "tvseries"),
-    const AnimeGridScreen(typec: "anime"), 
-    const GenreListScreen(), 
+    const AnimeGridScreen(typec: "anime"),
+    const GenreListScreen(),
     const FavoritesScreen(),
-   const IptvScreen(), 
-   /// const WatchlistScreen(), 
+    const IptvScreen(),
+
+    /// const WatchlistScreen(),
   ];
 
   void _onPageChanged(int index) {
@@ -62,14 +63,15 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
       curve: Curves.ease,
     );
   }
+
   @override
   void initState() {
     super.initState();
-        _initDeepLinking();
+    _initDeepLinking();
   }
 
   // For when app is opened *while already running*
-    void _initDeepLinking() async {
+  void _initDeepLinking() async {
     _appLinks = AppLinks();
     _uriStream = _appLinks.uriLinkStream;
 
@@ -85,25 +87,21 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
     }
   }
 
-    void _handleDeepLink(Uri uri) async {
+  void _handleDeepLink(Uri uri) async {
     final path = uri.path;
     final idStr = uri.queryParameters['id'];
     final id = int.tryParse(idStr ?? '');
 
-
-
     if (path == 'miko/movie' && id != null) {
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => MovieDetailPage(id: id)));
+    } else if (path == 'miko/series' && id != null) {
+      final MovieService _movieService = MovieService();
+      final tvs = await _movieService.getTvShowDetails(tvShowId: id);
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => MovieDetailPage(id: id),
-        ),
-      );
-    } else     if (path == 'miko/series' && id != null) {
-        final MovieService _movieService = MovieService();
-        final tvs = await _movieService.getTvShowDetails(tvShowId: id);
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => TvShowDetailPageAnime(tvShow: tvs,typec: "tvseries",),
+          builder: (_) => TvShowDetailPageAnime(tvShow: tvs, typec: "tvseries"),
         ),
       );
     }
@@ -115,11 +113,12 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
     _sub?.cancel();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     final movieProvider = context.watch<MovieProvider>();
     final tvProvider = context.watch<TvSeriesProvider>();
-    final animeProvider = context.watch<AnimeProvider>(); 
+    final animeProvider = context.watch<AnimeProvider>();
     return MaterialApp(
       theme: AppThemes.netflixDarkTheme,
       debugShowCheckedModeBanner: false,
@@ -130,54 +129,69 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
           physics: const BouncingScrollPhysics(),
           allowImplicitScrolling: true,
           children: _pages,
-
         ),
         bottomNavigationBar: BottomNavBar(
           currentIndex: _currentIndex,
           onTap: _onNavBarTap,
         ),
         floatingActionButton: pp.Consumer<FloatingButtonVisibilityNotifier>(
-    builder: (context, visibilityNotifier, child) {
-      return visibilityNotifier.isVisible ?
-         AlienFloatSwapMenu(
-            OnAskAi: () {
-              showDialog(
-                    context: context,
-                    builder: (ctx) {
-        
-                      return ProviderScope(
-                        parent: ProviderScope.containerOf(context),
-                        child:  AiChatDialog(),
+          builder: (context, visibilityNotifier, child) {
+            return visibilityNotifier.isVisible
+                ? AlienFloatSwapMenu(
+                    OnAskAi: () {
+                      showDialog(
+                        context: context,
+                        builder: (ctx) {
+                          return ProviderScope(
+                            parent: ProviderScope.containerOf(context),
+                            child: AiChatDialog(),
+                          );
+                        },
                       );
                     },
-                  );
-                },
-                onFilter: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (context) {
-                    switch (_currentIndex) {
-                      case 0:
-                        return ContentFilterBottomSheet<MovieProvider>(provider: movieProvider);
-                      case 1:
-                        return ContentFilterBottomSheet<TvSeriesProvider>(provider: tvProvider);
-                      case 2:
-                        return ContentFilterBottomSheet<AnimeProvider>(provider: animeProvider);
-                      default:
-                        return ContentFilterBottomSheet<MovieProvider>(provider: movieProvider);
-                    }
-                  },
-                );
-              },
-                search: () {showModalBottomSheet(
-  context: context,
-  isScrollControlled: true, 
-  shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-  builder: (context) => UnifiedSearchBottomSheet(initialQuery: ''),
-);},
-          ) : Container();
-        }),
+                    onFilter: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (context) {
+                          switch (_currentIndex) {
+                            case 0:
+                              return ContentFilterBottomSheet<MovieProvider>(
+                                provider: movieProvider,
+                              );
+                            case 1:
+                              return ContentFilterBottomSheet<TvSeriesProvider>(
+                                provider: tvProvider,
+                              );
+                            case 2:
+                              return ContentFilterBottomSheet<AnimeProvider>(
+                                provider: animeProvider,
+                              );
+                            default:
+                              return ContentFilterBottomSheet<MovieProvider>(
+                                provider: movieProvider,
+                              );
+                          }
+                        },
+                      );
+                    },
+                    search: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(20),
+                          ),
+                        ),
+                        builder: (context) =>
+                            UnifiedSearchBottomSheet(initialQuery: ''),
+                      );
+                    },
+                  )
+                : Container();
+          },
+        ),
       ),
     );
   }

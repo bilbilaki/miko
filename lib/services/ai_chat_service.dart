@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:miko/configs/consts.dart';
+import 'package:miko/configs/consts2.dart';
 //import 'package:miko/services/ai_chat_service.dart';
 import 'package:tmdb_api/tmdb_api.dart';
 import 'dart:convert';

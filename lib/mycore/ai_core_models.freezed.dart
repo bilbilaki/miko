@@ -42,7 +42,8 @@ mixin _$Attachment {
             @Uint8ListBase64Converter() Uint8List bytes,
             @DurationMsConverter() Duration duration,
             AudioSourceType sourceType,
-            AudioFormat format)
+            AudioFormat format,
+            dynamic file)
         audio,
     required TResult Function(
             String fileName,
@@ -62,7 +63,8 @@ mixin _$Attachment {
             @Uint8ListBase64Converter() Uint8List bytes,
             @DurationMsConverter() Duration duration,
             AudioSourceType sourceType,
-            AudioFormat format)?
+            AudioFormat format,
+            dynamic file)?
         audio,
     TResult? Function(
             String fileName,
@@ -82,7 +84,8 @@ mixin _$Attachment {
             @Uint8ListBase64Converter() Uint8List bytes,
             @DurationMsConverter() Duration duration,
             AudioSourceType sourceType,
-            AudioFormat format)?
+            AudioFormat format,
+            dynamic file)?
         audio,
     TResult Function(
             String fileName,
@@ -278,7 +281,8 @@ class _$ImageAttachmentImpl extends ImageAttachment {
             @Uint8ListBase64Converter() Uint8List bytes,
             @DurationMsConverter() Duration duration,
             AudioSourceType sourceType,
-            AudioFormat format)
+            AudioFormat format,
+            dynamic file)
         audio,
     required TResult Function(
             String fileName,
@@ -301,7 +305,8 @@ class _$ImageAttachmentImpl extends ImageAttachment {
             @Uint8ListBase64Converter() Uint8List bytes,
             @DurationMsConverter() Duration duration,
             AudioSourceType sourceType,
-            AudioFormat format)?
+            AudioFormat format,
+            dynamic file)?
         audio,
     TResult? Function(
             String fileName,
@@ -324,7 +329,8 @@ class _$ImageAttachmentImpl extends ImageAttachment {
             @Uint8ListBase64Converter() Uint8List bytes,
             @DurationMsConverter() Duration duration,
             AudioSourceType sourceType,
-            AudioFormat format)?
+            AudioFormat format,
+            dynamic file)?
         audio,
     TResult Function(
             String fileName,
@@ -421,7 +427,8 @@ abstract class _$$AudioAttachmentImplCopyWith<$Res> {
       {@Uint8ListBase64Converter() Uint8List bytes,
       @DurationMsConverter() Duration duration,
       AudioSourceType sourceType,
-      AudioFormat format});
+      AudioFormat format,
+      dynamic file});
 }
 
 /// @nodoc
@@ -441,6 +448,7 @@ class __$$AudioAttachmentImplCopyWithImpl<$Res>
     Object? duration = null,
     Object? sourceType = null,
     Object? format = null,
+    Object? file = freezed,
   }) {
     return _then(_$AudioAttachmentImpl(
       bytes: null == bytes
@@ -459,6 +467,10 @@ class __$$AudioAttachmentImplCopyWithImpl<$Res>
           ? _value.format
           : format // ignore: cast_nullable_to_non_nullable
               as AudioFormat,
+      file: freezed == file
+          ? _value.file
+          : file // ignore: cast_nullable_to_non_nullable
+              as dynamic,
     ));
   }
 }
@@ -471,6 +483,7 @@ class _$AudioAttachmentImpl extends AudioAttachment {
       @DurationMsConverter() required this.duration,
       required this.sourceType,
       this.format = AudioFormat.wav,
+      this.file,
       final String? $type})
       : $type = $type ?? 'audio',
         super._();
@@ -489,13 +502,15 @@ class _$AudioAttachmentImpl extends AudioAttachment {
   @override
   @JsonKey()
   final AudioFormat format;
+  @override
+  final dynamic file;
 
   @JsonKey(name: 'runtimeType')
   final String $type;
 
   @override
   String toString() {
-    return 'Attachment.audio(bytes: $bytes, duration: $duration, sourceType: $sourceType, format: $format)';
+    return 'Attachment.audio(bytes: $bytes, duration: $duration, sourceType: $sourceType, format: $format, file: $file)';
   }
 
   @override
@@ -508,13 +523,19 @@ class _$AudioAttachmentImpl extends AudioAttachment {
                 other.duration == duration) &&
             (identical(other.sourceType, sourceType) ||
                 other.sourceType == sourceType) &&
-            (identical(other.format, format) || other.format == format));
+            (identical(other.format, format) || other.format == format) &&
+            const DeepCollectionEquality().equals(other.file, file));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType,
-      const DeepCollectionEquality().hash(bytes), duration, sourceType, format);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(bytes),
+      duration,
+      sourceType,
+      format,
+      const DeepCollectionEquality().hash(file));
 
   /// Create a copy of Attachment
   /// with the given fields replaced by the non-null parameter values.
@@ -535,7 +556,8 @@ class _$AudioAttachmentImpl extends AudioAttachment {
             @Uint8ListBase64Converter() Uint8List bytes,
             @DurationMsConverter() Duration duration,
             AudioSourceType sourceType,
-            AudioFormat format)
+            AudioFormat format,
+            dynamic file)
         audio,
     required TResult Function(
             String fileName,
@@ -545,7 +567,7 @@ class _$AudioAttachmentImpl extends AudioAttachment {
         file,
     required TResult Function(String text, String? sourceName) chunk,
   }) {
-    return audio(bytes, duration, sourceType, format);
+    return audio(bytes, duration, sourceType, format, this.file);
   }
 
   @override
@@ -558,7 +580,8 @@ class _$AudioAttachmentImpl extends AudioAttachment {
             @Uint8ListBase64Converter() Uint8List bytes,
             @DurationMsConverter() Duration duration,
             AudioSourceType sourceType,
-            AudioFormat format)?
+            AudioFormat format,
+            dynamic file)?
         audio,
     TResult? Function(
             String fileName,
@@ -568,7 +591,7 @@ class _$AudioAttachmentImpl extends AudioAttachment {
         file,
     TResult? Function(String text, String? sourceName)? chunk,
   }) {
-    return audio?.call(bytes, duration, sourceType, format);
+    return audio?.call(bytes, duration, sourceType, format, this.file);
   }
 
   @override
@@ -581,7 +604,8 @@ class _$AudioAttachmentImpl extends AudioAttachment {
             @Uint8ListBase64Converter() Uint8List bytes,
             @DurationMsConverter() Duration duration,
             AudioSourceType sourceType,
-            AudioFormat format)?
+            AudioFormat format,
+            dynamic file)?
         audio,
     TResult Function(
             String fileName,
@@ -593,7 +617,7 @@ class _$AudioAttachmentImpl extends AudioAttachment {
     required TResult orElse(),
   }) {
     if (audio != null) {
-      return audio(bytes, duration, sourceType, format);
+      return audio(bytes, duration, sourceType, format, this.file);
     }
     return orElse();
   }
@@ -648,7 +672,8 @@ abstract class AudioAttachment extends Attachment {
       {@Uint8ListBase64Converter() required final Uint8List bytes,
       @DurationMsConverter() required final Duration duration,
       required final AudioSourceType sourceType,
-      final AudioFormat format}) = _$AudioAttachmentImpl;
+      final AudioFormat format,
+      final dynamic file}) = _$AudioAttachmentImpl;
   const AudioAttachment._() : super._();
 
   factory AudioAttachment.fromJson(Map<String, dynamic> json) =
@@ -660,6 +685,7 @@ abstract class AudioAttachment extends Attachment {
   Duration get duration;
   AudioSourceType get sourceType;
   AudioFormat get format;
+  dynamic get file;
 
   /// Create a copy of Attachment
   /// with the given fields replaced by the non-null parameter values.
@@ -791,7 +817,8 @@ class _$FileAttachmentImpl extends FileAttachment {
             @Uint8ListBase64Converter() Uint8List bytes,
             @DurationMsConverter() Duration duration,
             AudioSourceType sourceType,
-            AudioFormat format)
+            AudioFormat format,
+            dynamic file)
         audio,
     required TResult Function(
             String fileName,
@@ -814,7 +841,8 @@ class _$FileAttachmentImpl extends FileAttachment {
             @Uint8ListBase64Converter() Uint8List bytes,
             @DurationMsConverter() Duration duration,
             AudioSourceType sourceType,
-            AudioFormat format)?
+            AudioFormat format,
+            dynamic file)?
         audio,
     TResult? Function(
             String fileName,
@@ -837,7 +865,8 @@ class _$FileAttachmentImpl extends FileAttachment {
             @Uint8ListBase64Converter() Uint8List bytes,
             @DurationMsConverter() Duration duration,
             AudioSourceType sourceType,
-            AudioFormat format)?
+            AudioFormat format,
+            dynamic file)?
         audio,
     TResult Function(
             String fileName,
@@ -1018,7 +1047,8 @@ class _$ChunkAttachmentImpl extends ChunkAttachment {
             @Uint8ListBase64Converter() Uint8List bytes,
             @DurationMsConverter() Duration duration,
             AudioSourceType sourceType,
-            AudioFormat format)
+            AudioFormat format,
+            dynamic file)
         audio,
     required TResult Function(
             String fileName,
@@ -1041,7 +1071,8 @@ class _$ChunkAttachmentImpl extends ChunkAttachment {
             @Uint8ListBase64Converter() Uint8List bytes,
             @DurationMsConverter() Duration duration,
             AudioSourceType sourceType,
-            AudioFormat format)?
+            AudioFormat format,
+            dynamic file)?
         audio,
     TResult? Function(
             String fileName,
@@ -1064,7 +1095,8 @@ class _$ChunkAttachmentImpl extends ChunkAttachment {
             @Uint8ListBase64Converter() Uint8List bytes,
             @DurationMsConverter() Duration duration,
             AudioSourceType sourceType,
-            AudioFormat format)?
+            AudioFormat format,
+            dynamic file)?
         audio,
     TResult Function(
             String fileName,

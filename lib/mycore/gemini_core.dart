@@ -3,11 +3,12 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:google_generative_ai/google_generative_ai.dart' as gemini;
-import 'package:miko/configs/consts.dart';
+import 'package:miko/configs/consts2.dart';
 import 'package:miko/mycore/ai_converters.dart';
 import 'package:miko/mycore/ai_core_models.dart';
 import 'package:miko/mycore/ai_core_service.dart';
 import 'package:miko/mycore/openai_core.dart';
+import 'package:miko/mycore/settings_service.dart';
 import 'package:uuid/uuid.dart';
 import 'package:openai_dart/openai_dart.dart' as openai;
 
@@ -17,8 +18,10 @@ class GeminiCoreService implements AiCoreService {
   final double defaultTemperature;
   final String ttsModelId;
   final gemini.SafetySetting? safetyOverride;
+  final StorageSettingsService settingsService;
 
   GeminiCoreService({
+    required this.settingsService,
     required String apiKey,
     String chatModelId = 'gemini-2.0-flash',
     this.defaultTemperature = 0.7,
@@ -115,30 +118,30 @@ class GeminiCoreService implements AiCoreService {
     }
   }
 
-  @override
-  Future<VoiceResponse> voiceResponse({
-    required List<UnifiedMessage> history,
-    AiCallOptions options = const AiCallOptions(),
-    AiTtsOptions tts = const AiTtsOptions(),
-  }) async {
-    // 1) Get text answer via chat
-    final textRes = await messageMulti(history: history, options: options);
-    final text = textRes.message.text ?? '';
+  // @override
+  // Future<VoiceResponse> voiceResponse({
+  //   required List<UnifiedMessage> history,
+  //   AiCallOptions options = const AiCallOptions(),
+  //   AiTtsOptions tts = const AiTtsOptions(),
+  // }) async {
+  //   // 1) Get text answer via chat
+  //   final textRes = await messageMulti(history: history, options: options);
+  //   final text = textRes.message.text ?? '';
 
-    // 2) TTS using gemini-2.5-tts
-    final bytes = await ttsGenerateInternal(
-      text: text,
-      responseMimeType: tts.responseMimeType,
-      options: options,
-    );
+  //   // 2) TTS using gemini-2.5-tts
+  //   final bytes = await ttsGenerateInternal(
+  //     text: text,
+  //     responseMimeType: tts.responseMimeType,
+  //     options: options,
+  //   );
 
-    return VoiceResponse(
-      audioBytes: bytes,
-      mimeType: tts.responseMimeType,
-      transcript: text,
-      raw: const {},
-    );
-  }
+  //   return VoiceResponse(
+  //     audioBytes: bytes,
+  //     mimeType: tts.responseMimeType,
+  //     transcript: text,
+  //     raw: const {},
+  //   );
+  // }
 
   @override
   Future<String> transcribe({
@@ -164,53 +167,53 @@ class GeminiCoreService implements AiCoreService {
     return res.text?.trim() ?? '';
   }
 
-  @override
-  Future<Uint8List> tts({
-    required String text,
-    AiTtsOptions tts = const AiTtsOptions(),
-    AiCallOptions options = const AiCallOptions(),
-  }) async {
-    return ttsGenerateInternal(
-      text: text,
-      responseMimeType: tts.responseMimeType,
-      options: options,
-    );
-  }
+  // @override
+  // Future<Uint8List> tts({
+  //   required String text,
+  //   AiTtsOptions tts = const AiTtsOptions(),
+  //   AiCallOptions options = const AiCallOptions(),
+  // }) async {
+  //   return ttsGenerateInternal(
+  //     text: text,
+  //     responseMimeType: tts.responseMimeType,
+  //     options: options,
+  //   );
+  // }
 
-  Future<Uint8List> ttsGenerateInternal({
-    required String text,
-    required String responseMimeType,
-    AiCallOptions options = const AiCallOptions(),
-  }) async {
-    final ttsModel = gemini.GenerativeModel(
-      model: ttsModelId,
-      apiKey: kApiKey,
-      generationConfig: gemini.GenerationConfig(
-        responseMimeType: responseMimeType,
-      ),
-    );
-       Uint8List b ;
-     openai.OpenAIClient client = openai.OpenAIClient();
- b= await OpenAiCoreService(client: client).tts(text: text);
-    final res = await ttsModel.generateContent(gemini.Content("Assistant",[gemini.TextPart(text)]) as Iterable<gemini.Content>);
-    final parts = res.candidates.firstOrNull?.content.parts ?? const [];
+//   Future<Uint8List> ttsGenerateInternal({
+//     required String text,
+//     required String responseMimeType,
+//     AiCallOptions options = const AiCallOptions(),
+//   }) async {
+//     final ttsModel = gemini.GenerativeModel(
+//       model: ttsModelId,
+//       apiKey: kApiKey,
+//       generationConfig: gemini.GenerationConfig(
+//         responseMimeType: responseMimeType,
+//       ),
+//     );
+//        Uint8List b ;
+//      openai.OpenAIClient client = openai.OpenAIClient();
+//  b= await OpenAiCoreService(client: client,settingsService: settingsService).tts(text: text);
+//     final res = await ttsModel.generateContent(gemini.Content("Assistant",[gemini.TextPart(text)]) as Iterable<gemini.Content>);
+//     final parts = res.candidates.firstOrNull?.content.parts ?? const [];
   
-    for (final p in parts) {
-      if (p is gemini.DataPart && p.bytes != null) {
-        // In newer SDKs audio is returned as DataPart(bytes+mime)
-        return p.bytes;
-      }
-    }
-    // Fallback for SDKs returning via blobs
-    for (final p in parts) {
-       if (p is gemini.DataPart && p.bytes != null) {
-        // In newer SDKs audio is returned as DataPart(bytes+mime)
-        return p.bytes;
-       }
-  }
-         return b;
+//     for (final p in parts) {
+//       if (p is gemini.DataPart && p.bytes != null) {
+//         // In newer SDKs audio is returned as DataPart(bytes+mime)
+//         return p.bytes;
+//       }
+//     }
+//     // Fallback for SDKs returning via blobs
+//     for (final p in parts) {
+//        if (p is gemini.DataPart && p.bytes != null) {
+//         // In newer SDKs audio is returned as DataPart(bytes+mime)
+//         return p.bytes;
+//        }
+//   }
+//          return b;
 
-  }
+//   }
 
   @override
   Future<String> summarize({
@@ -301,5 +304,41 @@ class GeminiCoreService implements AiCoreService {
     ]);
 
     return res.text?.trim() ?? '';
+  }
+  
+  @override
+  Stream<AiStreamEvent> eventsForMessageMulti({required List<UnifiedMessage> history, AiCallOptions options = const AiCallOptions(), Duration waitTick = const Duration(milliseconds: 250)}) {
+    // TODO: implement eventsForMessageMulti
+    throw UnimplementedError();
+  }
+  
+  @override
+  Stream<AiStreamEvent> eventsForRunWithTools({required List<UnifiedMessage> history, required List<ToolSpec> tools, AiCallOptions options = const AiCallOptions(), Duration waitTick = const Duration(milliseconds: 250)}) {
+    // TODO: implement eventsForRunWithTools
+    throw UnimplementedError();
+  }
+  
+  @override
+  Stream<AiStreamEvent> eventsForVoiceResponse({required List<UnifiedMessage> history, AiCallOptions options = const AiCallOptions(), AiTtsOptions tts = const AiTtsOptions(), Duration waitTick = const Duration(milliseconds: 250)}) {
+    // TODO: implement eventsForVoiceResponse
+    throw UnimplementedError();
+  }
+  
+  @override
+  Stream<AiStreamEvent> streamVoice({required List<UnifiedMessage> history, AiCallOptions options = const AiCallOptions(), AiTtsOptions tts = const AiTtsOptions()}) {
+    // TODO: implement streamVoice
+    throw UnimplementedError();
+  }
+  
+  @override
+  Future<VoiceResponse> voiceResponse({required List<UnifiedMessage> history, AiCallOptions options = const AiCallOptions(), AiTtsOptions tts = const AiTtsOptions()}) {
+    // TODO: implement voiceResponse
+    throw UnimplementedError();
+  }
+  
+  @override
+  Future<Uint8List> tts({required String text, AiTtsOptions tts = const AiTtsOptions(), AiCallOptions options = const AiCallOptions()}) {
+    // TODO: implement tts
+    throw UnimplementedError();
   }
 }

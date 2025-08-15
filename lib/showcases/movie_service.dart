@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
 import 'package:http/http.dart' as http;
-import 'package:miko/configs/consts.dart';
+import 'package:miko/configs/consts2.dart';
 import 'package:miko/constants.dart';
 import '../models/tmdb/tmdb_m.dart'
     show

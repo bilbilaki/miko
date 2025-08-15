@@ -1,6 +1,7 @@
 // lib/core/ai_converters.dart
 import 'dart:convert';
 import 'package:google_generative_ai/google_generative_ai.dart' as gemini;
+import 'package:miko/mycore/chat_controller.dart';
 import 'package:openai_dart/openai_dart.dart' as openai;
 
 import 'ai_core_models.dart';
@@ -11,13 +12,14 @@ class AiMessageConverters {
   static List<openai.ChatCompletionMessage> buildOpenAiMessages(
     List<UnifiedMessage> msgs, {
     bool includeFilesAsTextNotice = true,
+    required AiSettings settings
   }) {
     final List<openai.ChatCompletionMessage> out = [];
     for (final m in msgs) {
       switch (m.role) {
         case MessageRole.system:
           out.add(openai.ChatCompletionMessage.system(
-            content: m.text ?? '',
+            content: settings.systemPrompt,
           ));
           break;
         case MessageRole.user:
@@ -76,13 +78,13 @@ class AiMessageConverters {
           break;
         case MessageRole.assistant:
           out.add(openai.ChatCompletionMessage.assistant(
-            content: m.text ?? '',
+            content: m.text,
           ));
           break;
         case MessageRole.tool:
           // Fallback: map tool to assistant textual message
           out.add(openai.ChatCompletionMessage.assistant(
-            content: m.text ?? '',
+            content: m.text,
           ));
           break;
       }
@@ -96,7 +98,7 @@ class AiMessageConverters {
       case AudioFormat.wav:
         return openai.ChatCompletionMessageInputAudioFormat.wav;
       case AudioFormat.mp3:
-        return openai.ChatCompletionMessageInputAudioFormat.mp3;
+        return openai.ChatCompletionMessageInputAudioFormat.wav;
 
     }
   }

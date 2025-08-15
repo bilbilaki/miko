@@ -1,24 +1,94 @@
-// lib/core/session_manager.dart
+import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:google_generative_ai/google_generative_ai.dart' as gemini;
+import 'package:miko/mycore/ai_converters.dart';
+import 'package:miko/mycore/ai_core_models.dart';
+import 'package:miko/mycore/chat_controller.dart';
+import 'package:openai_dart/openai_dart.dart' as openai;
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
-import 'ai_core_models.dart';
-import 'ai_converters.dart';
-import 'package:google_generative_ai/google_generative_ai.dart' as gemini;
-import 'package:openai_dart/openai_dart.dart' as openai;
+// Ensure the following app-specific imports/types exist in your project:
+// - Session, UnifiedMessage, Attachment, MessageRole, AiMessageConverters
+// - openai.ChatCompletionMessage, gemini.Content
 
 class SessionManager extends ChangeNotifier {
   final LinkedHashMap<String, Session> _sessions = LinkedHashMap();
   String? _currentSessionId;
 
+  // -------- Persistence --------
+  static const String _storeFileName = 'sessions_v1.json';
+  static const Duration _saveDebounce = Duration(milliseconds: 300);
+  Timer? _saveTimer;
+  bool _loadedFromDisk = false;
+ final AiSettings settings= AiSettings();
+
+  SessionManager() {
+    // Load persisted data in background and notify listeners when ready.
+    unawaited(_loadFromDisk());
+  }
+
+  @override
+  void dispose() {
+    _saveTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<File> _getStoreFile() async {
+    final dir = await getApplicationSupportDirectory();
+    final path = '${dir.path}${Platform.pathSeparator}$_storeFileName';
+    return File(path);
+  }
+
+  Future<void> _loadFromDisk() async {
+    if (_loadedFromDisk) return;
+    try {
+      final file = await _getStoreFile();
+      if (await file.exists()) {
+        final raw = await file.readAsString();
+        if (raw.isNotEmpty) {
+          final decoded = jsonDecode(raw) as Map<String, dynamic>;
+          final mgr = SessionManager.fromJson(decoded);
+          _sessions
+            ..addAll(mgr._sessions);
+          _currentSessionId = mgr._currentSessionId;
+        }
+      }
+    } catch (_) {
+      // In case of any read/parse error, start fresh without crashing.
+    } finally {
+      _loadedFromDisk = true;
+      notifyListeners();
+    }
+  }
+
+  void _scheduleSave() {
+    _saveTimer?.cancel();
+    _saveTimer = Timer(_saveDebounce, () {
+      unawaited(_saveToDisk());
+    });
+  }
+
+  Future<void> _saveToDisk() async {
+    try {
+      final file = await _getStoreFile();
+      final jsonStr = jsonEncode(toJson());
+      await file.writeAsString(jsonStr, flush: true);
+    } catch (_) {
+      // Avoid throwing; persisting failure shouldn't crash the app.
+    }
+  }
+
   // -------- Public getters --------
 
   List<Session> get sessions => UnmodifiableListView(_sessions.values);
   String? get currentSessionId => _currentSessionId;
-  Session? get currentSession =>
-      _currentSessionId != null ? _sessions[_currentSessionId] : null;
+  Session? get currentSession => _currentSessionId != null ? _sessions[_currentSessionId] : null;
+  bool get isLoaded => _loadedFromDisk;
 
   // -------- Session CRUD --------
 
@@ -35,6 +105,7 @@ class SessionManager extends ChangeNotifier {
     );
     _currentSessionId ??= id;
     notifyListeners();
+    _scheduleSave();
     return id;
   }
 
@@ -42,6 +113,7 @@ class SessionManager extends ChangeNotifier {
     if (_sessions.containsKey(sessionId)) {
       _currentSessionId = sessionId;
       notifyListeners();
+      _scheduleSave();
     }
   }
 
@@ -53,6 +125,7 @@ class SessionManager extends ChangeNotifier {
         updatedAt: DateTime.now(),
       );
       notifyListeners();
+      _scheduleSave();
     }
   }
 
@@ -64,6 +137,7 @@ class SessionManager extends ChangeNotifier {
         updatedAt: DateTime.now(),
       );
       notifyListeners();
+      _scheduleSave();
     }
   }
 
@@ -73,12 +147,14 @@ class SessionManager extends ChangeNotifier {
       _currentSessionId = _sessions.isEmpty ? null : _sessions.keys.first;
     }
     notifyListeners();
+    _scheduleSave();
   }
 
   void clearAll() {
     _sessions.clear();
     _currentSessionId = null;
     notifyListeners();
+    _scheduleSave();
   }
 
   // -------- Message operations --------
@@ -109,6 +185,7 @@ class SessionManager extends ChangeNotifier {
     );
     _sessions[sessionId] = updated;
     notifyListeners();
+    _scheduleSave();
     return msg;
   }
 
@@ -137,6 +214,7 @@ class SessionManager extends ChangeNotifier {
     final msgs = List<UnifiedMessage>.of(s.messages)..[idx] = edited;
     _sessions[sessionId] = s.copyWith(messages: msgs, updatedAt: DateTime.now());
     notifyListeners();
+    _scheduleSave();
   }
 
   void deleteMessage({
@@ -148,6 +226,7 @@ class SessionManager extends ChangeNotifier {
     final msgs = s.messages.where((m) => m.id != messageId).toList();
     _sessions[sessionId] = s.copyWith(messages: msgs, updatedAt: DateTime.now());
     notifyListeners();
+    _scheduleSave();
   }
 
   void replaceAllMessages({
@@ -156,9 +235,9 @@ class SessionManager extends ChangeNotifier {
   }) {
     final s = _sessions[sessionId];
     if (s == null) return;
-    _sessions[sessionId] =
-        s.copyWith(messages: List.unmodifiable(messages), updatedAt: DateTime.now());
+    _sessions[sessionId] = s.copyWith(messages: List.unmodifiable(messages), updatedAt: DateTime.now());
     notifyListeners();
+    _scheduleSave();
   }
 
   // -------- Context limiting --------
@@ -184,6 +263,7 @@ class SessionManager extends ChangeNotifier {
 
     _sessions[sessionId] = s.copyWith(messages: trimmed, updatedAt: DateTime.now());
     notifyListeners();
+    _scheduleSave();
   }
 
   void limitContextByCharBudget({
@@ -216,6 +296,7 @@ class SessionManager extends ChangeNotifier {
 
     _sessions[sessionId] = s.copyWith(messages: kept, updatedAt: DateTime.now());
     notifyListeners();
+    _scheduleSave();
   }
 
   int _messageApproxSize(UnifiedMessage m) {
@@ -236,8 +317,8 @@ class SessionManager extends ChangeNotifier {
   List<openai.ChatCompletionMessage> openAiMessagesFor(String sessionId) {
     final s = _sessions[sessionId];
     if (s == null) return const [];
-    return AiMessageConverters.buildOpenAiMessages(s.messages);
-    }
+    return AiMessageConverters.buildOpenAiMessages(s.messages,settings: settings);
+  }
 
   List<gemini.Content> geminiHistoryFor(String sessionId) {
     final s = _sessions[sessionId];
@@ -253,12 +334,35 @@ class SessionManager extends ChangeNotifier {
       };
 
   static SessionManager fromJson(Map<String, dynamic> json) {
-    final mgr = SessionManager();
+    final mgr = SessionManager._empty();
     final sessionsJson = json['sessions'] as Map<String, dynamic>? ?? {};
     sessionsJson.forEach((key, val) {
       mgr._sessions[key] = Session.fromJson(val as Map<String, dynamic>);
     });
     mgr._currentSessionId = json['currentSessionId'] as String?;
     return mgr;
+  }
+
+  SessionManager._empty();
+
+  // -------- Export utilities --------
+
+  // Returns the entire session store as a JSON string (pretty or compact).
+  String exportAsJson({bool pretty = true}) {
+    final encoder = pretty ? const JsonEncoder.withIndent('  ') : const JsonEncoder();
+    return encoder.convert(toJson());
+  }
+
+  // Writes the exported sessions JSON to a temporary file and returns the File.
+  Future<File> exportToFile({String? fileName, bool pretty = true}) async {
+    final dir = await getTemporaryDirectory();
+    final safeName = (fileName?.trim().isNotEmpty == true
+            ? fileName!.trim()
+            : 'sessions_export_${DateTime.now().toIso8601String().replaceAll(':', '-')}.json')
+        .replaceAll(RegExp(r'[<>:"/\\|?*]+'), '-');
+    final path = '${dir.path}${Platform.pathSeparator}$safeName';
+    final file = File(path);
+    await file.writeAsString(exportAsJson(pretty: pretty), flush: true);
+    return file;
   }
 }

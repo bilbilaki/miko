@@ -37,6 +37,7 @@ _$AudioAttachmentImpl _$$AudioAttachmentImplFromJson(
       sourceType: $enumDecode(_$AudioSourceTypeEnumMap, json['sourceType']),
       format: $enumDecodeNullable(_$AudioFormatEnumMap, json['format']) ??
           AudioFormat.wav,
+      file: json['file'],
       $type: json['runtimeType'] as String?,
     );
 
@@ -47,6 +48,7 @@ Map<String, dynamic> _$$AudioAttachmentImplToJson(
       'duration': const DurationMsConverter().toJson(instance.duration),
       'sourceType': _$AudioSourceTypeEnumMap[instance.sourceType]!,
       'format': _$AudioFormatEnumMap[instance.format]!,
+      'file': instance.file,
       'runtimeType': instance.$type,
     };
 

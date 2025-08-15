@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:miko/ai/functions/ai_browser_functions.dart';
 import 'package:miko/ai/tools/ai_browser_tools.dart';
-import 'package:miko/configs/consts.dart';
+import 'package:miko/configs/consts2.dart';
 import 'package:openai_dart/openai_dart.dart';
 final client = OpenAIClient(
   apiKey: webVieApiKey,

@@ -1,5 +1,6 @@
 // lib/core/ai_core_models.dart
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -75,6 +76,7 @@ sealed class Attachment with _$Attachment {
     @DurationMsConverter() required Duration duration,
     required AudioSourceType sourceType,
     @Default(AudioFormat.wav) AudioFormat format,
+    dynamic file
   }) = AudioAttachment;
 
   const factory Attachment.file({

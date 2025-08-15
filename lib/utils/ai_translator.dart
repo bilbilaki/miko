@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:miko/configs/consts.dart';
+import 'package:miko/configs/consts2.dart';
 import 'package:miko/services/user_data_service.dart';
 import 'package:provider/provider.dart';
 
@@ -37,7 +37,6 @@ final targetLanguage = userDataService.custoombaseurl;
     }
   }
 }
-
 // Example Usage (for demonstration purposes, not part of the core library code)
 // void main() async {
 //   // IMPORTANT: Replace with your actual Gemini API Key.

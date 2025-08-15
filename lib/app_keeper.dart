@@ -14,21 +14,17 @@ class AppKeeper extends ConsumerStatefulWidget {
 
 class _AppKeeperConsumerState extends ConsumerState<AppKeeper>
     with TickerProviderStateMixin {
-  // Tab controllers remain for layout
   late TabController _leftDrawerTabController;
- // late TabController _rightDrawerTabController;
 
   @override
   void initState() {
     super.initState();
     _leftDrawerTabController = TabController(length: 1, vsync: this);
-   // _rightDrawerTabController = TabController(length: 1, vsync: this);
   }
 
   @override
   void dispose() {
     _leftDrawerTabController.dispose();
-  //  _rightDrawerTabController.dispose();
     super.dispose();
   }
 
@@ -59,80 +55,22 @@ class _AppKeeperConsumerState extends ConsumerState<AppKeeper>
             child: child!,
           );
         },
-        home: isSmallScreen
-            ? Scaffold(
+        home:  Scaffold(
                 appBar: AppBar(),
                 drawer: Drawer(
-                  backgroundColor: leftSidebarColor,
-                  child: Column(
-                    children: [
-                      TabBar(
-                        controller: _leftDrawerTabController,
-                        tabs: const [
-                          Tab(
-                            icon: Icon(Icons.query_builder_outlined),
-                          ),
-                        ],
-                      ),
-                      Expanded(
-                        child: TabBarView(
-                          controller: _leftDrawerTabController,
-                          children: const [
-                            LeftNavigationPanel(
+
+                  child:           LeftNavigationPanel(
                               isMobileLayout: true,
                               isCollapsed: false,
                             ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                        
+                        
+                    
+                  
+                  
                 ),
                 body: CenterContentPanel(isMobileLayout: isSmallScreen),
               )
-            : Scaffold(
-                appBar: AppBar(),
-                // Removed commented out AppBar block
-                body: Row(
-                  children: [
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeInOutCubic,
-                      width: sidebarWidth,
-                      color: leftSidebarColor, // Used theme color
-                      child: Column(
-                        children: [
-                          TabBar(
-                            controller: _leftDrawerTabController,
-                            isScrollable: true,
-                            tabs: const [
-                              Tab(
-                                icon: Icon(Icons.query_builder_outlined),
-                              ),
-                            ],
-                          ),
-                          Expanded(
-                            child: TabBarView(
-                              controller: _leftDrawerTabController,
-                              children: [
-                                LeftNavigationPanel(
-                                  isMobileLayout: false,
-                                  isCollapsed: isSidebarCollapsed,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const Expanded(
-                      flex: 2,
-                      child: CenterContentPanel(
-                          isMobileLayout: false), 
-                    ),
-                  ],
-                ),
-              ));
+           );
   }
 }
