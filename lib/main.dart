@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:miko/app_keeper.dart';
 import 'package:miko/jackett/models/jackett_config.dart';
 import 'package:miko/jackett/services/config_service.dart';
-import 'package:miko/mycore/settings_service.dart';
 import 'package:miko/providers/ai_chat_provider.dart';
 
 import 'package:miko/providers/csv_detail_process_provider.dart';
@@ -23,33 +22,20 @@ import 'package:provider/provider.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as pr;
-import 'package:hive_flutter/hive_flutter.dart' as h;
-import 'dart:async';
+import 'package:hive_flutter/hive_flutter.dart';
 
-import 'package:fl_lib/fl_lib.dart' as f;
-import 'package:flutter/material.dart';
-import 'package:miko/box/core/util/sync.dart';
-import 'package:miko/box/data/model/chat/history/hive_adapter.dart';
-import 'package:miko/box/data/res/build_data.dart';
-import 'package:miko/box/data/res/openai.dart';
-import 'package:miko/box/data/store/all.dart';
-import 'package:miko/box/hive/hive_registrar.g.dart';
-import 'package:hive_ce_flutter/hive_flutter.dart';
-import 'package:logging/logging.dart';
-
-// This function must be a top-level function.
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
+  MediaKit.ensureInitialized();
 
-//await h.Hive.initFlutter();
+await Hive.initFlutter();
+  Hive.registerAdapter(JackettConfigAdapter());
+  await Hive.openBox<JackettConfig>(ConfigService.boxName);
 
-  // Register all your adapters
-  // IMPORTANT: Call this before the app runs
-// 2. Create a provider so Riverpod can access the key
-  _runInZone(() async {
-    await _initApp();
-    final settingsService = await StorageSettingsService.init();
-
+final container = pr.ProviderContainer();
+  await container.read(ytdlpDownloaderServiceProvider).initialize();
+  await container.read(settingsProvider.notifier).loadSettings();
   runApp(
     MultiProvider(
       providers: [
@@ -61,13 +47,7 @@ Future<void> main() async {
                 MovieProvider()), // Initialize MovieProvider directly
         ChangeNotifierProvider(create: (context) => TvSeriesProvider()),
  
-    //ChangeNotifierProvider(
-        //    create: (context) =>
-        //        TMDBApiService()), // Initialize AnimeProvider directly
-    //     ChangeNotifierProvider(
-    //         create: (context) =>
-    //             ad.MovieProvider()), // Initialize MovieProvider directly
-    //     ChangeNotifierProvider(create: (context) => ad.TvSeriesProvider()),
+
         ChangeNotifierProvider(
             create: (context) => UserDataService()), // Add UserDataService
         ChangeNotifierProvider(create: (_) => ProcessingProvider()),
@@ -76,94 +56,11 @@ Future<void> main() async {
         ChangeNotifierProvider(
             create: (context) => FloatingButtonVisibilityNotifier()),
       
-ChangeNotifierProvider<StorageSettingsService>.value(
-      value: settingsService,
-    ),],
 
+      ],
      child: const MyApp(), // Use const if MyApp is stateless
     ),
-  );}  );}
-
-void _runInZone(void Function() body) {
-  final zoneSpec = ZoneSpecification(
-    print: (_, parent, zone, line) => parent.print(zone, line),
-  );
-
-  runZonedGuarded(
-    body,
-    (e, s) => print('[ZONE] $e\n$s'),
-    zoneSpecification: zoneSpec,
-  );
-}
-
-Future<void> _initApp() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  MediaKit.ensureInitialized();
-
-  await f.Paths.init(BuildData.name);
-  await _initDb();
-
-  _setupLogger();
-  _initAppComponents();
-}
-
-Future<void> _initDb() async {
-  await Hive.initFlutter();
-  Hive.registerAdapters();
-  // You are trying to register DateTimeAdapter (typeId 4) for type DateTime
-  // but there is already a TypeAdapter for this type: DateTimeWithTimezoneAdapter (typeId 18).
-  // Note that DateTimeAdapter will have no effect as DateTimeWithTimezoneAdapter takes precedence.
-  // If you want to override the existing adapter, the typeIds must match.
-  // Hive.registerAdapter(DateTimeAdapter()); // 4
-  Hive.registerAdapter(ChatCompletionMessageToolCallAdapter()); // 9
-  Hive.registerAdapter(ChatCompletionMessageFunctionCallAdapter()); // 10
-    await f.PrefStore.shared.init();
-  await Stores.init();
-      await h.Hive.initFlutter();
-
-    h.Hive.registerAdapter(JackettConfigAdapter());
-
-  await h.Hive.openBox<JackettConfig>(ConfigService.boxName);
-
-final container = pr.ProviderContainer();
-  await container.read(ytdlpDownloaderServiceProvider).initialize();
-  await container.read(settingsProvider.notifier).loadSettings();
-
-}
-
-void _setupLogger() {
-  Logger.root.level = Level.ALL;
-  Logger.root.onRecord.listen((record) {
-    f.DebugProvider.addLog(record);
-    print(record);
-    if (record.error != null) print(record.error);
-    if (record.stackTrace != null) print(record.stackTrace);
-  });
-}
-
-Future<void> _initAppComponents() async {
-  f.UserApi.init();
-
-  final sets = Stores.setting;
-  final windowStateProp = sets.windowState;
-  final windowState = windowStateProp.fetch();
-  await f.SystemUIs.initDesktopWindow(
-    hideTitleBar: sets.hideTitleBar.get(),
-    size: windowState?.size,
-    position: windowState?.position,
-    listener: f.WindowStateListener(windowStateProp),
-  );
-
-  Cfg.applyClient();
-  Cfg.updateModels();
-
-  //  BakSync.instance.init();
-  //  BakSync.instance.sync();
-
-  //if (Stores.setting.joinBeta.get()) AppUpdate.chan = AppUpdateChan.beta;
-
-  Stores.trash.autoDelete();
-}
+  );}
 
 // ignore: must_be_immutable
 class MyApp extends pr.ConsumerWidget {
@@ -188,7 +85,7 @@ class MyApp extends pr.ConsumerWidget {
       child: MaterialApp(
         navigatorKey: navigatorKey,
                   theme: AppThemes.netflixDarkTheme,
-                  
+                
                    home:  SplashScreen2(ref),
 
     ));

@@ -19,6 +19,7 @@ import 'package:miko/utils/utils.dart';
 import 'package:miko/widgets/ai_chat_dialog.dart';
 import 'package:miko/widgets/alienswapbutton.dart';
 import 'package:miko/widgets/bottom_nav_bar.dart';
+import 'package:miko/widgets/left_navigation_panel.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/provider.dart' as pp;
 
@@ -123,6 +124,18 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
       theme: AppThemes.netflixDarkTheme,
       debugShowCheckedModeBanner: false,
       home: Scaffold(
+        drawer: Drawer(
+
+                  child:           LeftNavigationPanel(
+                              isMobileLayout: true,
+                              isCollapsed: false,
+                            ),
+                        
+                        
+                    
+                  
+                  
+                ),
         body: PageView(
           controller: _pageController,
           onPageChanged: _onPageChanged,
@@ -196,3 +209,5 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
     );
   }
 }
+
+

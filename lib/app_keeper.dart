@@ -55,22 +55,8 @@ class _AppKeeperConsumerState extends ConsumerState<AppKeeper>
             child: child!,
           );
         },
-        home:  Scaffold(
-                appBar: AppBar(),
-                drawer: Drawer(
-
-                  child:           LeftNavigationPanel(
-                              isMobileLayout: true,
-                              isCollapsed: false,
-                            ),
-                        
-                        
-                    
-                  
-                  
-                ),
-                body: CenterContentPanel(isMobileLayout: isSmallScreen),
-              )
+        home:  CenterContentPanel(isMobileLayout: isSmallScreen),
+            
            );
   }
 }
