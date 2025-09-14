@@ -17,7 +17,6 @@ class MoviePage1 extends StatefulWidget {
 
 class _MoviePageState extends State<MoviePage1> {
   final MovieService _movieService = MovieService();
-  final TmdbApiService _tmdbService = TmdbApiService();
 
   final List<mmmm.Movie> _movies = [];
   int _currentPage = 1;
@@ -61,7 +60,6 @@ class _MoviePageState extends State<MoviePage1> {
   void dispose() {
     _scrollController.dispose();
     _searchScrollController.dispose();
-    _movieService.dispose();
     _searchController.removeListener(_onSearchChanged);
     _searchController2.removeListener(_onSearchChanged2);
     _searchController2.dispose();
@@ -104,7 +102,7 @@ class _MoviePageState extends State<MoviePage1> {
       _hasError = false;
     });
     try {
-      final response = await _tmdbService.discoverMovies(page: _currentPage);
+      final response = await _movieService.getPopularMovies(page: _currentPage);
       setState(() {
         _movies.addAll(response.results);
         _totalPages = response.totalPages;
@@ -125,7 +123,7 @@ class _MoviePageState extends State<MoviePage1> {
       _isLoading2 = true;
     });
     try {
-      final response = await _tmdbService.discoverMovies(page: _currentPage2);
+      final response = await _movieService.getPopularMovies(page: _currentPage2);
       setState(() {
         _movies.addAll(response.results);
         _totalPages2 = response.totalPages;
@@ -528,8 +526,8 @@ class _MoviePageState extends State<MoviePage1> {
     }
 
     final String posterUrl = imagePath != null
-        ? 'https://inosdb.worker-inosuke.workers.dev/w500$imagePath'
-        : 'https://inosdb.worker-inosuke.workers.dev/w500$imagePath';
+        ? 'https://db.inosuke.sbs/t/p/w500$imagePath'
+        : 'https://db.inosuke.sbs/t/p/w500$imagePath';
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:miko/jackett/ui/screens/home_screen.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/screens/genre_detail_screen.dart';
 import 'package:miko/screens/grid.dart';
 import 'package:miko/screens/http.dart';
-import 'package:miko/screens/iptv_screen.dart';
 import 'package:miko/screens/watchlist_screen.dart';
 import 'package:miko/showcases/keyword_search_page.dart';
 import 'package:miko/showcases/movie_page_copy.dart';
@@ -13,8 +11,6 @@ import 'package:miko/showcases/moviesearchpage.dart';
 import 'package:miko/showcases/tvsearchpage.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:miko/utils/utils.dart';
-import 'package:miko/webviewai/main.dart';
-import 'package:miko/yt-dlp/ui/screens/home_screen.dart';
 import '../providers/settings_provider.dart';
 
 
@@ -123,45 +119,29 @@ class LeftNavigationPanel extends ConsumerWidget {
             padding: EdgeInsets.zero,
             shrinkWrap: true,
             children: [
-              _buildNavigationItem(
-                context,
-                ref,
-                icon: Icons.tornado_rounded,
-                title: 'Jackett Search',
-                showText: showText,
-                onTap: () =>
-                    _navigateTo(context, JackettHome(), isMobileLayout),
-              ),
+         
 
-              _buildNavigationItem(
-                context,
-                ref,
-                icon: Icons.tv,
-                title: 'IPTV Player',
-                showText: showText,
-                onTap: () => _navigateTo(context, IptvScreen(), isMobileLayout),
-              ),
+              // _buildNavigationItem(
+              //   context,
+              //   ref,
+              //   icon: Icons.tv,
+              //   title: 'IPTV Player',
+              //   showText: showText,
+              //   onTap: () => _navigateTo(context, IptvScreen(), isMobileLayout),
+              // ),
 
-              _buildNavigationItem(
-                context,
-                ref,
-                icon: Icons.assistant,
-                title: 'AI Browser OpenAI',
-                showText: showText,
-                onTap: () =>
-                    _navigateTo(context, AiBrowserApp(), isMobileLayout),
-              ),
+              // _buildNavigationItem(
+              //   context,
+              //   ref,
+              //   icon: Icons.assistant,
+              //   title: 'AI Browser OpenAI',
+              //   showText: showText,
+              //   onTap: () =>
+              //       _navigateTo(context, AiBrowserApp(), isMobileLayout),
+              // ),
 
           
-              _buildNavigationItem(
-                context,
-                ref,
-                icon: Icons.play_lesson_rounded,
-                title: 'Yt-dlp',
-                showText: showText,
-                onTap: () =>
-                    _navigateTo(context, YTDLPHomeScreen(), isMobileLayout),
-              ),
+        
               _buildNavigationItem(
                 context,
                 ref,
@@ -182,7 +162,7 @@ class LeftNavigationPanel extends ConsumerWidget {
                 showText: showText,
                 onTap: () => _navigateTo(
                   context,
-                  const AnimeGridScreen(typec: "tvseries"),
+                   AnimeGridScreen(typec: "tvseries"),
                   isMobileLayout,
                 ),
               ),
@@ -195,7 +175,7 @@ class LeftNavigationPanel extends ConsumerWidget {
 
                 onTap: () => _navigateTo(
                   context,
-                  const AnimeGridScreen(typec: "anime"),
+                   AnimeGridScreen(typec: "anime"),
                   isMobileLayout,
                 ),
               ),

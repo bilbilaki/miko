@@ -1,5 +1,7 @@
 // --- episode_detail_page.dart ---
 import 'package:flutter/material.dart';
+import 'package:miko/utils/ai_translator.dart';
+import 'package:miko/utils/utils.dart';
 import 'model.dart';
 import 'movie_service.dart';
 import 'person_detail_page.dart'; // For navigating to crew/guest star details
@@ -26,7 +28,9 @@ class EpisodeDetailPage extends StatefulWidget {
 
 class _EpisodeDetailPageState extends State<EpisodeDetailPage> {
   late Future<EpisodeDetails> _episodeDetailsFuture;
-
+  bool tr = false;
+  var tran = '';
+  var trans = '';
   @override
   void initState() {
     super.initState();
@@ -50,6 +54,12 @@ class _EpisodeDetailPageState extends State<EpisodeDetailPage> {
     );
   }
 
+  void loader() async {
+    if (tr == false) {
+      trans = tran;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,8 +72,11 @@ class _EpisodeDetailPageState extends State<EpisodeDetailPage> {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (snapshot.hasData) {
             final episode = snapshot.data!;
-            final String fullStillPath ='https://image.tmdb.org/t/p/w500${episode.stillPath}' // Larger still
-              ;
+            tran = episode.overview;
+            loader();
+            final String fullStillPath =
+                'https://db.inosuke.sbs/t/p/w500${episode.stillPath}' // Larger still
+                ;
 
             return CustomScrollView(
               slivers: [
@@ -73,12 +86,24 @@ class _EpisodeDetailPageState extends State<EpisodeDetailPage> {
                   flexibleSpace: FlexibleSpaceBar(
                     title: Text(
                       'S${episode.seasonNumber} E${episode.episodeNumber}: ${episode.name}',
-                      style: const TextStyle(fontSize: 16, shadows: [Shadow(blurRadius: 5, color: Colors.black)]),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        shadows: [Shadow(blurRadius: 5, color: Colors.black)],
+                      ),
                     ),
                     background: Image.network(
                       fullStillPath,
                       fit: BoxFit.cover,
-                      errorBuilder: (c,e,s) => Container(color: Colors.grey[800], child: Center(child: Icon(Icons.broken_image, color: Colors.white54, size: 50))),
+                      errorBuilder: (c, e, s) => Container(
+                        color: Colors.grey[800],
+                        child: Center(
+                          child: Icon(
+                            Icons.broken_image,
+                            color: Colors.white54,
+                            size: 50,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -91,34 +116,82 @@ class _EpisodeDetailPageState extends State<EpisodeDetailPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Air Date: ${episode.airDate}', style: Theme.of(context).textTheme.titleSmall),
+                            Text(
+                              'Air Date: ${episode.airDate}',
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
                             if (episode.runtime != null)
-                                Text('Runtime: ${episode.runtime} min', style: Theme.of(context).textTheme.titleSmall),
+                              Text(
+                                'Runtime: ${episode.runtime} min',
+                                style: Theme.of(context).textTheme.titleSmall,
+                              ),
                           ],
                         ),
-                         if (episode.voteAverage > 0) ...[
-                            const SizedBox(height: 8),
-                            Row(children: [
-                                const Icon(Icons.star, color: Colors.amber, size: 18),
-                                const SizedBox(width: 4),
-                                Text('${episode.voteAverage.toStringAsFixed(1)} (${episode.voteCount} votes)', style: Theme.of(context).textTheme.titleSmall),
-                            ]),
-                         ],
+                        if (episode.voteAverage > 0) ...[
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${episode.voteAverage.toStringAsFixed(1)} (${episode.voteCount} votes)',
+                                style: Theme.of(context).textTheme.titleSmall,
+                              ),
+                            ],
+                          ),
+                        ],
                         const SizedBox(height: 16),
-                        Text('Overview', style: Theme.of(context).textTheme.titleLarge),
+                        IconButton(
+                          iconSize: 20.0,
+                          icon: const Icon(Icons.assistant),
+                          tooltip: 'translate overview',
+                          onPressed: () async {
+                            tVClick();
+                            final translator = MovieTvTranslator();
+                            debugPrint(trans);
+                            final translatedOverView = await translator
+                                .translateTextForMoviesAndTV(trans);
+                            debugPrint(translatedOverView);
+                            debugPrint(trans);
+                            setState(() {
+                              tr = true;
+                              trans = translatedOverView;
+
+                              debugPrint(trans);
+                            });
+                          },
+                        ),
+                        Text(
+                          'Overview',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
                         const SizedBox(height: 8),
-                        Text(episode.overview.isEmpty ? 'No overview available.' : episode.overview),
-                        
+                        Text(
+                          episode.overview.isEmpty
+                              ? 'No overview available.'
+                              : trans,
+                        ),
+
                         if (episode.guestStars.isNotEmpty) ...[
                           const SizedBox(height: 24),
-                          Text('Guest Stars', style: Theme.of(context).textTheme.titleLarge),
+                          Text(
+                            'Guest Stars',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
                           const SizedBox(height: 12),
                           _buildPersonList(context, episode.guestStars, true),
                         ],
 
                         if (episode.crew.isNotEmpty) ...[
                           const SizedBox(height: 24),
-                          Text('Crew', style: Theme.of(context).textTheme.titleLarge),
+                          Text(
+                            'Crew',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
                           const SizedBox(height: 12),
                           _buildPersonList(context, episode.crew, false),
                         ],
@@ -137,7 +210,11 @@ class _EpisodeDetailPageState extends State<EpisodeDetailPage> {
     );
   }
 
-  Widget _buildPersonList(BuildContext context, List<dynamic> people, bool isGuestStar) {
+  Widget _buildPersonList(
+    BuildContext context,
+    List<dynamic> people,
+    bool isGuestStar,
+  ) {
     return SizedBox(
       height: 180, // Adjust as needed
       child: ListView.builder(
@@ -158,8 +235,9 @@ class _EpisodeDetailPageState extends State<EpisodeDetailPage> {
             profilePath = person.profilePath;
             role = person.job;
           }
-          
-          final String fullProfileUrl ='https://inosdb.worker-inosuke.workers.dev/w500$profilePath';
+
+          final String fullProfileUrl =
+              'https://db.inosuke.sbs/t/p/w500$profilePath';
           return GestureDetector(
             onTap: () => _navigateToPersonDetail(person.id, name, profilePath),
             child: Container(
@@ -175,14 +253,34 @@ class _EpisodeDetailPageState extends State<EpisodeDetailPage> {
                       child: Image.network(
                         fullProfileUrl,
                         fit: BoxFit.cover,
-                        errorBuilder: (c,e,s) => Container(color: Colors.grey[700], child: const Center(child: Icon(Icons.person_outline))),
+                        errorBuilder: (c, e, s) => Container(
+                          color: Colors.grey[700],
+                          child: const Center(
+                            child: Icon(Icons.person_outline),
+                          ),
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 6),
-                  Text(name, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                  Text(
+                    name,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
                   if (role.isNotEmpty)
-                    Text(role, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 10, color: Colors.grey[400])),
+                    Text(
+                      role,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 10, color: Colors.grey[400]),
+                    ),
                 ],
               ),
             ),

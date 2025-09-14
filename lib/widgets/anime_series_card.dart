@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:miko/providers/god_proovider.dart' as ss;
 import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/showcases/movie_service.dart';
@@ -16,16 +17,14 @@ import '../showcases/model.dart'; // For accessing UserDataService
 import 'package:miko/showcases/model.dart' as mmd;
 import 'package:miko/showcases/movie_detail_page_copy.dart';
 
-//import 'package:myapp/screens/video_player_screen.dart'; // Your player screen
 
 import '../screens/video_player_wplaylist_screen.dart';
 
 class EpisodeTileNew extends StatelessWidget {
-  // The 'season' property should be of type ss.Season, not a generic 'dynamic' or 'String'
   final String seriesname;
   final ss.Season season;
   final ss.Episode episode;
-  final int id; // This is the TvseriesId
+  final int id; 
 
   const EpisodeTileNew({
     required this.seriesname,
@@ -42,21 +41,18 @@ class EpisodeTileNew extends StatelessWidget {
         Provider.of<UserDataService>(context, listen: false);
 
     void playEpisode(BuildContext context, url) async {
-      // Find the index of the current episode within its season's list
       final int initialIndex = season.episodes.indexOf(episode);
 
-      // Navigate to the player with the full context
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => VideoPlayerScreen(
+          builder: (_) => VideoPlayerScreenPl(
             seriesname: seriesname,
             tvSeriesId: id,
             season: season,
             playlist: season.episodes,
             initialIndex: initialIndex,
             url: url,
-            //  episode: episode
           ),
         ),
       );
@@ -208,7 +204,7 @@ class MovieCard extends StatelessWidget {
                             10.0), // Consistent border radius
                         child: Container(
                           decoration: BoxDecoration(
-                            color: AppColors2.onBackground.withOpacity(
+                            color: AppColors2.onBackgroundLight.withOpacity(
                                 0.6), // Subtle background for image
                           ),
                           child: posterUrl != null && posterUrl.isNotEmpty
@@ -325,91 +321,132 @@ class MovieCard extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4.0),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        movie.title,
-                        style: const TextStyle(
-                          color: AppColors2.onPrimary,
-                          fontWeight:
-                              FontWeight.bold, // Slightly bolder for title
-                          fontSize: 14.0,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(
-                          height: 4.0), // More space before rating/year
-                      Row(
-                        children: [
-                          const Icon(Icons.star_rounded,
-                              color: Colors.amber,
-                              size: 14), // Rounded star icon
-                          const SizedBox(width: 4), // Consistent spacing
-                          Expanded(
-                            child: Text(
-                              '${movie.voteAverage.toStringAsFixed(1)} • $releaseYear',
-                              style: const TextStyle(
-                                color: AppColors2.tinytext,
-                                fontSize: 12.0,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (movie.runtime != null && movie.runtime! > 0)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 4.0),
-                            Text(
-                              'Runtime: ${movie.runtime} min',
-                              style: const TextStyle(
-                                color: AppColors2.tinytext,
-                                fontSize: 10.5, // Consistent font size
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      if (
-                          movie.originalLanguage.isNotEmpty)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 4.0),
-                            Text(
-                              'Language: ${movie.originalLanguage.toUpperCase()}',
-                              style: const TextStyle(
-                                color: AppColors2.tinytext,
-                                fontSize: 10.5,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      if (movie.popularity > 0)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 4.0),
-                            Text(
-                              'Popularity: ${movie.popularity.toStringAsFixed(1)}',
-                              style: const TextStyle(
-                                color: AppColors2.tinytext,
-                                fontSize: 10.5,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                    ],
+  crossAxisAlignment: CrossAxisAlignment.start,
+  mainAxisSize: MainAxisSize.min,
+  children: [
+    Text(
+      movie.title,
+      style: GoogleFonts.lato( // Using Lato from Google Fonts
+        color: AppColors2.onPrimary,
+        fontWeight: FontWeight.bold, // Slightly bolder for title
+        fontSize: 14.0,
+      ),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    ),
+    const SizedBox(
+        height: 4.0), // More space before rating/year
+    Row(
+      children: [
+        const Icon(Icons.star_rounded,
+            color: Colors.amber,
+            size: 14), // Rounded star icon
+        // const SizedBox(width: 4), // Consistent spacing
+        Expanded(
+          child: Text(
+            '${movie.voteAverage.toStringAsFixed(1)} • $releaseYear',
+            style: const TextStyle(
+              color: AppColors2.tinytext,
+              fontSize: 12.0,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    ),
+    if (movie.runtime != null && movie.runtime! > 0)
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // const SizedBox(height: 4.0),
+          RichText(
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: 'Runtime: ',
+                  style: TextStyle(
+                    color: Colors.green, // Key color
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.bold, // Make key bolder
+                  ),
+                ),
+                TextSpan(
+                  text: '${movie.runtime} min',
+                  style: TextStyle(
+                    color: Colors.blue, // Value color
+                    fontSize: 10.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    if (movie.originalLanguage.isNotEmpty)
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // const SizedBox(height: 4.0),
+          RichText(
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: 'Language: ',
+                  style: TextStyle(
+                    color: Colors.green, // Key color
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.bold, // Make key bolder
+                  ),
+                ),
+                TextSpan(
+                  text: '${movie.originalLanguage.toUpperCase()}',
+                  style: TextStyle(
+                    color: Colors.blue, // Value color
+                    fontSize: 10.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    if (movie.popularity > 0)
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // const SizedBox(height: 4.0),
+          RichText(
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: 'Popularity: ',
+                  style: TextStyle(
+                    color: Colors.green, // Key color
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.bold, // Make key bolder
+                  ),
+                ),
+                TextSpan(
+                  text: '${movie.popularity.toStringAsFixed(1)}',
+                  style: TextStyle(
+                    color: Colors.blue, // Value color
+                    fontSize: 10.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+  ],
+
                   ),
                 ),
               ],
@@ -511,12 +548,13 @@ class AnimeSeriesCard extends StatelessWidget {
           child: Card(
             color: Colors.transparent,
             elevation: 0,
-            margin: EdgeInsets.zero,
+            margin: const EdgeInsets.symmetric(
+                vertical: 4.0, horizontal: 4.0),
             clipBehavior:
                 Clip.antiAlias, // Ensures content respects card boundaries
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+           //   crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 AspectRatio(
                   aspectRatio: 2 / 3,
@@ -636,77 +674,108 @@ class AnimeSeriesCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 8.0),
+           //     const SizedBox(height: 8.0),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        series.name,
-                        style: const TextStyle(
-                          color: AppColors.primaryText,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14.0,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4.0),
-                      Row(
-                        children: [
-                          const Icon(Icons.star_rounded,
-                              color: Colors.amber, size: 14),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              '${series.voteAverage.toStringAsFixed(1)} • $displayYear',
-                              style: const TextStyle(
-                                color: AppColors.secondaryText,
-                                fontSize: 12.0,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (series.numberOfSeasons != null &&
-                          series.numberOfEpisodes != null)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 4.0),
-                            Text(
-                              'Seasons: ${series.numberOfSeasons} • Episodes: ${series.numberOfEpisodes}',
-                              style: const TextStyle(
-                                color: AppColors.secondaryText,
-                                fontSize: 10.5,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      if (
-                          series.originalLanguage.isNotEmpty)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 4.0),
-                            Text(
-                              'Language: ${series.originalLanguage.toUpperCase()}',
-                              style: const TextStyle(
-                                color: AppColors.secondaryText,
-                                fontSize: 10.5,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                    ],
+                  child: 
+
+Column(
+ crossAxisAlignment: CrossAxisAlignment.start,
+ mainAxisSize: MainAxisSize.min,
+ children: [
+ Text(
+ series.name,
+ style: GoogleFonts.lato( // Using Lato from Google Fonts
+ color: AppColors.primaryText,
+ fontWeight: FontWeight.bold,
+ fontSize: 14.0,
+ ),
+ maxLines: 2,
+ overflow: TextOverflow.ellipsis,
+ ),
+ const SizedBox(height: 4.0),
+ Row(
+ children: [
+ const Icon(Icons.star_rounded,
+ color: Colors.amber, size: 14),
+ const SizedBox(width: 4),
+ Expanded(
+ child: Text(
+ '${series.voteAverage.toStringAsFixed(1)} • $displayYear',
+ style: const TextStyle(
+ color: AppColors.secondaryText,
+ fontSize: 12.0,
+ ),
+ maxLines: 1,
+ overflow: TextOverflow.ellipsis,
+ ),
+ ),
+ ],
+ ),
+ if (series.numberOfSeasons != null &&
+ series.numberOfEpisodes != null)
+ Column(
+ crossAxisAlignment: CrossAxisAlignment.start,
+ children: [
+ const SizedBox(height: 4.0),
+ RichText(
+ maxLines: 1,
+ overflow: TextOverflow.ellipsis,
+ text: TextSpan(
+ children: [
+ TextSpan(
+ text: 'Seasons: ',
+ style: TextStyle(
+ color: Colors.green, // Key color
+ fontSize: 10.5,
+ fontWeight: FontWeight.bold, // Make key bolder
+ ),
+ ),
+ TextSpan(
+ text: '${series.numberOfSeasons} • Episodes: ${series.numberOfEpisodes}',
+ style: TextStyle(
+ color: Colors.blue, // Value color
+ fontSize: 10.5,
+ ),
+ ),
+ ],
+ ),
+ ),
+ ],
+ ),
+ if (
+ series.originalLanguage.isNotEmpty)
+ Column(
+ crossAxisAlignment: CrossAxisAlignment.start,
+ children: [
+ const SizedBox(height: 4.0),
+ RichText(
+ maxLines: 1,
+ overflow: TextOverflow.ellipsis,
+ text: TextSpan(
+ children: [
+ TextSpan(
+ text: 'Language: ',
+ style: TextStyle(
+ color: Colors.green, // Key color
+ fontSize: 10.5,
+ fontWeight: FontWeight.bold, // Make key bolder
+ ),
+ ),
+ TextSpan(
+ text: '${series.originalLanguage.toUpperCase()}',
+ style: TextStyle(
+ color: Colors.blue, // Value color
+ fontSize: 10.5,
+ ),
+ ),
+ ],
+ ),
+ ),
+ ],
+ ),
+ ],
+
                   ),
                 ),
               ],

@@ -166,10 +166,10 @@ class _UnifiedSearchBottomSheetState extends State<UnifiedSearchBottomSheet> {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               child: Row(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.close, color: AppColors.iconColor), // Changed to close for bottom sheet
-                    onPressed: () => Navigator.pop(context),
-                  ),
+                  // IconButton(
+                  //   icon: const Icon(Icons.close, color: AppColors.iconColor), // Changed to close for bottom sheet
+                  //   onPressed: () => Navigator.pop(context),
+                  // ),
                   Expanded(
                     child: TextField(
                       controller: _searchController,

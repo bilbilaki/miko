@@ -1,14 +1,38 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:csv/csv.dart';
-import 'dart:io';
-import 'dart:convert';
-import 'package:path_provider/path_provider.dart';
-import 'package:provider/provider.dart'; // Make sure provider package is in pubspec.yaml
+
 
 import 'package:url_launcher/url_launcher.dart';
+// Generated full Riverpod providers with all functionalities for the provided linked classes.
+// The main provider will extend existing functionality
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Assuming that the main provider is MovieProvider and TvSeriesProvider manage episodes as providers.
+// This example provides an enhanced implementation of both movies and TV series classes.
+//
+// Main MovieProvider
+final movieProvider = ChangeNotifierProvider<MovieProvider>((ref) {
+  return MovieProvider();
+});
+
+// TVSeriesProvider with episodes also added as provider
+final tvSeriesProvider = ChangeNotifierProvider<TvSeriesProvider>((ref) {
+  return TvSeriesProvider();
+});
+
+// Individual Serializable Seializable Record Extension on TV Series Clip
+final tvSeriesUnisqueseriesNameChangeNotifierProvider =
+    ChangeNotifierProvider<TvSeriesProvider>((ref) {
+      final val = TvSeriesProvider();
+
+      return val;
+    });
+// AnimeProvider necessary to extend basic functionality
+final animeProvider = ChangeNotifierProvider<AnimeProvider>((ref) {
+  return AnimeProvider();
+});
 // Models (provided by user, copied for completeness)
 enum LoadingStatus { idle, loading, loaded, error, notloaded }
 
@@ -307,8 +331,8 @@ class TvSeriesAnime {
   final List<Season> seasons; // Populated by provider
 
   // --- Base URL for images (keep this) ---
-  static const String _imageBaseUrl = 'https://inosdb.worker-inosuke.workers.dev/w500';
-  static const String _backdropBaseUrl = 'https://inosdb.worker-inosuke.workers.dev/w780'; // Use a higher res for backdrop
+  static const String _imageBaseUrl = 'https://db.inosuke.sbs/t/p/w500';
+  static const String _backdropBaseUrl = 'https://db.inosuke.sbs/t/p/w780'; // Use a higher res for backdrop
 
   TvSeriesAnime({
     required this.tmdbId,
@@ -588,7 +612,7 @@ class Movie {
   final String? rawDownloadLinks; // Store the raw string
   final String? rawVideos;
 
-  static const String imageBaseUrl = 'https://inosdb.worker-inosuke.workers.dev/w500';
+  static const String imageBaseUrl = 'https://db.inosuke.sbs/t/p/w500';
 
   Movie({
     required this.id,
@@ -672,7 +696,7 @@ class Movie {
 
   String? getBackdropUrl() {
     // Use w780 or original for backdrops for better quality
-    const String backdropBaseUrl = 'https://inosdb.worker-inosuke.workers.dev/w780';
+    const String backdropBaseUrl = 'https://db.inosuke.sbs/t/p/w780';
     if (backdropPath == null || backdropPath!.isEmpty || backdropPath == "nan") {
       return null;
     }
@@ -1129,8 +1153,8 @@ abstract class ContentProvider<T> extends ChangeNotifier {
           compare = voteA.compareTo(voteB);
           break;
         case SortBy.releaseDate:
-          final dateA = (a is Movie) ? (a).releaseDate : (a as TvSeriesAnime).firstAirDate;
-          final dateB = (b is Movie) ? (b).releaseDate : (b as TvSeriesAnime).firstAirDate;
+          DateTime? dateA = (a is Movie) ? (a).releaseDate : (a as TvSeriesAnime).firstAirDate;
+          DateTime? dateB = (b is Movie) ? (b).releaseDate : (b as TvSeriesAnime).firstAirDate;
           // Handle null dates: nulls come last in ascending, first in descending
           if (dateA == null && dateB == null) {
             compare = 0;
@@ -1143,13 +1167,13 @@ abstract class ContentProvider<T> extends ChangeNotifier {
           }
           break;
         case SortBy.name:
-          final nameA = (a is Movie) ? (a).title : (a as TvSeriesAnime).name;
-          final nameB = (b is Movie) ? (b).title : (b as TvSeriesAnime).name;
+          String nameA = (a is Movie) ? (a).title : (a as TvSeriesAnime).name;
+          String nameB = (b is Movie) ? (b).title : (b as TvSeriesAnime).name;
           compare = nameA.toLowerCase().compareTo(nameB.toLowerCase());
           break;
         case SortBy.runtime:
-          final runtimeA = (a is Movie) ? (a).runtime : (a as TvSeriesAnime).runtime;
-          final runtimeB = (b is Movie) ? (b).runtime : (b as TvSeriesAnime).runtime;
+          int? runtimeA = (a is Movie) ? (a).runtime : (a as TvSeriesAnime).runtime;
+          int? runtimeB = (b is Movie) ? (b).runtime : (b as TvSeriesAnime).runtime;
           if (runtimeA == null && runtimeB == null) {
             compare = 0;
           } else if (runtimeA == null) {
@@ -1212,6 +1236,37 @@ class MovieProvider extends ContentProvider<Movie> {
   bool get isIdeling => _status == LoadingStatus.idle;
   bool get isLooaded => _status == LoadingStatus.loaded;
   bool get isInitialized => _isInitialized;
+int _currentPage = 0;
+  int _perPage = 50; // Items per page (adjust for performance, e.g., 20-100)
+  bool _isLoadingNextPage = false;
+  bool get isLoadingNextPage => _isLoadingNextPage;
+  bool get hasMorePages => (_currentPage + 1) * _perPage < _masterList.length;
+  List<Movie> _visibleItems = [];
+  List<Movie> get visibleItems => _visibleItems;
+
+  Future<void> loadInitialPage() async {
+    if (_masterList.isEmpty) await loadMovies(); // Ensure data is loaded
+    _currentPage = 0;
+    _visibleItems = _masterList.take(_perPage).toList();
+    notifyListeners();
+  }
+
+  Future<void> loadNextPage() async {
+    if (_isLoadingNextPage || !hasMorePages) return;
+    _isLoadingNextPage = true;
+    notifyListeners();
+    await Future.delayed(
+      const Duration(milliseconds: 100),
+    ); // Simulate load delay (remove if not needed)
+    _currentPage++;
+    final start = _currentPage * _perPage;
+    final end = start + _perPage;
+    _visibleItems.addAll(
+      _masterList.sublist(start, end.clamp(0, _masterList.length)),
+    );
+    _isLoadingNextPage = false;
+    notifyListeners();
+  }
 
   // New getters for filter options
   Set<String> _allAvailableGenres = {};
@@ -1248,10 +1303,10 @@ class MovieProvider extends ContentProvider<Movie> {
     notifyListeners();
 
     try {
-      final rawData = await rootBundle.loadString('assets/movies_db.csv');
+      String rawData = await rootBundle.loadString('assets/movies_db.csv');
       List<List<dynamic>> csvTable = const CsvToListConverter().convert(rawData);
 
-      final dataRows = csvTable.skip(1);
+      var dataRows = csvTable.skip(1);
       _masterList = dataRows.map((row) {
         return Movie.fromCsvRow(row);
       }).toList();
@@ -1267,7 +1322,7 @@ class MovieProvider extends ContentProvider<Movie> {
       if (kDebugMode) {
         print("Successfully loaded ${_masterList.length} movies from CSV.");
       }
-    } catch (e, stacktrace) {
+    } catch (e) {
       _status = LoadingStatus.error;
       _errorMessage = "Failed to load or parse CSV: $e";
       if (kDebugMode) {
@@ -1345,7 +1400,37 @@ class TvSeriesProvider extends ContentProvider<TvSeriesAnime> {
   Set<String> get allAvailableLanguages => _allAvailableLanguages;
   @override
   Set<String> get allAvailableCountries => {}; // TV Series does not have this property
+int _currentPage = 0;
+  int _perPage = 50; // Items per page (adjust for performance, e.g., 20-100)
+  bool _isLoadingNextPage = false;
+  bool get isLoadingNextPage => _isLoadingNextPage;
+  bool get hasMorePages => (_currentPage + 1) * _perPage < _masterList.length;
+  List<TvSeriesAnime> _visibleItems = [];
+  List<TvSeriesAnime> get visibleItems => _visibleItems;
 
+  Future<void> loadInitialPage() async {
+    if (_masterList.isEmpty) await loadAnimeData(); // Ensure data is loaded
+    _currentPage = 0;
+    _visibleItems = _masterList.take(_perPage).toList();
+    notifyListeners();
+  }
+
+  Future<void> loadNextPage() async {
+    if (_isLoadingNextPage || !hasMorePages) return;
+    _isLoadingNextPage = true;
+    notifyListeners();
+    await Future.delayed(
+      const Duration(milliseconds: 100),
+    ); // Simulate load delay (remove if not needed)
+    _currentPage++;
+    final start = _currentPage * _perPage;
+    final end = start + _perPage;
+    _visibleItems.addAll(
+      _masterList.sublist(start, end.clamp(0, _masterList.length)),
+    );
+    _isLoadingNextPage = false;
+    notifyListeners();
+  }
   // Initialize data only once
   Future<void> _initializeData() async {
     if (!_isInitialized) {
@@ -1376,17 +1461,17 @@ class TvSeriesProvider extends ContentProvider<TvSeriesAnime> {
 
     try {
       // 1. Load Series Details CSV
-      final detailsRawData = await rootBundle.loadString(_tvSeriesDetailPath);
+      String detailsRawData = await rootBundle.loadString(_tvSeriesDetailPath);
       List<List<dynamic>> detailsCsvTable = const CsvToListConverter().convert(detailsRawData);
 
-      final Map<int, TvSeriesAnime> tempAnimeSeriesMap = {};
+       Map<int, TvSeriesAnime> tempAnimeSeriesMap = {};
       // Using a temporary map to store series names -> tmdb_id for linking episodes later
-      final Map<String, int> animeseriesnameToTmdbidMap = {};
+       Map<String, int> animeseriesnameToTmdbidMap = {};
 
       for (final row in detailsCsvTable.skip(1)) {
         // Skip header row
         try {
-          final animeseries = TvSeriesAnime.fromCsvRow(row);
+          TvSeriesAnime animeseries = TvSeriesAnime.fromCsvRow(row);
           if (animeseries.tmdbId != 0) {
             // Use TMDB ID as the primary key
             tempAnimeSeriesMap[animeseries.tmdbId] = animeseries;
@@ -1403,7 +1488,7 @@ class TvSeriesProvider extends ContentProvider<TvSeriesAnime> {
            //   print("Skipping series due to missing or invalid TMDB ID in row: $row");
             }
           }
-        } catch (e, stacktrace) {
+        } catch (e) {
           if (kDebugMode) {
         //    print("Error parsing TV Series details row: $row -> $e");
          //   print(stacktrace);
@@ -1418,17 +1503,17 @@ class TvSeriesProvider extends ContentProvider<TvSeriesAnime> {
       }
 
       // 2. Load Episodes CSV
-      final episodesRawData = await rootBundle.loadString(_episodetvsCsvPath);
+      String episodesRawData = await rootBundle.loadString(_episodetvsCsvPath);
       List<List<dynamic>> episodesCsvTable = const CsvToListConverter().convert(episodesRawData);
 
       // Group episodes temporarily by TMDB ID
-      final Map<int, List<Episode>> tempEpisodesByTmdbId = {};
+       Map<int, List<Episode>> tempEpisodesByTmdbId = {};
 
       for (final row in episodesCsvTable.skip(1)) {
         // Skip header row
         if (row.isNotEmpty && row[0] != null) {
-          final String animeseriesNameFromEpisodeCsv = row[0].toString();
-          final String animeseriesNameLower = animeseriesNameFromEpisodeCsv.toLowerCase();
+           String animeseriesNameFromEpisodeCsv = row[0].toString();
+           String animeseriesNameLower = animeseriesNameFromEpisodeCsv.toLowerCase();
 
           // *** IMPORTANT JOIN LOGIC ***
           // Attempt to find the TMDB ID using the name from the episode CSV
@@ -1436,7 +1521,7 @@ class TvSeriesProvider extends ContentProvider<TvSeriesAnime> {
 
           if (targetTmdbId != null) {
             try {
-              final episode = Episode.fromCsvInfo(animeseriesNameFromEpisodeCsv, targetTmdbId, row); // Pass targetTmdbId
+              Episode episode = Episode.fromCsvInfo(animeseriesNameFromEpisodeCsv, targetTmdbId, row); // Pass targetTmdbId
               if (!tempEpisodesByTmdbId.containsKey(targetTmdbId)) {
                 tempEpisodesByTmdbId[targetTmdbId] = [];
               }
@@ -1464,9 +1549,9 @@ class TvSeriesProvider extends ContentProvider<TvSeriesAnime> {
       }
 
       // 3. Combine Details and Episodes
-      for (final tmdbId in tempAnimeSeriesMap.keys) {
-        final baseSeries = tempAnimeSeriesMap[tmdbId]!;
-        final csvEpisodes = tempEpisodesByTmdbId[tmdbId] ?? []; // Get episodes for this TMDB ID
+      for (int tmdbId in tempAnimeSeriesMap.keys) {
+        TvSeriesAnime baseSeries = tempAnimeSeriesMap[tmdbId]!;
+        List<Episode> csvEpisodes = tempEpisodesByTmdbId[tmdbId] ?? []; // Get episodes for this TMDB ID
 
         // Sort episodes by season and episode number
         csvEpisodes.sort((a, b) {
@@ -1495,7 +1580,7 @@ class TvSeriesProvider extends ContentProvider<TvSeriesAnime> {
           ..sort((a, b) => a.seasonNumber.compareTo(b.seasonNumber));
 
         // Create the final TvSeries object with combined data
-        final finalSeries = baseSeries.copyWith(seasons: seasons);
+        TvSeriesAnime finalSeries = baseSeries.copyWith(seasons: seasons);
         _animeseriesMap[tmdbId] = finalSeries; // Add to the final map
       }
 
@@ -1514,7 +1599,7 @@ class TvSeriesProvider extends ContentProvider<TvSeriesAnime> {
 
       _status = LoadingStatus.loaded;
       _isInitialized = true;
-    } catch (e, stacktrace) {
+    } catch (e) {
       _status = LoadingStatus.error;
       _errorMessage = "Failed to load TV series data: $e";
       if (kDebugMode) {
@@ -1545,7 +1630,7 @@ class TvSeriesProvider extends ContentProvider<TvSeriesAnime> {
     notifyListeners();
   }
 
-  void _updateStatus(LoadingStatus newStatus, [String? message]) {
+  void updateStatus(LoadingStatus newStatus, [String? message]) {
     _status = newStatus;
     _errorMessage = message;
     notifyListeners();
@@ -1596,7 +1681,37 @@ class AnimeProvider extends ContentProvider<TvSeriesAnime> {
   Set<String> get allAvailableLanguages => _allAvailableLanguages;
   @override
   Set<String> get allAvailableCountries => {}; // Anime does not have this property
+int _currentPage = 0;
+  int _perPage = 50; // Items per page (adjust for performance, e.g., 20-100)
+  bool _isLoadingNextPage = false;
+  bool get isLoadingNextPage => _isLoadingNextPage;
+  bool get hasMorePages => (_currentPage + 1) * _perPage < _masterList.length;
+  List<TvSeriesAnime> _visibleItems = [];
+  List<TvSeriesAnime> get visibleItems => _visibleItems;
 
+  Future<void> loadInitialPage() async {
+    if (_masterList.isEmpty) await loadAnimeData(); // Ensure data is loaded
+    _currentPage = 0;
+    _visibleItems = _masterList.take(_perPage).toList();
+    notifyListeners();
+  }
+
+  Future<void> loadNextPage() async {
+    if (_isLoadingNextPage || !hasMorePages) return;
+    _isLoadingNextPage = true;
+    notifyListeners();
+    await Future.delayed(
+      const Duration(milliseconds: 100),
+    ); // Simulate load delay (remove if not needed)
+    _currentPage++;
+    final start = _currentPage * _perPage;
+    final end = start + _perPage;
+    _visibleItems.addAll(
+      _masterList.sublist(start, end.clamp(0, _masterList.length)),
+    );
+    _isLoadingNextPage = false;
+    notifyListeners();
+  }
   // Initialize data only once
   Future<void> _initializeData() async {
     if (!_isInitialized) {
@@ -1619,52 +1734,52 @@ class AnimeProvider extends ContentProvider<TvSeriesAnime> {
       return;
     }
 
-    updateSearchQuery(''); // Reset search query on load
+    //updateSearchQuery(''); // Reset search query on load
     applyFiltersAndSort(ContentFilterState.initial()); // Reset filters on load
     _status = LoadingStatus.loading;
     _errorMessage = null;
     notifyListeners();
 
     // Attempt to load cached data to avoid reprocessing CSV on each launch
-    try {
-      final dir = await getApplicationDocumentsDirectory();
-      final cacheFile = File('${dir.path}/anime_cache.json');
-      if (await cacheFile.exists()) {
-        final content = await cacheFile.readAsString();
-        final List<dynamic> jsonData = jsonDecode(content);
-        for (var item in jsonData) {
-          final series = TvSeriesAnime.fromJson(item as Map<String, dynamic>);
-          _animeseriesMap[series.tmdbId] = series;
-        }
-        _masterList = _animeseriesMap.values.toList()
-          ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-        _searchResults = _masterList;
+    // try {
+    //   final dir = await getApplicationDocumentsDirectory();
+    //   final cacheFile = File('${dir.path}/anime_cache.json');
+    //   if (await cacheFile.exists()) {
+    //     final content = await cacheFile.readAsString();
+    //     final List<dynamic> jsonData = jsonDecode(content);
+    //     for (var item in jsonData) {
+    //       final series = TvSeriesAnime.fromJson(item as Map<String, dynamic>);
+    //       _animeseriesMap[series.tmdbId] = series;
+    //     }
+    //     _masterList = _animeseriesMap.values.toList()
+    //       ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    //     _searchResults = _masterList;
 
-        // Collect all unique filter options from cache
-        _allAvailableGenres = _masterList.expand((series) => series.genres).toSet();
-        _allAvailableLanguages = _masterList.map((series) => series.originalLanguage).toSet();
+    //     // Collect all unique filter options from cache
+    //     _allAvailableGenres = _masterList.expand((series) => series.genres).toSet();
+    //     _allAvailableLanguages = _masterList.map((series) => series.originalLanguage).toSet();
 
-        _status = LoadingStatus.loaded;
-        _isInitialized = true;
-        if (kDebugMode) print('Loaded anime data from cache.');
-        _updateFilteredAndSortedContent();
-        return;
-      }
-    } catch (e) {
-      if (kDebugMode) {}//print('Cache load failed, parsing CSV: $e');
-    }
+    //     _status = LoadingStatus.loaded;
+    //     _isInitialized = true;
+    //     if (kDebugMode) print('Loaded anime data from cache.');
+    //     _updateFilteredAndSortedContent();
+    //     return;
+    //   }
+    // } catch (e) {
+    //   if (kDebugMode) {}//print('Cache load failed, parsing CSV: $e');
+    // }
 
     try {
       // 1. Load Series Details CSV
-      final detailsRawData = await rootBundle.loadString(_animeseriesDetailsCsvPath);
+      String detailsRawData = await rootBundle.loadString(_animeseriesDetailsCsvPath);
       List<List<dynamic>> detailsCsvTable = const CsvToListConverter().convert(detailsRawData);
 
-      final Map<int, TvSeriesAnime> tempAnimeSeriesMap = {};
-      final Map<String, int> animeseriesnameToTmdbidMap = {};
+       Map<int, TvSeriesAnime> tempAnimeSeriesMap = {};
+       Map<String, int> animeseriesnameToTmdbidMap = {};
 
-      for (final row in detailsCsvTable.skip(1)) {
+      for (var row in detailsCsvTable.skip(1)) {
         try {
-          final animeseries = TvSeriesAnime.fromCsvRow(row);
+          TvSeriesAnime animeseries = TvSeriesAnime.fromCsvRow(row);
           if (animeseries.tmdbId != 0) {
             tempAnimeSeriesMap[animeseries.tmdbId] = animeseries;
             animeseriesnameToTmdbidMap[animeseries.originalName.toLowerCase()] = animeseries.tmdbId;
@@ -1674,7 +1789,7 @@ class AnimeProvider extends ContentProvider<TvSeriesAnime> {
               animeseriesnameToTmdbidMap[row[1].toString().toLowerCase()] = animeseries.tmdbId;
             }
           }
-        } catch (e, stacktrace) {
+        } catch (e) {
           if (kDebugMode) {
           //  print("Error parsing TV Series details row: $row -> $e");
          //   print(stacktrace);
@@ -1683,15 +1798,15 @@ class AnimeProvider extends ContentProvider<TvSeriesAnime> {
       }
 
       // 2. Load Episodes CSV
-      final episodesRawData = await rootBundle.loadString(_episodesCsvPath);
+      String episodesRawData = await rootBundle.loadString(_episodesCsvPath);
       List<List<dynamic>> episodesCsvTable = const CsvToListConverter().convert(episodesRawData);
 
-      final Map<int, List<Episode>> tempEpisodesByTmdbId = {};
+       Map<int, List<Episode>> tempEpisodesByTmdbId = {};
 
-      for (final row in episodesCsvTable.skip(1)) {
+      for (var row in episodesCsvTable.skip(1)) {
         if (row.isNotEmpty && row[0] != null) {
-          final String animeseriesNameFromEpisodeCsv = row[0].toString();
-          final String animeseriesNameLower = animeseriesNameFromEpisodeCsv.toLowerCase();
+           String animeseriesNameFromEpisodeCsv = row[0].toString();
+           String animeseriesNameLower = animeseriesNameFromEpisodeCsv.toLowerCase();
           int? targetTmdbId = animeseriesnameToTmdbidMap[animeseriesNameLower];
 
           if (targetTmdbId != null) {
@@ -1748,22 +1863,22 @@ class AnimeProvider extends ContentProvider<TvSeriesAnime> {
       _allAvailableLanguages = _masterList.map((series) => series.originalLanguage).toSet();
 
       // Cache the combined data to avoid reprocessing CSV on next launch
-      try {
-        final dir = await getApplicationDocumentsDirectory();
-        final cacheFile = File('${dir.path}/anime_cache.json');
-        final List<Map<String, dynamic>> jsonData = _masterList.map((s) => s.toJson()).toList();
-        await cacheFile.writeAsString(jsonEncode(jsonData));
-        if (kDebugMode){} //print('Cached anime data to ${cacheFile.path}');
-      } catch (e) {
-        if (kDebugMode){  }// print('Failed to write anime cache: $e');
-      }
+      // try {
+      //   final dir = await getApplicationDocumentsDirectory();
+      //   final cacheFile = File('${dir.path}/anime_cache.json');
+      //   final List<Map<String, dynamic>> jsonData = _masterList.map((s) => s.toJson()).toList();
+      //   await cacheFile.writeAsString(jsonEncode(jsonData));
+      //   if (kDebugMode){} //print('Cached anime data to ${cacheFile.path}');
+      // } catch (e) {
+      //   if (kDebugMode){  }// print('Failed to write anime cache: $e');
+      // }
 
       _status = LoadingStatus.loaded;
       _isInitialized = true;
       if (kDebugMode) {
       //  print("Successfully loaded and combined data for ${_masterList.length} anime series.");
       }
-    } catch (e, stacktrace) {
+    } catch (e) {
       _status = LoadingStatus.error;
       _errorMessage = "Failed to load anime data: $e";
       if (kDebugMode) {
@@ -1794,7 +1909,7 @@ class AnimeProvider extends ContentProvider<TvSeriesAnime> {
     return _animeseriesMap[tmdbId]; // Direct lookup is efficient
   }
 
-  void _updateStatus(LoadingStatus newStatus, [String? message]) {
+  void updateStatus(LoadingStatus newStatus, [String? message]) {
     _status = newStatus;
     _errorMessage = message;
     notifyListeners();

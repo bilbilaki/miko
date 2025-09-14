@@ -136,12 +136,12 @@ class TvShow {
   }
 
   String get fullPosterPath => posterPath != null
-      ? 'https://inosdb.worker-inosuke.workers.dev/w500$posterPath'
-      : 'https://inosdb.worker-inosuke.workers.dev/w500$posterPath';
+      ? 'https://db.inosuke.sbs/t/p/w500$posterPath'
+      : 'https://db.inosuke.sbs/t/p/w500$posterPath';
 
   String get fullBackdropPath => backdropPath != null
-      ? 'https://inosdb.worker-inosuke.workers.dev/w780$backdropPath'
-      : 'https://inosdb.worker-inosuke.workers.dev/w780$backdropPath';
+      ? 'https://db.inosuke.sbs/t/p/w780$backdropPath'
+      : 'https://db.inosuke.sbs/t/p/w780$backdropPath';
 
   String get year {
     if (firstAirDate == null || firstAirDate!.isEmpty) {
@@ -266,7 +266,7 @@ class Season {
   }
 
   String get fullPosterPath => posterPath != null
-      ? 'https://inosdb.worker-inosuke.workers.dev/w500$posterPath'
+      ? 'https://db.inosuke.sbs/t/p/w500$posterPath'
       : '';
 
   String get formattedAirDate {
@@ -331,7 +331,7 @@ class Episode {
   }
 
   String get fullStillPath => stillPath != null
-      ? 'https://inosdb.worker-inosuke.workers.dev/w500$stillPath'
+      ? 'https://db.inosuke.sbs/t/p/w500$stillPath'
       : '';
 
   String get formattedAirDate {
@@ -397,7 +397,7 @@ class Creator {
   }
 
   String get fullProfilePath => profilePath != null
-      ? 'https://inosdb.worker-inosuke.workers.dev/w500$profilePath'
+      ? 'https://db.inosuke.sbs/t/p/w500$profilePath'
       : '';
 
   String get genderText {
@@ -435,7 +435,7 @@ class Network {
   }
 
   String get fullLogoPath => logoPath != null
-      ? 'https://inosdb.worker-inosuke.workers.dev/w500$logoPath'
+      ? 'https://db.inosuke.sbs/t/p/w500$logoPath'
       : '';
 }
 
@@ -479,7 +479,7 @@ class ProductionCompany {
   }
 
   String get fullLogoPath => logoPath != null
-      ? 'https://inosdb.worker-inosuke.workers.dev/w500$logoPath'
+      ? 'https://db.inosuke.sbs/t/p/w500$logoPath'
       : '';
 }
 
@@ -958,7 +958,7 @@ class TVCast {
 
   String get profileImageUrl {
     return
-         'https://inosdb.worker-inosuke.workers.dev/w500$profilePath';  }
+         'https://db.inosuke.sbs/t/p/w500$profilePath';  }
 
   String get genderString {
     switch (gender) {
@@ -1014,7 +1014,7 @@ class TVCrew {
 
   String get profileImageUrl {
     return 
-         'https://inosdb.worker-inosuke.workers.dev/w500$profilePath';
+         'https://db.inosuke.sbs/t/p/w500$profilePath';
   }
 }
 
@@ -1091,8 +1091,8 @@ class Person {
   }
 
   String get fullProfilePath => profilePath != null
-      ? 'https://inosdb.worker-inosuke.workers.dev/w500$profilePath'
-      : 'https://inosdb.worker-inosuke.workers.dev/w500$profilePath';
+      ? 'https://db.inosuke.sbs/t/p/w500$profilePath'
+      : 'https://db.inosuke.sbs/t/p/w500$profilePath';
 
   String get genderText {
     switch (gender) {
@@ -1210,8 +1210,8 @@ class Cast {
   }
 
   String get fullProfilePath => profilePath != null
-      ? 'https://inosdb.worker-inosuke.workers.dev/w500$profilePath'
-      : 'https://inosdb.worker-inosuke.workers.dev/w500$profilePath';
+      ? 'https://db.inosuke.sbs/t/p/w500$profilePath'
+      : 'https://db.inosuke.sbs/t/p/w500$profilePath';
 
   String get genderText {
     switch (gender) {
@@ -1269,8 +1269,8 @@ class Crew {
   }
 
   String get fullProfilePath => profilePath != null
-      ? 'https://inosdb.worker-inosuke.workers.dev/w500$profilePath'
-      : 'https://inosdb.worker-inosuke.workers.dev/w500$profilePath';
+      ? 'https://db.inosuke.sbs/t/p/w500$profilePath'
+      : 'https://db.inosuke.sbs/t/p/w500$profilePath';
 }
 
 class MovieCredits {
@@ -1348,8 +1348,8 @@ class MovieCredits {
 //   }
 
 //   String get fullLogoPath => logoPath != null
-//       ? 'https://inosdb.worker-inosuke.workers.dev/w500$logoPath'
-//       : 'https://inosdb.worker-inosuke.workers.dev/w500$logoPath';
+//       ? 'https://db.inosuke.sbs/t/p/w500$logoPath'
+//       : 'https://db.inosuke.sbs/t/p/w500$logoPath';
 // }
 
 // class ProductionCountry {
@@ -1532,12 +1532,12 @@ class Movie {
   }
 
   String get fullPosterPath => posterPath != null
-      ? 'https://inosdb.worker-inosuke.workers.dev/w500$posterPath'
-      : 'https://inosdb.worker-inosuke.workers.dev/w500$posterPath';
+      ? 'https://db.inosuke.sbs/t/p/w500$posterPath'
+      : 'https://db.inosuke.sbs/t/p/w500$posterPath';
 
   String get fullBackdropPath => backdropPath != null
-      ? 'https://inosdb.worker-inosuke.workers.dev/w780$backdropPath'
-      : 'https://inosdb.worker-inosuke.workers.dev/w780$backdropPath';
+      ? 'https://db.inosuke.sbs/t/p/w780$backdropPath'
+      : 'https://db.inosuke.sbs/t/p/w780$backdropPath';
 
   String get formattedRuntime {
     if (runtime == null || runtime == 0) return 'N/A';

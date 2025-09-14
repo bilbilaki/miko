@@ -17,7 +17,6 @@ class TvShowPage1 extends StatefulWidget {
 
 class _TvShowPageState extends State<TvShowPage1> {
   final MovieService _movieService = MovieService();
-  final TmdbApiService _tmdbService = TmdbApiService();
 
   final List<TvShow> _tvShows = [];
   int _currentPage = 1;
@@ -55,7 +54,6 @@ class _TvShowPageState extends State<TvShowPage1> {
   @override
   void dispose() {
     _scrollController.dispose();
-    _movieService.dispose();
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     _debounce?.cancel();
@@ -89,7 +87,7 @@ class _TvShowPageState extends State<TvShowPage1> {
     });
 
     try {
-      final response = await _tmdbService.discoverTvShows(page: _currentPage);
+      final response = await _movieService.getPopularTvShows(page: _currentPage);
 
       setState(() {
         _tvShows.addAll(response.results);
@@ -113,7 +111,7 @@ class _TvShowPageState extends State<TvShowPage1> {
     });
 
     try {
-      final response = await _tmdbService.discoverTvShows(page: _currentPage2);
+      final response = await _movieService.getPopularTvShows(page: _currentPage2);
 
       setState(() {
         _tvShows.addAll(response.results);
@@ -349,8 +347,8 @@ class _TvShowPageState extends State<TvShowPage1> {
     }
 
     final String posterUrl = imagePath != null
-        ? 'https://inosdb.worker-inosuke.workers.dev/w500$imagePath'
-        : 'https://inosdb.worker-inosuke.workers.dev/w500$imagePath';
+        ? 'https://db.inosuke.sbs/t/p/w500$imagePath'
+        : 'https://db.inosuke.sbs/t/p/w500$imagePath';
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),

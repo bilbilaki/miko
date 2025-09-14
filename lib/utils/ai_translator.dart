@@ -1,40 +1,40 @@
-import 'package:flutter/material.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:miko/configs/consts2.dart';
 import 'package:miko/services/user_data_service.dart';
-import 'package:provider/provider.dart';
+import 'package:openai_dart/openai_dart.dart' as openai;
 
 class MovieTvTranslator {
-  final String _apiKey = kApiKey;
-  late final GenerativeModel _model;
+
 
   MovieTvTranslator() {
-    _model = GenerativeModel(model: 'gemini-2.5-flash-lite', apiKey: _apiKey);
   }
 
   /// Translates the given [text] optimizing for movie and TV show contexts.
   /// Returns the translated string or an error message if translation fails.
-  Future<String> translateTextForMoviesAndTV( String text) async {
-        final UserDataService userDataService = UserDataService();
-final targetLanguage = userDataService.custoombaseurl;
-    try {
-      final content = [
-        Content.text(
-          "I am a highly skilled movie and TV show translator. I will translate the given text into $targetLanguage, ensuring the translation is natural, idiomatic, and suitable for subtitles or dubbing in a film or series. I will maintain the original tone, character voice, and colloquialisms. Provide only the translated text, nothing else.\n\n"
-          "Translate this: \"$text\"",
-        ),
-      ];
 
-      final response = await _model.generateContent(content);
-
-      if (response.text != null && response.text!.isNotEmpty) {
-        return response.text!.trim();
-      } else {
-        return 'Translation failed: No text returned.';
-      }
-    } catch (e) {
-      return 'Translation error: $e';
-    }
+  final client = openai.OpenAIClient(
+    apiKey: webVieApiKey,
+    baseUrl: webViewBaseUrl,
+  );
+  Future<String> translateTextForMoviesAndTV(String text) async {
+    final UserDataService userDataService = UserDataService();
+    final targetLanguage = userDataService.custoombaseurl;
+    final res = await client.createChatCompletion(
+      request: openai.CreateChatCompletionRequest(
+        model: openai.ChatCompletionModel.modelId("gemini-2.5-flash-lite"),
+        messages: [
+          openai.ChatCompletionMessage.system(
+            content:
+                'just translate and return translated content',
+          ),
+          openai.ChatCompletionMessage.user(
+            content: openai.ChatCompletionUserMessageContent.string('''I am a highly skilled movie and TV show translator. I will translate the given text into $targetLanguage, ensuring the translation is natural, idiomatic, and suitable for subtitles or dubbing in a film or series. I will maintain the original tone, character voice, and colloquialisms. Provide only the translated text, nothing else.\n\n"
+          "Translate this: $text'''),
+          ),
+        ],
+        temperature: 0.9,
+      ),
+    );
+    return (res.choices.first.message.content ?? '').trim();
   }
 }
 // Example Usage (for demonstration purposes, not part of the core library code)

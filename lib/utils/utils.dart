@@ -8,10 +8,7 @@ import '../providers/god_proovider.dart' as CsvModels;
 
 
 import 'package:path_provider/path_provider.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as p;
-import 'dart:convert';
-import 'package:image_picker/image_picker.dart';
 
 class ShareItem {
   final String? name;
@@ -926,53 +923,19 @@ Future<TmdbApiModels.TvShow?> toTmdbTvSeries(CsvModels.TvSeriesAnime? csvTvSerie
 }
 
 
-class FileUtils {
-  static Future<Uint8List?> pickImageAndConvertToBase64() async {
-    final picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      final bytes = await image.readAsBytes();
-      return bytes;
-    }
-    return null;
-  }
+// class FileUtils {
+//   static Future<Uint8List?> pickImageAndConvertToBase64() async {
+//     final picker = ImagePicker();
+//     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+//     if (image != null) {
+//       final bytes = await image.readAsBytes();
+//       return bytes;
+//     }
+//     return null;
+//   }
 
-  static Future<Map<String, String>?> pickAudioAndConvertToBase64() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.audio);
-    if (result != null && result.files.single.path != null) {
-      final file = File(result.files.single.path!);
-      final bytes = await file.readAsBytes();
-      final String format = result.files.single.extension ?? 'wav'; // Default to wav if no extension
-      return {
-        'data': base64Encode(bytes),
-        'format': format,
-      };
-    }
-    return null;
-  }
-}
-class FileService {
-  Future<File?> pickFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: [
-        'txt',
-        'csv',
-        'json',
-        'log',
-        'md',
-        'yaml',
-        'xml',
-        'html'
-      ], // Add more as needed
-    );
-
-    if (result != null && result.files.single.path != null) {
-      return File(result.files.single.path!);
-    }
-    return null;
-  }
-
+  
+ 
   Future<String> readFileContent(File file) async {
     try {
       return await file.readAsString();
@@ -1019,7 +982,7 @@ class FileService {
     }
   }
   */
-}
+
 class FilesService {
 // ···
   Future<String> get localPath async {

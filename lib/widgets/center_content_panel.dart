@@ -1,25 +1,21 @@
 import 'dart:async';
 
-import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:miko/providers/god_proovider.dart';
-import 'package:miko/providers/settings_provider.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/screens/filtrering_screen.dart';
 import 'package:miko/screens/genre_detail_screen.dart';
-import 'package:miko/screens/iptv_screen.dart';
 import 'package:miko/screens/unisearch_screen.dart';
 import 'package:miko/screens/watchlist_screen.dart';
-import 'package:miko/showcases/movie_detail_page_copy.dart';
-import 'package:miko/showcases/movie_service.dart';
-import 'package:miko/showcases/tv_detail_page_anime.dart';
+import 'package:miko/src/ui/dashboard_screen.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:miko/utils/utils.dart';
-import 'package:miko/widgets/ai_chat_dialog.dart';
 import 'package:miko/widgets/alienswapbutton.dart';
+import 'package:miko/widgets/awesome_unified_search_field.dart';
 import 'package:miko/widgets/bottom_nav_bar.dart';
 import 'package:miko/widgets/left_navigation_panel.dart';
+import 'package:miko/widgets/right_navigation_panel.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/provider.dart' as pp;
 
@@ -35,21 +31,22 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
   final PageController _pageController = PageController();
   int _currentIndex = 0;
   StreamSubscription? _sub;
-  late final AppLinks _appLinks;
-  late final Stream<Uri> _uriStream;
+  
+  // late final AppLinks _appLinks;
+  // late final Stream<Uri> _uriStream;
   final List<Widget> _pages = [
-    const AnimeGridScreen(typec: "movie"),
-    const AnimeGridScreen(typec: "tvseries"),
-    const AnimeGridScreen(typec: "anime"),
-    const GenreListScreen(),
-    const FavoritesScreen(),
-    const IptvScreen(),
+        DashboardScreen(),
+
+    AnimeGridScreen(typec: "movie"),
+    AnimeGridScreen(typec: "tvseries"),
+    AnimeGridScreen(typec: "anime"),
+    GenreListScreen(),
+    WatchlistScreen(),
 
     /// const WatchlistScreen(),
   ];
 
   void _onPageChanged(int index) {
-    debugPrint('Navigating to page index: $index');
     tVmedium();
     setState(() {
       _currentIndex = index;
@@ -68,44 +65,7 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
   @override
   void initState() {
     super.initState();
-    _initDeepLinking();
-  }
-
-  // For when app is opened *while already running*
-  void _initDeepLinking() async {
-    _appLinks = AppLinks();
-    _uriStream = _appLinks.uriLinkStream;
-
-    // Listen for incoming links (hot start)
-    _uriStream.listen((Uri uri) {
-      _handleDeepLink(uri);
-    });
-
-    // Check for cold start deep link
-    final initialUri = await _appLinks.getInitialLink();
-    if (initialUri != null) {
-      _handleDeepLink(initialUri);
-    }
-  }
-
-  void _handleDeepLink(Uri uri) async {
-    final path = uri.path;
-    final idStr = uri.queryParameters['id'];
-    final id = int.tryParse(idStr ?? '');
-
-    if (path == 'miko/movie' && id != null) {
-      Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => MovieDetailPage(id: id)));
-    } else if (path == 'miko/series' && id != null) {
-      final MovieService _movieService = MovieService();
-      final tvs = await _movieService.getTvShowDetails(tvShowId: id);
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => TvShowDetailPageAnime(tvShow: tvs, typec: "tvseries"),
-        ),
-      );
-    }
+    // _initDeepLinking();
   }
 
   @override
@@ -124,18 +84,62 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
       theme: AppThemes.netflixDarkTheme,
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        drawer: Drawer(
-
-                  child:           LeftNavigationPanel(
-                              isMobileLayout: true,
-                              isCollapsed: false,
-                            ),
-                        
-                        
-                    
-                  
-                  
+// Inside your Scaffold (like in CenterContentPanel)
+        appBar: AppBar(
+          toolbarHeight: 72,
+          flexibleSpace: SafeArea(
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                child: FractionallySizedBox(
+                  widthFactor: 0.5, // Half width
+                  child: AwesomeUnifiedSearchField(
+                    autofocus: true,
+                    // Map to your first example provider methods:
+                    searchMovies: (q) =>
+                        context.read<MovieProvider>().searchMovies(q),
+                    searchTv: (q) => context
+                        .read<TvSeriesProvider>()
+                        .searchAnime(q), // adjust to your actual method
+                    searchAnime: (q) =>
+                        context.read<AnimeProvider>().searchAnime(q),
+                    onAdvancedTap: () {
+                      showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              builder: (context) {
+                switch (_currentIndex) {
+                  case 1:
+                    return ContentFilterBottomSheet<MovieProvider>(
+                      provider: movieProvider,
+                    );
+                  case 2:
+                    return ContentFilterBottomSheet<TvSeriesProvider>(
+                      provider: tvProvider,
+                    );
+                  case 3:
+                    return ContentFilterBottomSheet<AnimeProvider>(
+                      provider: animeProvider,
+                    );
+                  default:
+                    return ContentFilterBottomSheet<MovieProvider>(
+                      provider: movieProvider,
+                    );
+                }});
+                    },
+                  ),
                 ),
+              ),
+            ),
+          ),
+        ),       drawer: Drawer(
+          child: LeftNavigationPanel(isMobileLayout: true, isCollapsed: false),
+        ),
+        endDrawer: Drawer(child: RightNavigationPanel(isMobileLayout: true, isCollapsed: false)),
+        endDrawerEnableOpenDragGesture: true,
+        drawerEnableOpenDragGesture: true,
+
         body: PageView(
           controller: _pageController,
           onPageChanged: _onPageChanged,
@@ -147,67 +151,57 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
           currentIndex: _currentIndex,
           onTap: _onNavBarTap,
         ),
-        floatingActionButton: pp.Consumer<FloatingButtonVisibilityNotifier>(
-          builder: (context, visibilityNotifier, child) {
-            return visibilityNotifier.isVisible
-                ? AlienFloatSwapMenu(
-                    OnAskAi: () {
-                      showDialog(
-                        context: context,
-                        builder: (ctx) {
-                          return ProviderScope(
-                            parent: ProviderScope.containerOf(context),
-                            child: AiChatDialog(),
-                          );
-                        },
-                      );
-                    },
-                    onFilter: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (context) {
-                          switch (_currentIndex) {
-                            case 0:
-                              return ContentFilterBottomSheet<MovieProvider>(
-                                provider: movieProvider,
-                              );
-                            case 1:
-                              return ContentFilterBottomSheet<TvSeriesProvider>(
-                                provider: tvProvider,
-                              );
-                            case 2:
-                              return ContentFilterBottomSheet<AnimeProvider>(
-                                provider: animeProvider,
-                              );
-                            default:
-                              return ContentFilterBottomSheet<MovieProvider>(
-                                provider: movieProvider,
-                              );
-                          }
-                        },
-                      );
-                    },
-                    search: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(20),
-                          ),
-                        ),
-                        builder: (context) =>
-                            UnifiedSearchBottomSheet(initialQuery: ''),
-                      );
-                    },
-                  )
-                : Container();
-          },
-        ),
-      ),
-    );
-  }
-}
-
-
+  //       floatingActionButton: ExpandableFab(
+  // distance: 112,
+  // children: [
+  //   ActionButton(
+  //     onPressed: () {
+  //           showModalBottomSheet(
+  //             context: context,
+  //             isScrollControlled: true,
+  //             builder: (context) {
+  //               switch (_currentIndex) {
+  //                 case 1:
+  //                   return ContentFilterBottomSheet<MovieProvider>(
+  //                     provider: movieProvider,
+  //                   );
+  //                 case 2:
+  //                   return ContentFilterBottomSheet<TvSeriesProvider>(
+  //                     provider: tvProvider,
+  //                   );
+  //                 case 3:
+  //                   return ContentFilterBottomSheet<AnimeProvider>(
+  //                     provider: animeProvider,
+  //                   );
+  //                 default:
+  //                   return ContentFilterBottomSheet<MovieProvider>(
+  //                     provider: movieProvider,
+  //                   );
+  //               }});},
+  //     icon: const Icon(Icons.search_rounded),
+  //   ),
+  //   ActionButton(
+  //     onPressed: () {
+  //           showModalBottomSheet(
+  //             context: context,
+  //             isScrollControlled: true,
+  //             shape: RoundedRectangleBorder(
+  //               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+  //             ),
+  //             builder: (context) => UnifiedSearchBottomSheet(initialQuery: ''),
+  //           );
+  //         },
+  //     icon: const Icon(Icons.archive_rounded),
+  //   ),
+//  ],//
+//),
+        
+        
+        
+        
+        
+        
+        
+        
+        
+));  }}

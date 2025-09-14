@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:miko/providers/god_proovider.dart' show MovieProvider;
 import 'package:miko/screens/anime_grid_screen.dart';
+import 'package:miko/screens/video_player_wplaylist_screen.dart';
 import 'package:miko/showcases/cast_page.dart';
 import 'package:miko/showcases/recommendations_page.dart';
 import 'package:miko/utils/ai_translator.dart';
@@ -16,16 +17,16 @@ import 'package:miko/showcases/movies_by_keyword_screen.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../screens/video_player_screen.dart';
 import 'model.dart';
 import 'movie_service.dart';
 import 'person_detail_page.dart';
 import 'package:share_plus/share_plus.dart';
 
+// ignore: must_be_immutable
 class FadeIn extends StatefulWidget {
-  final Widget child;
-  final Duration duration;
-  const FadeIn(
+   Widget child;
+   Duration duration;
+   FadeIn(
       {Key? key,
       required this.child,
       this.duration = const Duration(milliseconds: 300)})
@@ -59,17 +60,18 @@ class _FadeInState extends State<FadeIn> with SingleTickerProviderStateMixin {
   }
 }
 
+// ignore: must_be_immutable
 class MovieDetailPage extends StatefulWidget {
-  final int id;
+   int id;
 
-  const MovieDetailPage({super.key, required this.id});
+   MovieDetailPage({super.key, required this.id});
 
   @override
   State<MovieDetailPage> createState() => _MovieDetailPageState();
 }
 
 class _MovieDetailPageState extends State<MovieDetailPage> {
-  final MovieService _movieService = MovieService();
+   MovieService _movieService = MovieService();
   late Future<Map<String, dynamic>> _movieDataFuture;
   MovieResponse? recommendations;
   List<Keyword> _movieKeywords = [];
@@ -92,14 +94,13 @@ String oveview='';
 
   @override
   void dispose() {
-    _movieService.dispose();
     super.dispose();
   }
 
   void _loadMovieData() async {
     _movieDataFuture =
         _movieService.getMovieDetailsWithCredits(movieId: widget.id);
-final _movie = await _movieService.getMovieDetails(movieId: widget.id);
+Movie _movie = await _movieService.getMovieDetails(movieId: widget.id);
     _movieDataFuture.then((_) {
       if (mounted) {
         setState(() async {
@@ -115,7 +116,7 @@ final _movie = await _movieService.getMovieDetails(movieId: widget.id);
 
   @override
   Widget build(BuildContext context) {
-    final userDataService = Provider.of<UserDataService>(context);
+    var userDataService = Provider.of<UserDataService>(context);
     return Scaffold(
       body: FutureBuilder<Map<String, dynamic>>(
         future: _movieDataFuture,
@@ -125,8 +126,8 @@ final _movie = await _movieService.getMovieDetails(movieId: widget.id);
           } else if (snapshot.hasError) {
             return _buildRetryableView(context, userDataService);
           } else if (snapshot.hasData) {
-            final detailedMovie = snapshot.data!['details'] as Movie;
-            final credits = snapshot.data!['credits'] as MovieCredits;
+            Movie detailedMovie = snapshot.data!['details'] as Movie;
+            MovieCredits credits = snapshot.data!['credits'] as MovieCredits;
             recommendations =
                 snapshot.data!['recommendations'] as MovieResponse;
 
@@ -269,7 +270,7 @@ final _movie = await _movieService.getMovieDetails(movieId: widget.id);
     return Column(
       children: [
         Expanded(
-          child: _buildDetailView(context, movie!, null, userDataService,
+          child: _buildDetailView(context, movie, null, userDataService,
               showDetailedInfo: false),
         ),
         Container(
@@ -366,8 +367,8 @@ final _movie = await _movieService.getMovieDetails(movieId: widget.id);
     bool isFavorite = userDataService.isFavoriteMovie(movie.id);
     //final movieM = Provider.of<MovieProvider>(context, listen: false)
     // .getMovieById(movie.id);
-    final backdropUrl = movie.fullBackdropPath;
-    final posterUrl = movie.fullPosterPath;
+    String backdropUrl = movie.fullBackdropPath;
+    String posterUrl = movie.fullPosterPath;
     // if (movieM != null){
     //  movieM!.getDownloadLinksList();}
     bool isInWatchlist = userDataService.isOnWatchlistMovie(movie.id);
@@ -561,7 +562,7 @@ final _movie = await _movieService.getMovieDetails(movieId: widget.id);
                   ),
                   onPressed: () async {
                     _performHapticFeedback();
-                    final myItem = ShareItem(
+                    var myItem = ShareItem(
                       name: movie.title,
                       vote: movie.voteAverage,
                       releaseDate: movie.releaseDate,
@@ -570,7 +571,7 @@ final _movie = await _movieService.getMovieDetails(movieId: widget.id);
                       internalUrl:
                           'https://inosuke.page.link/miko/movie${movie.id}', // Replace with a real URL
                     );
-                    final String shareContent = '''
+                     String shareContent = '''
 Check out this: ${myItem.name}
 Rating: ${myItem.vote}
 Release Date: ${myItem.releaseDate}
@@ -607,7 +608,7 @@ Open in miko by click on ${myItem.internalUrl}
   }
 
   void dllink(BuildContext context) async{
-    final mmovie = Provider.of<MovieProvider>(context, listen: false)
+    var mmovie = Provider.of<MovieProvider>(context, listen: false)
         .getMovieById(widget.id);
     if (mmovie != null) {
       final downloadLink = mmovie.getDownloadLinksList();
@@ -870,7 +871,7 @@ Open in miko by click on ${myItem.internalUrl}
                   scrollDirection: Axis.horizontal,
                   itemCount: credits.cast.length,
                   itemBuilder: (context, index) {
-                    final castMember = credits.cast[index];
+                    Cast castMember = credits.cast[index];
                     return Padding(
                       padding: const EdgeInsets.only(right: 12.0),
                       child: GestureDetector(
@@ -999,7 +1000,7 @@ Open in miko by click on ${myItem.internalUrl}
                     scrollDirection: Axis.horizontal,
                     itemCount: credits.directors.length,
                     itemBuilder: (context, index) {
-                      final director = credits.directors[index];
+                      Crew director = credits.directors[index];
                       return Padding(
                         padding: const EdgeInsets.only(right: 12.0),
                         child: GestureDetector(
@@ -1401,7 +1402,6 @@ Open in miko by click on ${myItem.internalUrl}
                       icon: const Icon(Icons.language),
                       label: const Text('Official Website'),
                       onPressed: () async {
-                        // TODO: Launch URL (would need url_launcher package)
                         // import 'package:url_launcher/url_launcher.dart';
                         if (await canLaunchUrl(Uri.parse(movie.homepage!))) {
                           await launchUrl(Uri.parse(movie.homepage!));
@@ -1413,7 +1413,6 @@ Open in miko by click on ${myItem.internalUrl}
                       icon: const Icon(Icons.movie),
                       label: const Text('IMDb'),
                       onPressed: () async {
-                        // TODO: Launch IMDb URL
                         final imdbUrl =
                             'https://www.imdb.com/title/${movie.imdbId}/';
                         if (await canLaunchUrl(Uri.parse(imdbUrl))) {
@@ -1434,7 +1433,7 @@ Open in miko by click on ${myItem.internalUrl}
 
   void _showDownloadLinkSelection(
       BuildContext context, List<String> links) async {
-    final userDataService =
+    var userDataService =
         Provider.of<UserDataService>(context, listen: false);
 
     showDialog(
@@ -1572,7 +1571,7 @@ Open in miko by click on ${myItem.internalUrl}
                       MaterialPageRoute(
                         builder: (context) => RecommendationsPage(
                           movieId: widget.id,
-                          movieTitle: movie!.title,
+                          movieTitle: movie.title,
                           typec: "movie",
                         ),
                       ),
@@ -1609,7 +1608,7 @@ Open in miko by click on ${myItem.internalUrl}
                   ? 10
                   : recommendations!.results.length,
               itemBuilder: (context, index) {
-                final movie = recommendations!.results[index];
+                Movie movie = recommendations!.results[index];
                 return _buildRecommendationCard(context, movie);
               },
             ),
@@ -1784,9 +1783,9 @@ Open in miko by click on ${myItem.internalUrl}
   }
   
   void gentranslate() async {
-  final translator = MovieTvTranslator();
+  MovieTvTranslator translator = MovieTvTranslator();
   debugPrint(oveview);
-final translatedOverView = await translator.translateTextForMoviesAndTV(oveview);
+String translatedOverView = await translator.translateTextForMoviesAndTV(oveview);
 debugPrint(translatedOverView);
   debugPrint(oveview);
   setState(() {  
@@ -1805,7 +1804,7 @@ Future<String?> showTextInputDialog(
   TextCapitalization textCapitalization = TextCapitalization.sentences,
   TextInputType keyboardType = TextInputType.text,
 }) async {
-  final TextEditingController textEditingController =
+   TextEditingController textEditingController =
       TextEditingController(text: initialText);
 
   return showDialog<String>(

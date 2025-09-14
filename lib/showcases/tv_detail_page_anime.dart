@@ -20,10 +20,11 @@ import 'person_detail_page.dart';
 import 'episodedetailpage.dart';
 import 'package:shimmer/shimmer.dart'; // Import Shimmer
 
+// ignore: must_be_immutable
 class TvShowDetailPageAnime extends StatefulWidget {
-  final tvShow;
-  final typec;
-  const TvShowDetailPageAnime(
+  var tvShow;
+  String typec;
+   TvShowDetailPageAnime(
       {super.key, required this.tvShow, required this.typec});
 
   @override
@@ -32,9 +33,9 @@ class TvShowDetailPageAnime extends StatefulWidget {
 
 class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
     with SingleTickerProviderStateMixin {
-  final MovieService _movieService = MovieService();
+   MovieService _movieService = MovieService();
   late Future<Map<String, dynamic>> _tvShowDataFuture;
-  final ScrollController _seasonsScrollController = ScrollController();
+   ScrollController _seasonsScrollController = ScrollController();
 
   late TabController _tabController;
   TvShowResponse? recommendations;
@@ -45,7 +46,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
   Future<TVCredits>? creditsFuture;
   Future<YoutubeVideoForSeries>? _videosFuture;
 
-  final List<Tab> _tabs = const [
+   List<Tab> _tabs =  [
     Tab(text: 'OVERVIEW'),
     Tab(text: 'List of Episodes'),
     Tab(text: 'SEASONS'),
@@ -63,7 +64,6 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
   @override
   void dispose() {
     _tabController.dispose();
-    _movieService.dispose();
     _seasonsScrollController.dispose();
     super.dispose();
   }
@@ -73,7 +73,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
         tvShowId: widget.tvShow.id);
     _tvShowDataFuture.then((data) {
       if (mounted && data['details'] != null) {
-        final loadedShow = data['details'] as TvShow;
+        TvShow loadedShow = data['details'] as TvShow;
         setState(() {
           _detailedTvShow = loadedShow;
           creditsFuture = _movieService.getTVCredits(tvId: loadedShow.id);
@@ -285,9 +285,9 @@ if (tr== false){
 
   Widget _buildAppBar(BuildContext context, TvShow tvShow) {
     int tvSeriesId = tvShow.id;
-    final userDataService = Provider.of<UserDataService>(context);
-    final backdropUrl = tvShow.fullBackdropPath;
-    final posterUrl = tvShow.fullPosterPath; // Used as fallback image
+    var userDataService = Provider.of<UserDataService>(context);
+    String backdropUrl = tvShow.fullBackdropPath;
+    String posterUrl = tvShow.fullPosterPath; // Used as fallback image
     bool isFavorite = userDataService.isFavoriteAnime(tvSeriesId);
     bool isInWatchlist = userDataService.isOnWatchlistAnime(tvSeriesId);
 
@@ -478,14 +478,14 @@ if (tr== false){
                   ),
                   onPressed: () async {
                     tVheavy();
-final myItem = ShareItem(
+var myItem = ShareItem(
   name: tvShow.name,
   vote: tvShow.voteAverage,
   releaseDate: tvShow.firstAirDate.toString(),
   overview: tvShow.overview,
   posterUrl: tvShow.fullPosterPath, internalUrl: 'https://inosuke.page.link/miko/series${tvShow.id}', // Replace with a real URL
 );
-final String shareContent = '''
+ String shareContent = '''
 Check out this: ${myItem.name}
 Rating: ${myItem.vote}
 Release Date: ${myItem.releaseDate}
@@ -658,7 +658,7 @@ SharePlus.instance.share(
   }
 
   Widget _buildOverviewTab(BuildContext context, TvShow tvShow) {
-        final userDataService = Provider.of<UserDataService>(context);
+        var userDataService = Provider.of<UserDataService>(context);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -792,7 +792,7 @@ SharePlus.instance.share(
                 scrollDirection: Axis.horizontal,
                 itemCount: tvShow.networks!.length,
                 itemBuilder: (context, index) {
-                  final network = tvShow.networks![index];
+                  var network = tvShow.networks![index];
                   return Padding(
                     padding: const EdgeInsets.only(right: 12.0),
                     child: SizedBox(
@@ -870,7 +870,7 @@ SharePlus.instance.share(
       return const Center(child: Text('No seasons information available.'));
     }
 
-    final sortedSeasons = List<Season>.from(tvShow.seasons!)
+    List<Season> sortedSeasons = List<Season>.from(tvShow.seasons!)
       ..sort((a, b) => a.seasonNumber.compareTo(b.seasonNumber));
     return ListView.builder(
       shrinkWrap: false,
@@ -969,7 +969,7 @@ SharePlus.instance.share(
   }
 
   Widget _buildCastTab(BuildContext context, int tvShowId) {
-  final  creditsFuture = _movieService.getTVCredits(tvId: tvShowId);
+  var  creditsFuture = _movieService.getTVCredits(tvId: tvShowId);
     return FutureBuilder<TVCredits>(
       future: creditsFuture,
       builder: (context, snapshot) {
@@ -1011,7 +1011,7 @@ SharePlus.instance.share(
         } else if (snapshot.hasError) {
           return Center(child: Text('Error loading cast: ${snapshot.error}'));
         } else if (snapshot.hasData && snapshot.data!.cast.isNotEmpty) {
-          final cast = snapshot.data!.cast
+          List<TVCast> cast = snapshot.data!.cast
             ..sort((a, b) => a.order.compareTo(b.order));
           return GridView.builder(
             padding: const EdgeInsets.all(16),
@@ -1023,7 +1023,7 @@ SharePlus.instance.share(
             ),
             itemCount: cast.length,
             itemBuilder: (context, index) {
-              final member = cast[index];
+              TVCast member = cast[index];
               return GestureDetector(
                 onTap: () => _navigateToPersonDetail(
                     member.id, member.name, member.profilePath),
@@ -1123,7 +1123,7 @@ SharePlus.instance.share(
         } else if (snapshot.hasError) {
           return Center(child: Text('Error loading videos: ${snapshot.error}'));
         } else if (snapshot.hasData && snapshot.data!.results.isNotEmpty) {
-          final videos = snapshot.data!.results
+          List<VideoForSeries> videos = snapshot.data!.results
               .where((v) => v.site.toLowerCase() == 'youtube')
               .toList();
           if (videos.isEmpty) {
@@ -1134,8 +1134,8 @@ SharePlus.instance.share(
             padding: const EdgeInsets.all(16),
             itemCount: videos.length,
             itemBuilder: (context, index) {
-              final video = videos[index];
-              final thumbnailUrl =
+              VideoForSeries video = videos[index];
+              String thumbnailUrl =
                   'https://linod.worker-inosuke.workers.dev/youtube/${video.key}/hqdefault.jpg';
               return Card(
                 margin: const EdgeInsets.only(bottom: 16),
@@ -1212,7 +1212,7 @@ SharePlus.instance.share(
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: seasons.length,
         itemBuilder: (context, index) {
-          final season = seasons[index];
+          ss.Season season = seasons[index];
 
           // ...existing ExpansionTile code...
           // Use ExpansionTile for collapsable seasons
@@ -1232,14 +1232,14 @@ SharePlus.instance.share(
               title: Text(
                 'Season ${season.seasonNumber}',
                 style: const TextStyle(
-                    color: AppColors.primaryText,
+                    color: Color.fromARGB(255, 255, 228, 108),
                     fontWeight: FontWeight.w600,
                     fontSize: 16),
               ),
               subtitle: Text(
                 '${season.episodes.length} Episode${season.episodes.length == 1 ? '' : 's'}',
                 style: const TextStyle(
-                    color: AppColors.secondaryText, fontSize: 12),
+                    color: Color.fromARGB(255, 157, 241, 59), fontSize: 12),
               ),
               iconColor:
                   AppColors.accentColor, // Use accent color for expand icon
@@ -1482,7 +1482,7 @@ SharePlus.instance.share(
                 ? 10
                 : recommendations!.results.length,
             itemBuilder: (context, index) {
-              final tvShow = recommendations!.results[index];
+              TvShow tvShow = recommendations!.results[index];
               return _buildRecommendationCard(context, tvShow);
             },
           ),
@@ -1491,9 +1491,9 @@ SharePlus.instance.share(
     );
   }
   void gentranslate() async {
-  final translator = MovieTvTranslator();
+  MovieTvTranslator translator = MovieTvTranslator();
   debugPrint(oveview);
-final translatedOverView = await translator.translateTextForMoviesAndTV(oveview);
+String translatedOverView = await translator.translateTextForMoviesAndTV(oveview);
 debugPrint(translatedOverView);
   debugPrint(oveview);
   setState(() {  
@@ -1512,7 +1512,7 @@ Future<String?> showTextInputDialog(
   TextCapitalization textCapitalization = TextCapitalization.sentences,
   TextInputType keyboardType = TextInputType.text,
 }) async {
-  final TextEditingController textEditingController =
+   TextEditingController textEditingController =
       TextEditingController(text: initialText);
 
   return showDialog<String>(
@@ -1658,7 +1658,7 @@ Future<String?> showTextInputDialog(
 }
 
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  final TabBar _tabBar;
+   TabBar _tabBar;
   _SliverAppBarDelegate(this._tabBar);
   @override
   double get minExtent => _tabBar.preferredSize.height;

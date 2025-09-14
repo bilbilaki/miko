@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:miko/screens/grid.dart';
+import 'package:miko/screens/video_player_wplaylist_screen.dart';
 import 'package:miko/utils/utils.dart';
 
-import '../screens/video_player_screen.dart'; // We will create this next
 
 class InteractiveVideoCard extends StatefulWidget {
   final Scene scene;

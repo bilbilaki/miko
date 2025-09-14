@@ -41,8 +41,7 @@ class ProcessingProvider extends ChangeNotifier {
     if (_isProcessing) return;
 
     FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['csv'],
+      type: FileType.any,
     );
 
     if (result != null) {

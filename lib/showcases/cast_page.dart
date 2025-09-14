@@ -35,7 +35,6 @@ class _CastPageState extends State<CastPage> {
 
   @override
   void dispose() {
-    _movieService.dispose();
     super.dispose();
   }
 

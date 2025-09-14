@@ -39,7 +39,6 @@ class _TvSearchPageState extends State<TvSearchPage> {
     _searchController.dispose();
     _debounce?.cancel();
     _scrollController.dispose();
-    _movieService.dispose();
     super.dispose();
   }
 
@@ -192,8 +191,8 @@ class _TvSearchPageState extends State<TvSearchPage> {
 
   Widget _buildTvShowResultCard(BuildContext context, TVSearchResult tvResult) {
     final String posterUrl = tvResult.posterPath != null
-        ? 'https://inosdb.worker-inosuke.workers.dev/w500${tvResult.posterPath}'
-        : 'https://inosdb.worker-inosuke.workers.dev/w500${tvResult.posterPath}';
+        ? 'https://db.inosuke.sbs/t/p/w500${tvResult.posterPath}'
+        : 'https://db.inosuke.sbs/t/p/w500${tvResult.posterPath}';
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),

@@ -29,8 +29,8 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
   late Future<Person> _personDetailsFuture;
   bool _hasError = false;
   String _errorMessage = '';
-  String oveview= '';
-  bool tr=false;
+  String oveview = '';
+  bool tr = false;
   @override
   void initState() {
     super.initState();
@@ -39,7 +39,6 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
 
   @override
   void dispose() {
-    _movieService.dispose();
     super.dispose();
   }
 
@@ -47,22 +46,25 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
     setState(() {
       _hasError = false; // Reset error state on new load attempt
     });
-    _personDetailsFuture =
-        _movieService.getPersonDetails(personId: widget.personId);
-    _personDetailsFuture.then((_) {
-      if (mounted) {
-        setState(() {
-          // FutureBuilder handles success state, no specific action needed here
+    _personDetailsFuture = _movieService.getPersonDetails(
+      personId: widget.personId,
+    );
+    _personDetailsFuture
+        .then((_) {
+          if (mounted) {
+            setState(() {
+              // FutureBuilder handles success state, no specific action needed here
+            });
+          }
+        })
+        .catchError((error) {
+          if (mounted) {
+            setState(() {
+              _hasError = true;
+              _errorMessage = error.toString();
+            });
+          }
         });
-      }
-    }).catchError((error) {
-      if (mounted) {
-        setState(() {
-          _hasError = true;
-          _errorMessage = error.toString();
-        });
-      }
-    });
   }
 
   Future<void> _launchUrl(String uri) async {
@@ -70,9 +72,9 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
     try {
       if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Could not launch $url')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Could not launch $url')));
         }
       }
     } catch (e) {
@@ -96,6 +98,7 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
             return _buildErrorOverlay(context);
           } else if (snapshot.hasData) {
             final person = snapshot.data!;
+            dllink(person);
             return _buildPersonDetailView(context, person);
           } else {
             // Fallback to basic view if no data and not waiting/error (should ideally not happen)
@@ -113,9 +116,7 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
         Positioned.fill(
           child: Container(
             color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.7),
-            child: const Center(
-              child: CircularProgressIndicator(),
-            ),
+            child: const Center(child: CircularProgressIndicator()),
           ),
         ),
       ],
@@ -136,15 +137,16 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
                 fontWeight: FontWeight.bold,
                 shadows: const [
                   Shadow(
-                      blurRadius: 10.0,
-                      color: Colors.black,
-                      offset: Offset(2.0, 2.0)),
+                    blurRadius: 10.0,
+                    color: Colors.black,
+                    offset: Offset(2.0, 2.0),
+                  ),
                 ],
               ),
             ),
             background: _buildProfileImage(
               context,
-              'https://inosdb.worker-inosuke.workers.dev/v500${widget.initialProfilePath}', // Ensure correct base URL
+              'https://db.inosuke.sbsv500${widget.initialProfilePath}', // Ensure correct base URL
               heroTag: 'person-${widget.personId}',
             ),
           ),
@@ -182,14 +184,15 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.sentiment_dissatisfied_outlined,
-                        size: 80, color: Theme.of(context).colorScheme.error),
+                    Icon(
+                      Icons.sentiment_dissatisfied_outlined,
+                      size: 80,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                     const SizedBox(height: 24),
                     Text(
                       'Oops! Something went wrong.',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineSmall
+                      style: Theme.of(context).textTheme.headlineSmall
                           ?.copyWith(fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
@@ -208,9 +211,12 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
                       label: const Text('Try Again'),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 12),
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30)),
+                          borderRadius: BorderRadius.circular(30),
+                        ),
                       ),
                     ),
                   ],
@@ -223,16 +229,14 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
     );
   }
 
-void dllink() async{
- 
-    final ov =      await   _movieService.getPersonDetails(personId: widget.personId);
-if (tr == false){
-  oveview=ov.biography.toString();
-}
-}
+  void dllink(Person person) async {
+    if (tr == false) {
+      oveview = person.biography.toString();
+    }
+  }
 
   Widget _buildPersonDetailView(BuildContext context, Person person) {
-            final userDataService = Provider.of<UserDataService>(context);
+    final userDataService = Provider.of<UserDataService>(context);
 
     return CustomScrollView(
       slivers: [
@@ -242,8 +246,11 @@ if (tr == false){
           stretch: true,
           flexibleSpace: FlexibleSpaceBar(
             centerTitle: false,
-            titlePadding:
-                const EdgeInsets.only(bottom: 16.0, left: 16.0, right: 16.0),
+            titlePadding: const EdgeInsets.only(
+              bottom: 16.0,
+              left: 16.0,
+              right: 16.0,
+            ),
             title: Text(
               person.name,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -251,14 +258,18 @@ if (tr == false){
                 fontWeight: FontWeight.bold,
                 shadows: const [
                   Shadow(
-                      blurRadius: 10.0,
-                      color: Colors.black,
-                      offset: Offset(2.0, 2.0)),
+                    blurRadius: 10.0,
+                    color: Colors.black,
+                    offset: Offset(2.0, 2.0),
+                  ),
                 ],
               ),
             ),
-            background: _buildProfileImage(context, person.fullProfilePath,
-                heroTag: 'person-${person.id}'),
+            background: _buildProfileImage(
+              context,
+              person.fullProfilePath,
+              heroTag: 'person-${person.id}',
+            ),
           ),
           actions: [
             IconButton(
@@ -267,7 +278,8 @@ if (tr == false){
                 // Implement share functionality
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                      content: Text('Share functionality coming soon!')),
+                    content: Text('Share functionality coming soon!'),
+                  ),
                 );
               },
             ),
@@ -286,15 +298,18 @@ if (tr == false){
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 8),
-                 IconButton(
-                iconSize: 20.0,
-                icon: const Icon(Icons.assistant),
-                tooltip: 'translate overview',
-                onPressed: ()async {
-                  tVClick();
-                 gentranslate();},
-                 onLongPress:(){showTextInputDialog(context,userDataService);
-  }),
+                IconButton(
+                  iconSize: 20.0,
+                  icon: const Icon(Icons.assistant),
+                  tooltip: 'translate overview',
+                  onPressed: () async {
+                    tVClick();
+                    gentranslate();
+                  },
+                  onLongPress: () {
+                    showTextInputDialog(context, userDataService);
+                  },
+                ),
                 Text(
                   oveview.isNotEmpty == true
                       ? oveview
@@ -315,17 +330,19 @@ if (tr == false){
                     children: person.alsoKnownAs!.map((name) {
                       return Chip(
                         label: Text(name),
-                        backgroundColor:
-                            Theme.of(context).colorScheme.primaryContainer,
-                        labelStyle:
-                            Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onPrimaryContainer,
-                                ),
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.primaryContainer,
+                        labelStyle: Theme.of(context).textTheme.bodyMedium
+                            ?.copyWith(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onPrimaryContainer,
+                            ),
                         side: BorderSide.none,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       );
                     }).toList(),
                   ),
@@ -347,17 +364,23 @@ if (tr == false){
                           label: const Text('IMDb'),
                           onPressed: () {
                             _launchUrl(
-                                'https://www.imdb.com/name/${person.imdbId}/');
+                              'https://www.imdb.com/name/${person.imdbId}/',
+                            );
                           },
                           style: OutlinedButton.styleFrom(
-                            foregroundColor:
-                                Theme.of(context).colorScheme.onSurface,
+                            foregroundColor: Theme.of(
+                              context,
+                            ).colorScheme.onSurface,
                             side: BorderSide(
-                                color: Theme.of(context).colorScheme.outline),
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 10),
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
                           ),
                         ),
                       if (person.homepage != null &&
@@ -369,14 +392,19 @@ if (tr == false){
                             _launchUrl(person.homepage!);
                           },
                           style: OutlinedButton.styleFrom(
-                            foregroundColor:
-                                Theme.of(context).colorScheme.onSurface,
+                            foregroundColor: Theme.of(
+                              context,
+                            ).colorScheme.onSurface,
                             side: BorderSide(
-                                color: Theme.of(context).colorScheme.outline),
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 10),
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
                           ),
                         ),
                     ],
@@ -390,74 +418,85 @@ if (tr == false){
       ],
     );
   }
-    void gentranslate() async {
-  final translator = MovieTvTranslator();
-  debugPrint(oveview);
-final translatedOverView = await translator.translateTextForMoviesAndTV(oveview);
-debugPrint(translatedOverView);
-  debugPrint(oveview);
-  setState(() {  
-    tr = true;
-        oveview = translatedOverView;
-  
 
-  debugPrint(oveview);
-  });
+  void gentranslate() async {
+    final translator = MovieTvTranslator();
+    debugPrint(oveview);
+    final translatedOverView = await translator.translateTextForMoviesAndTV(
+      oveview,
+    );
+    debugPrint(translatedOverView);
+    debugPrint(oveview);
+    setState(() {
+      tr = true;
+      oveview = translatedOverView;
+
+      debugPrint(oveview);
+    });
   }
-Future<String?> showTextInputDialog(
-  BuildContext context, userDataService,{
-  String title = 'Enter Your Prefred Language',
-  String? initialText,
-  String hintText = 'Like Arabic , Ar ...',
-  TextCapitalization textCapitalization = TextCapitalization.sentences,
-  TextInputType keyboardType = TextInputType.text,
-}) async {
-  final TextEditingController textEditingController =
-      TextEditingController(text: initialText);
 
-  return showDialog<String>(
-    context: context,
-    builder: (BuildContext dialogContext) {
-      return AlertDialog(
-        title: Text(title),
-        content: TextField(
-          controller: textEditingController,
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: hintText,
-            border: const OutlineInputBorder(),
-          ),
-          textCapitalization: textCapitalization,
-          keyboardType: keyboardType,
-          onSubmitted: (value) {
-            // Allow submitting by pressing Enter/Done on keyboard
-            Navigator.of(dialogContext).pop(value);
-          },
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.of(dialogContext).pop(null); // Return null on cancel
+  Future<String?> showTextInputDialog(
+    BuildContext context,
+    userDataService, {
+    String title = 'Enter Your Prefred Language',
+    String? initialText,
+    String hintText = 'Like Arabic , Ar ...',
+    TextCapitalization textCapitalization = TextCapitalization.sentences,
+    TextInputType keyboardType = TextInputType.text,
+  }) async {
+    final TextEditingController textEditingController = TextEditingController(
+      text: initialText,
+    );
+
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text(title),
+          content: TextField(
+            controller: textEditingController,
+            autofocus: true,
+            decoration: InputDecoration(
+              hintText: hintText,
+              border: const OutlineInputBorder(),
+            ),
+            textCapitalization: textCapitalization,
+            keyboardType: keyboardType,
+            onSubmitted: (value) {
+              // Allow submitting by pressing Enter/Done on keyboard
+              Navigator.of(dialogContext).pop(value);
             },
-            child: const Text('Cancel'),
           ),
-          ElevatedButton(
-            onPressed: () async {
-        await  userDataService.setCustoombaseurl(textEditingController.text);
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(null); // Return null on cancel
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await userDataService.setCustoombaseurl(
+                  textEditingController.text,
+                );
 
-              Navigator.of(dialogContext)
-                  .pop(textEditingController.text); // Return entered text
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      );
-    },
-  );
-}
+                Navigator.of(
+                  dialogContext,
+                ).pop(textEditingController.text); // Return entered text
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-  Widget _buildProfileImage(BuildContext context, String? imageUrl,
-      {required String heroTag}) {
+  Widget _buildProfileImage(
+    BuildContext context,
+    String? imageUrl, {
+    required String heroTag,
+  }) {
     // Check for null, empty, or placeholder string values (like "null")
     if (imageUrl == null ||
         imageUrl.isEmpty ||
@@ -466,8 +505,11 @@ Future<String?> showTextInputDialog(
       return Container(
         color: Theme.of(context).colorScheme.surfaceVariant,
         child: Center(
-          child: Icon(Icons.person_outline,
-              size: 80, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          child: Icon(
+            Icons.person_outline,
+            size: 80,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       );
     }
@@ -492,8 +534,11 @@ Future<String?> showTextInputDialog(
         errorWidget: (context, url, error) => Container(
           color: Theme.of(context).colorScheme.surfaceVariant,
           child: Center(
-            child: Icon(Icons.broken_image_outlined,
-                size: 80, color: Theme.of(context).colorScheme.error),
+            child: Icon(
+              Icons.broken_image_outlined,
+              size: 80,
+              color: Theme.of(context).colorScheme.error,
+            ),
           ),
         ),
       ),
@@ -503,24 +548,50 @@ Future<String?> showTextInputDialog(
   Widget _buildPersonalInfoSection(BuildContext context, Person person) {
     final List<Widget> bodyRows = [];
 
-    bodyRows.add(_buildInfoRow(
-        context, 'Known For', person.knownForDepartment, Icons.work_outline));
     bodyRows.add(
-        _buildInfoRow(context, 'Gender', person.genderText, Icons.transgender));
+      _buildInfoRow(
+        context,
+        'Known For',
+        person.knownForDepartment,
+        Icons.work_outline,
+      ),
+    );
+    bodyRows.add(
+      _buildInfoRow(context, 'Gender', person.genderText, Icons.transgender),
+    );
     if (person.birthday != null) {
-      bodyRows.add(_buildInfoRow(context, 'Birthday',
-          '${person.formattedBirthday} (${person.age})', Icons.cake_outlined));
+      bodyRows.add(
+        _buildInfoRow(
+          context,
+          'Birthday',
+          '${person.formattedBirthday} (${person.age})',
+          Icons.cake_outlined,
+        ),
+      );
     }
     if (person.placeOfBirth != null && person.placeOfBirth!.isNotEmpty) {
-      bodyRows.add(_buildInfoRow(context, 'Place of Birth',
-          person.placeOfBirth!, Icons.location_on_outlined));
+      bodyRows.add(
+        _buildInfoRow(
+          context,
+          'Place of Birth',
+          person.placeOfBirth!,
+          Icons.location_on_outlined,
+        ),
+      );
     }
-    bodyRows.add(_buildInfoRow(context, 'Popularity',
-        person.popularity.toStringAsFixed(1), Icons.trending_up));
+    bodyRows.add(
+      _buildInfoRow(
+        context,
+        'Popularity',
+        person.popularity.toStringAsFixed(1),
+        Icons.trending_up,
+      ),
+    );
 
     // Filter out SizedBox.shrink() and interleave with Dividers
-    final List<Widget> visibleInfoRows =
-        bodyRows.where((element) => element is! SizedBox).toList();
+    final List<Widget> visibleInfoRows = bodyRows
+        .where((element) => element is! SizedBox)
+        .toList();
 
     return Card(
       elevation: 4,
@@ -543,7 +614,9 @@ Future<String?> showTextInputDialog(
                   row,
                   if (index < visibleInfoRows.length - 1)
                     const Divider(
-                        height: 32, thickness: 0.5), // Divider between items
+                      height: 32,
+                      thickness: 0.5,
+                    ), // Divider between items
                 ],
               );
             }),
@@ -554,7 +627,11 @@ Future<String?> showTextInputDialog(
   }
 
   Widget _buildInfoRow(
-      BuildContext context, String title, String? value, IconData icon) {
+    BuildContext context,
+    String title,
+    String? value,
+    IconData icon,
+  ) {
     if (value == null || value.isEmpty || value == "null") {
       return const SizedBox.shrink();
     }
@@ -572,16 +649,16 @@ Future<String?> showTextInputDialog(
                 Text(
                   title,
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        letterSpacing: 0.5,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    letterSpacing: 0.5,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
                 ),
               ],
             ),

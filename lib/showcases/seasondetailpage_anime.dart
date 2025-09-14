@@ -42,8 +42,8 @@ class _SeasonDetailPageAnimeState extends State<SeasonDetailPageAnime> {
   @override
   Widget build(BuildContext context) {
     final String fullPosterPath = widget.posterPath != null
-        ? 'https://inosdb.worker-inosuke.workers.dev/w500${widget.posterPath}'
-        : 'https://inosdb.worker-inosuke.workers.dev/w500${widget.posterPath}';
+        ? 'https://db.inosuke.sbs/t/p/w500${widget.posterPath}'
+        : 'https://db.inosuke.sbs/t/p/w500${widget.posterPath}';
 
     return Scaffold(
       body: CustomScrollView(

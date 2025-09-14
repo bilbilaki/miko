@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'package:miko/providers/god_proovider.dart';
-import 'package:miko/screens/video_player_screen.dart';
+import 'package:miko/screens/video_player_wplaylist_screen.dart';
 import 'package:miko/services/user_data_service.dart';
 import 'package:miko/showcases/model.dart';
 import 'package:miko/showcases/model.dart' as mo;
@@ -15,6 +15,7 @@ import 'package:miko/showcases/movie_detail_page_copy.dart';
 import 'package:miko/showcases/movie_service.dart' as mo;
 import 'package:miko/showcases/person_detail_page.dart';
 import 'package:miko/showcases/tv_detail_page_anime.dart';
+import 'package:miko/src/ui/dashboard_screen.dart';
 import 'package:miko/utils/utils.dart';
 //import 'package:miko/showcases/tv_detail_page_anime.dart';
 import 'package:miko/widgets/anime_series_card.dart';
@@ -26,25 +27,28 @@ import 'package:shimmer/shimmer.dart';
 
 import '../providers/god_proovider.dart' as ss; // Added for shimmer effect
 
+// ignore: must_be_immutable
 class AnimeGridScreen extends StatefulWidget {
-  final String typec;
+   String typec;
 
-  const AnimeGridScreen({super.key, required this.typec});
+   AnimeGridScreen({super.key, required this.typec});
 
   @override
   State<AnimeGridScreen> createState() => AnimeGridScreenState();
 }
 
 class AnimeGridScreenState extends State<AnimeGridScreen> {
-  late double? gridCrossAxisCount = 3.0; // Default grid size
-
+   double? gridCrossAxisCount = 3.0; // Default grid size
+ScrollController custroller= ScrollController();
   // Haptic feedback function
 
   @override
   Widget build(BuildContext context) {
     return Material(
       child: Scaffold(
-        body: NotificationListener<ScrollNotification>(
+        body: 
+        
+        NotificationListener<ScrollNotification>(
           // Listen for scroll events for vibration
           onNotification: (ScrollNotification notification) {
             if (Platform.isAndroid) {
@@ -54,32 +58,34 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
             }
             return false; // Continue to bubble up the notification
           },
-          child: GestureDetector(
+        
             // Added GestureDetector for general touch/drag vibration
             //  onTapDown: (_) => triggerVibration(), // Vibrate on touch/tap down
             //        onPanDown: (_) => triggerVibration(), // Vibrate on pan/drag down
-            child: Stack(
+            child: GestureDetector(child: 
+            
+            Stack(
               children: [
                 if (widget.typec == "movie")
                   Consumer<MovieProvider>(
                     builder: (context, movieProvider, child) {
                       return _buildBody0(context, movieProvider, widget.typec,
-                          triggerVibration);
+                          triggerVibration, custroller);
                     },
                   )
-                else if (widget.typec == "anime")
+                  else if (widget.typec == "anime")
                   Consumer<AnimeProvider>(
                       builder: (context, seriesProvider, child) {
                     // Optional: Keep DynamicBackground if desired
                     return _buildBody0(context, seriesProvider, widget.typec,
-                        triggerVibration);
+                        triggerVibration,custroller);
                   })
                 else if (widget.typec == "tvseries")
                   Consumer<TvSeriesProvider>(
                       builder: (context, seriesProvider, child) {
                     // Optional: Keep DynamicBackground if desired
                     return _buildBody0(context, seriesProvider, widget.typec,
-                        triggerVibration);
+                        triggerVibration,custroller);
                   }),
                 Positioned(
                   bottom: 0,
@@ -119,21 +125,21 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
                 ),
               ],
             ),
-          ),
+         ),
         ),
-      ),
-    );
+      
+     ) );
   }
 
-  final mo.MovieService _movieService = mo.MovieService();
+   mo.MovieService _movieService = mo.MovieService();
 
   bool _isLoading2 = false;
-  final ScrollController _scrollController = ScrollController();
+   ScrollController _scrollController = ScrollController();
 
   // Search fields
-  final TextEditingController _searchController2 = TextEditingController();
+   TextEditingController _searchController2 = TextEditingController();
 
-  final ScrollController _searchScrollController2 = ScrollController();
+   ScrollController _searchScrollController2 = ScrollController();
 
   Timer? _debounce;
   MultiSearchResponse? _searchResponse;
@@ -158,7 +164,6 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
     _searchController2.removeListener(onSearchChanged2);
     //  _searchController2.dispose();
     _debounce?.cancel();
-    _movieService.dispose();
 
     _scrollController.dispose();
 
@@ -177,8 +182,8 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
 
   void onSearchChanged2() async {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 100), () {
-      late final query = _searchController2.text.trim();
+    _debounce = Timer( Duration(milliseconds: 100), () async {
+     String query = _searchController2.text.trim();
       if (query != _currentQuery2) {
         _currentQuery2 = query;
         _searchPage2 = 1;
@@ -188,7 +193,7 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
             _isLoading2 = true;
             _error2 = null;
           });
-          fetchMultiSearch();
+         await fetchMultiSearch();
         } else {
           setState(() {
             _isLoading2 = false;
@@ -211,7 +216,7 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
       _error2 = null;
     });
     try {
-      final response = await _movieService.multiSearch(
+    MultiSearchResponse   response = await _movieService.multiSearch(
         query: _currentQuery2,
         page: _searchPage2,
       );
@@ -328,7 +333,7 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
+      shape:  RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
       builder: (context) => StatefulBuilder(
@@ -347,18 +352,18 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
                 borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(25)),
+                     BorderRadius.vertical(top: Radius.circular(25)),
               ),
               child: Column(
                 children: [
                   // Search Header
                   Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding:  EdgeInsets.all(16.0),
                     child: TextField(
                       controller: _searchController2,
                       decoration: InputDecoration(
                         hintText: 'Search TV Shows...',
-                        prefixIcon: const Icon(Icons.search),
+                        prefixIcon:  Icon(Icons.search),
                         suffixIcon: IconButton(
                           icon: const Icon(Icons.clear),
                           onPressed: () async {
@@ -422,7 +427,7 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
                               color: Colors.white),
                           const SizedBox(height: 8),
                           Container(
-                              width: 150, height: 12, color: Colors.white),
+                              width: double.infinity, height: 12, color: Colors.white),
                           const SizedBox(height: 8),
                           Container(
                               width: double.infinity,
@@ -450,7 +455,7 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
     }
 
     if (_searchResponse == null) {
-      return const Center(child: Text('Start typing to search...'));
+      return  Center(child: Text('Start typing to search...'));
     }
 
     if (_searchResponse != null && _searchResponse!.results.isEmpty) {
@@ -462,17 +467,17 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
 
     return ListView.builder(
       controller: _searchScrollController2, // Use the correct controller here
-      padding: const EdgeInsets.all(8.0),
+      padding:  EdgeInsets.all(8.0),
       itemCount: results.length + (_isFetchingMore2 ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == results.length && _isFetchingMore2) {
-          return const Center(
+          return  Center(
               child: Padding(
                   padding: EdgeInsets.all(8.0),
                   child: CircularProgressIndicator()));
         }
 
-        final result = results[index];
+        MultiSearchResult result = results[index];
         return _buildMultiSearchResultCard(context, result, triggerVibration);
       },
     );
@@ -486,28 +491,28 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
 
     switch (result.mediaType) {
       case MediaType.movie:
-        final movie = result as MultiSearchMovie;
+        MultiSearchMovie movie = result as MultiSearchMovie;
         imagePath = movie.posterPath;
         title = movie.title;
         subtitle = 'Movie • ${movie.releaseDate}';
         break;
       case MediaType.tv:
-        final tv = result as MultiSearchTV;
+        MultiSearchTV tv = result as MultiSearchTV;
         imagePath = tv.posterPath;
         title = tv.name;
         subtitle = 'TV Show • ${tv.firstAirDate}';
         break;
       case MediaType.person:
-        final person = result as MultiSearchPerson;
+        MultiSearchPerson person = result as MultiSearchPerson;
         imagePath = person.profilePath;
         title = person.name;
         subtitle = 'Person • ${person.knownForDepartment}';
         break;
     }
 
-    final String posterUrl = imagePath != null
-        ? 'https://inosdb.worker-inosuke.workers.dev/w500$imagePath'
-        : 'https://inosdb.worker-inosuke.workers.dev/w500$imagePath';
+     String posterUrl = imagePath != null
+        ? 'https://db.inosuke.sbs/t/p/w500$imagePath'
+        : 'https://db.inosuke.sbs/t/p/w500$imagePath';
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -536,8 +541,8 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
                       ),
                       errorWidget: (context, url, error) =>
                           _buildErrorWidget(result.mediaType),
-                      fadeInDuration: const Duration(milliseconds: 200),
-                      fadeOutDuration: const Duration(milliseconds: 100),
+                      fadeInDuration:  Duration(milliseconds: 200),
+                      fadeOutDuration:  Duration(milliseconds: 100),
                     )
                   : _buildErrorWidget(
                       result.mediaType), // show error if posterUrl is empty
@@ -603,14 +608,17 @@ class AnimeGridScreenState extends State<AnimeGridScreen> {
 }
 
 Widget _buildBody0(
-    BuildContext context, seriesProvider, typec, VoidCallback vibrateCallback) {
-  final status = seriesProvider.status;
-  final userData = Provider.of<UserDataService>(context);
+    BuildContext context, seriesProvider, typec, VoidCallback vibrateCallback, ScrollController custroller) {
+  var status = seriesProvider.status;
+  var userData = Provider.of<UserDataService>(context);
 
-  final gridSize = userData.gridSize.toInt();
+  int gridSize = userData.gridSize.toInt();
   if (status == LoadingStatus.loading) {
     // Show loading indicator initially or while loading
-    return Center(
+    return 
+
+    
+    Center(
       child: Shimmer.fromColors(
         // Shimmer effect for main grid loading
         baseColor: AppColors.secondaryBackground.withOpacity(0.5),
@@ -631,11 +639,11 @@ Widget _buildBody0(
           },
         ),
       ),
-    );
+     );
   }
 
-  final seriesList = seriesProvider.filteredAndSortedContent;
-  return MasonryGridView.count(
+  var seriesList = seriesProvider.filteredAndSortedContent;
+    return   MasonryGridView.count(
     padding: const EdgeInsets.all(3.0),
     crossAxisCount: 1 * gridSize, // Adjust number of
     mainAxisSpacing: 1.05,
@@ -646,7 +654,7 @@ Widget _buildBody0(
   //  cacheExtent: 100,
     itemCount: seriesList.length,
     itemBuilder: (context, index) {
-      final series = seriesList[index];
+      var series = seriesList[index];
       return GestureDetector(
         // Wrap card for tap vibration if the card itself does not handle
         onTap: () {
@@ -664,13 +672,13 @@ Widget _buildBody0(
     },
   );
 }
-
+// ignore: must_be_immutable
 class AnimeDetailsScreen extends StatelessWidget {
-  final int tvSeriesId; // Use TMDB ID to fetch from map
-  final String typec;
+   int tvSeriesId; // Use TMDB ID to fetch from map
+   String typec;
   AnimeDetailsScreen(
       {required this.tvSeriesId, required this.typec, super.key});
-  final ScrollController _seasonsScrollController = ScrollController();
+   ScrollController _seasonsScrollController = ScrollController();
 
   // Haptic feedback function instance for this class
 
@@ -678,10 +686,10 @@ class AnimeDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Fetch the specific series using the ID directly from the provider's map/list
     // No 'listen: false' needed if the UI should rebuild if the underlying data changes (unlikely here)
-    final series = typec == "anime"
+    var series = typec == "anime"
         ? Provider.of<AnimeProvider>(context).getAnimeByTmdbId(tvSeriesId)
         : Provider.of<TvSeriesProvider>(context).getAnimeByTmdbId(tvSeriesId);
-    final userDataService = Provider.of<UserDataService>(context);
+    var userDataService = Provider.of<UserDataService>(context);
     if (series == null) {
       // Handle case where series with the ID isn't found (shouldn't happen if navigation is correct)
       return Scaffold(
@@ -704,15 +712,15 @@ class AnimeDetailsScreen extends StatelessWidget {
     }
 
     // Use data directly from the `series` object loaded from CSV
-    final backdropUrl = series.fullBackdropUrl;
-    final posterUrl = series.fullPosterUrl;
+    String? backdropUrl = series.fullBackdropUrl;
+    String? posterUrl = series.fullPosterUrl;
     final releaseYear = series.firstAirDate != null
         ? DateFormat('yyyy').format(series.firstAirDate!)
         : 'N/A';
     bool isFavorite = userDataService.isFavoriteAnime(series.tmdbId);
     bool isInWatchlist = userDataService.isOnWatchlistAnime(series.tmdbId);
     // Format runtime if available
-    final runtimeString = series.runtime != null && series.runtime! > 0
+    String? runtimeString = series.runtime != null && series.runtime! > 0
         ? '${series.runtime} min/ep'
         : 'N/A';
 
@@ -1179,7 +1187,7 @@ class AnimeDetailsScreen extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: seasons.length,
         itemBuilder: (context, index) {
-          final season = seasons[index];
+          var season = seasons[index];
 
           // Use ExpansionTile for collapsable seasons
           return Card(
@@ -1249,10 +1257,11 @@ class AnimeDetailsScreen extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
 class MovieDetailsScreen extends StatelessWidget {
-  final int movieId;
-  final String typec;
-  const MovieDetailsScreen(
+   int movieId;
+   String typec;
+   MovieDetailsScreen(
       {required this.typec, required this.movieId, super.key});
 
   // Helper function for haptic feedback
@@ -1262,11 +1271,11 @@ class MovieDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Find the movie using the provider
-    final movie = Provider.of<MovieProvider>(context, listen: false)
+    var movie = Provider.of<MovieProvider>(context, listen: false)
         .getMovieById(movieId);
 
     // Fetch UserDataService
-    final userDataService = Provider.of<UserDataService>(context);
+    var userDataService = Provider.of<UserDataService>(context);
     bool isFavorite = userDataService.isFavoriteMovie(movieId);
 
     if (movie == null) {
@@ -1287,9 +1296,9 @@ class MovieDetailsScreen extends StatelessWidget {
 //           return false;
 //         },
 //         child:
-    final backdropUrl = movie.getBackdropUrl();
-    final posterUrl = movie.getPosterUrl();
-    final downloadLinks = movie.getDownloadLinksList();
+    String? backdropUrl = movie.getBackdropUrl();
+    String? posterUrl = movie.getPosterUrl();
+    List<String>? downloadLinks = movie.getDownloadLinksList();
     bool isInWatchlist = userDataService.isOnWatchlistMovie(movieId);
     bool isWatched = userDataService.isWatchedEpisode(
         movieId, movieId, movieId, downloadLinks.toString());
@@ -1734,7 +1743,7 @@ class MovieDetailsScreen extends StatelessWidget {
   // --- Function to show Download Link Selection Dialog ---
   void _showDownloadLinkSelection(
       BuildContext context, List<String> links) async {
-    final userDataService =
+    var userDataService =
         Provider.of<UserDataService>(context, listen: false);
 
     showDialog(

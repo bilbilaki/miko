@@ -46,7 +46,6 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
 
   @override
   void dispose() {
-    _movieService.dispose();
     super.dispose();
   }
 

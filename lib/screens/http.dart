@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:beautiful_soup_dart/beautiful_soup.dart';
 import 'package:csv/csv.dart';
-import 'package:miko/screens/http_rest.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as p;
 import 'package:cached_network_image/cached_network_image.dart';
@@ -50,10 +49,7 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
   @override
   void initState() {
     super.initState();
-    // if (Platform.isWindows || Platform.isLinux) {
-    //   sqfliteFfiInit();
-    // }
-    // databaseFactory = databaseFactoryFfi;
+
   }
 
   void _log(String message) {
@@ -61,7 +57,6 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
     setState(() {
       _logMessages.insert(0, message);
     });
-    // ignore: avoid_print
     print(message);
   }
 
@@ -151,22 +146,18 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
 
   // --- NEW: Concurrent Crawl Loop ---
   Future<void> _crawlLoop() async {
-    // This loop manages spawning workers until the job is done.
-    // It continues as long as there are items to process or workers still running.
+
     while ((_crawlQueue.isNotEmpty || _activeWorkers > 0) && !_isCancelled) {
-      // If paused, just wait and check again.
       if (_isPaused) {
         await Future.delayed(const Duration(milliseconds: 100));
         continue;
       }
 
-      // If there are items in the queue and we have capacity for more workers...
       if (_crawlQueue.isNotEmpty && _activeWorkers < maxConcurrentRequests) {
         _activeWorkers++;
         final item = _crawlQueue.removeFirst();
 
-        // Launch a worker but DON'T await it.
-        // The 'then' block ensures _activeWorkers is decremented when the future completes.
+
         _crawlStep(item).then((_) {
           if (mounted) {
             setState(() {
@@ -176,14 +167,11 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
         });
       }
 
-      // A short delay to allow the event loop to handle UI updates and other tasks.
       await Future.delayed(const Duration(milliseconds: 30));
     }
   }
 
-  // --- MODIFIED: Crawl Step now processes one item ---
   Future<void> _crawlStep(CrawlItem item) async {
-    // Check for cancellation at the start of the task
     if (_isCancelled) return;
 
     if (item.depth > maxDepth) {
@@ -216,8 +204,7 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
             continue;
           }
 
-          // Because multiple workers can add to _visitedUrls, we must check again
-          // inside this worker's context before adding to the queue.
+
           if (_visitedUrls.contains(fullUrlString)) {
             continue;
           }
@@ -327,55 +314,19 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
       return;
     }
 
-    //   _log("💾 Saving session: $sessionName...");
-    //   final session = CrawlSession(
-    //     sessionName: sessionName,
-    //     savedAt: DateTime.now(),
-    //     rootUrls: _urlController.text,
-    //     baseName: _fileNameController.text,
-    //     selectedExtension: _selectedExtension,
-    //     processAsSeries: _processAsSeries ? 1 : 0,
-    //     crawlQueueJson:
-    //         jsonEncode(_crawlQueue.map((item) => item.toJson()).toList()),
-    //     visitedUrlsJson: jsonEncode(_visitedUrls.toList()),
-    //     foundUrlsJson: jsonEncode(_foundUrls.toList()),
-    //   );
 
-    //   await SessionDatabase.instance.create(session);
-    //   _log("✅ Session '$sessionName' saved successfully.");
-    //   if (mounted) {
-    //     setState(() {});
-    //   }
-    // }
-
-    // Future<void> _loadSession(CrawlSession session) async {
-    //   _log("🔄 Loading session: ${session.sessionName}...");
-    //   _urlController.text = session.rootUrls;
-    //   _fileNameController.text = session.baseName;
-
-    //   final queueList = jsonDecode(session.crawlQueueJson) as List;
-    //   final visitedList = jsonDecode(session.visitedUrlsJson) as List;
-    //   final foundList = jsonDecode(session.foundUrlsJson) as List;
 
     setState(() {
-      // _selectedExtension = session.selectedExtension;
-      // _processAsSeries = session.processAsSeries == 1;
+
 
       _crawlQueue.clear();
-      // _crawlQueue
-      // .addAll(queueList.map((item) => CrawlItem.fromJson(item)).toList());
+
 
       _visitedUrls.clear();
-      // _visitedUrls.addAll(List<String>.from(visitedList));
+ 
 
       _foundUrls.clear();
-      // _foundUrls.addAll(List<String>.from(foundList));
 
-      // _basePaths = session.rootUrls
-      // .split('\n')
-      // .map((s) => s.trim())
-      // .where((s) => s.isNotEmpty)
-      // .toList();
 
       _isProcessing = true;
       _isPaused = true;
@@ -388,14 +339,7 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
     });
   }
 
-  // Future<void> _deleteSession(int id) async {
-  //   _log("Deleting session...");
-  //   // await SessionDatabase.instance.delete(id);
-  //   _log("Session deleted.");
-  //   if (mounted) {
-  //     setState(() {});
-  //   }
-  // }
+
 
   // --- Saving Results ---
   Future<void> _saveMovieResults(String baseName) async {
@@ -433,20 +377,7 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
         .writeAsString(const ListToCsvConverter().convert(rows));
     _log(" - Saved $csvFilePath");
 
-    // final dbFilePath = p.join(dirPath, '$baseName.db');
-    // Database database = await openDatabase(dbFilePath, version: 1,
-    //     onCreate: (Database db, int version) async {
-    //   await db.execute(
-    //       'CREATE TABLE Movies (id INTEGER PRIMARY KEY, name TEXT, urls TEXT)');
-    // });
 
-    // for (final movie in movieMap.values) {
-    //   await database
-    //       .insert('Movies', {'name': movie.name, 'urls': movie.urls.join(',')});
-    // }
-    // await database.close();
-
-    // _log(" - Saved $dbFilePath");
 
     _showSuccessDialog(movieMap.length, "movies", dirPath);
   }
@@ -639,7 +570,7 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Web Crawler & Processor'),
@@ -649,64 +580,20 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
           bottom: const TabBar(tabs: [
             Tab(icon: Icon(Icons.cloud_download), text: 'Crawler'),
             Tab(icon: Icon(Icons.build), text: 'Tools'),
-            Tab(icon: Icon(Icons.api_outlined), text: 'REST Client'),
+         //   Tab(icon: Icon(Icons.api_outlined), text: 'REST Client'),
           ]),
         ),
         body: TabBarView(
           children: [
             _buildCrawlerTab(),
             _buildToolsTab(),
-            _buildRestTab(),
+        //    _buildRestTab(),
           ],
         ),
       ),
     );
   }
 
-  // Widget _buildSessionMenu() {
-  //   return FutureBuilder<List<CrawlSession>>(
-  //     future: SessionDatabase.instance.readAllSessions(),
-  //     builder: (context, snapshot) {
-  //       if (!snapshot.hasData || snapshot.data!.isEmpty) {
-  //         return IconButton(
-  //           icon: const Icon(Icons.history),
-  //           tooltip: "No saved sessions",
-  //           onPressed: () {
-  //             ScaffoldMessenger.of(context).showSnackBar(
-  //               const SnackBar(content: Text("No saved sessions found.")),
-  //             );
-  //           },
-  //         );
-  //       }
-
-  //       final sessions = snapshot.data!;
-  //       return PopupMenuButton<CrawlSession>(
-  //         icon: const Icon(Icons.history),
-  //         tooltip: "Load Session",
-  //         onSelected: (session) => _loadSession(session),
-  //         itemBuilder: (context) => sessions.map((session) {
-  //           return PopupMenuItem<CrawlSession>(
-  //             value: session,
-  //             child: ListTile(
-  //               contentPadding: EdgeInsets.zero,
-  //               title:
-  //                   Text(session.sessionName, overflow: TextOverflow.ellipsis),
-  //               subtitle: Text(
-  //                   session.savedAt.toLocal().toString().substring(0, 16)),
-  //               trailing: IconButton(
-  //                 icon: const Icon(Icons.delete_outline, color: Colors.red),
-  //                 onPressed: () {
-  //                   Navigator.of(context).pop(); // Close the menu
-  //                   _deleteSession(session.id!);
-  //                 },
-  //               ),
-  //             ),
-  //           );
-  //         }).toList(),
-  //       );
-  //     },
-  //   );
-  // }
 
   Widget _buildCrawlerTab() {
     return SingleChildScrollView(
@@ -877,9 +764,7 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
     Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
   }
 
-  Widget _buildRestTab() {
-    return const SizedBox(child: HttpClientPage());
-  }
+
 
   Future<void> _runFixAndCleanTask() async {
     _log("🔧 Starting 'Fix & Clean' task...");

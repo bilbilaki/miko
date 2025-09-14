@@ -363,8 +363,8 @@ class _KeywordMoviesPageState extends State<KeywordMoviesPage> {
 
   Widget _buildMovieCard(BuildContext context, Movie movie) {
     final String posterUrl = movie.posterPath != null
-        ? 'https://inosdb.worker-inosuke.workers.dev/w500${movie.posterPath}'
-        : 'https://inosdb.worker-inosuke.workers.dev/w500${movie.posterPath}';
+        ? 'https://db.inosuke.sbs/t/p/w500${movie.posterPath}'
+        : 'https://db.inosuke.sbs/t/p/w500${movie.posterPath}';
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
