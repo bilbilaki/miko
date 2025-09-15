@@ -114,11 +114,6 @@ class _AwesomeUnifiedSearchFieldState extends State<AwesomeUnifiedSearchField> {
     }
   }
 
-  void _onClear() {
-    _controller
-        .clear(); // extField clear suffix will call onChanged('') via extField
-    _clearAll();
-  }
 
   @override
   Widget build(BuildContext context) {

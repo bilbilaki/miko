@@ -20,7 +20,7 @@ class UserDataService extends ChangeNotifier {
   static const String _isWatchedMovieKey = 'isWatchedMovie';
   static const String _isWatchedSeriesKey = 'isWatchedSeries';
   static const String myListKey = 'myList';
-
+late SharedPreferences perfs;
   // Add keys for history, downloads if implemented later
   String _custoombaseurl = 'Farsi';
   SharedPreferences? _prefs;
@@ -86,6 +86,8 @@ class UserDataService extends ChangeNotifier {
   }
   Future<void> _init() async {
     _prefs ??= await SharedPreferences.getInstance();
+    perfs=_prefs??await SharedPreferences.getInstance();
+  
     await _loadPreferences();
     await _loadSettings();
   }

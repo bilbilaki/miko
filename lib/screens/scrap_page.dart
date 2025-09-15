@@ -9,6 +9,7 @@ import 'package:file_picker/file_picker.dart';
 
 
 import 'package:miko/functions/data_storage.dart';
+import 'package:miko/services/data_safer_service.dart';
 
 import 'dataset_manager_screen.dart';
 
@@ -300,6 +301,7 @@ class _DataExplorerScreenState extends State<DataExplorerScreen> {
   }
 
   Future<void> _pickAndParseFile() async {
+
     setState(() {
       error = null;
       isParsing = true;

@@ -9,6 +9,7 @@ import 'package:beautiful_soup_dart/beautiful_soup.dart';
 import 'package:csv/csv.dart';
 import 'package:miko/screens/dataset_manager_screen.dart';
 import 'package:miko/screens/scrap_page.dart';
+import 'package:miko/screens/super_tool_controller_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as p;
 import 'package:cached_network_image/cached_network_image.dart';
@@ -787,6 +788,17 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
             ),
             trailing: ElevatedButton(
               onPressed: () => _navigateTo(context, ScraperPage(), true),
+              child: const Text("Open page"),
+            ),
+          ),
+           ListTile(
+            leading: const Icon(Icons.perm_contact_calendar_sharp),
+            title: const Text("Super Tool page"),
+            subtitle: const Text(
+              "Super Tool is in testing ...",
+            ),
+            trailing: ElevatedButton(
+              onPressed: () => _navigateTo(context, SuperToolControllerScreen(), true),
               child: const Text("Open page"),
             ),
           ),

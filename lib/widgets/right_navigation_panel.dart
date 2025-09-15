@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
+import 'package:miko/screens/audio_screen.dart';
 import 'package:miko/screens/local_screen.dart';
 import 'package:miko/screens/scrap_page.dart';
 import 'package:miko/utils/colors.dart';
@@ -177,6 +178,18 @@ class RightNavigationPanel extends ConsumerWidget {
                 onTap: () => _navigateTo(
                   context,
                   DataExplorerScreen(),
+                  isMobileLayout,
+                ),
+              ),
+               _buildRightNavigationItem(
+                context,
+                ref,
+                icon: Icons.music_video,
+                title: 'Audio Player',
+                showText: showText,
+                onTap: () => _navigateTo(
+                  context,
+                  AudioPlayer(),
                   isMobileLayout,
                 ),
               ),

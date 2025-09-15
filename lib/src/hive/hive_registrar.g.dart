@@ -3,7 +3,8 @@
 // Check in to version control
 
 import 'package:hive_ce/hive.dart';
-import 'hive_adapters.dart';
+import 'package:miko/src/hive/hive_adapters.dart';
+
 
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
@@ -171,7 +172,6 @@ extension HiveRegistrar on HiveInterface {
     registerAdapter(WatchedTrackerSeriesEpisodeAdapter());
     registerAdapter(WatchedTrackerTypeAdapter());
     registerAdapter(WatchedTrackerTypeAdapter());
-
     registerAdapter(WatchlistItemTypeAdapter());
     registerAdapter(WatchlistItemTypeAdapter());
     registerAdapter(WatchlistMovieItemAdapter());
@@ -347,7 +347,6 @@ extension IsolatedHiveRegistrar on IsolatedHiveInterface {
     registerAdapter(WatchedTrackerSeriesEpisodeAdapter());
     registerAdapter(WatchedTrackerTypeAdapter());
     registerAdapter(WatchedTrackerTypeAdapter());
-
     registerAdapter(WatchlistItemTypeAdapter());
     registerAdapter(WatchlistItemTypeAdapter());
     registerAdapter(WatchlistMovieItemAdapter());

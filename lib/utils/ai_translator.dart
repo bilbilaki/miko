@@ -111,7 +111,7 @@ class Assistant {
     final toolMsgs = <openai.ChatCompletionMessage>[];
 
     for (final c in calls) {
-      final name = c.function!.name!;
+      final name = c.function.name;
       final args = json.decode(c.function.arguments) as Map<String, dynamic>;
       dynamic result;
 

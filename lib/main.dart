@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:miko/app_keeper.dart';
-import 'package:miko/providers/app_data_provider.dart';
 import 'package:miko/providers/csv_detail_process_provider.dart';
 import 'package:miko/providers/god_proovider.dart';
 import 'package:miko/providers/local_provider.dart';
@@ -15,6 +14,7 @@ import 'package:provider/provider.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as pr;
+import 'package:rhttp/rhttp.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +22,7 @@ Future<void> main() async {
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
   final hiveManager = HiveBoxManager();
   await hiveManager.init();
-
+    await Rhttp.init(); // required once per process
   // Initialize a single AppDataManager instance after Hive has been initialized
   
   runApp(

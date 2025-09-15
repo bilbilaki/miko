@@ -2,15 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:path/path.dart' as p;
 
-import 'package:mime/mime.dart';
 import 'package:pool/pool.dart'; // FIX: Import the pool package
-import 'package:thumbnailer/thumbnailer.dart';
 
 /// A provider for managing and interacting with a user-selected external directory.
 /// - Stores path with SharedPreferences
@@ -145,8 +143,8 @@ class LocalProvider extends ChangeNotifier {
             return await VideoThumbnail.thumbnailData(
               video: mediaPath,
               imageFormat: ImageFormat.JPEG,
-              maxWidth: 1500,
-              quality: 98,
+              maxWidth: 500,
+              quality: 95,
             );
           } else if (Platform.isWindows ||
               Platform.isLinux ||
@@ -162,34 +160,8 @@ class LocalProvider extends ChangeNotifier {
         // a package like `image` or `flutter_image_compress`.
       } else if (isAudioFile(File(mediaPath))) {
         // FIX: Correctly generate and use the thumbnail for audio files.
-        final mim = MimeTypeResolver().lookup(mediaPath);
-        if (mim != null) {
-          final thumbnail = Thumbnail(
-            mimeType: mim,
-            onlyIcon: true,
-            decoration: WidgetDecoration(
-              wrapperBgColor: Colors.deepOrange,
-              wrapperSize: 110,
-            ),
-            widgetSize: 100,
-          );
-          thumbnailData = await thumbnail.dataResolver!();
-        }
       } else if (isTextFile(File(mediaPath))) {
         // FIX: Correctly generate and use the thumbnail for document/text files.
-        final mim = MimeTypeResolver().lookup(mediaPath);
-        if (mim != null) {
-          final thumbnail = Thumbnail(
-            mimeType: mim,
-            onlyIcon: true,
-            decoration: WidgetDecoration(
-              wrapperBgColor: Colors.blueGrey,
-              wrapperSize: 110,
-            ),
-            widgetSize: 100,
-          );
-          thumbnailData = await thumbnail.dataResolver!();
-        }
       }
     } catch (e) {
       if (kDebugMode) {
@@ -341,6 +313,50 @@ class LocalProvider extends ChangeNotifier {
     await _prefs.setString(_kExternalPathKey, newPath);
     await _refreshList(newPath);
     notifyListeners();
+  }
+
+  // Add this method to your LocalProvider class
+  Future andprims() async {
+    if (Platform.isAndroid) {
+      var status = await Permission.manageExternalStorage.status;
+      if (!status.isGranted) {
+        // This will open the system settings page for your app.
+        // The user needs to manually grant the permission.
+        await Permission.manageExternalStorage.request();
+      }
+      // After the user returns from settings, check the status again.
+      return await Permission.manageExternalStorage.status.isGranted;
+    }
+    return true;
+  }
+
+  /// Checks if a path is stored; if not, sets a default OS-specific home directory.
+  Future<void> setDefaultPathIfNoneSet() async {
+    // Only run if no path has ever been set by the user
+    if (_basePath == null) {
+      Directory? defaultDir;
+      try {
+        if (Platform.isAndroid) {
+          final what = await andprims();
+          if (what == true) {
+            // On Android, this is /storage/emulated/0
+            defaultDir = Directory("/storage/0/emulated/");
+          }
+        } else if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
+          // On Desktop, this is the user's home folder
+          defaultDir = await getExternalStorageDirectory();
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print("Error getting default directory: $e");
+        }
+      }
+
+      if (defaultDir != null) {
+        // Use your existing setPath method to initialize the app state
+        await setPath(defaultDir.path);
+      }
+    }
   }
 
   /// Remove the saved path.
