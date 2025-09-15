@@ -24,29 +24,29 @@ class BottomNavBar extends StatelessWidget {
       unselectedFontSize: 10.0,
       items:  [
         BottomNavigationBarItem(
-          icon: Icon(Icons.movie_edit),
-          activeIcon: Icon(Icons.camera_roll_sharp),
+          icon: Icon(Icons.home),
+          activeIcon: Icon(Icons.home_filled),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.movie),
+          activeIcon: Icon(Icons.movie_edit),
           label: 'Movies',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.tv),
-          activeIcon: Icon(Icons.live_tv),
-          label: 'TVSeries',
+          activeIcon: Icon(Icons.tv_sharp),
+          label: 'TvSeries',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.movie_outlined),
-          activeIcon: Icon(Icons.movie),
+          icon: Icon(Icons.star_border_outlined),
+          activeIcon: Icon(Icons.star_border_sharp),
           label: 'Anime',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.category_outlined),
-          activeIcon: Icon(Icons.category),
+          icon: Icon(Icons.category),
+          activeIcon: Icon(Icons.category_sharp),
           label: 'Genres',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.download_for_offline_outlined),
-          activeIcon: Icon(Icons.download_done_outlined),
-          label: 'Downloads',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.bookmark_add),

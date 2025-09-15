@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:beautiful_soup_dart/beautiful_soup.dart';
 import 'package:csv/csv.dart';
+import 'package:miko/screens/dataset_manager_screen.dart';
+import 'package:miko/screens/scrap_page.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as p;
 import 'package:cached_network_image/cached_network_image.dart';
@@ -755,6 +757,39 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
             child: const Text("Open page"),
           ),
         ),
+         ListTile(
+            leading: const Icon(Icons.rowing),
+            title: const Text("Database Exploring Page"),
+            subtitle: const Text(
+              "Import and Explore and save Database to app",
+            ),
+            trailing: ElevatedButton(
+              onPressed: () => _navigateTo(context, DataExplorerScreen(), true),
+              child: const Text("Open page"),
+            ),
+          ),
+           ListTile(
+            leading: const Icon(Icons.manage_accounts),
+            title: const Text("Dataset Manager"),
+            subtitle: const Text(
+              "Managing imported Data from Database to App.",
+            ),
+            trailing: ElevatedButton(
+              onPressed: () => _navigateTo(context, DatasetManagerScreen(), true),
+              child: const Text("Open page"),
+            ),
+          ),
+           ListTile(
+            leading: const Icon(Icons.perm_contact_calendar_sharp),
+            title: const Text("Un Finished Scraping page"),
+            subtitle: const Text(
+              "Is under baking ...",
+            ),
+            trailing: ElevatedButton(
+              onPressed: () => _navigateTo(context, ScraperPage(), true),
+              child: const Text("Open page"),
+            ),
+          ),
       ]),
     );
   }
@@ -986,7 +1021,7 @@ class TmdbDatailsProcess extends StatelessWidget {
                     ? CachedNetworkImage(
                         filterQuality: FilterQuality.high,
                         imageUrl:
-                            'https://image.tmdb.org/t/p/w200${item.posterPath}',
+                            'https://db.inosuke.sbs/t/p/w200${item.posterPath}',
                         placeholder: (context, url) => const SizedBox(
                             width: 50,
                             height: 75,

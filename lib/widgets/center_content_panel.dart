@@ -93,7 +93,7 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
                 child: FractionallySizedBox(
-                  widthFactor: 0.5, // Half width
+                  widthFactor: 0.3, // Half width
                   child: AwesomeUnifiedSearchField(
                     autofocus: true,
                     // Map to your first example provider methods:

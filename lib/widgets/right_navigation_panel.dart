@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
+import 'package:miko/screens/local_screen.dart';
+import 'package:miko/screens/scrap_page.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:miko/utils/utils.dart';
 import '../providers/settings_provider.dart';
@@ -155,6 +157,30 @@ class RightNavigationPanel extends ConsumerWidget {
                   isMobileLayout,
                 ),
               ),
+                _buildRightNavigationItem(
+                context,
+                ref,
+                icon: Icons.library_add_check,
+                title: 'Local Files',
+                showText: showText,
+                onTap: () => _navigateTo(
+                  context,
+                  LocalScreen(),
+                  isMobileLayout,
+                ),
+              ),  _buildRightNavigationItem(
+                context,
+                ref,
+                icon: Icons.network_wifi_sharp,
+                title: 'Scrap Page',
+                showText: showText,
+                onTap: () => _navigateTo(
+                  context,
+                  DataExplorerScreen(),
+                  isMobileLayout,
+                ),
+              ),
+      
 
               const Divider(color: AppColors.dividerColor, height: 1),
 

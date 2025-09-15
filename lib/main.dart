@@ -6,6 +6,7 @@ import 'package:miko/app_keeper.dart';
 import 'package:miko/providers/app_data_provider.dart';
 import 'package:miko/providers/csv_detail_process_provider.dart';
 import 'package:miko/providers/god_proovider.dart';
+import 'package:miko/providers/local_provider.dart';
 import 'package:miko/providers/settings_provider.dart';
 import 'package:miko/services/user_data_service.dart'; // Import UserDataService
 import 'package:miko/src/core/hive_manager.dart';
@@ -34,6 +35,7 @@ Future<void> main() async {
           create: (context) => MovieProvider(),
         ), // Initialize MovieProvider directly
         ChangeNotifierProvider(create: (context) => TvSeriesProvider()),
+        ChangeNotifierProvider(create: (context) => LocalProvider()),
 
         ChangeNotifierProvider(
           create: (context) => UserDataService(),
