@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:miko/functions/data_storage.dart';
+import 'package:miko/services/data_storage.dart';
 import 'package:miko/screens/scrap_page.dart';
 
 class DatasetManagerScreen extends StatefulWidget {

@@ -24,6 +24,9 @@ late SharedPreferences perfs;
   // Add keys for history, downloads if implemented later
   String _custoombaseurl = 'Farsi';
   SharedPreferences? _prefs;
+    String _tmdbBaseUrl = "https://db.inosuke.sbs";
+
+  
   bool _historyformodelsenabled = false;
   bool _historychatenabled = true;
   List<int> _favoriteMovieIds = [];
@@ -80,6 +83,10 @@ late SharedPreferences perfs;
   String get downloadManager => _downloadManager;
   double get gridSize => _gridSize;
   String get decoderPreference => _decoderPreference;
+String get tmdbBaseUrl => _tmdbBaseUrl;
+
+
+  
 
   UserDataService() {
     _init();
@@ -91,7 +98,6 @@ late SharedPreferences perfs;
     await _loadPreferences();
     await _loadSettings();
   }
-
   Future<void> _loadPreferences() async {
     _prefs = await SharedPreferences.getInstance();
     _favoriteMovieIds = _getIntList(_favoriteMoviesKey);
@@ -105,11 +111,13 @@ late SharedPreferences perfs;
     _watchlistMovieIds = _getIntList(_watchlistMoviesKey);
     _watchlistAnimeIds = _getIntList(_watchlistAnimeKey);
     _watchlistTvSeriesIds = _getIntList(_watchlistTvSeriesKey);
-    _custoombaseurl = _prefs!.getString('custoombaseurl') ?? '';
+    _custoombaseurl = _prefs?.getString('custoombaseurl') ?? '';
     _historyformodelsenabled =
-        _prefs!.getBool('historyformodelsenabled') ?? false;
-    _historychatenabled = _prefs!.getBool('historychatenabled') ??
+        _prefs?.getBool('historyformodelsenabled') ?? false;
+    _historychatenabled = _prefs?.getBool('historychatenabled') ??
         false; // Use string key for bool
+            _tmdbBaseUrl = _prefs?.getString('tmdbBaseUrl') ?? "https://db.inosuke.sbs";
+
 
     notifyListeners(); // Notify listeners once prefs are loaded
   }
@@ -134,6 +142,12 @@ late SharedPreferences perfs;
     }
     return null; // Return zero duration if no progress is saved
   }
+Future<void> setTmdbBaseUrl(String value) async {
+    _tmdbBaseUrl = value;
+    await _prefs?.setString('tmdbBaseUrl', value.toString());
+    notifyListeners();
+  }
+
 
   /// Clears the saved progress for an episode (e.g., after it's fully watched).
   Future<void> clearEpisodeProgress(int seriesId, int seasonNumber, int episodeNumber) async {
@@ -379,6 +393,8 @@ late SharedPreferences perfs;
     _favoriteTvSeriesIds.clear();
     _watchlistMovieIds.clear();
     _watchlistAnimeIds.clear();
+
+    await _prefs?.remove('tmdbBaseUrl');
 
     _watchlistTvSeriesIds.clear();
     _custoombaseurl = '';

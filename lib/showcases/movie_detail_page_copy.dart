@@ -1,9 +1,12 @@
 import 'dart:io' show Platform;
+import 'package:background_downloader/background_downloader.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:miko/main.dart';
 
 import 'package:miko/providers/god_proovider.dart' show MovieProvider;
 import 'package:miko/screens/anime_grid_screen.dart';
+import 'package:miko/screens/dl.dart';
 import 'package:miko/screens/video_player_wplaylist_screen.dart';
 import 'package:miko/showcases/cast_page.dart';
 import 'package:miko/showcases/recommendations_page.dart';
@@ -77,6 +80,24 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   List<Keyword> _movieKeywords = [];
   late Movie movie;
   List<String> downloadLinks = [''];
+    String? _translatedTitle;
+  bool _isTranslating = false;
+  final _translator = MovieTvTranslator();
+
+  Future<void> _translateTitle(String original) async {
+    setState(() => _isTranslating = true);
+    try {
+      final translated = await _translator.translateTextForMoviesAndTV(
+        original,
+      );
+      setState(() {
+        _translatedTitle = translated;
+      });
+    } finally {
+      setState(() => _isTranslating = false);
+    }
+  }
+
   // Helper for haptic feedback
   bool tr = false;
   void _performHapticFeedback() {
@@ -377,7 +398,7 @@ Movie _movie = await _movieService.getMovieDetails(movieId: widget.id);
       expandedHeight: 600,
       pinned: true,
       flexibleSpace: FlexibleSpaceBar(
-        title: Text(movie.title,
+        title: Text(_translatedTitle ?? movie.title,
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w900,
@@ -479,6 +500,7 @@ Movie _movie = await _movieService.getMovieDetails(movieId: widget.id);
                   ]),
             ),
           ),
+         
           Positioned(
             top: 8.0,
             right: 8.0,
@@ -701,13 +723,13 @@ Open in miko by click on ${myItem.internalUrl}
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+                          const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SelectableText(
-                      movie.title,
+                     _translatedTitle?? movie.title,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 8),
@@ -724,6 +746,44 @@ Open in miko by click on ${myItem.internalUrl}
                           '${movie.voteAverage.toStringAsFixed(1)} (${movie.voteCount} votes)',
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
+                                       IconButton(
+                          icon: _isTranslating
+                              ? SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Icon(
+                                  Icons.auto_awesome,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                          onPressed: () async {
+                            _performHapticFeedback();
+                            // toggle: if already translated, revert to original by clearing translated text
+                            if (_translatedTitle != null) {
+                              setState(() => _translatedTitle = null);
+                              return;
+                            }
+                            await _translateTitle(movie.title);
+                            if (_translatedTitle != null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Title translated'),
+                                  duration: const Duration(seconds: 1),
+                                ),
+                              );
+                            }
+                          },
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.black.withOpacity(0.5),
+                            padding: const EdgeInsets.all(4.0),
+                          ),
+                        ),
+
                       ],
                     ),
                     if (showDetailedInfo && movie.runtime != null)
@@ -785,7 +845,25 @@ Open in miko by click on ${myItem.internalUrl}
                           // downloadLinks.toString());
                         },
                       )
-                    : SizedBox(child: Text("No Playing Link Exist")),
+                    :  Text("No Playing Link Exist"),
+                    SizedBox(width: 10,),
+                     (downloadLinks != [''])?
+                     ElevatedButton.icon(
+                        icon: isWatched? Icon(Icons.done):Icon(Icons.download),
+                        label: Text(
+                          'Download',
+                        ),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(255, 0, 241, 32),
+                            foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 30, vertical: 12)),
+                        onPressed: () {
+                          _performHapticFeedback();
+                          _showDownloadLinkSelection(context, downloadLinks,isForPlay: false);
+                          // downloadLinks.toString());
+                        },
+                      ):SizedBox()
               ],
             ),
             const SizedBox(height: 4),
@@ -1432,7 +1510,7 @@ Open in miko by click on ${myItem.internalUrl}
   }
 
   void _showDownloadLinkSelection(
-      BuildContext context, List<String> links) async {
+      BuildContext context, List<String> links,{bool isForPlay=true}) async {
     var userDataService =
         Provider.of<UserDataService>(context, listen: false);
 
@@ -1466,6 +1544,7 @@ Open in miko by click on ${myItem.internalUrl}
             return SimpleDialogOption(
               onPressed: () async {
                 tVmedium(); // Haptic feedback on dialog option tap
+                if (isForPlay){
                 Navigator.pop(dialogContext); // Close the dialog
                 userDataService.toggleIsWatchedLink(
                     widget.id, widget.id, widget.id, links.toString());
@@ -1474,8 +1553,39 @@ Open in miko by click on ${myItem.internalUrl}
                   MaterialPageRoute(
                     builder: (_) => VideoPlayerScreen(videoUrl: link),
                   ),
-                );
-              },
+                      );
+              }
+              else if (isForPlay==false)
+              {
+                 downloadManager.addDownload(
+                            DownloadItem(
+                              null, // path will be set internally
+                              null, // episodeNumber
+                              null, // sessionNumber
+                              movie.title, // name
+                              isMovie: true,
+                              task: DownloadTask(
+                                url: link,
+                                taskId:
+                                    '${movie.title}.${movie.id}', // Added entry.key for unique task ID per resolution
+                              ),
+                              idC: movie.id, // Dummy ID
+                              movieService: MovieService(),
+                            ),
+                          );
+
+                          tVClick();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DownloadScreen(
+                                downloadManager: downloadManager,
+                              ),
+                            ),
+                          );
+                        
+
+              }},
               padding:
                   const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
               child: Text(
@@ -1484,9 +1594,9 @@ Open in miko by click on ${myItem.internalUrl}
                     const TextStyle(color: AppColors.primaryText, fontSize: 14),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-              ),
-            );
-          }).toList(),
+          ),
+          );
+                          }).toList(),
         );
       },
     );

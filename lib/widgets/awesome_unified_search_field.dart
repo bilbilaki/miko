@@ -11,6 +11,8 @@ class AwesomeUnifiedSearchField extends StatefulWidget {
 
   // Optional advanced button (e.g., open UnifiedSearchBottomSheet)
   final VoidCallback? onAdvancedTap;
+    final VoidCallback? onDownloadsTap;
+
 
   // Text field params
   final TextEditingController? controller;
@@ -32,6 +34,7 @@ class AwesomeUnifiedSearchField extends StatefulWidget {
     this.searchTv,
     this.searchAnime,
     this.onAdvancedTap,
+    this.onDownloadsTap,
     this.controller,
     this.focusNode,
     this.debounce = const Duration(milliseconds: 300),
@@ -121,6 +124,22 @@ class _AwesomeUnifiedSearchFieldState extends State<AwesomeUnifiedSearchField> {
       padding: widget.padding,
       child: Row(
         children: [
+                      Tooltip(
+            message: 'Downloads',
+            child: Ink(
+              decoration: ShapeDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.12),
+                shape: const CircleBorder(),
+              ),
+              child: IconButton(
+                onPressed: widget.onDownloadsTap,
+                icon: const Icon(Icons.download),
+                tooltip: 'Downloads Screen',
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
           Expanded(
             child: extField(
               controller: _controller,

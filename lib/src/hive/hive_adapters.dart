@@ -1,9 +1,5 @@
 import 'package:hive_ce/hive.dart';
-import 'package:miko/models/download_task.dart';
-import 'package:miko/models/favorite_item.dart';
-import 'package:miko/models/watch_progress.dart';
-import 'package:miko/models/watched_tracker.dart';
-import 'package:miko/models/watchlist_item.dart';
+
 import 'package:miko/src/models/auth/account.dart';
 import 'package:miko/src/models/auth/account_states.dart';
 import 'package:miko/src/models/auth/guest_session.dart';
@@ -44,6 +40,7 @@ import 'package:miko/src/models/tv/tv_credits.dart';
 import 'package:miko/src/models/tv/tv_genre.dart';
 import 'package:miko/src/models/tv/tv_lists.dart';
 import 'package:miko/src/models/tv/tv_show_detail.dart';
+
 
 @GenerateAdapters([
   AdapterSpec<AccountStates>(),
@@ -121,23 +118,7 @@ import 'package:miko/src/models/tv/tv_show_detail.dart';
     AdapterSpec<MovieCredits>(),
     AdapterSpec<MovieCastMember>(),
     AdapterSpec<MovieCrewMember>(),
-      AdapterSpec<DownloadTask>(),
-  AdapterSpec<TaskStatus>(),
-  AdapterSpec<FavoriteMovieItem>(),
-AdapterSpec<FavoriteTvSeriesItem>(),
-AdapterSpec<FavoriteAnimeItem>(),
-AdapterSpec<FavoriteSeasonItem>(),
-AdapterSpec<FavoriteEpisodeItem>(),
-AdapterSpec<WatchProgressMovie>(),
-AdapterSpec<WatchProgressEpisode>(),
-AdapterSpec<WatchedTrackerMovie>(),
-AdapterSpec<WatchlistMovieItem>(),
-  AdapterSpec<WatchlistTvSeriesItem>(),
-  AdapterSpec<WatchedTrackerSeriesEpisode>(),
-  AdapterSpec<FavoriteItemType>(),
-  AdapterSpec<WatchProgressType>(),
-  AdapterSpec<WatchedTrackerType>(),
-  AdapterSpec<WatchlistItemType>(),
+
 
 ])
 part 'hive_adapters.g.dart';

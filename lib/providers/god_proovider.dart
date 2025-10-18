@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:csv/csv.dart';
@@ -1024,7 +1026,7 @@ class ContentFilterState {
 abstract class ContentProvider<T> extends ChangeNotifier {
   ContentFilterState _activeFilters = ContentFilterState.initial();
   String _searchQuery = '';
-  List<T> _masterList = []; // This will hold all loaded data
+  List<T> masterList = []; // This will hold all loaded data
 
   ContentFilterState get activeFilters => _activeFilters;
   String get searchQuery => _searchQuery;
@@ -1240,14 +1242,14 @@ int _currentPage = 0;
   int _perPage = 50; // Items per page (adjust for performance, e.g., 20-100)
   bool _isLoadingNextPage = false;
   bool get isLoadingNextPage => _isLoadingNextPage;
-  bool get hasMorePages => (_currentPage + 1) * _perPage < _masterList.length;
+  bool get hasMorePages => (_currentPage + 1) * _perPage < masterList.length;
   List<Movie> _visibleItems = [];
   List<Movie> get visibleItems => _visibleItems;
 
   Future<void> loadInitialPage() async {
-    if (_masterList.isEmpty) await loadMovies(); // Ensure data is loaded
+    if (masterList.isEmpty) await loadMovies(); // Ensure data is loaded
     _currentPage = 0;
-    _visibleItems = _masterList.take(_perPage).toList();
+    _visibleItems = masterList.take(_perPage).toList();
     notifyListeners();
   }
 
@@ -1262,7 +1264,7 @@ int _currentPage = 0;
     final start = _currentPage * _perPage;
     final end = start + _perPage;
     _visibleItems.addAll(
-      _masterList.sublist(start, end.clamp(0, _masterList.length)),
+      masterList.sublist(start, end.clamp(0, masterList.length)),
     );
     _isLoadingNextPage = false;
     notifyListeners();
@@ -1307,20 +1309,20 @@ int _currentPage = 0;
       List<List<dynamic>> csvTable = const CsvToListConverter().convert(rawData);
 
       var dataRows = csvTable.skip(1);
-      _masterList = dataRows.map((row) {
+      masterList = dataRows.map((row) {
         return Movie.fromCsvRow(row);
       }).toList();
 
       // Collect all unique filter options
-      _allAvailableGenres = _masterList.expand((movie) => movie.genres).toSet();
-      _allAvailableLanguages = _masterList.map((movie) => movie.originalLanguage).toSet();
-      _allAvailableCountries = _masterList.expand((movie) => movie.productionCountries).toSet();
+      _allAvailableGenres = masterList.expand((movie) => movie.genres).toSet();
+      _allAvailableLanguages = masterList.map((movie) => movie.originalLanguage).toSet();
+      _allAvailableCountries = masterList.expand((movie) => movie.productionCountries).toSet();
 
-      _masterList.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase())); // Initial sort
+      masterList.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase())); // Initial sort
 
       _status = LoadingStatus.loaded;
       if (kDebugMode) {
-        print("Successfully loaded ${_masterList.length} movies from CSV.");
+        print("Successfully loaded ${masterList.length} movies from CSV.");
       }
     } catch (e) {
       _status = LoadingStatus.error;
@@ -1329,7 +1331,7 @@ int _currentPage = 0;
     //    print("CSV Loading Error (MovieProvider): $e");
     //    print(stacktrace);
       }
-      _masterList = [];
+      masterList = [];
     } finally {
       _updateFilteredAndSortedContent(); // Apply initial sort/filters
       notifyListeners();
@@ -1343,13 +1345,13 @@ int _currentPage = 0;
 
   @override
   void _updateFilteredAndSortedContent() {
-    _searchResults = applyFilteringAndSorting(_masterList, searchQuery, activeFilters);
+    _searchResults = applyFilteringAndSorting(masterList, searchQuery, activeFilters);
     notifyListeners();
   }
 
   Movie? getMovieById(int id) {
     try {
-      return _masterList.firstWhere((movie) => movie.id == id);
+      return masterList.firstWhere((movie) => movie.id == id);
     } catch (e) {
       return null;
     }
@@ -1404,14 +1406,14 @@ int _currentPage = 0;
   int _perPage = 50; // Items per page (adjust for performance, e.g., 20-100)
   bool _isLoadingNextPage = false;
   bool get isLoadingNextPage => _isLoadingNextPage;
-  bool get hasMorePages => (_currentPage + 1) * _perPage < _masterList.length;
+  bool get hasMorePages => (_currentPage + 1) * _perPage < masterList.length;
   List<TvSeriesAnime> _visibleItems = [];
   List<TvSeriesAnime> get visibleItems => _visibleItems;
 
   Future<void> loadInitialPage() async {
-    if (_masterList.isEmpty) await loadAnimeData(); // Ensure data is loaded
+    if (masterList.isEmpty) await loadAnimeData(); // Ensure data is loaded
     _currentPage = 0;
-    _visibleItems = _masterList.take(_perPage).toList();
+    _visibleItems = masterList.take(_perPage).toList();
     notifyListeners();
   }
 
@@ -1426,7 +1428,7 @@ int _currentPage = 0;
     final start = _currentPage * _perPage;
     final end = start + _perPage;
     _visibleItems.addAll(
-      _masterList.sublist(start, end.clamp(0, _masterList.length)),
+      masterList.sublist(start, end.clamp(0, masterList.length)),
     );
     _isLoadingNextPage = false;
     notifyListeners();
@@ -1585,16 +1587,16 @@ int _currentPage = 0;
       }
 
       // Create the sorted list for display
-      _masterList = _animeseriesMap.values.toList()
+      masterList = _animeseriesMap.values.toList()
         ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-      _searchResults = _masterList; // Initialize search results
+      _searchResults = masterList; // Initialize search results
 
       // Collect all unique filter options
-      _allAvailableGenres = _masterList.expand((series) => series.genres).toSet();
-      _allAvailableLanguages = _masterList.map((series) => series.originalLanguage).toSet();
+      _allAvailableGenres = masterList.expand((series) => series.genres).toSet();
+      _allAvailableLanguages = masterList.map((series) => series.originalLanguage).toSet();
 
       if (kDebugMode) {
-     //   print("Successfully loaded and combined data for ${_masterList.length} TV series.");
+     //   print("Successfully loaded and combined data for ${masterList.length} TV series.");
       }
 
       _status = LoadingStatus.loaded;
@@ -1607,7 +1609,7 @@ int _currentPage = 0;
       //  print(stacktrace);
       }
       _animeseriesMap = {};
-      _masterList = [];
+      masterList = [];
       _searchResults = [];
       _isInitialized = false;
     } finally {
@@ -1626,7 +1628,7 @@ int _currentPage = 0;
 
   @override
   void _updateFilteredAndSortedContent() {
-    _searchResults = applyFilteringAndSorting(_masterList, searchQuery, activeFilters);
+    _searchResults = applyFilteringAndSorting(masterList, searchQuery, activeFilters);
     notifyListeners();
   }
 
@@ -1685,14 +1687,14 @@ int _currentPage = 0;
   int _perPage = 50; // Items per page (adjust for performance, e.g., 20-100)
   bool _isLoadingNextPage = false;
   bool get isLoadingNextPage => _isLoadingNextPage;
-  bool get hasMorePages => (_currentPage + 1) * _perPage < _masterList.length;
+  bool get hasMorePages => (_currentPage + 1) * _perPage < masterList.length;
   List<TvSeriesAnime> _visibleItems = [];
   List<TvSeriesAnime> get visibleItems => _visibleItems;
 
   Future<void> loadInitialPage() async {
-    if (_masterList.isEmpty) await loadAnimeData(); // Ensure data is loaded
+    if (masterList.isEmpty) await loadAnimeData(); // Ensure data is loaded
     _currentPage = 0;
-    _visibleItems = _masterList.take(_perPage).toList();
+    _visibleItems = masterList.take(_perPage).toList();
     notifyListeners();
   }
 
@@ -1707,7 +1709,7 @@ int _currentPage = 0;
     final start = _currentPage * _perPage;
     final end = start + _perPage;
     _visibleItems.addAll(
-      _masterList.sublist(start, end.clamp(0, _masterList.length)),
+      masterList.sublist(start, end.clamp(0, masterList.length)),
     );
     _isLoadingNextPage = false;
     notifyListeners();
@@ -1751,13 +1753,13 @@ int _currentPage = 0;
     //       final series = TvSeriesAnime.fromJson(item as Map<String, dynamic>);
     //       _animeseriesMap[series.tmdbId] = series;
     //     }
-    //     _masterList = _animeseriesMap.values.toList()
+    //     masterList = _animeseriesMap.values.toList()
     //       ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-    //     _searchResults = _masterList;
+    //     _searchResults = masterList;
 
     //     // Collect all unique filter options from cache
-    //     _allAvailableGenres = _masterList.expand((series) => series.genres).toSet();
-    //     _allAvailableLanguages = _masterList.map((series) => series.originalLanguage).toSet();
+    //     _allAvailableGenres = masterList.expand((series) => series.genres).toSet();
+    //     _allAvailableLanguages = masterList.map((series) => series.originalLanguage).toSet();
 
     //     _status = LoadingStatus.loaded;
     //     _isInitialized = true;
@@ -1855,18 +1857,18 @@ int _currentPage = 0;
         _animeseriesMap[tmdbId] = finalSeries;
       }
 
-      _masterList = _animeseriesMap.values.toList()
+      masterList = _animeseriesMap.values.toList()
         ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase())); // Initial sort
 
       // Collect all unique filter options
-      _allAvailableGenres = _masterList.expand((series) => series.genres).toSet();
-      _allAvailableLanguages = _masterList.map((series) => series.originalLanguage).toSet();
+      _allAvailableGenres = masterList.expand((series) => series.genres).toSet();
+      _allAvailableLanguages = masterList.map((series) => series.originalLanguage).toSet();
 
       // Cache the combined data to avoid reprocessing CSV on next launch
       // try {
       //   final dir = await getApplicationDocumentsDirectory();
       //   final cacheFile = File('${dir.path}/anime_cache.json');
-      //   final List<Map<String, dynamic>> jsonData = _masterList.map((s) => s.toJson()).toList();
+      //   final List<Map<String, dynamic>> jsonData = masterList.map((s) => s.toJson()).toList();
       //   await cacheFile.writeAsString(jsonEncode(jsonData));
       //   if (kDebugMode){} //print('Cached anime data to ${cacheFile.path}');
       // } catch (e) {
@@ -1876,7 +1878,7 @@ int _currentPage = 0;
       _status = LoadingStatus.loaded;
       _isInitialized = true;
       if (kDebugMode) {
-      //  print("Successfully loaded and combined data for ${_masterList.length} anime series.");
+      //  print("Successfully loaded and combined data for ${masterList.length} anime series.");
       }
     } catch (e) {
       _status = LoadingStatus.error;
@@ -1886,7 +1888,7 @@ int _currentPage = 0;
      //   print(stacktrace);
       }
       _animeseriesMap = {};
-      _masterList = [];
+      masterList = [];
       _searchResults = [];
       _isInitialized = false;
     } finally {
@@ -1901,7 +1903,7 @@ int _currentPage = 0;
 
   @override
   void _updateFilteredAndSortedContent() {
-    _searchResults = applyFilteringAndSorting(_masterList, searchQuery, activeFilters);
+    _searchResults = applyFilteringAndSorting(masterList, searchQuery, activeFilters);
     notifyListeners();
   }
 
@@ -1915,3 +1917,142 @@ int _currentPage = 0;
     notifyListeners();
   }
 }
+
+
+// 1- number of all existant anime
+int getTotalAnimeCount(AnimeProvider animeProvider) {
+  return animeProvider.isInitialized ? animeProvider.masterList.length : 0;
+}
+
+// 2- number of all anime episodes
+int getTotalAnimeEpisodesCount(AnimeProvider animeProvider) {
+  if (!animeProvider.isInitialized) return 0;
+  int totalEpisodes = 0;
+  for (final anime in animeProvider.masterList) {
+    for (final season in anime.seasons) {
+      totalEpisodes += season.episodes.length;
+    }
+  }
+  return totalEpisodes;
+}
+
+// 3- number of all tvseries
+int getTotalTvSeriesCount(TvSeriesProvider tvSeriesProvider) {
+  return tvSeriesProvider.isInitialized ? tvSeriesProvider.masterList.length : 0;
+}
+
+// 4- number of all tvseries episode
+int getTotalTvSeriesEpisodesCount(TvSeriesProvider tvSeriesProvider) {
+  if (!tvSeriesProvider.isInitialized) return 0;
+  int totalEpisodes = 0;
+  for (final series in tvSeriesProvider.masterList) {
+    for (final season in series.seasons) {
+      totalEpisodes += season.episodes.length;
+    }
+  }
+  return totalEpisodes;
+}
+
+// 5- number of all movies
+int getTotalMoviesCount(MovieProvider movieProvider) {
+  return movieProvider.isInitialized ? movieProvider.masterList.length : 0;
+}
+
+// 6- random chooser and return 1 anime series
+TvSeriesAnime? getRandomAnime(AnimeProvider animeProvider) {
+  if (!animeProvider.isInitialized || animeProvider.masterList.isEmpty) return null;
+  final random = Random();
+  return animeProvider.masterList[random.nextInt(animeProvider.masterList.length)];
+}
+
+// 7- random choice and return 1 tvseries
+TvSeriesAnime? getRandomTvSeries(TvSeriesProvider tvSeriesProvider) {
+  if (!tvSeriesProvider.isInitialized || tvSeriesProvider.masterList.isEmpty) return null;
+  final random = Random();
+  return tvSeriesProvider.masterList[random.nextInt(tvSeriesProvider.masterList.length)];
+}
+
+// 8- random choice and return 1 movie
+Movie? getRandomMovie(MovieProvider movieProvider) {
+  if (!movieProvider.isInitialized || movieProvider.masterList.isEmpty) return null;
+  final random = Random();
+  return movieProvider.masterList[random.nextInt(movieProvider.masterList.length)];
+}
+
+// 9- get a series or anime and return random season and episode
+Episode? getRandomEpisodeFromSeries(TvSeriesAnime series) {
+  if (series.seasons.isEmpty) return null;
+  final random = Random();
+  
+  // Pick a random season
+  final randomSeason = series.seasons[random.nextInt(series.seasons.length)];
+  if (randomSeason.episodes.isEmpty) return null;
+  
+  // Pick a random episode from that season
+  return randomSeason.episodes[random.nextInt(randomSeason.episodes.length)];
+}
+
+// 10- get a anime or series with season number and return random episode
+Episode? getRandomEpisodeFromSeason(TvSeriesAnime series, int seasonNumber) {
+  try {
+    final season = series.seasons.firstWhere((s) => s.seasonNumber == seasonNumber);
+    if (season.episodes.isEmpty) return null;
+    final random = Random();
+    return season.episodes[random.nextInt(season.episodes.length)];
+  } catch (e) {
+    return null; // Season not found
+  }
+}
+
+// 11- gets some genres and return random 20 anime
+List<TvSeriesAnime> getRandomAnimeByGenres(AnimeProvider animeProvider, List<String> genres, {int count = 20}) {
+  if (!animeProvider.isInitialized) return [];
+  
+  // Filter anime by genres
+  final filteredAnime = animeProvider.masterList.where((anime) {
+    return genres.any((genre) => anime.genres.contains(genre));
+  }).toList();
+  
+  // Shuffle and take up to count
+  final random = Random();
+  filteredAnime.shuffle(random);
+  
+  return filteredAnime.take(count).toList();
+}
+
+// 12- gets some genres and return 20 random series
+List<TvSeriesAnime> getRandomTvSeriesByGenres(TvSeriesProvider tvSeriesProvider, List<String> genres, {int count = 20}) {
+  if (!tvSeriesProvider.isInitialized) return [];
+  
+  // Filter TV series by genres
+  final filteredSeries = tvSeriesProvider.masterList.where((series) {
+    return genres.any((genre) => series.genres.contains(genre));
+  }).toList();
+  
+  // Shuffle and take up to count
+  final random = Random();
+  filteredSeries.shuffle(random);
+  
+  return filteredSeries.take(count).toList();
+}
+
+// 13- gets some genres and return 20 random movie
+List<Movie> getRandomMoviesByGenres(MovieProvider movieProvider, List<String> genres, {int count = 20}) {
+  if (!movieProvider.isInitialized) return [];
+  
+  // Filter movies by genres
+  final filteredMovies = movieProvider.masterList.where((movie) {
+    return genres.any((genre) => movie.genres.contains(genre));
+  }).toList();
+  
+  // Shuffle and take up to count
+  final random = Random();
+  filteredMovies.shuffle(random);
+  
+  return filteredMovies.take(count).toList();
+}
+
+
+//final animeCount = getTotalAnimeCount(ref.read(animeProvider));
+//final randomAnime = getRandomAnime(ref.read(animeProvider));
+//final actionAnime = getRandomAnimeByGenres(ref.read(animeProvider), ['Action']);

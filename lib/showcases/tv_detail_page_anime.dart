@@ -33,9 +33,9 @@ class TvShowDetailPageAnime extends StatefulWidget {
 
 class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
     with SingleTickerProviderStateMixin {
-   MovieService _movieService = MovieService();
+   final MovieService _movieService = MovieService();
   late Future<Map<String, dynamic>> _tvShowDataFuture;
-   ScrollController _seasonsScrollController = ScrollController();
+   final ScrollController _seasonsScrollController = ScrollController();
 
   late TabController _tabController;
   TvShowResponse? recommendations;
@@ -45,8 +45,24 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
   // Futures for tab-specific data
   Future<TVCredits>? creditsFuture;
   Future<YoutubeVideoForSeries>? _videosFuture;
+String? _translatedTitle;
+  bool _isTranslating = false;
+  final _translator = MovieTvTranslator();
 
-   List<Tab> _tabs =  [
+  Future<void> _translateTitle(String original) async {
+    setState(() => _isTranslating = true);
+    try {
+      final translated = await _translator.translateTextForMoviesAndTV(
+        original,
+      );
+      setState(() {
+        _translatedTitle = translated;
+      });
+    } finally {
+      setState(() => _isTranslating = false);
+    }
+  }
+   final List<Tab> _tabs =  [
     Tab(text: 'OVERVIEW'),
     Tab(text: 'List of Episodes'),
     Tab(text: 'SEASONS'),
@@ -295,7 +311,8 @@ if (tr== false){
         expandedHeight: 600,
         pinned: true,
         flexibleSpace: FlexibleSpaceBar(
-          title: Text(tvShow.name,
+          title: Text(
+          _translatedTitle ?? tvShow.name,
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.w900,
@@ -385,6 +402,7 @@ if (tr== false){
                   fadeOutDuration: const Duration(milliseconds: 100),
                 ),
                 // Gradient overlay for text readability
+             
                 Positioned(
                   top: 8.0,
                   right: 8.0,
@@ -595,7 +613,7 @@ SharePlus.instance.share(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(tvShow.name,
+                Text(_translatedTitle??tvShow.name,
                     style: Theme.of(context).textTheme.titleLarge),
                 if (tvShow.originalName != tvShow.name)
                   Text('(${tvShow.originalName})',
@@ -617,8 +635,7 @@ SharePlus.instance.share(
                           style: Theme.of(context).textTheme.bodyMedium)),
                 ]),
                 const SizedBox(height: 8),
-                if (tvShow.episodeRunTime != null &&
-                    tvShow.episodeRunTime!.isNotEmpty)
+                if (tvShow.episodeRunTime != null)
                   Row(children: [
                     const Icon(Icons.timer, size: 16),
                     const SizedBox(width: 4),
@@ -635,6 +652,40 @@ SharePlus.instance.share(
                             style: Theme.of(context).textTheme.bodyMedium)),
                   ]),
                 const SizedBox(height: 8),
+                   IconButton(
+                  icon: _isTranslating
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+                  onPressed: () async {
+                    tVClick();
+                    // toggle: if already translated, revert to original by clearing translated text
+                    if (_translatedTitle != null) {
+                      setState(() => _translatedTitle = null);
+                      return;
+                    }
+                    await _translateTitle(tvShow.name);
+                    if (_translatedTitle != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Title translated'),
+                          duration: const Duration(seconds: 1),
+                        ),
+                      );
+                    }
+                  },
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.black.withOpacity(0.5),
+                    padding: const EdgeInsets.all(4.0),
+                  ),
+                ),
+
                 if (tvShow.status != null)
                   Container(
                     padding:

@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:miko/main.dart';
 import 'package:miko/providers/god_proovider.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
+import 'package:miko/screens/dl.dart';
 import 'package:miko/screens/filtrering_screen.dart';
 import 'package:miko/screens/genre_detail_screen.dart';
 import 'package:miko/screens/watchlist_screen.dart';
@@ -43,6 +45,17 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
 
     /// const WatchlistScreen(),
   ];
+  void _navigateToDownloadScreen() {
+    tVClick();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DownloadScreen(
+          downloadManager: downloadManager,
+        ),
+      ),
+    );
+  }
 
   void _onPageChanged(int index) {
     tVmedium();
@@ -91,7 +104,7 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
                 child: FractionallySizedBox(
-                  widthFactor: 0.3, // Half width
+                  widthFactor: 0.7, // Half width
                   child: AwesomeUnifiedSearchField(
                     autofocus: true,
                     // Map to your first example provider methods:
@@ -102,6 +115,7 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
                         .searchAnime(q), // adjust to your actual method
                     searchAnime: (q) =>
                         context.read<AnimeProvider>().searchAnime(q),
+                        onDownloadsTap: _navigateToDownloadScreen,
                     onAdvancedTap: () {
                       showModalBottomSheet(
               context: context,
@@ -125,6 +139,7 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
                       provider: movieProvider,
                     );
                 }});
+                
                     },
                   ),
                 ),

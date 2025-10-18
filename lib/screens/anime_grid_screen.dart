@@ -15,7 +15,6 @@ import 'package:miko/showcases/movie_detail_page_copy.dart';
 import 'package:miko/showcases/movie_service.dart' as mo;
 import 'package:miko/showcases/person_detail_page.dart';
 import 'package:miko/showcases/tv_detail_page_anime.dart';
-import 'package:miko/src/ui/dashboard_screen.dart';
 import 'package:miko/utils/utils.dart';
 //import 'package:miko/showcases/tv_detail_page_anime.dart';
 import 'package:miko/widgets/anime_series_card.dart';

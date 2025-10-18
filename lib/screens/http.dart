@@ -9,7 +9,6 @@ import 'package:beautiful_soup_dart/beautiful_soup.dart';
 import 'package:csv/csv.dart';
 import 'package:miko/screens/dataset_manager_screen.dart';
 import 'package:miko/screens/scrap_page.dart';
-import 'package:miko/screens/super_tool_controller_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as p;
 import 'package:cached_network_image/cached_network_image.dart';
@@ -52,7 +51,6 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
   @override
   void initState() {
     super.initState();
-
   }
 
   void _log(String message) {
@@ -73,8 +71,9 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
 
   String _extractFileName(String url) {
     final uri = Uri.parse(url);
-    String lastSegment =
-        uri.pathSegments.isNotEmpty ? uri.pathSegments.last : '';
+    String lastSegment = uri.pathSegments.isNotEmpty
+        ? uri.pathSegments.last
+        : '';
     if (lastSegment.isEmpty) return 'file';
 
     String filenameWithoutExtension = p.basenameWithoutExtension(lastSegment);
@@ -85,7 +84,8 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
     if (_urlController.text.isEmpty || _fileNameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Please fill in both URL(s) and Base Name.')),
+          content: Text('Please fill in both URL(s) and Base Name.'),
+        ),
       );
       return;
     }
@@ -104,7 +104,8 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
     });
 
     _log(
-        "🚀 Starting processing with up to $maxConcurrentRequests concurrent workers.");
+      "🚀 Starting processing with up to $maxConcurrentRequests concurrent workers.",
+    );
 
     final List<String> rootUrls = _urlController.text
         .split('\n')
@@ -119,9 +120,11 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
       _visitedUrls.add(url);
     }
 
-    _log(_processAsSeries
-        ? "🎬 Processing as TV Series."
-        : "🎥 Processing as Movies.");
+    _log(
+      _processAsSeries
+          ? "🎬 Processing as TV Series."
+          : "🎥 Processing as Movies.",
+    );
 
     await _crawlLoop(); // Start the concurrent loop
 
@@ -149,7 +152,6 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
 
   // --- NEW: Concurrent Crawl Loop ---
   Future<void> _crawlLoop() async {
-
     while ((_crawlQueue.isNotEmpty || _activeWorkers > 0) && !_isCancelled) {
       if (_isPaused) {
         await Future.delayed(const Duration(milliseconds: 100));
@@ -159,7 +161,6 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
       if (_crawlQueue.isNotEmpty && _activeWorkers < maxConcurrentRequests) {
         _activeWorkers++;
         final item = _crawlQueue.removeFirst();
-
 
         _crawlStep(item).then((_) {
           if (mounted) {
@@ -207,7 +208,6 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
             continue;
           }
 
-
           if (_visitedUrls.contains(fullUrlString)) {
             continue;
           }
@@ -226,14 +226,16 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
                 _foundUrls.add(fullUrlString);
               } else {
                 _log(
-                    " ${'  ' * (item.depth + 1)}↪️ Ignored invalid filename: $fullUrlString");
+                  " ${'  ' * (item.depth + 1)}↪️ Ignored invalid filename: $fullUrlString",
+                );
               }
             }
           }
         }
       } else {
         _log(
-            " ${'  ' * item.depth}⚠️ Failed to fetch ${item.url} (Status: ${response.statusCode})");
+          " ${'  ' * item.depth}⚠️ Failed to fetch ${item.url} (Status: ${response.statusCode})",
+        );
       }
     } catch (e) {
       _log(" ${'  ' * item.depth}🔥 Error crawling ${item.url}: $e");
@@ -244,8 +246,10 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
     if (!filename.toLowerCase().endsWith(extension.toLowerCase())) {
       return false;
     }
-    final nameWithoutExt =
-        filename.substring(0, filename.length - extension.length);
+    final nameWithoutExt = filename.substring(
+      0,
+      filename.length - extension.length,
+    );
     if (nameWithoutExt.contains('.test') ||
         nameWithoutExt.contains('.temp') ||
         nameWithoutExt.contains('?=') ||
@@ -287,7 +291,8 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
 
     if (!_isCancelled && !_isPaused) {
       _log(
-          "✅ Crawl finished after resume. Found ${_foundUrls.length} total files.");
+        "✅ Crawl finished after resume. Found ${_foundUrls.length} total files.",
+      );
       if (_foundUrls.isNotEmpty) {
         _log("💾 Processing and saving results...");
         if (_processAsSeries) {
@@ -313,23 +318,17 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
     if (sessionName.trim().isEmpty) {
       _log("⚠️ Cannot save session: Base Name is empty.");
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please provide a Base Name to save.")));
+        const SnackBar(content: Text("Please provide a Base Name to save.")),
+      );
       return;
     }
 
-
-
     setState(() {
-
-
       _crawlQueue.clear();
 
-
       _visitedUrls.clear();
- 
 
       _foundUrls.clear();
-
 
       _isProcessing = true;
       _isPaused = true;
@@ -342,8 +341,6 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
     });
   }
 
-
-
   // --- Saving Results ---
   Future<void> _saveMovieResults(String baseName) async {
     _log("... Grouping found URLs by movie name.");
@@ -353,8 +350,9 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
 
     for (final url in _foundUrls) {
       final filenameWithoutExt = _extractFileName(url);
-      String cleanedName =
-          filenameWithoutExt.replaceAll(nameRegex, '').replaceAll('.', ' ');
+      String cleanedName = filenameWithoutExt
+          .replaceAll(nameRegex, '')
+          .replaceAll('.', ' ');
 
       movieMap.putIfAbsent(cleanedName, () => MovieData(cleanedName));
       movieMap[cleanedName]!.urls.add(url);
@@ -371,16 +369,15 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
 
     final csvFilePath = p.join(dirPath, '$baseName.csv');
     List<List<dynamic>> rows = [
-      ['Name', 'URL']
+      ['Name', 'URL'],
     ];
     movieMap.forEach((name, data) {
       rows.add([name, data.urls.join(',')]);
     });
-    await File(csvFilePath)
-        .writeAsString(const ListToCsvConverter().convert(rows));
+    await File(
+      csvFilePath,
+    ).writeAsString(const ListToCsvConverter().convert(rows));
     _log(" - Saved $csvFilePath");
-
-
 
     _showSuccessDialog(movieMap.length, "movies", dirPath);
   }
@@ -402,7 +399,9 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
         final pivotKey = "${seriesName}_$episodeId";
 
         pivotData.putIfAbsent(
-            pivotKey, () => {'Series': seriesName, 'Episode': episodeId});
+          pivotKey,
+          () => {'Series': seriesName, 'Episode': episodeId},
+        );
         pivotData[pivotKey]![quality] = url;
       }
     }
@@ -410,7 +409,8 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
     // --- NEW: Fallback logic ---
     if (pivotData.isEmpty && _foundUrls.isNotEmpty) {
       _log(
-          "⚠️ Could not recognize any episodes. Saving all found URLs as a raw list.");
+        "⚠️ Could not recognize any episodes. Saving all found URLs as a raw list.",
+      );
       await _saveUnrecognizedResults(baseName);
       return; // Stop further processing in this function
     }
@@ -432,7 +432,7 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
       '720p',
       '540p',
       '480p',
-      'Dubbed'
+      'Dubbed',
     ];
     List<List<dynamic>> rows = [headers];
 
@@ -443,8 +443,9 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
     }
 
     final csvFilePath = p.join(dirPath, '$baseName.csv');
-    await File(csvFilePath)
-        .writeAsString(const ListToCsvConverter().convert(rows));
+    await File(
+      csvFilePath,
+    ).writeAsString(const ListToCsvConverter().convert(rows));
     _log(" - Saved $csvFilePath");
 
     _showSuccessDialog(pivotData.length, "episodes", dirPath);
@@ -463,14 +464,15 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
 
     final csvFilePath = p.join(dirPath, '$newBaseName.csv');
     List<List<dynamic>> rows = [
-      ['URL']
+      ['URL'],
     ]; // Header
     for (final url in _foundUrls) {
       rows.add([url]);
     }
 
-    await File(csvFilePath)
-        .writeAsString(const ListToCsvConverter().convert(rows));
+    await File(
+      csvFilePath,
+    ).writeAsString(const ListToCsvConverter().convert(rows));
     _log(" - Saved $csvFilePath");
 
     _showSimpleDialog(
@@ -481,8 +483,10 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
 
   // --- Series Helpers (Unchanged) ---
   String? _extractQuality(String url) {
-    final match = RegExp(r'(1080p|720p|540p|480p|Dubbed)', caseSensitive: false)
-        .firstMatch(url);
+    final match = RegExp(
+      r'(1080p|720p|540p|480p|Dubbed)',
+      caseSensitive: false,
+    ).firstMatch(url);
     return match?.group(1);
   }
 
@@ -503,8 +507,10 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
       return 'E${int.parse(match.group(1)!).toString().padLeft(2, '0')}';
     }
 
-    match = RegExp(r'Ep(?:isode)?\.?(\d+)', caseSensitive: false)
-        .firstMatch(filename);
+    match = RegExp(
+      r'Ep(?:isode)?\.?(\d+)',
+      caseSensitive: false,
+    ).firstMatch(filename);
     if (match != null) {
       return 'E${int.parse(match.group(1)!).toString().padLeft(2, '0')}';
     }
@@ -537,36 +543,41 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
   void _showSuccessDialog(int count, String itemType, String path) {
     if (!mounted) return;
     showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Success'),
-            content: Text(
-                'Successfully processed and saved $count $itemType.\nFiles saved in: $path'),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('OK'))
-            ],
-          );
-        });
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Success'),
+          content: Text(
+            'Successfully processed and saved $count $itemType.\nFiles saved in: $path',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showSimpleDialog(String title, String content) {
     if (!mounted) return;
     showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text(title),
-            content: Text(content),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('OK'))
-            ],
-          );
-        });
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // --- UI Build (Unchanged from previous version) ---
@@ -580,229 +591,252 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
           // actions: [
           //   _buildSessionMenu(),
           // ],
-          bottom: const TabBar(tabs: [
-            Tab(icon: Icon(Icons.cloud_download), text: 'Crawler'),
-            Tab(icon: Icon(Icons.build), text: 'Tools'),
-         //   Tab(icon: Icon(Icons.api_outlined), text: 'REST Client'),
-          ]),
+          bottom: const TabBar(
+            tabs: [
+              Tab(icon: Icon(Icons.cloud_download), text: 'Crawler'),
+              Tab(icon: Icon(Icons.build), text: 'Tools'),
+              //   Tab(icon: Icon(Icons.api_outlined), text: 'REST Client'),
+            ],
+          ),
         ),
         body: TabBarView(
           children: [
             _buildCrawlerTab(),
             _buildToolsTab(),
-        //    _buildRestTab(),
+            //    _buildRestTab(),
           ],
         ),
       ),
     );
   }
 
-
   Widget _buildCrawlerTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        TextField(
-          controller: _fileNameController,
-          decoration: const InputDecoration(labelText: 'Base Name for Saving'),
-          enabled: !_isProcessing,
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: _urlController,
-          decoration: const InputDecoration(
-              labelText: 'Starting URL(s) - One per line',
-              alignLabelWithHint: true),
-          keyboardType: TextInputType.multiline,
-          maxLines: 5,
-          minLines: 1,
-          enabled: !_isProcessing,
-        ),
-        const SizedBox(height: 16),
-        DropdownButtonFormField<String>(
-          value: _selectedExtension,
-          decoration: const InputDecoration(labelText: 'File Extension'),
-          items: [
-            ".mp4",
-            ".mkv",
-            ".mp3",
-            ".srt",
-            ".avi",
-            ".mov",
-            ".ass",
-            ".vtt",
-            ".webm",
-            ".pdf",
-            ".doc",
-            ".docx",
-            ".flac",
-            ".exe",
-            ".txt"
-          ].map((String value) {
-            return DropdownMenuItem<String>(value: value, child: Text(value));
-          }).toList(),
-          onChanged: _isProcessing
-              ? null
-              : (v) => setState(() => _selectedExtension = v!),
-        ),
-        const SizedBox(height: 16),
-        CheckboxListTile(
-          title: const Text('Process as TV Series (Pivot Data)'),
-          value: _processAsSeries,
-          onChanged: _isProcessing
-              ? null
-              : (v) => setState(() => _processAsSeries = v!),
-          controlAffinity: ListTileControlAffinity.leading,
-          contentPadding: EdgeInsets.zero,
-        ),
-        CheckboxListTile(
-          title: const Text('Create a Zip file'),
-          value: _createZip,
-          onChanged:
-              _isProcessing ? null : (v) => setState(() => _createZip = v!),
-          controlAffinity: ListTileControlAffinity.leading,
-          contentPadding: EdgeInsets.zero,
-        ),
-        const SizedBox(height: 24),
-        if (_isProcessing) ...[
-          LinearProgressIndicator(
-            // Show determinate progress for workers if possible
-            value: (_crawlQueue.isNotEmpty || _activeWorkers > 0) ? null : 1.0,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            controller: _fileNameController,
+            decoration: const InputDecoration(
+              labelText: 'Base Name for Saving',
+            ),
+            enabled: !_isProcessing,
           ),
-          const SizedBox(height: 8),
-          Text(
+          const SizedBox(height: 16),
+          TextField(
+            controller: _urlController,
+            decoration: const InputDecoration(
+              labelText: 'Starting URL(s) - One per line',
+              alignLabelWithHint: true,
+            ),
+            keyboardType: TextInputType.multiline,
+            maxLines: 5,
+            minLines: 1,
+            enabled: !_isProcessing,
+          ),
+          const SizedBox(height: 16),
+          DropdownButtonFormField<String>(
+            value: _selectedExtension,
+            decoration: const InputDecoration(labelText: 'File Extension'),
+            items:
+                [
+                  ".mp4",
+                  ".mkv",
+                  ".mp3",
+                  ".srt",
+                  ".avi",
+                  ".mov",
+                  ".ass",
+                  ".vtt",
+                  ".webm",
+                  ".pdf",
+                  ".doc",
+                  ".docx",
+                  ".flac",
+                  ".exe",
+                  ".txt",
+                ].map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+            onChanged: _isProcessing
+                ? null
+                : (v) => setState(() => _selectedExtension = v!),
+          ),
+          const SizedBox(height: 16),
+          CheckboxListTile(
+            title: const Text('Process as TV Series (Pivot Data)'),
+            value: _processAsSeries,
+            onChanged: _isProcessing
+                ? null
+                : (v) => setState(() => _processAsSeries = v!),
+            controlAffinity: ListTileControlAffinity.leading,
+            contentPadding: EdgeInsets.zero,
+          ),
+          CheckboxListTile(
+            title: const Text('Create a Zip file'),
+            value: _createZip,
+            onChanged: _isProcessing
+                ? null
+                : (v) => setState(() => _createZip = v!),
+            controlAffinity: ListTileControlAffinity.leading,
+            contentPadding: EdgeInsets.zero,
+          ),
+          const SizedBox(height: 24),
+          if (_isProcessing) ...[
+            LinearProgressIndicator(
+              // Show determinate progress for workers if possible
+              value: (_crawlQueue.isNotEmpty || _activeWorkers > 0)
+                  ? null
+                  : 1.0,
+            ),
+            const SizedBox(height: 8),
+            Text(
               "Queue: ${_crawlQueue.length} | Active Workers: $_activeWorkers / $maxConcurrentRequests",
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            alignment: WrapAlignment.center,
-            children: [
-              ElevatedButton.icon(
-                icon: const Icon(Icons.pause),
-                label: const Text('Pause'),
-                onPressed: _isPaused ? null : _pauseProcessing,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              alignment: WrapAlignment.center,
+              children: [
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.pause),
+                  label: const Text('Pause'),
+                  onPressed: _isPaused ? null : _pauseProcessing,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.play_arrow),
+                  label: const Text('Resume'),
+                  onPressed: _isPaused ? _resumeProcessing : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.save),
+                  label: const Text('Save'),
+                  onPressed: () => _saveSession(),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                ),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.cancel),
+                  label: const Text('Cancel'),
+                  onPressed: _cancelProcessing,
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                ),
+              ],
+            ),
+          ] else
+            ElevatedButton.icon(
+              icon: const Icon(Icons.play_arrow),
+              label: const Text('Start Processing'),
+              onPressed: _startProcessing,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.play_arrow),
-                label: const Text('Resume'),
-                onPressed: _isPaused ? _resumeProcessing : null,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-              ),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.save),
-                label: const Text('Save'),
-                onPressed: () => _saveSession(),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-              ),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.cancel),
-                label: const Text('Cancel'),
-                onPressed: _cancelProcessing,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              ),
-            ],
+            ),
+          const SizedBox(height: 24),
+          const Text('Logs', style: TextStyle(fontWeight: FontWeight.bold)),
+          const Divider(),
+          Container(
+            height: 200,
+            padding: const EdgeInsets.all(8.0),
+            color: Colors.black.withOpacity(0.2),
+            child: ListView.builder(
+              reverse: true,
+              itemCount: _logMessages.length,
+              itemBuilder: (context, index) => Text(_logMessages[index]),
+            ),
           ),
-        ] else
-          ElevatedButton.icon(
-            icon: const Icon(Icons.play_arrow),
-            label: const Text('Start Processing'),
-            onPressed: _startProcessing,
-            style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16)),
-          ),
-        const SizedBox(height: 24),
-        const Text('Logs', style: TextStyle(fontWeight: FontWeight.bold)),
-        const Divider(),
-        Container(
-          height: 200,
-          padding: const EdgeInsets.all(8.0),
-          color: Colors.black.withOpacity(0.2),
-          child: ListView.builder(
-            reverse: true,
-            itemCount: _logMessages.length,
-            itemBuilder: (context, index) => Text(_logMessages[index]),
-          ),
-        )
-      ]),
+        ],
+      ),
     );
   }
 
   Widget _buildToolsTab() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text("Post-Processing Tools",
-            style: Theme.of(context).textTheme.headlineSmall),
-        const SizedBox(height: 20),
-        ListTile(
-          leading: const Icon(Icons.cleaning_services),
-          title: const Text("Fix & Clean CSV File"),
-          subtitle: const Text(
-              "Removes '_PartX' from the first column of a selected CSV file."),
-          trailing: ElevatedButton(
-            onPressed: _isProcessing ? null : _runFixAndCleanTask,
-            child: const Text("Run Task"),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Post-Processing Tools",
+            style: Theme.of(context).textTheme.headlineSmall,
           ),
-        ),
-        ListTile(
-          leading: const Icon(Icons.perm_contact_calendar_sharp),
-          title: const Text("Data Import from Tmdb"),
-          subtitle: const Text(
-              "Import Data for Each series from TMDB with selected CSV file."),
-          trailing: ElevatedButton(
-            onPressed: () => _navigateTo(context, TmdbDatailsProcess(), true),
-            child: const Text("Open page"),
+          const SizedBox(height: 20),
+          ListTile(
+            leading: const Icon(Icons.cleaning_services),
+            title: const Text("Fix & Clean CSV File"),
+            subtitle: const Text(
+              "Removes '_PartX' from the first column of a selected CSV file.",
+            ),
+            trailing: ElevatedButton(
+              onPressed: _isProcessing ? null : _runFixAndCleanTask,
+              child: const Text("Run Task"),
+            ),
           ),
-        ),
-         ListTile(
+          ListTile(
+            leading: const Icon(Icons.perm_contact_calendar_sharp),
+            title: const Text("Data Import from Tmdb"),
+            subtitle: const Text(
+              "Import Data for Each series from TMDB with selected CSV file.",
+            ),
+            trailing: ElevatedButton(
+              onPressed: () => _navigateTo(context, TmdbDatailsProcess(), true),
+              child: const Text("Open page"),
+            ),
+          ),
+          ListTile(
             leading: const Icon(Icons.rowing),
             title: const Text("Database Exploring Page"),
-            subtitle: const Text(
-              "Import and Explore and save Database to app",
-            ),
+            subtitle: const Text("Import and Explore and save Database to app"),
             trailing: ElevatedButton(
               onPressed: () => _navigateTo(context, DataExplorerScreen(), true),
               child: const Text("Open page"),
             ),
           ),
-           ListTile(
+          ListTile(
             leading: const Icon(Icons.manage_accounts),
             title: const Text("Dataset Manager"),
             subtitle: const Text(
               "Managing imported Data from Database to App.",
             ),
             trailing: ElevatedButton(
-              onPressed: () => _navigateTo(context, DatasetManagerScreen(), true),
+              onPressed: () =>
+                  _navigateTo(context, DatasetManagerScreen(), true),
               child: const Text("Open page"),
             ),
           ),
-           ListTile(
+          ListTile(
             leading: const Icon(Icons.perm_contact_calendar_sharp),
             title: const Text("Un Finished Scraping page"),
-            subtitle: const Text(
-              "Is under baking ...",
-            ),
+            subtitle: const Text("Is under baking ..."),
             trailing: ElevatedButton(
               onPressed: () => _navigateTo(context, ScraperPage(), true),
               child: const Text("Open page"),
             ),
           ),
-           ListTile(
-            leading: const Icon(Icons.perm_contact_calendar_sharp),
-            title: const Text("Super Tool page"),
-            subtitle: const Text(
-              "Super Tool is in testing ...",
-            ),
-            trailing: ElevatedButton(
-              onPressed: () => _navigateTo(context, SuperToolControllerScreen(), true),
-              child: const Text("Open page"),
-            ),
-          ),
-      ]),
+          // ListTile(
+          //   leading: const Icon(Icons.perm_contact_calendar_sharp),
+          //   title: const Text("Super Tool page"),
+          //   subtitle: const Text("Super Tool is in testing ..."),
+          //   trailing: ElevatedButton(
+          //     onPressed: () =>
+          //         _navigateTo(context, SuperToolControllerScreen(), true),
+          //     child: const Text("Open page"),
+          //   ),
+          // ),
+        ],
+      ),
     );
   }
 
@@ -811,12 +845,12 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
     Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
   }
 
-
-
   Future<void> _runFixAndCleanTask() async {
     _log("🔧 Starting 'Fix & Clean' task...");
-    FilePickerResult? result = await FilePicker.platform
-        .pickFiles(type: FileType.custom, allowedExtensions: ['csv']);
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['csv'],
+    );
 
     if (result == null || result.files.single.path == null) {
       _log("... Task cancelled. No input file selected.");
@@ -851,7 +885,9 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
       _log("... ✅ Successfully processed and saved to: $outputPath");
 
       _showSimpleDialog(
-          "Success", "The CSV file has been processed and saved successfully.");
+        "Success",
+        "The CSV file has been processed and saved successfully.",
+      );
     } catch (e) {
       _log("... ❌ Error during 'Fix & Clean' task: $e");
       _showSimpleDialog("Error", "An error occurred: $e");
@@ -893,8 +929,9 @@ class TmdbDatailsProcess extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Controller for the API key text field
-    final apiKeyController =
-        TextEditingController(text: context.read<ProcessingProvider>().apiKey);
+    final apiKeyController = TextEditingController(
+      text: context.read<ProcessingProvider>().apiKey,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -912,8 +949,10 @@ class TmdbDatailsProcess extends StatelessWidget {
             const SizedBox(height: 20),
             _buildProgressSection(context),
             const Divider(height: 30),
-            const Text('Results',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'Results',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 10),
             Expanded(child: _buildResultsList()),
           ],
@@ -923,7 +962,9 @@ class TmdbDatailsProcess extends StatelessWidget {
   }
 
   Widget _buildConfigSection(
-      BuildContext context, TextEditingController controller) {
+    BuildContext context,
+    TextEditingController controller,
+  ) {
     return TextField(
       controller: controller,
       obscureText: true,
@@ -1003,12 +1044,12 @@ class TmdbDatailsProcess extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             if (provider.isProcessing)
-              LinearProgressIndicator(
-                value: provider.progress,
-              )
+              LinearProgressIndicator(value: provider.progress)
             else if (provider.inputFileName.isNotEmpty)
-              Text("File: ${provider.inputFileName}",
-                  style: TextStyle(color: Colors.grey.shade600))
+              Text(
+                "File: ${provider.inputFileName}",
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
           ],
         );
       },
@@ -1024,8 +1065,10 @@ class TmdbDatailsProcess extends StatelessWidget {
         return ListView.builder(
           itemCount: provider.results.length,
           itemBuilder: (context, index) {
-            final item = provider.results[
-                provider.results.length - 1 - index]; // Show latest first
+            final item =
+                provider.results[provider.results.length -
+                    1 -
+                    index]; // Show latest first
             return Card(
               margin: const EdgeInsets.symmetric(vertical: 6),
               child: ListTile(
@@ -1035,9 +1078,10 @@ class TmdbDatailsProcess extends StatelessWidget {
                         imageUrl:
                             'https://db.inosuke.sbs/t/p/w200${item.posterPath}',
                         placeholder: (context, url) => const SizedBox(
-                            width: 50,
-                            height: 75,
-                            child: Center(child: CircularProgressIndicator())),
+                          width: 50,
+                          height: 75,
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
                         errorWidget: (context, url, error) =>
                             const Icon(Icons.movie, size: 40),
                         width: 50,
@@ -1046,10 +1090,12 @@ class TmdbDatailsProcess extends StatelessWidget {
                     : const SizedBox(
                         width: 50,
                         height: 75,
-                        child: Icon(Icons.movie, size: 40)),
+                        child: Icon(Icons.movie, size: 40),
+                      ),
                 title: Text(item.seriesName),
                 subtitle: Text(
-                    '${item.type} • ${item.status} • ★ ${item.voteAverage}'),
+                  '${item.type} • ${item.status} • ★ ${item.voteAverage}',
+                ),
                 isThreeLine: true,
               ),
             );
@@ -1059,3 +1105,5 @@ class TmdbDatailsProcess extends StatelessWidget {
     );
   }
 }
+
+

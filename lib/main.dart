@@ -3,10 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:miko/app_keeper.dart';
+import 'package:miko/configs/consts2.dart';
+import 'package:miko/models/cache.dart';
 import 'package:miko/providers/csv_detail_process_provider.dart';
 import 'package:miko/providers/god_proovider.dart';
 import 'package:miko/providers/local_provider.dart';
 import 'package:miko/providers/settings_provider.dart';
+import 'package:miko/screens/dl.dart';
+
 import 'package:miko/services/user_data_service.dart'; // Import UserDataService
 import 'package:miko/src/core/hive_manager.dart';
 import 'package:miko/utils/colors.dart';
@@ -14,17 +18,20 @@ import 'package:provider/provider.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as pr;
-import 'package:rhttp/rhttp.dart';
-
+import 'package:tmdb_api/tmdb_api.dart';
+final persistentCache = PersistentTranslationCache(ttl: Duration(days: 365), maxEntries: 5000);
+final downloadManager = DownloadListManager();
+TMDB tmdb = TMDB(ApiKeys(tmdbapiv3, tmdbapitokensc));
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
+
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+
   final hiveManager = HiveBoxManager();
   await hiveManager.init();
-    await Rhttp.init(); // required once per process
   // Initialize a single AppDataManager instance after Hive has been initialized
-  
+await persistentCache.init(); // at app startup
   runApp(
     MultiProvider(
       providers: [
@@ -49,9 +56,9 @@ Future<void> main() async {
   overrides: [
       hiveManagerProvider.overrideWithValue(hiveManager),
       // Provide the already-initialized instance so the app uses the same AppDataManager
-              movieProvider.overrideWith((ref)=> MovieProvider()),
-              tvSeriesProvider.overrideWith((ref)=> TvSeriesProvider()),
-              animeProvider.overrideWith((ref)=> AnimeProvider()),
+              // movieProvider.overrideWith((ref)=> MovieProvider()),
+              // tvSeriesProvider.overrideWith((ref)=> TvSeriesProvider()),
+              // animeProvider.overrideWith((ref)=> AnimeProvider()),
 //              tvSeriesUnisqueseriesNameChangeNotifierProvider.overrideWith((ref)=> tvSe)
 
         settingsServiceProvider.overrideWith((ref) => settingsService),
@@ -67,58 +74,59 @@ class MyApp extends pr.ConsumerWidget {
   MyApp({super.key});
 
   void loading(context) {
-    Provider.of<MovieProvider>(context, listen: false);
-    Provider.of<TvSeriesProvider>(context, listen: false);
-    Provider.of<AnimeProvider>(context, listen: false);
   }
 
   @override
   Widget build(BuildContext context, pr.WidgetRef ref) {
+    
+    tmdb = TMDB(ApiKeys(tmdbapiv3, tmdbapitokensc),baseUrl: UserDataService().tmdbBaseUrl);
     // Scroll to the bottom after receiving a new message
     loading(context);
 
     return  MaterialApp(
+      debugShowCheckedModeBanner: false,
+        
         theme: AppThemes.netflixDarkTheme,
 
-        home: SplashScreen2(ref),
+        home: SplashScreen(),
     
     );
   }
 }
 
-class SplashScreen2 extends StatefulWidget {
-  const SplashScreen2(pr.WidgetRef ref, {super.key});
+// class SplashScreen2 extends StatefulWidget {
+//   const SplashScreen2(pr.WidgetRef ref, {super.key});
 
-  @override
-  State<SplashScreen2> createState() => _SplashScreen2State();
-}
+//   @override
+//   State<SplashScreen2> createState() => _SplashScreen2State();
+// }
 
-class _SplashScreen2State extends State<SplashScreen2> {
-  @override
-  void initState() {
-    super.initState();
-    debugPrint("Splash screen initialized");
+// class _SplashScreen2State extends State<SplashScreen2> {
+//   @override
+//   void initState() {
+//     super.initState();
+//     debugPrint("Splash screen initialized");
 
-    _navigateToHome();
-  }
-  // Check for cold start deep link
+//     _navigateToHome();
+//   }
+//   // Check for cold start deep link
 
-  Future<void> _navigateToHome() async {
-    debugPrint("Waiting for 5 seconds before navigation...");
-    await Future.delayed(const Duration(seconds: 5));
-    if (!mounted) return;
+//   Future<void> _navigateToHome() async {
+//     debugPrint("Waiting for 5 seconds before navigation...");
+//     await Future.delayed(const Duration(seconds: 5));
+//     if (!mounted) return;
 
-    debugPrint("Navigating to home screen...");
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (context) => SplashScreen()));
-  }
+//     debugPrint("Navigating to home screen...");
+//     Navigator.of(
+//       context,
+//     ).pushReplacement(MaterialPageRoute(builder: (context) => SplashScreen()));
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(body: Container());
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(body: Container());
+//   }
+// }
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

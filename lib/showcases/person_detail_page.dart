@@ -31,6 +31,25 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
   String _errorMessage = '';
   String oveview = '';
   bool tr = false;
+
+  String? _translatedTitle;
+  bool _isTranslating = false;
+    final _translator = MovieTvTranslator();
+
+  Future<void> _translateTitle(String original) async {
+    setState(() => _isTranslating = true);
+    try {
+      final translated = await _translator.translateTextForMoviesAndTV(
+        original,
+      );
+      setState(() {
+        _translatedTitle = translated;
+      });
+    } finally {
+      setState(() => _isTranslating = false);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -130,23 +149,47 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
           expandedHeight: 300,
           pinned: true,
           flexibleSpace: FlexibleSpaceBar(
-            title: Text(
-              widget.initialName ?? 'Loading Person...',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                shadows: const [
+            title:  Text(
+              widget.initialName?? "Loading",
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
+                // color: Colors.white,
+                letterSpacing: 1.5,
+                height: 1.2,
+                shadows: [
                   Shadow(
-                    blurRadius: 10.0,
-                    color: Colors.black,
-                    offset: Offset(2.0, 2.0),
+                    offset: const Offset(2, 2),
+                    blurRadius: 8,
+                    color: Colors.black.withOpacity(0.8),
+                  ),
+                  Shadow(
+                    offset: const Offset(-1, -1),
+                    blurRadius: 4,
+                    color: Colors.purple.withOpacity(0.3),
+                  ),
+                  Shadow(
+                    offset: const Offset(0, 0),
+                    blurRadius: 20,
+                    color: Colors.cyan.withOpacity(0.4),
                   ),
                 ],
+                foreground: Paint()
+                  ..shader = const LinearGradient(
+                    colors: [
+                      Color(0xFFFF6B6B),
+                      Color(0xFF4ECDC4),
+                      Color(0xFF45B7D1),
+                      Color(0xFF96CEB4),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ).createShader(const Rect.fromLTWH(0, 0, 300, 100)),
               ),
             ),
             background: _buildProfileImage(
               context,
-              'https://db.inosuke.sbsv500${widget.initialProfilePath}', // Ensure correct base URL
+              'https://db.inosuke.sbs/3/t/p/v500${widget.initialProfilePath}', // Ensure correct base URL
               heroTag: 'person-${widget.personId}',
             ),
           ),
@@ -251,18 +294,46 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
               left: 16.0,
               right: 16.0,
             ),
-            title: Text(
+            title:  Text(
               person.name,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                shadows: const [
+              style: TextStyle(
+               // backgroundColor:const Color.fromARGB(155, 0, 0, 0),
+                decorationThickness:10.0,
+               // decorationStyle:TextDecorationStyle.double,
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
+                // color: Colors.white,
+                letterSpacing: 1.5,
+                height: 1.2,
+                shadows: [
                   Shadow(
-                    blurRadius: 10.0,
-                    color: Colors.black,
-                    offset: Offset(2.0, 2.0),
+                    offset: const Offset(2, 2),
+                    blurRadius: 8,
+                    color: Colors.black.withOpacity(0.8),
+                  ),
+                  Shadow(
+                    offset: const Offset(-1, -1),
+                    blurRadius: 4,
+                    color: Colors.purple.withOpacity(0.3),
+                  ),
+                  Shadow(
+                    offset: const Offset(0, 0),
+                    blurRadius: 20,
+                    color: Colors.cyan.withOpacity(0.4),
                   ),
                 ],
+                foreground: Paint()
+                  ..shader = const LinearGradient(
+                    colors: [
+                      Color(0xFFFF6B6B),
+                      Color(0xFF4ECDC4),
+                      Color(0xFF45B7D1),
+                      Color(0xFF96CEB4),
+                    ],
+                    
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ).createShader(const Rect.fromLTWH(0, 0, 300, 100)),
               ),
             ),
             background: _buildProfileImage(
@@ -298,21 +369,43 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 8),
-                IconButton(
-                  iconSize: 20.0,
-                  icon: const Icon(Icons.assistant),
-                  tooltip: 'translate overview',
+               IconButton(
+                  icon: _isTranslating
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Icon(Icons.auto_awesome, color: Colors.white, size: 20),
                   onPressed: () async {
                     tVClick();
-                    gentranslate();
+                    // toggle: if already translated, revert to original by clearing translated text
+                    if (_translatedTitle != null) {
+                      setState(() => _translatedTitle = null);
+                      return;
+                    }
+                    await _translateTitle(oveview);
+                    if (_translatedTitle != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Title translated'),
+                          duration: const Duration(seconds: 1),
+                        ),
+                      );
+                    }
                   },
-                  onLongPress: () {
-                    showTextInputDialog(context, userDataService);
-                  },
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.black.withOpacity(0.5),
+                    padding: const EdgeInsets.all(4.0),
+                  ),
                 ),
+
                 Text(
                   oveview.isNotEmpty == true
-                      ? oveview
+                      ? _translatedTitle??oveview
                       : 'No biography available for ${person.name}.',
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
@@ -419,78 +512,7 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
     );
   }
 
-  void gentranslate() async {
-    final translator = MovieTvTranslator();
-    debugPrint(oveview);
-    final translatedOverView = await translator.translateTextForMoviesAndTV(
-      oveview,
-    );
-    debugPrint(translatedOverView);
-    debugPrint(oveview);
-    setState(() {
-      tr = true;
-      oveview = translatedOverView;
 
-      debugPrint(oveview);
-    });
-  }
-
-  Future<String?> showTextInputDialog(
-    BuildContext context,
-    userDataService, {
-    String title = 'Enter Your Prefred Language',
-    String? initialText,
-    String hintText = 'Like Arabic , Ar ...',
-    TextCapitalization textCapitalization = TextCapitalization.sentences,
-    TextInputType keyboardType = TextInputType.text,
-  }) async {
-    final TextEditingController textEditingController = TextEditingController(
-      text: initialText,
-    );
-
-    return showDialog<String>(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: Text(title),
-          content: TextField(
-            controller: textEditingController,
-            autofocus: true,
-            decoration: InputDecoration(
-              hintText: hintText,
-              border: const OutlineInputBorder(),
-            ),
-            textCapitalization: textCapitalization,
-            keyboardType: keyboardType,
-            onSubmitted: (value) {
-              // Allow submitting by pressing Enter/Done on keyboard
-              Navigator.of(dialogContext).pop(value);
-            },
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop(null); // Return null on cancel
-              },
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                await userDataService.setCustoombaseurl(
-                  textEditingController.text,
-                );
-
-                Navigator.of(
-                  dialogContext,
-                ).pop(textEditingController.text); // Return entered text
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   Widget _buildProfileImage(
     BuildContext context,
@@ -500,8 +522,8 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
     // Check for null, empty, or placeholder string values (like "null")
     if (imageUrl == null ||
         imageUrl.isEmpty ||
-        imageUrl == "null" ||
-        !imageUrl.startsWith('http')) {
+        imageUrl == "null" )
+     {
       return Container(
         color: Theme.of(context).colorScheme.surfaceVariant,
         child: Center(

@@ -1,6 +1,7 @@
 // --- season_detail_page.dart ---
 import 'package:flutter/material.dart';
 import 'package:miko/showcases/episodedetailpage.dart';
+import 'package:miko/utils/ai_translator.dart';
 import 'model.dart';
 import 'movie_service.dart';
 // For navigation
@@ -29,7 +30,20 @@ class SeasonDetailPageAnime extends StatefulWidget {
 
 class _SeasonDetailPageAnimeState extends State<SeasonDetailPageAnime> {
   late Future<SeasonDetails> _seasonDetailsFuture;
-
+final Map<int, String?> _translatedOverviews = {};
+  final Map<int, bool> _isTranslatingMap = {};
+  final _translator = MovieTvTranslator();
+Future<void> _translateOverviewForEpisode(int key, String original) async {
+    setState(() => _isTranslatingMap[key] = true);
+    try {
+      final translated = await _translator.translateTextForMoviesAndTV(
+        original,
+      );
+      setState(() => _translatedOverviews[key] = translated);
+    } finally {
+      setState(() => _isTranslatingMap[key] = false);
+    }
+  }
   @override
   void initState() {
     super.initState();
@@ -105,6 +119,10 @@ class _SeasonDetailPageAnimeState extends State<SeasonDetailPageAnime> {
   }
 
   Widget _buildEpisodeListItem(BuildContext context, Episode episode) {
+    final int key = episode.id ?? episode.episodeNumber;
+    final bool isTranslating = _isTranslatingMap[key] == true;
+    final String? translated = _translatedOverviews[key];
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       clipBehavior: Clip.antiAlias,
@@ -174,12 +192,34 @@ class _SeasonDetailPageAnimeState extends State<SeasonDetailPageAnime> {
                       ]),
                     ],
                     const SizedBox(height: 6),
+
+
+IconButton(
+  icon: isTranslating
+    ? SizedBox(width:16, height:16, child: CircularProgressIndicator(strokeWidth:1, color: Colors.white))
+    : Icon(Icons.auto_awesome, color: Colors.white, size:16),
+  onPressed: () async {
+    // toggle off if already translated
+    if (translated != null) {
+      setState(() => _translatedOverviews.remove(key));
+      return;
+    }
+    await _translateOverviewForEpisode(key, episode.overview);
+    if (_translatedOverviews[key] != null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Overview translated'), duration: Duration(seconds:1)));
+    }
+  },
+//  style: IconButton.styleFrom(backgroundColor: Colors.black.withOpacity(0.5), padding: const EdgeInsets.all(1.0)),
+),
+
+
+                    SizedBox(height: 6),
                     if (episode.overview.isNotEmpty)
                       Text(
-                        episode.overview,
-                        maxLines: 2,
+                        translated ?? episode.overview,
+                        maxLines: 3,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 12),
+                        style: const TextStyle(fontSize: 13),
                       ),
                   ],
                 ),

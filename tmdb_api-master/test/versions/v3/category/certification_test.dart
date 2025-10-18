@@ -1,0 +1,18 @@
+import 'package:test/test.dart';
+import 'package:tmdb_api/tmdb_api.dart';
+
+import '../../../init_script.dart';
+
+void main() {
+  final tmdb = TMDB(ApiKeys(Keys.apiV3!, Keys.apiV4!));
+  group('Certification', () {
+    test('movie', () async {
+      final result = await tmdb.v3.certification.getMovie();
+      expect(result.containsKey('status_code'), false);
+    });
+    test('TV', () async {
+      final result = await tmdb.v3.certification.getTv();
+      expect(result.containsKey('status_code'), false);
+    });
+  });
+}

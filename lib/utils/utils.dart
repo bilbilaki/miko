@@ -37,100 +37,6 @@ Open in miko by click on ${item.internalUrl}
 ''';
 
 
-/// Displays a modal bottom sheet to let the user select a social sharing platform.
-///
-/// It constructs the sharing content from the provided [item] and attempts
-/// to download the [item.posterUrl] to use as media.
-///
-/// Parameters:
-/// - [context]: The BuildContext.
-/// - [item]: The [ShareItem] containing the data to be shared.
-
-
-      // return SafeArea(
-      //   child: Wrap(
-      //     children: <Widget>[
-      //       const ListTile(
-      //         title: Text(
-      //           'Share using...',
-      //           style: TextStyle(fontWeight: FontWeight.bold),
-      //         ),
-      //       ),
-      //       _buildShareOption(
-      //         context,
-      //         platform: SocialPlatform.facebook,
-      //         icon: Icons.facebook,
-      //         label: 'Facebook',
-      //         content: shareContent,
-      //         item: item,
-      //       ),
-      //       _buildShareOption(
-      //         context,
-      //         platform: SocialPlatform.whatsapp,
-      //         icon: Icons.chat, // A suitable icon for chat/WhatsApp
-      //         label: 'WhatsApp',
-      //         content: shareContent,
-      //         item: item,
-      //       ),
-      //       _buildShareOption(
-      //         context,
-      //         platform: SocialPlatform.telegram,
-      //         icon: Icons.sms,
-      //         label: 'SMS',
-      //         content: shareContent,
-      //         item: item,
-      //       ),
-      //       _buildShareOption(
-      //         context,
-      //         platform: SocialPlatform.twitter,
-      //         icon: Icons.search, // A suitable icon for Twitter
-      //         label: 'Twitter',
-      //         content: shareContent,
-      //         item: item,
-      //       ),
-      //       _buildShareOption(
-      //         context,
-      //         platform: SocialPlatform.reddit,
-      //         icon: Icons.camera_alt, // A suitable icon for Instagram
-      //         label: 'Instagram',
-      //         content: shareContent,
-      //         item: item,
-      //       ),
-            // Add more platforms as needed from SocialPlatform enum
-            // For example:
-            // _buildShareOption(
-            //   context,
-            //   platform: SocialPlatform.telegram,
-            //   icon: Icons.send,
-            //   label: 'Telegram',
-            //   content: shareContent,
-            //   item: item,
-            // ),
-            // _buildShareOption(
-            //   context,
-            //   platform: SocialPlatform.linkedin,
-            //   icon: Icons.cases,
-            //   label: 'LinkedIn',
-            //   content: shareContent,
-            //   item: item,
-            // ),
-            // _buildShareOption(
-            //   context,
-            //   platform: SocialPlatform.snapchat,
-            //   icon: Icons.snapchat, // You might need a custom icon for Snapchat
-            //   label: 'Snapchat',
-            //   content: shareContent,
-            //   item: item,
-//             // ),
-//           ],
-//         ),
-//       );
-//     },
-//   );
-// }
-
-/// Helper method to build individual share option list tiles.
-
 
 void triggerVibration() {
     if (Platform.isAndroid) {
@@ -152,32 +58,6 @@ void tVClick() {
       HapticFeedback.selectionClick();
     }
   }
-// lib/converters/app_model_converters.dart
-
-
-// IMPORTANT: For these imports to work correctly in your project,
-// you must ensure your model classes are organized into distinct files
-// to avoid name conflicts.
-//
-// Assuming your local/CSV-driven models are defined in:
-// 'package:miko/models/tv_series.dart'
-// This file should contain: CsvModels.TvSeriesAnime, CsvModels.Movie,
-// CsvModels.Season, CsvModels.Episode, CsvModels.VideoInfo, CsvModels.Genre (simple).
-
-// Assuming your TMDB API response models are defined in a separate file,
-// for example: 'package:miko/models/tmdb_api_models.dart'
-// This file should contain: TmdbApiModels.Movie (the second Movie def),
-// TmdbApiModels.TvShow, TmdbApiModels.Season (the second Season def),
-// TmdbApiModels.Episode (the second Episode def),
-// TmdbApiModels.Genre (the second Genre def),
-// TmdbApiModels.Person, TmdbApiModels.TVSearchResult, etc.
-// NOTE: You will need to create 'tmdb_api_models.dart' and move the relevant TMDB
-// response classes into it from your provided monolithic code block.
-
-// --- Helper Functions (copied from your provided code for self-containment) ---
-// These are included here to make the converter file as self-contained as possible.
-// If you have these universally accessible elsewhere, you can remove them from here
-// and import them instead.
 
 extension StringExtension on String {
   String? get nullIfEmpty => isEmpty ? null : this;

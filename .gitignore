@@ -47,3 +47,6 @@ lib/configs/consts2.dart
 lib/constants.dart
 *.py
 *.json
+/lib/configs/consts2.dart
+*consts2.dart
+*consts2.dart

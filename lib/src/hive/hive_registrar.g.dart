@@ -3,8 +3,8 @@
 // Check in to version control
 
 import 'package:hive_ce/hive.dart';
-import 'package:miko/src/hive/hive_adapters.dart';
-
+import 'package:miko/src/models/appmodels/collection.dart';
+import 'hive_adapters.dart';
 
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
@@ -38,21 +38,8 @@ extension HiveRegistrar on HiveInterface {
     registerAdapter(DiscoverMoviesResponseAdapter());
     registerAdapter(DiscoverParamsAdapter());
     registerAdapter(DiscoverParamsAdapter());
-    registerAdapter(DownloadTaskAdapter());
     registerAdapter(EpisodeDetailAdapter());
     registerAdapter(EpisodeDetailAdapter());
-    registerAdapter(FavoriteAnimeItemAdapter());
-    registerAdapter(FavoriteAnimeItemAdapter());
-    registerAdapter(FavoriteEpisodeItemAdapter());
-    registerAdapter(FavoriteEpisodeItemAdapter());
-    registerAdapter(FavoriteItemTypeAdapter());
-    registerAdapter(FavoriteItemTypeAdapter());
-    registerAdapter(FavoriteMovieItemAdapter());
-    registerAdapter(FavoriteMovieItemAdapter());
-    registerAdapter(FavoriteSeasonItemAdapter());
-    registerAdapter(FavoriteSeasonItemAdapter());
-    registerAdapter(FavoriteTvSeriesItemAdapter());
-    registerAdapter(FavoriteTvSeriesItemAdapter());
     registerAdapter(GenreAdapter());
     registerAdapter(GenreAdapter());
     registerAdapter(GenreListResponseAdapter());
@@ -121,7 +108,6 @@ extension HiveRegistrar on HiveInterface {
     registerAdapter(SessionResponseAdapter());
     registerAdapter(SpokenLanguageAdapter());
     registerAdapter(SpokenLanguageAdapter());
-    registerAdapter(TaskStatusAdapter());
     registerAdapter(TranslationDataAdapter());
     registerAdapter(TranslationDataAdapter());
     registerAdapter(TranslationItemAdapter());
@@ -154,30 +140,14 @@ extension HiveRegistrar on HiveInterface {
     registerAdapter(TvTranslationItemAdapter());
     registerAdapter(TvTranslationsResponseAdapter());
     registerAdapter(TvTranslationsResponseAdapter());
-    registerAdapter(WatchProgressEpisodeAdapter());
-    registerAdapter(WatchProgressEpisodeAdapter());
-    registerAdapter(WatchProgressMovieAdapter());
-    registerAdapter(WatchProgressMovieAdapter());
-    registerAdapter(WatchProgressTypeAdapter());
-    registerAdapter(WatchProgressTypeAdapter());
     registerAdapter(WatchProviderAdapter());
     registerAdapter(WatchProviderAdapter());
     registerAdapter(WatchProviderCountryAdapter());
     registerAdapter(WatchProviderCountryAdapter());
     registerAdapter(WatchProvidersResponseAdapter());
     registerAdapter(WatchProvidersResponseAdapter());
-    registerAdapter(WatchedTrackerMovieAdapter());
-    registerAdapter(WatchedTrackerMovieAdapter());
-    registerAdapter(WatchedTrackerSeriesEpisodeAdapter());
-    registerAdapter(WatchedTrackerSeriesEpisodeAdapter());
-    registerAdapter(WatchedTrackerTypeAdapter());
-    registerAdapter(WatchedTrackerTypeAdapter());
-    registerAdapter(WatchlistItemTypeAdapter());
-    registerAdapter(WatchlistItemTypeAdapter());
-    registerAdapter(WatchlistMovieItemAdapter());
-    registerAdapter(WatchlistMovieItemAdapter());
-    registerAdapter(WatchlistTvSeriesItemAdapter());
-    registerAdapter(WatchlistTvSeriesItemAdapter());
+              registerAdapter(CollectionAdapter());
+    registerAdapter(CollectionItemAdapter());
   }
 }
 
@@ -213,21 +183,8 @@ extension IsolatedHiveRegistrar on IsolatedHiveInterface {
     registerAdapter(DiscoverMoviesResponseAdapter());
     registerAdapter(DiscoverParamsAdapter());
     registerAdapter(DiscoverParamsAdapter());
-    registerAdapter(DownloadTaskAdapter());
     registerAdapter(EpisodeDetailAdapter());
     registerAdapter(EpisodeDetailAdapter());
-    registerAdapter(FavoriteAnimeItemAdapter());
-    registerAdapter(FavoriteAnimeItemAdapter());
-    registerAdapter(FavoriteEpisodeItemAdapter());
-    registerAdapter(FavoriteEpisodeItemAdapter());
-    registerAdapter(FavoriteItemTypeAdapter());
-    registerAdapter(FavoriteItemTypeAdapter());
-    registerAdapter(FavoriteMovieItemAdapter());
-    registerAdapter(FavoriteMovieItemAdapter());
-    registerAdapter(FavoriteSeasonItemAdapter());
-    registerAdapter(FavoriteSeasonItemAdapter());
-    registerAdapter(FavoriteTvSeriesItemAdapter());
-    registerAdapter(FavoriteTvSeriesItemAdapter());
     registerAdapter(GenreAdapter());
     registerAdapter(GenreAdapter());
     registerAdapter(GenreListResponseAdapter());
@@ -296,7 +253,6 @@ extension IsolatedHiveRegistrar on IsolatedHiveInterface {
     registerAdapter(SessionResponseAdapter());
     registerAdapter(SpokenLanguageAdapter());
     registerAdapter(SpokenLanguageAdapter());
-    registerAdapter(TaskStatusAdapter());
     registerAdapter(TranslationDataAdapter());
     registerAdapter(TranslationDataAdapter());
     registerAdapter(TranslationItemAdapter());
@@ -329,29 +285,16 @@ extension IsolatedHiveRegistrar on IsolatedHiveInterface {
     registerAdapter(TvTranslationItemAdapter());
     registerAdapter(TvTranslationsResponseAdapter());
     registerAdapter(TvTranslationsResponseAdapter());
-    registerAdapter(WatchProgressEpisodeAdapter());
-    registerAdapter(WatchProgressEpisodeAdapter());
-    registerAdapter(WatchProgressMovieAdapter());
-    registerAdapter(WatchProgressMovieAdapter());
-    registerAdapter(WatchProgressTypeAdapter());
-    registerAdapter(WatchProgressTypeAdapter());
     registerAdapter(WatchProviderAdapter());
     registerAdapter(WatchProviderAdapter());
     registerAdapter(WatchProviderCountryAdapter());
     registerAdapter(WatchProviderCountryAdapter());
     registerAdapter(WatchProvidersResponseAdapter());
     registerAdapter(WatchProvidersResponseAdapter());
-    registerAdapter(WatchedTrackerMovieAdapter());
-    registerAdapter(WatchedTrackerMovieAdapter());
-    registerAdapter(WatchedTrackerSeriesEpisodeAdapter());
-    registerAdapter(WatchedTrackerSeriesEpisodeAdapter());
-    registerAdapter(WatchedTrackerTypeAdapter());
-    registerAdapter(WatchedTrackerTypeAdapter());
-    registerAdapter(WatchlistItemTypeAdapter());
-    registerAdapter(WatchlistItemTypeAdapter());
-    registerAdapter(WatchlistMovieItemAdapter());
-    registerAdapter(WatchlistMovieItemAdapter());
-    registerAdapter(WatchlistTvSeriesItemAdapter());
-    registerAdapter(WatchlistTvSeriesItemAdapter());
+          registerAdapter(CollectionAdapter());
+    registerAdapter(CollectionItemAdapter());
+
+
+
   }
 }

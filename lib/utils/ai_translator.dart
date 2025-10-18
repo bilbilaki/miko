@@ -1,4 +1,6 @@
 import 'package:miko/configs/consts2.dart';
+import 'package:miko/main.dart';
+import 'package:miko/models/cache.dart';
 import 'package:miko/services/user_data_service.dart';
 import 'package:openai_dart/openai_dart.dart' as openai;
 import 'dart:convert';
@@ -8,6 +10,7 @@ import 'dart:collection';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
+
 
 typedef OpenRoute =
     Future<void> Function(String route, Map<String, dynamic>? args);
@@ -23,7 +26,7 @@ class Assistant {
     required this.openRoute,
     required this.recommendApi,
     required this.factApi,
-    this.modelId = 'gpt-4o-mini', // or your fast model
+    this.modelId = 'gpt-4.1-mini', // or your fast model
   });
 
   final openai.OpenAIClient client;
@@ -461,25 +464,27 @@ class MovieTvTranslator {
     apiKey: webVieApiKey,
     baseUrl: webViewBaseUrl,
   );
-  Future<String> translateTextForMoviesAndTV(String text) async {
-    final UserDataService userDataService = UserDataService();
-    final targetLanguage = userDataService.custoombaseurl;
+
+Future<String> translateTextForMoviesAndTV(String text) async {
+  final userDataService = UserDataService();
+  final targetLanguage = userDataService.custoombaseurl ?? 'en';
+
+  return persistentCache.runOrGet(text, targetLanguage, () async {
     final res = await client.createChatCompletion(
       request: openai.CreateChatCompletionRequest(
         model: openai.ChatCompletionModel.modelId("gemini-2.5-flash-lite"),
         messages: [
-          openai.ChatCompletionMessage.system(
-            content:
-                'just translate and return translated content',
-          ),
+          openai.ChatCompletionMessage.system(content: 'just translate and return translated content'),
           openai.ChatCompletionMessage.user(
-            content: openai.ChatCompletionUserMessageContent.string('''I am a highly skilled movie and TV show translator. I will translate the given text into $targetLanguage, ensuring the translation is natural, idiomatic, and suitable for subtitles or dubbing in a film or series. I will maintain the original tone, character voice, and colloquialisms. Provide only the translated text, nothing else.\n\n"
-          "Translate this: $text'''),
+            content: openai.ChatCompletionUserMessageContent.string(
+              '''I am a highly skilled movie and TV show translator. I will translate the given text into $targetLanguage, ensuring the translation is natural, idiomatic, and suitable for subtitles or dubbing in a film or series. I will maintain the original tone, character voice, and colloquialisms. Provide only the translated text, nothing else.\n\n"          "Translate this: $text'''
+            ),
           ),
         ],
         temperature: 0.9,
       ),
     );
     return (res.choices.first.message.content ?? '').trim();
-  }
+  });
+}
 }

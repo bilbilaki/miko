@@ -1,19 +1,16 @@
 // lib/src/hive/hive_box_manager.dart
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:miko/models/favorite_item.dart';
-import 'package:miko/models/watch_progress.dart';
-import 'package:miko/models/watched_tracker.dart';
-import 'package:miko/models/watchlist_item.dart';
-import 'package:miko/providers/app_data_provider.dart';
 import 'package:miko/src/hive/hive_registrar.g.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:miko/src/models/appmodels/collection.dart';
+
 
 final hiveManagerProvider = Provider<HiveBoxManager>((ref) => HiveBoxManager());
 
 class HiveBoxManager {
   bool _initialized = false;
+
 
   Future<void> init({String? path}) async {
     if (_initialized) return;
@@ -37,21 +34,6 @@ class HiveBoxManager {
     // registering the app-level Collection adapters (from freezed).
     // Register them explicitly to ensure the runtime type _Collection
     // has a matching adapter.
-    try {
-      Hive.registerAdapter(CollectionAdapter());
-      Hive.registerAdapter(CollectionItemAdapter());
-      Hive.registerAdapter(WatchlistAnimeItemAdapter());
-     Hive.registerAdapter(WatchlistEpisodeItemAdapter());
-      Hive.registerAdapter(WatchlistSeasonItemAdapter());
-
-
-
-
-
-
-    } catch (_) {
-      // ignore: adapters may already be registered
-    }
 
     // open needed boxes
     await Future.wait([
@@ -60,6 +42,8 @@ class HiveBoxManager {
       Hive.openBox('downloads'),
       // collections box to store user collections
       Hive.openBox<Collection>('collections_box'),
+
+
       // Hive.openBox<FavoriteItem>('favorites_box'),
       //       Hive.openBox<WatchedTracker>('watched_tracker_box'),
       // Hive.openBox<WatchProgress>('watch_progress_box'),
@@ -72,7 +56,6 @@ class HiveBoxManager {
   }
 Box<Collection> get collectionBox => Hive.box<Collection>('collections_box');
   Box<String> get cacheBox => Hive.box<String>('cache_box');
-
   Future<void> clearCache() async {
     await cacheBox.clear();
   }

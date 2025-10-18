@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:miko/screens/video_player_wplaylist_screen.dart';
-import 'package:miko/widgets/alienswapbutton.dart';
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
@@ -11,10 +10,8 @@ import 'package:swipe_image_gallery/swipe_image_gallery.dart';
 import '../app_keeper.dart';
 import '../providers/local_provider.dart';
 import '../widgets/photoeditor.dart';
-import 'package:audioplayers/audioplayers.dart';
 
 // ...
-final player = AudioPlayer();
 
 // Enums for managing UI states
 class ComponentLibraryDrawer extends StatelessWidget {
@@ -676,8 +673,15 @@ class LocalScreenState extends State<LocalScreen> {
         // For images: Show in a simple dialog viewer
         _showImageDialog(file);
       } else if (provider.isAudioFile(file)) {
-        final bytes = await file.readAsBytes(); // file is a File object
-        await player.play(BytesSource(bytes));
+      final String filePath = file.path;
+        final String ext = p.extension(filePath).toLowerCase();
+        if (!['.mp3', '.wav', '.aac', '.flac', '.ogg'].contains(ext)) {
+          showSnackBar('Unsupported audio format: $ext');
+          return;
+        }
+
+
+    
       } else if (provider.isTextFile(file)) {
         // For text files: Open content for viewing/editing
         _showDocumentContentDialog(file, provider);
@@ -1218,7 +1222,6 @@ class LocalScreenState extends State<LocalScreen> {
       }
     }
   }
-
   /// Handles moving a folder to a new location selected by the user.
   Future<void> _moveFolder(Directory folder, LocalProvider provider) async {
     final String? destinationPath = await showPathSelectionDialog(
