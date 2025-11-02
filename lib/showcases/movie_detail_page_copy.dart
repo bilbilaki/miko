@@ -29,43 +29,25 @@ import 'movie_service.dart';
 import 'person_detail_page.dart';
 import 'package:share_plus/share_plus.dart';
 
-// ignore: must_be_immutable
-class FadeIn extends StatefulWidget {
-   Widget child;
-   Duration duration;
-   FadeIn(
-      {Key? key,
-      required this.child,
-      this.duration = const Duration(milliseconds: 300)})
-      : super(key: key);
-
-  @override
-  _FadeInState createState() => _FadeInState();
-}
-
-class _FadeInState extends State<FadeIn> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this, duration: widget.duration);
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeTransition(opacity: _animation, child: widget.child);
-  }
-}
+// Imported extracted widgets
+import 'package:miko/widgets/movie_detail/fade_in_widget.dart';
+import 'package:miko/widgets/movie_detail/movie_detail_loading_view.dart';
+import 'package:miko/widgets/movie_detail/movie_info_card.dart';
+import 'package:miko/widgets/movie_detail/movie_tagline.dart';
+import 'package:miko/widgets/movie_detail/movie_keywords_section.dart';
+import 'package:miko/widgets/movie_detail/external_links_section.dart';
+import 'package:miko/widgets/movie_detail/production_companies_section.dart';
+import 'package:miko/widgets/movie_detail/production_countries_section.dart';
+import 'package:miko/widgets/movie_detail/spoken_languages_section.dart';
+import 'package:miko/widgets/movie_detail/movie_overview_section.dart';
+import 'package:miko/widgets/movie_detail/movie_action_buttons.dart';
+import 'package:miko/widgets/movie_detail/movie_basic_info.dart';
+import 'package:miko/widgets/movie_detail/movie_cast_section.dart';
+import 'package:miko/widgets/movie_detail/movie_directors_section.dart';
+import 'package:miko/widgets/movie_detail/movie_crew_chip_section.dart';
+import 'package:miko/showcases/mixins/translation_mixin.dart';
+import 'package:miko/showcases/utils/haptic_helper.dart';
+import 'package:miko/showcases/utils/detail_page_navigation.dart';
 
 // ignore: must_be_immutable
 class MovieDetailPage extends StatefulWidget {
@@ -77,39 +59,20 @@ class MovieDetailPage extends StatefulWidget {
   State<MovieDetailPage> createState() => _MovieDetailPageState();
 }
 
-class _MovieDetailPageState extends State<MovieDetailPage> {
+class _MovieDetailPageState extends State<MovieDetailPage> with TranslationMixin {
    MovieService _movieService = MovieService();
   late Future<Map<String, dynamic>> _movieDataFuture;
   MovieResponse? recommendations;
   List<Keyword> _movieKeywords = [];
   late Movie movie;
   List<String> downloadLinks = [''];
-    String? _translatedTitle;
-  bool _isTranslating = false;
-  final _translator = MovieTvTranslator();
-
-  Future<void> _translateTitle(String original) async {
-    setState(() => _isTranslating = true);
-    try {
-      final translated = await _translator.translateTextForMoviesAndTV(
-        original,
-      );
-      setState(() {
-        _translatedTitle = translated;
-      });
-    } finally {
-      setState(() => _isTranslating = false);
-    }
-  }
+  bool tr = false;
 
   // Helper for haptic feedback
-  bool tr = false;
   void _performHapticFeedback() {
-    if (Platform.isAndroid) {
-      // Provides a subtle vibration
-      HapticFeedback.lightImpact;
-    }
+    HapticHelper.performHapticFeedback();
   }
+  
 String oveview='';
   @override
   void initState() {
@@ -185,109 +148,7 @@ Movie _movie = await _movieService.getMovieDetails(movieId: widget.id);
   }
 
   Widget _buildLoadingView() {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey[850]!,
-      highlightColor: Colors.grey[800]!,
-      child: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 250,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              title: Container(
-                height: 20,
-                width: 150,
-                color: Colors.white, // Placeholder for title
-              ),
-              background: Container(
-                  color: Colors.white), // Placeholder for background image
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 120,
-                        height: 180,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                                height: 20,
-                                width: double.infinity,
-                                color: Colors.white),
-                            const SizedBox(height: 8),
-                            Container(
-                                height: 16, width: 150, color: Colors.white),
-                            const SizedBox(height: 8),
-                            Container(
-                                height: 16, width: 100, color: Colors.white),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  Container(height: 24, width: 200, color: Colors.white),
-                  const SizedBox(height: 8),
-                  Container(
-                      height: 16, width: double.infinity, color: Colors.white),
-                  const SizedBox(height: 8),
-                  Container(
-                      height: 16, width: double.infinity, color: Colors.white),
-                  const SizedBox(height: 8),
-                  Container(height: 16, width: 250, color: Colors.white),
-                  const SizedBox(height: 24),
-                  Container(height: 24, width: 150, color: Colors.white),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    height: 180,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 5, // Mock number of cast members
-                      itemBuilder: (context, index) => Padding(
-                        padding: const EdgeInsets.only(right: 12.0),
-                        child: Column(
-                          children: [
-                            Container(
-                              width: 100,
-                              height: 100,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Container(
-                                height: 14, width: 80, color: Colors.white),
-                            const SizedBox(height: 4),
-                            Container(
-                                height: 12, width: 60, color: Colors.white),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    return const MovieDetailLoadingView();
   }
 
   Widget _buildErrorView(
@@ -402,7 +263,7 @@ Movie _movie = await _movieService.getMovieDetails(movieId: widget.id);
       expandedHeight: 600,
       pinned: true,
       flexibleSpace: FlexibleSpaceBar(
-        title: Text(_translatedTitle ?? movie.title,
+        title: Text(translatedTitle ?? movie.title,
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w900,
@@ -657,31 +518,7 @@ Open in miko by click on ${myItem.internalUrl}
           if (showDetailedInfo &&
               movie.tagline != null &&
               movie.tagline!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: Text('"${movie.tagline}"',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.white.withOpacity(0.85),
-                    letterSpacing: 0.8,
-                    height: 1.4,
-                    decorationStyle: GoogleFonts.dmSerifText().decorationStyle,
-                    fontStyle: FontStyle.italic,
-                    shadows: [
-                      Shadow(
-                        offset: const Offset(1, 1),
-                        blurRadius: 4,
-                        color: Colors.black.withOpacity(0.6),
-                      ),
-                      Shadow(
-                        offset: const Offset(0, 0),
-                        blurRadius: 8,
-                        color: Colors.blue.withOpacity(0.2),
-                      ),
-                    ],
-                  )),
-            ),
+            MovieTagline(tagline: movie.tagline!),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -733,7 +570,7 @@ Open in miko by click on ${myItem.internalUrl}
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SelectableText(
-                     _translatedTitle?? movie.title,
+                     translatedTitle?? movie.title,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 8),
@@ -751,7 +588,7 @@ Open in miko by click on ${myItem.internalUrl}
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                                        IconButton(
-                          icon: _isTranslating
+                          icon: isTranslating
                               ? SizedBox(
                                   width: 20,
                                   height: 20,
@@ -768,12 +605,8 @@ Open in miko by click on ${myItem.internalUrl}
                           onPressed: () async {
                             _performHapticFeedback();
                             // toggle: if already translated, revert to original by clearing translated text
-                            if (_translatedTitle != null) {
-                              setState(() => _translatedTitle = null);
-                              return;
-                            }
-                            await _translateTitle(movie.title);
-                            if (_translatedTitle != null) {
+                            await toggleTitleTranslation(movie.title);
+                            if (translatedTitle != null) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text('Title translated'),
