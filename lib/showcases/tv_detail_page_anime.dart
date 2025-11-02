@@ -26,6 +26,14 @@ import 'person_detail_page.dart';
 import 'episodedetailpage.dart';
 import 'package:shimmer/shimmer.dart'; // Import Shimmer
 
+// Imported extracted widgets and utilities
+import 'package:miko/showcases/mixins/translation_mixin.dart';
+import 'package:miko/showcases/utils/haptic_helper.dart';
+import 'package:miko/showcases/utils/detail_page_navigation.dart';
+import 'package:miko/widgets/tv_detail/tv_show_stat_card.dart';
+import 'package:miko/widgets/tv_detail/tv_show_genres_section.dart';
+import 'package:miko/widgets/tv_detail/tv_show_creators_section.dart';
+
 // ignore: must_be_immutable
 class TvShowDetailPageAnime extends StatefulWidget {
   var tvShow;
@@ -37,7 +45,7 @@ class TvShowDetailPageAnime extends StatefulWidget {
 }
 
 class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, TranslationMixin {
   final MovieService _movieService = MovieService();
   late Future<Map<String, dynamic>> _tvShowDataFuture;
   final ScrollController _seasonsScrollController = ScrollController();
@@ -50,23 +58,6 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
   // Futures for tab-specific data
   Future<TVCredits>? creditsFuture;
   Future<YoutubeVideoForSeries>? _videosFuture;
-  String? _translatedTitle;
-  bool _isTranslating = false;
-  final _translator = MovieTvTranslator();
-
-  Future<void> _translateTitle(String original) async {
-    setState(() => _isTranslating = true);
-    try {
-      final translated = await _translator.translateTextForMoviesAndTV(
-        original,
-      );
-      setState(() {
-        _translatedTitle = translated;
-      });
-    } finally {
-      setState(() => _isTranslating = false);
-    }
-  }
 
   final List<Tab> _tabs = [
     Tab(text: 'OVERVIEW'),
@@ -113,7 +104,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
   }
 
   void _navigateToPersonDetail(int personId, String name, String? profilePath) {
-    if (Platform.isAndroid) HapticFeedback.lightImpact();
+    HapticHelper.performHapticFeedback();
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -127,7 +118,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
   }
 
   Future<void> _launchUrl(String urlString) async {
-    if (Platform.isAndroid) HapticFeedback.lightImpact();
+    HapticHelper.performHapticFeedback();
     final Uri url = Uri.parse(urlString);
     if (!await launchUrl(url)) {
       if (mounted) {
@@ -242,7 +233,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
-                        if (Platform.isAndroid) HapticFeedback.lightImpact();
+                        HapticHelper.performHapticFeedback();
                         setState(() {
                           _detailedTvShow = null;
                           recommendations = null;
@@ -284,12 +275,8 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
               onTranslate: () async {
                 tVClick();
                 // toggle: if already translated, revert to original by clearing translated text
-                if (_translatedTitle != null) {
-                  setState(() => _translatedTitle = null);
-                  return;
-                }
-                await _translateTitle(tvShow.name);
-                if (_translatedTitle != null) {
+                await toggleTitleTranslation(tvShow.name);
+                if (translatedTitle != null) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Title translated'),
@@ -298,7 +285,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
                   );
                 }
               },
-              isTranslating: _isTranslating,
+              isTranslating: isTranslating,
             ),
           ), // pass true for shimmer
         ],
@@ -315,7 +302,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
       onNotification: (ScrollNotification scrollInfo) {
         if (Platform.isAndroid && scrollInfo is ScrollUpdateNotification) {
           // Trigger a subtle haptic feedback on scroll
-          HapticFeedback.selectionClick();
+          HapticHelper.performSelectionClick();
         }
         return false;
       },
@@ -337,12 +324,8 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
                 onTranslate: () async {
                   tVClick();
                   // toggle: if already translated, revert to original by clearing translated text
-                  if (_translatedTitle != null) {
-                    setState(() => _translatedTitle = null);
-                    return;
-                  }
-                  await _translateTitle(tvShow.name);
-                  if (_translatedTitle != null) {
+                  await toggleTitleTranslation(tvShow.name);
+                  if (translatedTitle != null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Title translated'),
@@ -351,7 +334,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
                     );
                   }
                 },
-                isTranslating: _isTranslating,
+                isTranslating: isTranslating,
               ),
             ),
             SliverPersistentHeader(
@@ -364,7 +347,7 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
                   labelColor: Theme.of(context).colorScheme.secondary,
                   unselectedLabelColor: Colors.grey,
                   onTap: (index) {
-                    if (Platform.isAndroid) HapticFeedback.lightImpact();
+                    HapticHelper.performHapticFeedback();
                   },
                 ),
               ),
@@ -417,102 +400,14 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
           ),
           const SizedBox(height: 24),
 
-          if (tvShow.genres != null && tvShow.genres!.isNotEmpty) ...[
-            Text('Genres', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: tvShow.genres!
-                  .map(
-                    (genre) => Chip(
-                      label: Text(genre.name),
-                      backgroundColor: Colors.grey[800],
-                    ),
-                  )
-                  .toList(),
-            ),
-            const SizedBox(height: 24),
-          ],
+          if (tvShow.genres != null && tvShow.genres!.isNotEmpty)
+            TvShowGenresSection(genres: tvShow.genres!),
 
-          if (tvShow.createdBy != null && tvShow.createdBy!.isNotEmpty) ...[
-            Text('Created by', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 150,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: tvShow.createdBy!.length,
-                itemBuilder: (context, index) {
-                  final creator = tvShow.createdBy![index];
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 12.0),
-                    child: GestureDetector(
-                      onTap: () => _navigateToPersonDetail(
-                        creator.id,
-                        creator.name,
-                        creator.profilePath,
-                      ),
-                      child: SizedBox(
-                        width: 90,
-                        child: Column(
-                          children: [
-                            CircleAvatar(
-                              radius: 40,
-                              child: creator.profilePath != null
-                                  ? CachedNetworkImage(
-                                      filterQuality: FilterQuality.high,
-                                      imageUrl: creator.fullProfilePath,
-                                      fit: BoxFit.cover,
-                                      width: 80,
-                                      height: 80,
-                                      imageBuilder: (context, imageProvider) =>
-                                          CircleAvatar(
-                                            backgroundImage: imageProvider,
-                                            radius: 40,
-                                          ),
-                                      placeholder: (context, url) =>
-                                          CircularProgressIndicator(
-                                            strokeWidth: 1,
-                                            color: AppColors.accentColor,
-                                          ),
-                                      errorWidget: (context, url, error) =>
-                                          Icon(
-                                            Icons.person,
-                                            size: 40,
-                                            color: AppColors.secondaryText,
-                                          ),
-                                      fadeInDuration: const Duration(
-                                        milliseconds: 300,
-                                      ),
-                                      fadeOutDuration: const Duration(
-                                        milliseconds: 100,
-                                      ),
-                                    )
-                                  : const Icon(
-                                      Icons.person,
-                                      size: 40,
-                                      color: AppColors.secondaryText,
-                                    ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              creator.name,
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
+          if (tvShow.createdBy != null && tvShow.createdBy!.isNotEmpty)
+            TvShowCreatorsSection(
+              creators: tvShow.createdBy!,
+              onCreatorTap: _navigateToPersonDetail,
             ),
-            const SizedBox(height: 24),
-          ],
 
           // Last and Next Episode
           if (tvShow.nextEpisodeToAir != null) ...[
@@ -525,7 +420,7 @@ EpisodeCardWidget(
               
               
                episode: tvShow.lastEpisodeToAir!, tvShowId: tvShow.id, isNext: false, onTap:  () {
-          if (Platform.isAndroid) HapticFeedback.lightImpact();
+          HapticHelper.performHapticFeedback();
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -551,7 +446,7 @@ EpisodeCardWidget(
               
               
                episode: tvShow.lastEpisodeToAir!, tvShowId: tvShow.id, isNext: false, onTap:  () {
-          if (Platform.isAndroid) HapticFeedback.lightImpact();
+          HapticHelper.performHapticFeedback();
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -632,11 +527,10 @@ EpisodeCardWidget(
               children: [
                 if (tvShow.numberOfSeasons != null)
                   Expanded(
-                    child: _buildStatCard(
-                      context,
-                      'Seasons',
-                      tvShow.numberOfSeasons.toString(),
-                      Icons.movie_filter_outlined,
+                    child: TvShowStatCard(
+                      title: 'Seasons',
+                      value: tvShow.numberOfSeasons.toString(),
+                      icon: Icons.movie_filter_outlined,
                     ),
                   ),
                 if (tvShow.numberOfSeasons != null &&
@@ -644,11 +538,10 @@ EpisodeCardWidget(
                   const SizedBox(width: 16),
                 if (tvShow.numberOfEpisodes != null)
                   Expanded(
-                    child: _buildStatCard(
-                      context,
-                      'Episodes',
-                      tvShow.numberOfEpisodes.toString(),
-                      Icons.list_alt_outlined,
+                    child: TvShowStatCard(
+                      title: 'Episodes',
+                      value: tvShow.numberOfEpisodes.toString(),
+                      icon: Icons.list_alt_outlined,
                     ),
                   ),
               ],
@@ -659,7 +552,7 @@ EpisodeCardWidget(
           RecommendationsSectionWidget(
             recommendations: recommendations,
             onShowAllPressed: () {
-              if (Platform.isAndroid) HapticFeedback.lightImpact();
+              HapticHelper.performHapticFeedback();
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
@@ -672,7 +565,7 @@ EpisodeCardWidget(
               );
             },
             onRecommendationTapped: () {
-              if (Platform.isAndroid) HapticFeedback.lightImpact();
+              HapticHelper.performHapticFeedback();
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
@@ -709,7 +602,7 @@ EpisodeCardWidget(
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: () {
-              if (Platform.isAndroid) HapticFeedback.lightImpact();
+              HapticHelper.performHapticFeedback();
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -1152,38 +1045,6 @@ EpisodeCardWidget(
     );
   }
 
-
-  Widget _buildStatCard(
-    BuildContext context,
-    String title,
-    String value,
-    IconData icon,
-  ) {
-    return Card(
-      color: Colors.grey[850],
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              size: 30,
-              color: Theme.of(context).colorScheme.secondary,
-            ),
-            const SizedBox(height: 8),
-            Text(title, style: Theme.of(context).textTheme.titleSmall),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   void gentranslate() async {
     MovieTvTranslator translator = MovieTvTranslator();
