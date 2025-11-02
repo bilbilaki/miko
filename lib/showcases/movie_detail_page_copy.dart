@@ -662,46 +662,17 @@ Open in miko by click on ${myItem.internalUrl}
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                (downloadLinks != [''])
-                    ? ElevatedButton.icon(
-                        icon: isWatched? Icon(Icons.done):Icon(Icons.play_arrow),
-                        label: Text(
-                          'Play',
-                        ),
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.accentColor,
-                            foregroundColor: AppColors.primaryText,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 30, vertical: 12)),
-                        onPressed: () {
-                          _performHapticFeedback();
-                          showDownloadLinkSelection(context, downloadLinks,movie.id,movie.title);
-                          // downloadLinks.toString());
-                        },
-                      )
-                    :  Text("No Playing Link Exist"),
-                    SizedBox(width: 10,),
-                     (downloadLinks != [''])?
-                     ElevatedButton.icon(
-                        icon: isWatched? Icon(Icons.done):Icon(Icons.download),
-                        label: Text(
-                          'Download',
-                        ),
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 0, 241, 32),
-                            foregroundColor: const Color.fromARGB(255, 0, 0, 0),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 30, vertical: 12)),
-                        onPressed: () {
-                          _performHapticFeedback();
-                          showDownloadLinkSelection(context, downloadLinks,movie.id,movie.title,isForPlay: false);
-                          // downloadLinks.toString());
-                        },
-                      ):SizedBox()
-              ],
+            MovieActionButtons(
+              downloadLinks: downloadLinks,
+              isWatched: isWatched,
+              onPlayPressed: () {
+                _performHapticFeedback();
+                showDownloadLinkSelection(context, downloadLinks, movie.id, movie.title);
+              },
+              onDownloadPressed: () {
+                _performHapticFeedback();
+                showDownloadLinkSelection(context, downloadLinks, movie.id, movie.title, isForPlay: false);
+              },
             ),
             const SizedBox(height: 4),
             Text(
@@ -712,555 +683,64 @@ Open in miko by click on ${myItem.internalUrl}
 
       
               
-          const SizedBox(height: 24),
-          Text(
-            'Overview',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-             IconButton(
-                iconSize: 20.0,
-                icon: const Icon(Icons.assistant),
-                tooltip: 'translate overview',
-                onPressed: ()async {
-                  tVClick();
-                 gentranslate();},
-                 onLongPress:(){showTextInputDialog(context,userDataService);
-
-
-                 }),
-          const SizedBox(height: 8),
-          SelectableText(
-           oveview, // movie.overview.isEmpty ? 'No overview available.' : movie.overview,
-            style: Theme.of(context).textTheme.bodyMedium,
+          MovieOverviewSection(
+            overview: oveview,
+            onTranslate: () async {
+              tVClick();
+              gentranslate();
+            },
+            onLongPress: () {
+              showTextInputDialog(context, userDataService);
+            },
           ),
           if (showDetailedInfo && _movieKeywords.isNotEmpty)
-            _buildKeywordsSection(context, _movieKeywords),
+            MovieKeywordsSection(
+              keywords: _movieKeywords,
+              movieService: _movieService,
+            ),
           if (showDetailedInfo &&
               credits != null &&
-              credits.cast.isNotEmpty) ...[
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Cast',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                TextButton(
-                  onPressed: () {
-                    _performHapticFeedback();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CastPage(
-                          movieId: movie.id,
-                          movieTitle: movie.title,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Text(
-                    'See all ${credits.cast.length}',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.secondary,
-                    ),
-                  ),
-                ),
-              ],
+              credits.cast.isNotEmpty)
+            MovieCastSection(
+              cast: credits.cast,
+              movieId: movie.id,
+              movieTitle: movie.title,
             ),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 180,
-              child: NotificationListener<ScrollNotification>(
-                onNotification: (ScrollNotification scrollInfo) {
-                  if (Platform.isAndroid &&
-                      scrollInfo is ScrollUpdateNotification) {
-                    if (scrollInfo.scrollDelta != null &&
-                        scrollInfo.scrollDelta! != 0) {
-                      _performHapticFeedback();
-                    }
-                  }
-                  return false;
-                },
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: credits.cast.length,
-                  itemBuilder: (context, index) {
-                    Cast castMember = credits.cast[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 12.0),
-                      child: GestureDetector(
-                        onTap: () {
-                          navigateToPersonDetail(context,castMember.id,
-                              castMember.name, castMember.profilePath);
-                        },
-                        child: SizedBox(
-                          width: 130,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Hero(
-                                tag: 'person-${castMember.id}',
-                                child: Material(
-                                  elevation: 4,
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: SizedBox(
-                                      width: 100,
-                                      height: 100,
-                                      child: castMember.profilePath ==
-                                              castMember.profilePath
-                                          ? CachedNetworkImage(
-                                              filterQuality: FilterQuality.high,
-                                              imageUrl:
-                                                  castMember.fullProfilePath,
-                                              fit: BoxFit.cover,
-                                              placeholder: (context, url) =>
-                                                  const Center(
-                                                      child:
-                                                          CircularProgressIndicator(
-                                                              strokeWidth: 1,
-                                                              color: AppColors
-                                                                  .accentColor)),
-                                              errorWidget:
-                                                  (context, url, error) =>
-                                                      Container(
-                                                color: Colors.grey[800],
-                                                child: const Center(
-                                                  child: Icon(
-                                                      Icons
-                                                          .image_not_supported_outlined, // Standardized icon
-                                                      size: 40,
-                                                      color: AppColors
-                                                          .secondaryText),
-                                                ),
-                                              ),
-                                              fadeInDuration: const Duration(
-                                                  milliseconds: 200),
-                                              fadeOutDuration: const Duration(
-                                                  milliseconds: 100),
-                                            )
-                                          : Container(
-                                              color: Colors.grey[800],
-                                              child: const Center(
-                                                child: Icon(
-                                                    Icons
-                                                        .image_not_supported_outlined, // Standardized icon
-                                                    size: 40,
-                                                    color: AppColors
-                                                        .secondaryText),
-                                              ),
-                                            ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                castMember.name,
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                castMember.character,
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey[400],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-          ],
           if (showDetailedInfo && credits != null) ...[
-            if (credits.directors.isNotEmpty) ...[
-              const SizedBox(height: 24),
-              Text(
-                'Directors',
-                style: Theme.of(context).textTheme.titleLarge,
+            if (credits.directors.isNotEmpty)
+              MovieDirectorsSection(directors: credits.directors),
+            if (credits.writers.isNotEmpty)
+              MovieCrewChipSection(
+                title: 'Writing',
+                crewMembers: credits.writers,
               ),
-              const SizedBox(height: 12),
-              SizedBox(
-                height: 140,
-                child: NotificationListener<ScrollNotification>(
-                  onNotification: (ScrollNotification scrollInfo) {
-                    if (Platform.isAndroid &&
-                        scrollInfo is ScrollUpdateNotification) {
-                      if (scrollInfo.scrollDelta != null &&
-                          scrollInfo.scrollDelta! != 0) {
-                        _performHapticFeedback();
-                      }
-                    }
-                    return false;
-                  },
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: credits.directors.length,
-                    itemBuilder: (context, index) {
-                      Crew director = credits.directors[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 12.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            navigateToPersonDetail(context,director.id, director.name,
-                                director.profilePath);
-                          },
-                          child: SizedBox(
-                            width: 90,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Material(
-                                  elevation: 4,
-                                  shape: const CircleBorder(),
-                                  clipBehavior: Clip.antiAlias,
-                                  child: SizedBox(
-                                    width: 80,
-                                    height: 80,
-                                    child: director.profilePath != null
-                                        ? CachedNetworkImage(
-                                            filterQuality: FilterQuality.high,
-                                            imageUrl: director.fullProfilePath,
-                                            fit: BoxFit.cover,
-                                            imageBuilder:
-                                                (context, imageProvider) =>
-                                                    CircleAvatar(
-                                              radius: 40,
-                                              backgroundImage: imageProvider,
-                                            ),
-                                            placeholder: (context, url) =>
-                                                const Center(
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                            strokeWidth: 1,
-                                                            color: AppColors
-                                                                .accentColor)),
-                                            errorWidget:
-                                                (context, url, error) =>
-                                                    const Center(
-                                              child: CircleAvatar(
-                                                radius: 40,
-                                                backgroundColor: Colors.grey,
-                                                child: Icon(
-                                                    Icons
-                                                        .image_not_supported_outlined, // Standardized icon
-                                                    size: 40,
-                                                    color: AppColors
-                                                        .secondaryText),
-                                              ),
-                                            ),
-                                            fadeInDuration: const Duration(
-                                                milliseconds: 300),
-                                            fadeOutDuration: const Duration(
-                                                milliseconds: 100),
-                                          )
-                                        : const CircleAvatar(
-                                            radius: 40,
-                                            backgroundColor: Colors.grey,
-                                            child: Icon(
-                                                Icons
-                                                    .image_not_supported_outlined, // Standardized icon
-                                                size: 40,
-                                                color: AppColors.secondaryText),
-                                          ),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  director.name,
-                                  textAlign: TextAlign.center,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Director',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.grey[400],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
+            if (credits.producers.isNotEmpty)
+              MovieCrewChipSection(
+                title: 'Production',
+                crewMembers: credits.producers,
+                maxDisplay: 5,
+                onSeeAll: () {
+                  _performHapticFeedback();
+                },
               ),
-            ],
-            if (credits.writers.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              Text(
-                'Writing',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 4),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: credits.writers.map((writer) {
-                  return GestureDetector(
-                    onTap: () {
-                      navigateToPersonDetail(context,
-                          writer.id, writer.name, writer.profilePath);
-                    },
-                    child: Chip(
-                      avatar: writer.profilePath != null
-                          ? CachedNetworkImage(
-                              filterQuality: FilterQuality.high,
-                              imageUrl: writer.fullProfilePath,
-                              imageBuilder: (context, imageProvider) =>
-                                  CircleAvatar(
-                                backgroundImage: imageProvider,
-                              ),
-                              placeholder: (context, url) => const Center(
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 1,
-                                      color: AppColors.accentColor)),
-                              errorWidget: (context, url, error) =>
-                                  const Center(
-                                child: Icon(
-                                    Icons
-                                        .image_not_supported_outlined, // Standardized icon
-                                    size: 16,
-                                    color: AppColors.secondaryText),
-                              ),
-                              fadeInDuration: const Duration(milliseconds: 200),
-                              fadeOutDuration:
-                                  const Duration(milliseconds: 100),
-                            )
-                          : const CircleAvatar(
-                              child: Icon(
-                                  Icons
-                                      .image_not_supported_outlined, // Standardized icon
-                                  size: 16,
-                                  color: AppColors.secondaryText),
-                            ),
-                      label: Text('${writer.name} (${writer.job})'),
-                      backgroundColor: Colors.grey[800],
-                      labelStyle: const TextStyle(color: AppColors.primaryText),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ],
-            if (credits.producers.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              Text(
-                'Production',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 4),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: credits.producers.take(5).map((producer) {
-                  return GestureDetector(
-                    onTap: () {
-                      navigateToPersonDetail(context,
-                          producer.id, producer.name, producer.profilePath);
-                    },
-                    child: Chip(
-                      avatar: producer.profilePath != null
-                          ? CachedNetworkImage(
-                              filterQuality: FilterQuality.high,
-                              imageUrl: producer.fullProfilePath,
-                              imageBuilder: (context, imageProvider) =>
-                                  CircleAvatar(
-                                backgroundImage: imageProvider,
-                              ),
-                              placeholder: (context, url) => const Center(
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 1,
-                                      color: AppColors.accentColor)),
-                              errorWidget: (context, url, error) =>
-                                  const Center(
-                                child: Icon(
-                                    Icons
-                                        .image_not_supported_outlined, // Standardized icon
-                                    size: 16,
-                                    color: AppColors.secondaryText),
-                              ),
-                              fadeInDuration: const Duration(milliseconds: 200),
-                              fadeOutDuration:
-                                  const Duration(milliseconds: 100),
-                            )
-                          : const CircleAvatar(
-                              child: Icon(
-                                  Icons
-                                      .image_not_supported_outlined, // Standardized icon
-                                  size: 16,
-                                  color: AppColors.secondaryText),
-                            ),
-                      label: Text('${producer.name} (${producer.job})'),
-                      backgroundColor: Colors.grey[800],
-                      labelStyle: const TextStyle(color: AppColors.primaryText),
-                    ),
-                  );
-                }).toList(),
-              ),
-              if (credits.producers.length > 5)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      _performHapticFeedback();
-                    },
-                    child: Text(
-                      'See all ${credits.producers.length} producers',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
           ],
           if (showDetailedInfo) ...[
             if (movie.productionCompanies != null &&
-                movie.productionCompanies!.isNotEmpty) ...[
-              const SizedBox(height: 24),
-              Text(
-                'Production Companies',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 80,
-                child: NotificationListener<ScrollNotification>(
-                  onNotification: (ScrollNotification scrollInfo) {
-                    if (Platform.isAndroid &&
-                        scrollInfo is ScrollUpdateNotification) {
-                      if (scrollInfo.scrollDelta != null &&
-                          scrollInfo.scrollDelta! != 0) {
-                        _performHapticFeedback();
-                      }
-                    }
-                    return false;
-                  },
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: movie.productionCompanies!.length,
-                    itemBuilder: (context, index) {
-                      final company = movie.productionCompanies![index];
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 16.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            if (company.logoPath != null)
-                              SizedBox(
-                                height: 40,
-                                width: 80,
-                                child: CachedNetworkImage(
-                                  filterQuality: FilterQuality.high,
-                                  imageUrl: company.fullLogoPath,
-                                  fit: BoxFit.contain,
-                                  placeholder: (context, url) => const Center(
-                                      child: CircularProgressIndicator(
-                                          strokeWidth: 1,
-                                          color: AppColors.accentColor)),
-                                  errorWidget: (context, url, error) =>
-                                      const Center(
-                                    // Standardized icon
-                                    child: Icon(
-                                        Icons.image_not_supported_outlined,
-                                        size: 30,
-                                        color: AppColors.secondaryText),
-                                  ),
-                                  fadeInDuration:
-                                      const Duration(milliseconds: 200),
-                                  fadeOutDuration:
-                                      const Duration(milliseconds: 100),
-                                ),
-                              )
-                            else
-                              const SizedBox(
-                                // Changed from Container with Text to SizedBox with Icon for consistency
-                                height: 40,
-                                width: 80,
-                                child: Center(
-                                  child: Icon(
-                                      Icons
-                                          .image_not_supported_outlined, // Standardized icon
-                                      size: 30,
-                                      color: AppColors.secondaryText),
-                                ),
-                              ),
-                            const SizedBox(height: 4),
-                            SizedBox(
-                              width: 80,
-                              child: Text(
-                                company.name,
-                                style: const TextStyle(
-                                    fontSize: 10, color: AppColors.primaryText),
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ],
+                movie.productionCompanies!.isNotEmpty)
+              ProductionCompaniesSection(companies: movie.productionCompanies!),
             if (movie.productionCountries != null &&
-                movie.productionCountries!.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              Text(
-                'Production Countries',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 4),
-              Wrap(
-                spacing: 8,
-                children: movie.productionCountries!.map((country) {
-                  return Chip(
-                    label: Text(country.name),
-                    backgroundColor: Colors.grey[800],
-                    labelStyle: const TextStyle(color: AppColors.primaryText),
-                  );
-                }).toList(),
-              ),
-            ],
+                movie.productionCountries!.isNotEmpty)
+              ProductionCountriesSection(countries: movie.productionCountries!),
             if (movie.budget != null || movie.revenue != null) ...[
               const SizedBox(height: 16),
               Row(
                 children: [
                   if (movie.budget != null && movie.budget! > 0) ...[
                     Expanded(
-                      child: _buildInfoCard(
-                        context,
-                        'Budget',
-                        movie.formattedBudget,
-                        Icons.attach_money,
+                      child: MovieInfoCard(
+                        title: 'Budget',
+                        value: movie.formattedBudget,
+                        icon: Icons.attach_money,
                       ),
                     ),
                     if (movie.revenue != null && movie.revenue! > 0)
@@ -1268,72 +748,22 @@ Open in miko by click on ${myItem.internalUrl}
                   ],
                   if (movie.revenue != null && movie.revenue! > 0)
                     Expanded(
-                      child: _buildInfoCard(
-                        context,
-                        'Revenue',
-                        movie.formattedRevenue,
-                        Icons.trending_up,
+                      child: MovieInfoCard(
+                        title: 'Revenue',
+                        value: movie.formattedRevenue,
+                        icon: Icons.trending_up,
                       ),
                     ),
                 ],
               ),
             ],
             if (movie.spokenLanguages != null &&
-                movie.spokenLanguages!.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              Text(
-                'Spoken Languages',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 4),
-              Wrap(
-                spacing: 8,
-                children: movie.spokenLanguages!.map((language) {
-                  return Chip(
-                    label: Text(language.englishName),
-                    backgroundColor: Colors.grey[800],
-                    labelStyle: const TextStyle(color: AppColors.primaryText),
-                  );
-                }).toList(),
-              ),
-            ],
-            if (movie.homepage != null && movie.homepage!.isNotEmpty ||
-                movie.imdbId != null) ...[
-              const SizedBox(height: 24),
-              Text(
-                'External Links',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 16,
-                children: [
-                  if (movie.homepage != null && movie.homepage!.isNotEmpty)
-                    OutlinedButton.icon(
-                      icon: const Icon(Icons.language),
-                      label: const Text('Official Website'),
-                      onPressed: () async {
-                        // import 'package:url_launcher/url_launcher.dart';
-                        if (await canLaunchUrl(Uri.parse(movie.homepage!))) {
-                          await launchUrl(Uri.parse(movie.homepage!));
-                        }
-                      },
-                    ),
-                  if (movie.imdbId != null)
-                    OutlinedButton.icon(
-                      icon: const Icon(Icons.movie),
-                      label: const Text('IMDb'),
-                      onPressed: () async {
-                        final imdbUrl =
-                            'https://www.imdb.com/title/${movie.imdbId}/';
-                        if (await canLaunchUrl(Uri.parse(imdbUrl))) {
-                          await launchUrl(Uri.parse(imdbUrl));
-                        }
-                      },
-                    ),
-                ],
-              ),
-            ],
+                movie.spokenLanguages!.isNotEmpty)
+              SpokenLanguagesSection(languages: movie.spokenLanguages!),
+            ExternalLinksSection(
+              homepage: movie.homepage,
+              imdbId: movie.imdbId,
+            ),
           ],
           const SizedBox(height: 32),
           RecommendationsSectionWidget( recommendations: null, onShowAllPressed: () {
@@ -1363,79 +793,6 @@ Open in miko by click on ${myItem.internalUrl}
   }
 
 
-
-  Widget _buildKeywordsSection(BuildContext context, List<Keyword> keywords) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 24),
-        Text(
-          'Keywords',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8.0,
-          runSpacing: 8.0,
-          children: keywords.map((keyword) {
-            return ActionChip(
-              label: Text(keyword.name),
-              backgroundColor: Colors.grey[800],
-              labelStyle: const TextStyle(color: Colors.white70),
-              onPressed: () {
-                _performHapticFeedback();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MoviesByKeywordScreen(
-                      keywordId: keyword.id,
-                      keywordName: keyword.name,
-                      movieService: _movieService,
-                    ),
-                  ),
-                );
-              },
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
-
-
-
-  Widget _buildInfoCard(
-      BuildContext context, String title, String value, IconData icon) {
-    return Card(
-      color: Colors.grey[
-          850], // Shimmer is used for the overall loading state, not individual static cards.
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          children: [
-            Icon(icon,
-                size: 28, color: Theme.of(context).colorScheme.secondary),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: Colors.white70),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold, color: AppColors.primaryText),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
   
   void gentranslate() async {
   MovieTvTranslator translator = MovieTvTranslator();
