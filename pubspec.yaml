@@ -114,6 +114,7 @@ flutter:
     - assets/
     - assets/splashlogo/
     - assets/fonts/
+    - assets/images/
 
   fonts:
     - family: FiraCode

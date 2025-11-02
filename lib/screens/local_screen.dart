@@ -666,7 +666,7 @@ class LocalScreenState extends State<LocalScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => VideoPlayerScreenLocal(
+            builder: (_) => VideoPlayerScreen(
               videoName: file.path,
               source: 'local',
               videoUrl: file.path),

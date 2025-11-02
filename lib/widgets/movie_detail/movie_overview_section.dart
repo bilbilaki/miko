@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:miko/services/user_data_service.dart';
-import 'package:miko/showcases/anime_detail_utils.dart';
+import 'package:miko/widgets/tv_detail/anime_detail_utils.dart';
 
 /// Widget for displaying movie overview with translation support
 class MovieOverviewSection extends StatelessWidget {

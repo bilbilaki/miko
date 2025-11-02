@@ -5,6 +5,7 @@ import 'package:miko/screens/dl.dart';
 import 'package:miko/screens/httpcopy.dart';
 import 'package:miko/screens/local_screen.dart';
 import 'package:miko/screens/scrap_page.dart';
+import 'package:miko/screens/url_source_screen.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:miko/utils/utils.dart';
 import '../providers/settings_provider.dart';
@@ -206,18 +207,18 @@ class RightNavigationPanel extends ConsumerWidget {
                   isMobileLayout,
                 ),
               ),
-              //          _buildRightNavigationItem(
-              //   context,
-              //   ref,
-              //   icon: Icons.music_video,
-              //   title: 'test',
-              //   showText: showText,
-              //   onTap: () => _navigateTo(
-              //     context,
-              //     SmbScreenTest(),
-              //     isMobileLayout,
-              //   ),
-              // ),
+                       _buildRightNavigationItem(
+                context,
+                ref,
+                icon: Icons.music_video,
+                title: 'Url',
+                showText: showText,
+                onTap: () => _navigateTo(
+                  context,
+                  StreamPlayerPage(),
+                  isMobileLayout,
+                ),
+              ),
       
 
               const Divider(color: AppColors.dividerColor, height: 1),

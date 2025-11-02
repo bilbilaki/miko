@@ -4,17 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import for HapticFeedback
 import 'package:miko/providers/god_proovider.dart' as ss;
 import 'package:miko/services/user_data_service.dart';
-import 'package:miko/showcases/anime_detail_header.dart';
-import 'package:miko/showcases/anime_detail_utils.dart';
+import 'package:miko/widgets/tv_detail/anime_detail_header.dart';
+import 'package:miko/widgets/tv_detail/anime_detail_utils.dart';
 import 'package:miko/showcases/recommendations_page.dart';
 import 'package:miko/utils/ai_translator.dart';
 import 'package:miko/utils/utils.dart' hide ShareItem;
 import 'package:miko/widgets/episode_tile_widget.dart';
 import 'package:share_plus/share_plus.dart';
 import '../widgets/anime_series_card.dart'; // Keep if used elsewhere
-import 'anime_detail_app_bar.dart';
-import 'anime_episode_widgets.dart';
-import 'anime_recommendations.dart';
+import '../widgets/tv_detail/anime_detail_app_bar.dart';
+import '../widgets/tv_detail/anime_episode_widgets.dart';
+import '../widgets/tv_detail/anime_recommendations.dart';
 import 'seasondetailpage_anime.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:provider/provider.dart';
