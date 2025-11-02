@@ -806,8 +806,10 @@ class VideoPlayerScreenPlState extends State<VideoPlayerScreenPl> {
 }
 class VideoPlayerScreen extends StatefulWidget {
   final String videoUrl;
+  final String videoName;
+  final String source;
   final List? playlistitem;
-  const VideoPlayerScreen({required this.videoUrl,this.playlistitem, super.key});
+  const VideoPlayerScreen({required this.videoUrl,this.playlistitem, super.key, required this.videoName, required this.source});
 
   @override
   State<VideoPlayerScreen> createState() => VideoPlayerScreenState();
@@ -816,31 +818,170 @@ class VideoPlayerScreen extends StatefulWidget {
 class VideoPlayerScreenState extends State<VideoPlayerScreen> {
   late final Player player = Player();
   late final VideoController controller = VideoController(player);
-
+  bool showControls = true;
+  bool showEpisodeList = false;
+  bool isFullScreen = false;
+  bool isMuted = false;
   bool isPiPEnabled = false;
-
+  Timer? _progressSaveTimer; // Timer to periodically save progress
+   ScrollController _seasonsScrollController = ScrollController();
+  String urlToPlayQuality = '';
   double subtitleSize = 32.0;
   Color subtitleColor = const Color.fromARGB(255, 238, 230, 5);
   bool showSubtitleControls = false;
+  late int currentIndex;
+  StreamSubscription? _completedSubscription;
+  StreamSubscription? _errorSubscription;
   Timer? _hideTimer;
+  String currentQuality = 'Auto';
+  bool streamHasError = false;
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {});
+      currentIndex = 0;
+    _userDataService = Provider.of<UserDataService>(context, listen: false);
+
+    _completedSubscription = player.stream.completed.listen((completed) {
+      debugPrint(
+        'VideoPlayerScreenPlState: Player completed stream event: $completed',
+      );
+      if (completed) {
+        _clearPlaybackProgress(); 
+        debugPrint('VideoPlayerScreenPlState: Video completed. Playing next.');
+        playNext();
+      }
+    });
+
+    _progressSaveTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      _savePlaybackProgress();
+    });
+    debugPrint('VideoPlayerScreenPlState: _progressSaveTimer started.');
 
 
-
-    player.open(Media(Uri.decodeComponent(widget.videoUrl)),
-        play: true);
-
-
-    player.stream.error.listen((error) {
-      debugPrint('Player error: $error');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadAndPlayEpisode(0, isInitialPlay: true);
     });
   }
+  Future<void> _loadAndPlayEpisode(
+    int index, {
+    bool isInitialPlay = true,
+    String? specificUrl,
+  }) async {
+    // 1. Validate index
+ 
 
-  String currentQuality = 'Auto';
+    // 2. Update state
+    setState(() {
+      currentIndex = index;
+    });
+
+
+
+    String urlToPlay;
+    if (specificUrl != null) {
+      urlToPlay = specificUrl;
+    } else {
+
+      urlToPlay = widget.videoUrl;
+    }
+
+    debugPrint("Opening media: $urlToPlay");
+    await player.open(Media(Uri.decodeComponent(urlToPlay)), play: false);
+
+    _userDataService.toggleIsWatchedLink(
+      widget.videoName,
+      widget.source,
+      0,
+      widget.videoUrl,
+    );
+
+    Duration? savedPosition = await _userDataService.getVideoProgress(
+widget.videoName,
+      widget.source,
+      '0',
+      widget.videoUrl,
+    );
+
+
+    if (isInitialPlay) {
+ 
+      if (savedPosition != null) {
+        final shouldResume = await _showResumeDialog(savedPosition);
+        if (shouldResume == true) {
+          await player.seek(savedPosition);
+          await player.play();
+        } else if (shouldResume == false) {
+          await _clearPlaybackProgress();
+        }
+      }
+    }
+
+
+    await player.play();
+  }
+
+  void playNext() {
+    _loadAndPlayEpisode(currentIndex + 1, isInitialPlay: true);
+  }
+
+  void playPrevious() {
+    _loadAndPlayEpisode(currentIndex - 1, isInitialPlay: true);
+  }
+
+  void playEpisode(int index) {
+    _loadAndPlayEpisode(
+      index,
+      isInitialPlay: true,
+    ); 
+  }
+
+    // player.open(Media(Uri.decodeComponent(widget.videoUrl)),
+    //     play: true);
+
+
+    // player.stream.error.listen((error) {
+    //   debugPrint('Player error: $error');
+    // });
+  
+
   final List<String> qualityOptions = ['Auto', '1080p', '720p', '480p', '360p'];
+  String formatDuration(Duration duration) {
+    String hours = duration.inHours.toString().padLeft(2, '0');
+    String minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    String seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    if (duration.inHours > 0) {
+      return "$hours:$minutes:$seconds";
+    }
+    return "$minutes:$seconds";
+  }
+
+   List<BoxFit> fitOptions = [
+    BoxFit.contain, // Standard
+    BoxFit.cover, // Fill/Crop
+    BoxFit.fill, // Stretch
+    BoxFit.fitWidth,
+    BoxFit.fitHeight,
+  ];
+  int currentFitIndex = 0;
+  BoxFit get currentFit => fitOptions[currentFitIndex];
+   Map<BoxFit, IconData> _fitIcons = {
+    BoxFit.contain: Icons.fullscreen_exit,
+    BoxFit.cover: Icons.fullscreen,
+    BoxFit.fill: Icons.photo_size_select_large,
+    BoxFit.fitWidth: Icons.swap_horiz,
+    BoxFit.fitHeight: Icons.swap_vert,
+  };
+
+
+   List<String> choicelist = [
+    'Auto',
+    '1080p',
+    '720p',
+    '540',
+    '480p',
+    'DUBBED',
+  ];
+
 
   void _showSubtitleControls() {
     setState(() {
@@ -860,11 +1001,76 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   void dispose(){
  // Release PiP plugin resources
-    _hideTimer?.cancel();
+    _progressSaveTimer?.cancel();
+    _completedSubscription?.cancel();
+    _errorSubscription?.cancel();
 
- player.dispose();
 
+    nimdispose(); // Your existing method is fine
     super.dispose();
+
+  }
+    void nimdispose() async {
+    await _savePlaybackProgress();
+    await player.dispose(); 
+  }
+
+    Future<void> _savePlaybackProgress() async {
+
+    if (player.state.duration.inSeconds > 10) {
+     
+      Duration position = player.state.position; // Original commented line
+    //  final duration = player.state.duration;
+    
+      await _userDataService.saveVideoProgress(
+widget.videoName,
+      widget.source,
+      '0',
+      widget.videoUrl,
+      position
+      );
+    }
+  }
+
+  Future<void> _clearPlaybackProgress() async {
+    await _userDataService.clearVideoProgress(
+widget.videoName,
+      widget.source,
+      '0',
+      widget.videoUrl,
+
+    );
+  }
+
+
+  Future<bool?> _showResumeDialog(Duration savedPosition) async {
+   
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false, // User must make a choice
+      builder: (context) => AlertDialog(
+        title: const Text('Resume Playback?'),
+        content: Text(
+          'You previously stopped watching at ${formatDuration(savedPosition)}. Would you like to resume?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+            
+              Navigator.of(context).pop(false); // Return false
+            },
+            child: const Text('START OVER'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+            
+              Navigator.of(context).pop(true); // Return true
+            },
+            child: const Text('RESUME'),
+          ),
+        ],
+      ),
+    );
   }
     final List<BoxFit> _fitOptions = [
     BoxFit.contain, // Standard
@@ -873,16 +1079,8 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
     BoxFit.fitWidth,
     BoxFit.fitHeight,
   ];
-  int currentFitIndex = 0;
-  BoxFit get currentFit => _fitOptions[currentFitIndex];
-  // Map to hold icons for each fit mode for better UX
-  final Map<BoxFit, IconData> _fitIcons = {
-    BoxFit.contain: Icons.fullscreen_exit,
-    BoxFit.cover: Icons.fullscreen,
-    BoxFit.fill: Icons.photo_size_select_large,
-    BoxFit.fitWidth: Icons.swap_horiz,
-    BoxFit.fitHeight: Icons.swap_vert,
-  };
+  late final UserDataService _userDataService;
+
   void _cycleBoxFit() {
     setState(() {
       currentFitIndex = (currentFitIndex + 1) % _fitOptions.length;
@@ -982,10 +1180,12 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
 class VideoPlayerScreenLocal extends StatefulWidget {
   final String videoUrl;
   final List? playlistitem;
+    final String videoName;
+  final String source;
   const VideoPlayerScreenLocal({
     required this.videoUrl,
     this.playlistitem,
-    super.key,
+    super.key, required this.videoName, required this.source,
   });
 
   @override
@@ -995,27 +1195,165 @@ class VideoPlayerScreenLocal extends StatefulWidget {
 class _VideoPlayerScreenLocalState extends State<VideoPlayerScreenLocal> {
   late final Player player = Player();
   late final VideoController controller = VideoController(player);
-
+  bool showControls = true;
+  bool showEpisodeList = false;
+  bool isFullScreen = false;
+  bool isMuted = false;
   bool isPiPEnabled = false;
-
+  Timer? _progressSaveTimer; // Timer to periodically save progress
+   ScrollController _seasonsScrollController = ScrollController();
+  String urlToPlayQuality = '';
   double subtitleSize = 32.0;
   Color subtitleColor = const Color.fromARGB(255, 238, 230, 5);
   bool showSubtitleControls = false;
+  late int currentIndex;
+  StreamSubscription? _completedSubscription;
+  StreamSubscription? _errorSubscription;
   Timer? _hideTimer;
+  String currentQuality = 'Auto';
+  bool streamHasError = false;
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {});
+      currentIndex = 0;
+    _userDataService = Provider.of<UserDataService>(context, listen: false);
 
-    player.open(Media(File(widget.videoUrl).path), play: true);
+    _completedSubscription = player.stream.completed.listen((completed) {
+      debugPrint(
+        'VideoPlayerScreenPlState: Player completed stream event: $completed',
+      );
+      if (completed) {
+        _clearPlaybackProgress(); 
+        debugPrint('VideoPlayerScreenPlState: Video completed. Playing next.');
+        playNext();
+      }
+    });
 
-    player.stream.error.listen((error) {
-      debugPrint('Player error: $error');
+    _progressSaveTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      _savePlaybackProgress();
+    });
+    debugPrint('VideoPlayerScreenPlState: _progressSaveTimer started.');
+
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadAndPlayEpisode(0, isInitialPlay: true);
     });
   }
+  Future<void> _loadAndPlayEpisode(
+    int index, {
+    bool isInitialPlay = true,
+    String? specificUrl,
+  }) async {
 
-  String currentQuality = 'Auto';
+    // 2. Update state
+    setState(() {
+      currentIndex = index;
+    });
+
+
+
+    String urlToPlay;
+    if (specificUrl != null) {
+      urlToPlay = specificUrl;
+    } else {
+      urlToPlay = widget.videoUrl;
+    }
+
+    debugPrint("Opening media: $urlToPlay");
+    await player.open(Media(Uri.decodeComponent(urlToPlay)), play: false);
+
+    _userDataService.toggleIsWatchedLink(
+   widget.videoName,
+      widget.source,
+      0,
+      widget.videoUrl,
+    );
+
+    Duration? savedPosition = await _userDataService.getVideoProgress(
+widget.videoName,
+      widget.source,
+      '0',
+      widget.videoUrl,
+    );
+
+    if (isInitialPlay) {
+ 
+      if (savedPosition != null) {
+        final shouldResume = await _showResumeDialog(savedPosition);
+        if (shouldResume == true) {
+          await player.seek(savedPosition);
+          await player.play();
+        } else if (shouldResume == false) {
+          await _clearPlaybackProgress();
+        }
+      }
+    }
+
+
+    await player.play();
+  }
+
+  void playNext() {
+    _loadAndPlayEpisode(currentIndex + 1, isInitialPlay: true);
+  }
+
+  void playPrevious() {
+    _loadAndPlayEpisode(currentIndex - 1, isInitialPlay: true);
+  }
+
+  void playEpisode(int index) {
+    _loadAndPlayEpisode(
+      index,
+      isInitialPlay: true,
+    ); 
+  }
+
+    // player.open(Media(Uri.decodeComponent(widget.videoUrl)),
+    //     play: true);
+
+
+    // player.stream.error.listen((error) {
+    //   debugPrint('Player error: $error');
+    // });
+  
+
   final List<String> qualityOptions = ['Auto', '1080p', '720p', '480p', '360p'];
+  String formatDuration(Duration duration) {
+    String hours = duration.inHours.toString().padLeft(2, '0');
+    String minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    String seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    if (duration.inHours > 0) {
+      return "$hours:$minutes:$seconds";
+    }
+    return "$minutes:$seconds";
+  }
+
+   List<BoxFit> fitOptions = [
+    BoxFit.contain, // Standard
+    BoxFit.cover, // Fill/Crop
+    BoxFit.fill, // Stretch
+    BoxFit.fitWidth,
+    BoxFit.fitHeight,
+  ];
+  int currentFitIndex = 0;
+  BoxFit get currentFit => fitOptions[currentFitIndex];
+   Map<BoxFit, IconData> _fitIcons = {
+    BoxFit.contain: Icons.fullscreen_exit,
+    BoxFit.cover: Icons.fullscreen,
+    BoxFit.fill: Icons.photo_size_select_large,
+    BoxFit.fitWidth: Icons.swap_horiz,
+    BoxFit.fitHeight: Icons.swap_vert,
+  };
+
+
+   List<String> choicelist = [
+    'Auto',
+    '1080p',
+    '720p',
+    '540',
+    '480p',
+    'DUBBED',
+  ];
 
   void _showSubtitleControls() {
     setState(() {
@@ -1035,13 +1373,78 @@ class _VideoPlayerScreenLocalState extends State<VideoPlayerScreenLocal> {
   @override
   void dispose() {
     // Release PiP plugin resources
-    _hideTimer?.cancel();
+    _progressSaveTimer?.cancel();
+    _completedSubscription?.cancel();
+    _errorSubscription?.cancel();
 
-    player.dispose();
 
+    nimdispose(); // Your existing method is fine
     super.dispose();
+
   }
 
+    Future<void> _savePlaybackProgress() async {
+
+    if (player.state.duration.inSeconds > 10) {
+     
+      Duration position = player.state.position; // Original commented line
+    //  final duration = player.state.duration;
+    
+      await _userDataService.saveVideoProgress(
+widget.videoName,
+      widget.source,
+      '0',
+      widget.videoUrl,
+
+        position, 
+      );
+    }
+  }
+
+  Future<void> _clearPlaybackProgress() async {
+    await _userDataService.clearVideoProgress(
+widget.videoName,
+      widget.source,
+      '0',
+      widget.videoUrl,
+
+    );
+  }
+
+
+  Future<bool?> _showResumeDialog(Duration savedPosition) async {
+   
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false, // User must make a choice
+      builder: (context) => AlertDialog(
+        title: const Text('Resume Playback?'),
+        content: Text(
+          'You previously stopped watching at ${formatDuration(savedPosition)}. Would you like to resume?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+            
+              Navigator.of(context).pop(false); // Return false
+            },
+            child: const Text('START OVER'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+            
+              Navigator.of(context).pop(true); // Return true
+            },
+            child: const Text('RESUME'),
+          ),
+        ],
+      ),
+    );
+  }
+  void nimdispose() async {
+    await _savePlaybackProgress();
+    await player.dispose(); 
+  }
   final List<BoxFit> _fitOptions = [
     BoxFit.contain, // Standard
     BoxFit.cover, // Fill/Crop
@@ -1049,16 +1452,8 @@ class _VideoPlayerScreenLocalState extends State<VideoPlayerScreenLocal> {
     BoxFit.fitWidth,
     BoxFit.fitHeight,
   ];
-  int currentFitIndex = 0;
-  BoxFit get currentFit => _fitOptions[currentFitIndex];
-  // Map to hold icons for each fit mode for better UX
-  final Map<BoxFit, IconData> _fitIcons = {
-    BoxFit.contain: Icons.fullscreen_exit,
-    BoxFit.cover: Icons.fullscreen,
-    BoxFit.fill: Icons.photo_size_select_large,
-    BoxFit.fitWidth: Icons.swap_horiz,
-    BoxFit.fitHeight: Icons.swap_vert,
-  };
+  late final UserDataService _userDataService;
+
   void _cycleBoxFit() {
     setState(() {
       currentFitIndex = (currentFitIndex + 1) % _fitOptions.length;

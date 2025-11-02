@@ -1,6 +1,7 @@
 // lib/widgets/unified_search_bottom_sheet.dart
 import 'package:flutter/material.dart';
 import 'package:miko/providers/god_proovider.dart'; // Assuming this is the correct import; removed duplicate with 'as tsa'
+import 'package:miko/widgets/movie_card_widget.dart';
 import 'package:provider/provider.dart';
 
 import 'package:miko/utils/colors.dart';

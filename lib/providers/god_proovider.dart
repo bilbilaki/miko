@@ -1916,7 +1916,7 @@ int _currentPage = 0;
     _errorMessage = message;
     notifyListeners();
   }
-}
+
 
 
 // 1- number of all existant anime
@@ -2056,3 +2056,4 @@ List<Movie> getRandomMoviesByGenres(MovieProvider movieProvider, List<String> ge
 //final animeCount = getTotalAnimeCount(ref.read(animeProvider));
 //final randomAnime = getRandomAnime(ref.read(animeProvider));
 //final actionAnime = getRandomAnimeByGenres(ref.read(animeProvider), ['Action']);
+}

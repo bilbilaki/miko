@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/screens/dl.dart';
+import 'package:miko/screens/httpcopy.dart';
 import 'package:miko/screens/local_screen.dart';
 import 'package:miko/screens/scrap_page.dart';
 import 'package:miko/utils/colors.dart';
@@ -193,6 +194,30 @@ class RightNavigationPanel extends ConsumerWidget {
                   isMobileLayout,
                 ),
               ),
+                      _buildRightNavigationItem(
+                context,
+                ref,
+                icon: Icons.music_video,
+                title: 'http2',
+                showText: showText,
+                onTap: () => _navigateTo(
+                  context,
+                  CrawlerHomePage5(),
+                  isMobileLayout,
+                ),
+              ),
+              //          _buildRightNavigationItem(
+              //   context,
+              //   ref,
+              //   icon: Icons.music_video,
+              //   title: 'test',
+              //   showText: showText,
+              //   onTap: () => _navigateTo(
+              //     context,
+              //     SmbScreenTest(),
+              //     isMobileLayout,
+              //   ),
+              // ),
       
 
               const Divider(color: AppColors.dividerColor, height: 1),

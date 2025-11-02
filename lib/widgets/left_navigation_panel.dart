@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
-import 'package:miko/screens/genre_detail_screen.dart';
+import 'package:miko/screens/favorites_screen.dart';
+import 'package:miko/screens/genres_list_screen.dart';
 import 'package:miko/screens/grid.dart';
 import 'package:miko/screens/http.dart';
 import 'package:miko/screens/watchlist_screen.dart';

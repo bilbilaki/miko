@@ -72,6 +72,8 @@ class _InteractiveVideoCardState extends State<InteractiveVideoCard> {
           context,
           MaterialPageRoute(
             builder: (_) => VideoPlayerScreen(
+              videoName: '${widget.scene.index}',
+              source: 'local',
               videoUrl: widget.scene.stream,
             ),
           ),

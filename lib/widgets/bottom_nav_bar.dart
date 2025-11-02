@@ -24,11 +24,6 @@ class BottomNavBar extends StatelessWidget {
       unselectedFontSize: 10.0,
       items:  [
         BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          activeIcon: Icon(Icons.home_filled),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
           icon: Icon(Icons.movie),
           activeIcon: Icon(Icons.movie_edit),
           label: 'Movies',
@@ -49,10 +44,15 @@ class BottomNavBar extends StatelessWidget {
           label: 'Genres',
         ),
         BottomNavigationBarItem(
+          icon: Icon(Icons.star_border_outlined),
+          activeIcon: Icon(Icons.star_border_sharp),
+          label: 'Favorites',
+        ),
+        BottomNavigationBarItem(
           icon: Icon(Icons.bookmark_add),
           activeIcon: Icon(Icons.bookmark),
           label: 'WatchList',
-        ),
+        )
       ],
     );
   }

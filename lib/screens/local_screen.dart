@@ -666,7 +666,10 @@ class LocalScreenState extends State<LocalScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => VideoPlayerScreenLocal(videoUrl: file.path),
+            builder: (_) => VideoPlayerScreenLocal(
+              videoName: file.path,
+              source: 'local',
+              videoUrl: file.path),
           ),
         );
       } else if (provider.isImageFile(file)) {

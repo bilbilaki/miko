@@ -7,11 +7,14 @@ import 'package:miko/main.dart';
 import 'package:miko/providers/god_proovider.dart' show MovieProvider;
 import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/screens/dl.dart';
+import 'package:miko/screens/offline_screens/movie_detail_screen.dart';
 import 'package:miko/screens/video_player_wplaylist_screen.dart';
+import 'package:miko/showcases/anime_recommendations.dart';
 import 'package:miko/showcases/cast_page.dart';
 import 'package:miko/showcases/recommendations_page.dart';
 import 'package:miko/utils/ai_translator.dart';
 import 'package:miko/utils/utils.dart';
+import 'package:miko/widgets/movie_links_box.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +23,7 @@ import 'package:miko/showcases/movies_by_keyword_screen.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'anime_detail_utils.dart';
 import 'model.dart';
 import 'movie_service.dart';
 import 'person_detail_page.dart';
@@ -841,7 +845,7 @@ Open in miko by click on ${myItem.internalUrl}
                                 horizontal: 30, vertical: 12)),
                         onPressed: () {
                           _performHapticFeedback();
-                          _showDownloadLinkSelection(context, downloadLinks);
+                          showDownloadLinkSelection(context, downloadLinks,movie.id,movie.title);
                           // downloadLinks.toString());
                         },
                       )
@@ -860,7 +864,7 @@ Open in miko by click on ${myItem.internalUrl}
                                 horizontal: 30, vertical: 12)),
                         onPressed: () {
                           _performHapticFeedback();
-                          _showDownloadLinkSelection(context, downloadLinks,isForPlay: false);
+                          showDownloadLinkSelection(context, downloadLinks,movie.id,movie.title,isForPlay: false);
                           // downloadLinks.toString());
                         },
                       ):SizedBox()
@@ -954,8 +958,7 @@ Open in miko by click on ${myItem.internalUrl}
                       padding: const EdgeInsets.only(right: 12.0),
                       child: GestureDetector(
                         onTap: () {
-                          _performHapticFeedback();
-                          _navigateToPersonDetail(castMember.id,
+                          navigateToPersonDetail(context,castMember.id,
                               castMember.name, castMember.profilePath);
                         },
                         child: SizedBox(
@@ -1083,8 +1086,7 @@ Open in miko by click on ${myItem.internalUrl}
                         padding: const EdgeInsets.only(right: 12.0),
                         child: GestureDetector(
                           onTap: () {
-                            _performHapticFeedback();
-                            _navigateToPersonDetail(director.id, director.name,
+                            navigateToPersonDetail(context,director.id, director.name,
                                 director.profilePath);
                           },
                           child: SizedBox(
@@ -1190,8 +1192,7 @@ Open in miko by click on ${myItem.internalUrl}
                 children: credits.writers.map((writer) {
                   return GestureDetector(
                     onTap: () {
-                      _performHapticFeedback();
-                      _navigateToPersonDetail(
+                      navigateToPersonDetail(context,
                           writer.id, writer.name, writer.profilePath);
                     },
                     child: Chip(
@@ -1247,8 +1248,7 @@ Open in miko by click on ${myItem.internalUrl}
                 children: credits.producers.take(5).map((producer) {
                   return GestureDetector(
                     onTap: () {
-                      _performHapticFeedback();
-                      _navigateToPersonDetail(
+                      navigateToPersonDetail(context,
                           producer.id, producer.name, producer.profilePath);
                     },
                     child: Chip(
@@ -1503,104 +1503,33 @@ Open in miko by click on ${myItem.internalUrl}
             ],
           ],
           const SizedBox(height: 32),
-          _buildRecommendationsSection(context),
+          RecommendationsSectionWidget( recommendations: null, onShowAllPressed: () {
+                    _performHapticFeedback();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RecommendationsPage(
+                          movieId: widget.id,
+                          movieTitle: movie.title,
+                          typec: "movie",
+                        ),
+                      ),
+                    );
+                  }, onRecommendationTapped: () {
+        _performHapticFeedback();
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MovieDetailPage(id: movie.id),
+          ),
+        );
+      }, recommendationsM: recommendations,),
         ],
       ),
     );
   }
 
-  void _showDownloadLinkSelection(
-      BuildContext context, List<String> links,{bool isForPlay=true}) async {
-    var userDataService =
-        Provider.of<UserDataService>(context, listen: false);
 
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return SimpleDialog(
-          title: const Text('Select Quality / Source'),
-          titleTextStyle: const TextStyle(
-              color: AppColors.primaryText,
-              fontSize: 18,
-              fontWeight: FontWeight.bold),
-          backgroundColor: AppColors.secondaryBackground,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          children: links.map((link) {
-            // Try to guess quality from URL (very basic)
-            String qualityGuess = "Unknown";
-            if (link.contains('1080p'))
-              qualityGuess = "1080p ";
-            else if (link.contains('720p'))
-              qualityGuess = "720p ";
-            else if (link.contains('480p'))
-              qualityGuess = "480p ";
-            else if (link.contains('BluRay'))
-              qualityGuess += " BluRay ";
-            else if (link.contains('HEVC') || link.contains('x265'))
-              qualityGuess += " HEVC ";
-            else if (link.contains('x264')) qualityGuess += " x264";
-
-            return SimpleDialogOption(
-              onPressed: () async {
-                tVmedium(); // Haptic feedback on dialog option tap
-                if (isForPlay){
-                Navigator.pop(dialogContext); // Close the dialog
-                userDataService.toggleIsWatchedLink(
-                    widget.id, widget.id, widget.id, links.toString());
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => VideoPlayerScreen(videoUrl: link),
-                  ),
-                      );
-              }
-              else if (isForPlay==false)
-              {
-                 downloadManager.addDownload(
-                            DownloadItem(
-                              null, // path will be set internally
-                              null, // episodeNumber
-                              null, // sessionNumber
-                              movie.title, // name
-                              isMovie: true,
-                              task: DownloadTask(
-                                url: link,
-                                taskId:
-                                    '${movie.title}.${movie.id}', // Added entry.key for unique task ID per resolution
-                              ),
-                              idC: movie.id, // Dummy ID
-                              movieService: MovieService(),
-                            ),
-                          );
-
-                          tVClick();
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DownloadScreen(
-                                downloadManager: downloadManager,
-                              ),
-                            ),
-                          );
-                        
-
-              }},
-              padding:
-                  const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
-              child: Text(
-                '$qualityGuess - ${Uri.parse(link).host}', // Show quality guess and domain
-                style:
-                    const TextStyle(color: AppColors.primaryText, fontSize: 14),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-          ),
-          );
-                          }).toList(),
-        );
-      },
-    );
-  }
 
   Widget _buildKeywordsSection(BuildContext context, List<Keyword> keywords) {
     return Column(
@@ -1640,225 +1569,8 @@ Open in miko by click on ${myItem.internalUrl}
     );
   }
 
-  void _navigateToPersonDetail(int personId, String name, String? profilePath) {
-    _performHapticFeedback();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PersonDetailPage(
-          personId: personId,
-          initialName: name,
-          initialProfilePath: profilePath,
-        ),
-      ),
-    );
-  }
 
-  Widget _buildRecommendationsSection(BuildContext context) {
-    if (recommendations == null || recommendations!.results.isEmpty) {
-      return const SizedBox.shrink();
-    }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 24),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Recommendations',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              if (recommendations!.results.length > 10)
-                TextButton(
-                  onPressed: () {
-                    _performHapticFeedback();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RecommendationsPage(
-                          movieId: widget.id,
-                          movieTitle: movie.title,
-                          typec: "movie",
-                        ),
-                      ),
-                    );
-                  },
-                  child: Text(
-                    'See All',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.secondary,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 230,
-          child: NotificationListener<ScrollNotification>(
-            onNotification: (ScrollNotification scrollInfo) {
-              if (Platform.isAndroid &&
-                  scrollInfo is ScrollUpdateNotification) {
-                if (scrollInfo.scrollDelta != null &&
-                    scrollInfo.scrollDelta! != 0) {
-                  _performHapticFeedback();
-                }
-              }
-              return false;
-            },
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 0),
-              scrollDirection: Axis.horizontal,
-              itemCount: recommendations!.results.length > 10
-                  ? 10
-                  : recommendations!.results.length,
-              itemBuilder: (context, index) {
-                Movie movie = recommendations!.results[index];
-                return _buildRecommendationCard(context, movie);
-              },
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-      ],
-    );
-  }
-
-  Widget _buildRecommendationCard(BuildContext context, Movie movie) {
-    return GestureDetector(
-      onTap: () {
-        _performHapticFeedback();
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MovieDetailPage(id: movie.id),
-          ),
-        );
-      },
-      child: Container(
-        width: 130,
-        margin: const EdgeInsets.only(right: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Hero(
-              tag: 'movie-recommendation-${movie.id}',
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Stack(
-                  children: [
-                    movie.fullPosterPath.isNotEmpty
-                        ? CachedNetworkImage(
-                            filterQuality: FilterQuality.high,
-                            imageUrl: movie.fullPosterPath,
-                            height: 170,
-                            width: 130,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => const Center(
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 1,
-                                    color: AppColors.accentColor)),
-                            errorWidget: (context, url, error) => Container(
-                              height: 170,
-                              width: 130,
-                              color: Colors.grey[800],
-                              child: const Center(
-                                child: Icon(
-                                    Icons
-                                        .image_not_supported_outlined, // Standardized icon
-                                    size: 40,
-                                    color: AppColors.secondaryText),
-                              ),
-                            ),
-                            fadeInDuration: const Duration(milliseconds: 300),
-                            fadeOutDuration: const Duration(milliseconds: 100),
-                          )
-                        : Container(
-                            height: 170,
-                            width: 130,
-                            color: Colors.grey[800],
-                            child: const Center(
-                              child: Icon(
-                                  Icons
-                                      .image_not_supported_outlined, // Standardized icon
-                                  size: 40,
-                                  color: AppColors.secondaryText),
-                            ),
-                          ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: _getRatingColor(movie.voteAverage),
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(8),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.star,
-                                color: Colors.white, size: 12),
-                            const SizedBox(width: 2),
-                            Text(
-                              movie.voteAverage.toStringAsFixed(1),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              movie.title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryText,
-              ),
-            ),
-            if (movie.releaseDate.isNotEmpty && movie.releaseDate.length >= 4)
-              Text(
-                movie.releaseDate.substring(0, 4),
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Colors.grey[400],
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Color _getRatingColor(double rating) {
-    if (rating >= 7.5) {
-      return Colors.green.shade700;
-    } else if (rating >= 5.0) {
-      return Colors.orange.shade700;
-    } else if (rating > 0.0) {
-      return Colors.red.shade700;
-    }
-    return Colors.grey.shade700;
-  }
 
   Widget _buildInfoCard(
       BuildContext context, String title, String value, IconData icon) {
@@ -1906,57 +1618,5 @@ debugPrint(translatedOverView);
   debugPrint(oveview);
   });
   }
-Future<String?> showTextInputDialog(
-  BuildContext context, userDataService,{
-  String title = 'Enter Your Prefred Language',
-  String? initialText,
-  String hintText = 'Like Arabic , Ar ...',
-  TextCapitalization textCapitalization = TextCapitalization.sentences,
-  TextInputType keyboardType = TextInputType.text,
-}) async {
-   TextEditingController textEditingController =
-      TextEditingController(text: initialText);
-
-  return showDialog<String>(
-    context: context,
-    builder: (BuildContext dialogContext) {
-      return AlertDialog(
-        title: Text(title),
-        content: TextField(
-          controller: textEditingController,
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: hintText,
-            border: const OutlineInputBorder(),
-          ),
-          textCapitalization: textCapitalization,
-          keyboardType: keyboardType,
-          onSubmitted: (value) {
-            // Allow submitting by pressing Enter/Done on keyboard
-            Navigator.of(dialogContext).pop(value);
-          },
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.of(dialogContext).pop(null); // Return null on cancel
-            },
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-        await  userDataService.setCustoombaseurl(textEditingController.text);
-
-              Navigator.of(dialogContext)
-                  .pop(textEditingController.text); // Return entered text
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      );
-    },
-  );
-}
-
   }
 

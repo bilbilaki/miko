@@ -23,7 +23,7 @@ class LocalProvider extends ChangeNotifier {
       'thumbnail_cache_map'; // New key for thumbnail paths map
 
   String? _basePath;
-
+  bool isSmb=false;
   String? _currentPath; // Track the path currently listing
   List<Directory> _folders = [];
   List<File> _movies = [];
@@ -32,7 +32,7 @@ class LocalProvider extends ChangeNotifier {
   List<File> _images = []; // New list for image files
 
   String? get externalPath => _basePath;
-
+  bool? get _isSmb => isSmb; 
   List<Directory> get folders => List.unmodifiable(_folders);
   List<File> get movies => List.unmodifiable(_movies);
   List<File> get audios => List.unmodifiable(_audios);
@@ -479,6 +479,9 @@ class LocalProvider extends ChangeNotifier {
 
   /// Create a new folder under the current path.
   Future<bool> createFolder(String name) async {
+    if (_isSmb==true){
+      
+    }
     if (_currentPath == null) return false;
     final newDir = Directory(p.join(_currentPath!, name));
     if (await newDir.exists()) {
