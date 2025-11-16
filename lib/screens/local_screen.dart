@@ -251,7 +251,7 @@ class LocalScreenState extends State<LocalScreen> {
   }
 
   /// Builds either a GridView or ListView based on the current `_viewMode`.
-  Widget _buildContent(List<_GridItem> items) {
+  Widget _buildContent(List<GridItem> items) {
     if (_viewMode == ViewMode.grid) {
       return _buildGridView(items);
     } else {

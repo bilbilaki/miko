@@ -2,7 +2,7 @@ import java.util.Properties
 import java.io.FileInputStream
 
 val keystoreProperties = Properties().apply {
-    val keystorePropertiesFile = rootProject.file("key.properties")
+    val keystorePropertiesFile = rootProject.file("keystore.properties")
     if (keystorePropertiesFile.exists()) {
         load(FileInputStream(keystorePropertiesFile))
     }
@@ -23,7 +23,8 @@ plugins {
 android {
     namespace = "com.example.miko"
         compileSdk = 36
-    ndkVersion = "29.0.13846066"
+            ndkVersion = "26.3.11579264"
+
 signingConfigs {
         create("release") {
             storeFile = file(keystoreProperties["storeFile"] as String)

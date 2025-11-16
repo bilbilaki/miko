@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:swipe_image_gallery/swipe_image_gallery.dart';
 import '../../providers/local_provider.dart';
-import '../../widgets/photoeditor.dart';
 import '../video_player_wplaylist_screen.dart';
 import 'local_screen_dialogs.dart';
 
@@ -58,7 +57,6 @@ class LocalScreenFileOperations {
       context: context,
       children: [
         Image.file(imageFile, fit: BoxFit.contain),
-        Photoeditor(imageFile, currentFolderPath),
       ],
     ).show();
   }

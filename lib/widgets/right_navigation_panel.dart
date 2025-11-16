@@ -5,6 +5,7 @@ import 'package:miko/screens/dl.dart';
 import 'package:miko/screens/httpcopy.dart';
 import 'package:miko/screens/local_screen.dart';
 import 'package:miko/screens/scrap_page.dart';
+import 'package:miko/screens/settings_page.dart';
 import 'package:miko/screens/url_source_screen.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:miko/utils/utils.dart';
@@ -216,6 +217,18 @@ class RightNavigationPanel extends ConsumerWidget {
                 onTap: () => _navigateTo(
                   context,
                   StreamPlayerPage(),
+                  isMobileLayout,
+                ),
+              ),
+                            _buildRightNavigationItem(
+                context,
+                ref,
+                icon: Icons.settings,
+                title: 'Settings',
+                showText: showText,
+                onTap: () => _navigateTo(
+                  context,
+                  SettingsPage(),
                   isMobileLayout,
                 ),
               ),

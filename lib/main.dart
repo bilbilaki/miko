@@ -6,6 +6,7 @@ import 'package:miko/app_keeper.dart';
 import 'package:miko/configs/consts2.dart';
 import 'package:miko/models/cache.dart';
 import 'package:miko/providers/csv_detail_process_provider.dart';
+import 'package:miko/providers/local_library_provider.dart';
 import 'package:miko/providers/god_proovider.dart';
 import 'package:miko/providers/local_provider.dart';
 import 'package:miko/providers/settings_provider.dart';
@@ -40,6 +41,7 @@ await persistentCache.init(); // at app startup
         ), // Initialize MovieProvider directly
         ChangeNotifierProvider(create: (context) => TvSeriesProvider()),
         ChangeNotifierProvider(create: (context) => LocalProvider()),
+        ChangeNotifierProvider(create: (context) => LocalLibraryProvider()),
 
 
         ChangeNotifierProvider(

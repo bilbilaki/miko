@@ -9,6 +9,7 @@ import 'package:miko/screens/dl.dart';
 import 'package:miko/screens/favorites_screen.dart';
 import 'package:miko/screens/filtrering_screen.dart';
 import 'package:miko/screens/genres_list_screen.dart';
+import 'package:miko/screens/settings_page.dart';
 import 'package:miko/screens/watchlist_screen.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:miko/utils/utils.dart';
@@ -146,7 +147,7 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
               ),
             ),
           ),
-        ),       drawer: Drawer(
+           ),       drawer: Drawer(
           child: LeftNavigationPanel(isMobileLayout: true, isCollapsed: false),
         ),
         endDrawer: Drawer(child: RightNavigationPanel(isMobileLayout: true, isCollapsed: false)),
