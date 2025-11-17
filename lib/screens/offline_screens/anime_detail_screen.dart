@@ -4,6 +4,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:miko/models/local_library/helper_model.dart';
 
 import 'package:miko/providers/god_proovider.dart';
 import 'package:miko/services/user_data_service.dart';
@@ -18,8 +19,9 @@ import '../../providers/god_proovider.dart' as ss; // Added for shimmer effect
 class AnimeDetailsScreen extends StatelessWidget {
    int tvSeriesId; // Use TMDB ID to fetch from map
    String typec;
+   HelperModel? helperModel;
   AnimeDetailsScreen(
-      {required this.tvSeriesId, required this.typec, super.key});
+      {required this.tvSeriesId,this.helperModel, required this.typec, super.key});
    ScrollController _seasonsScrollController = ScrollController();
 
   // Haptic feedback function instance for this class

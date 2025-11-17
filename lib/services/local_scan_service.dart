@@ -1,8 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-
-import 'package:miko/configs/consts2.dart';
-import 'package:miko/models/local_library/content_item.dart';
 import 'package:miko/models/local_library/directory_entry.dart';
 import 'package:miko/models/local_library/episode.dart';
 import 'package:miko/models/local_library/metadata.dart';
@@ -13,14 +10,20 @@ import 'package:miko/models/local_library/photo.dart';
 import 'package:miko/models/local_library/tv_series.dart';
 import 'package:miko/models/local_library/season.dart';
 import 'package:miko/models/local_library/fetched_data.dart';
-import 'package:tmdb_api/tmdb_api.dart';
+import 'package:miko/models/local_library/local_scan_index.dart';
+import 'package:miko/services/local_scan_index_service.dart';
+import 'package:miko/showcases/movie_service.dart';
 
 class LocalScanService {
-  LocalScanService();
+  final LocalScanIndexService _indexService;
+
+  LocalScanService({LocalScanIndexService? indexService})
+      : _indexService = indexService ?? const LocalScanIndexService();
 
   // State
   bool _isScanning = false;
   bool _cancelRequested = false;
+  bool _isFetchingMetadata = false;
   int _totalCandidates = 0;
   int _processed = 0;
 
@@ -48,6 +51,7 @@ class LocalScanService {
   Stream<List<Photo>> get photoResultsStream => _photoResultsController.stream;
 
   bool get isScanning => _isScanning;
+  bool get isFetchingMetadata => _isFetchingMetadata;
   double get progress => _totalCandidates == 0 ? 0 : _processed / _totalCandidates;
   List<Movie> get movieResults => List.unmodifiable(_movieResults);
   List<TvSeries> get tvResults => List.unmodifiable(_tvResults);
@@ -57,11 +61,74 @@ class LocalScanService {
   int get totalCandidates => _totalCandidates;
   int get processed => _processed;
 
-  Future<void> startScan(String rootDir, ContentType contentType) async {
+  /// Rebuild in-memory results from the persisted JSON index, if present.
+  ///
+  /// This allows the app to show cached local library content after a restart
+  /// without requiring the user to manually trigger a new scan. It reuses the
+  /// existing scan grouping logic but uses the indexed file list instead of
+  /// walking the filesystem again.
+  Future<void> loadFromCache() async {
     if (_isScanning) return;
+
+    final index = await _indexService.load();
+    if (index.entries.isEmpty) {
+      return; // Nothing cached yet
+    }
+
     _isScanning = true;
     _cancelRequested = false;
     _clearResults();
+    _processed = 0;
+    _totalCandidates = index.entries.length;
+
+    _statusController.add('Loading cached local library...');
+    _emitProgress();
+
+    // Bucket file paths by content type based on what was stored in the index.
+    final Map<ContentType, List<String>> byType = {
+      for (final type in ContentType.values) type: <String>[],
+    };
+
+    for (final entry in index.entries.values) {
+      final type = _contentTypeFromName(entry.contentType);
+      byType[type]?.add(entry.path);
+    }
+
+    // Reuse the existing scan logic but with cached candidate lists.
+    if (byType[ContentType.movie]!.isNotEmpty) {
+      await _scanMovies(byType[ContentType.movie]!);
+    }
+    if (byType[ContentType.tvSeries]!.isNotEmpty) {
+      await _scanTvSeries(byType[ContentType.tvSeries]!);
+    }
+    if (byType[ContentType.music]!.isNotEmpty) {
+      await _scanMusic(byType[ContentType.music]!);
+    }
+    if (byType[ContentType.musicVideo]!.isNotEmpty) {
+      await _scanMusicVideos(byType[ContentType.musicVideo]!);
+    }
+    if (byType[ContentType.photo]!.isNotEmpty) {
+      await _scanPhotos(byType[ContentType.photo]!);
+    }
+    if (byType[ContentType.mixed]!.isNotEmpty) {
+      await _scanMixedContent(byType[ContentType.mixed]!);
+    }
+
+    _isScanning = false;
+    _statusController.add('Loaded cached local library');
+  }
+
+  Future<void> startScan(
+    String rootDir,
+    ContentType contentType, {
+    bool clearExisting = true,
+  }) async {
+    if (_isScanning) return;
+    _isScanning = true;
+    _cancelRequested = false;
+    if (clearExisting) {
+      _clearResultsForType(contentType);
+    }
     _processed = 0;
     _totalCandidates = 0;
 
@@ -70,6 +137,10 @@ class LocalScanService {
     final candidates = await _collectCandidates(rootDir, contentType);
     _totalCandidates = candidates.length;
     _emitProgress();
+
+    // Update the lightweight JSON index on disk. This will only
+    // write the file if something actually changed between scans.
+    await _indexService.updateForScan(rootDir, contentType, candidates);
 
     if (candidates.isEmpty) {
       _isScanning = false;
@@ -129,6 +200,39 @@ class LocalScanService {
     _photoResults.clear();
   }
 
+  void _clearResultsForType(ContentType type) {
+    switch (type) {
+      case ContentType.movie:
+        _movieResults.clear();
+        _movieResultsController.add(List.unmodifiable(_movieResults));
+        break;
+      case ContentType.tvSeries:
+        _tvResults.clear();
+        _tvResultsController.add(List.unmodifiable(_tvResults));
+        break;
+      case ContentType.music:
+        _musicResults.clear();
+        _musicResultsController.add(List.unmodifiable(_musicResults));
+        break;
+      case ContentType.musicVideo:
+        _musicVideoResults.clear();
+        _musicVideoResultsController.add(List.unmodifiable(_musicVideoResults));
+        break;
+      case ContentType.photo:
+        _photoResults.clear();
+        _photoResultsController.add(List.unmodifiable(_photoResults));
+        break;
+      case ContentType.mixed:
+        _musicResults.clear();
+        _musicResultsController.add(List.unmodifiable(_musicResults));
+        _musicVideoResults.clear();
+        _musicVideoResultsController.add(List.unmodifiable(_musicVideoResults));
+        _photoResults.clear();
+        _photoResultsController.add(List.unmodifiable(_photoResults));
+        break;
+    }
+  }
+
   String _contentTypeLabel(ContentType type) {
     switch (type) {
       case ContentType.movie:
@@ -146,6 +250,13 @@ class LocalScanService {
     }
   }
 
+  ContentType _contentTypeFromName(String name) {
+    return ContentType.values.firstWhere(
+      (e) => e.name == name,
+      orElse: () => ContentType.movie,
+    );
+  }
+
   Future<void> _scanMovies(List<String> candidates) async {
     final videoExts = <String>{'.mp4', '.mkv', '.avi', '.mov', '.m4v', '.webm'};
 
@@ -160,13 +271,16 @@ class LocalScanService {
       final metadata = await Metadata.fromFile(file);
       final movieName = parsed.name.isEmpty ? 'Unknown Movie' : parsed.name;
       final moviePath = file.parent.path;
+            final seriesFolderName = moviePath.split(Platform.pathSeparator).last;
+
+      final normalizedSeriesName = _normalizeFolderNameForTmdb(seriesFolderName);
 
       var movie = _movieResults.firstWhere(
         (m) => m.path == moviePath && m.name == movieName,
         orElse: () => Movie(
           path: moviePath,
           parentPath: Directory(moviePath).parent.path,
-          name: movieName,
+          name: normalizedSeriesName,
           movieItems: [],
         ),
       );
@@ -747,6 +861,7 @@ class LocalScanService {
   
 
   // --- Series Helpers (Unchanged) ---
+  // ignore: unused_element
   String? _extractQuality(String url) {
     final match = RegExp(
       r'(1080p|720p|540p|480p|Dubbed)',
@@ -804,6 +919,158 @@ class LocalScanService {
 
   bool _isQualityString(String text) => RegExp(r'\d+p').hasMatch(text);
 
+  /// Fetch TMDB metadata for all scanned movies and series.
+  /// Updates the cache with TMDB IDs, titles, poster paths, etc.
+  Future<void> fetchTmdbMetadata() async {
+    if (_isFetchingMetadata || _isScanning) return;
+
+    _isFetchingMetadata = true;
+    _cancelRequested = false;
+    _processed = 0;
+
+    // Count items to fetch
+    _totalCandidates = _movieResults.length + _tvResults.length;
+    print('🎬 TMDB Fetch Started - Total items: $_totalCandidates');
+    if (_totalCandidates == 0) {
+      _isFetchingMetadata = false;
+      _statusController.add('No content to fetch metadata for');
+      print('❌ No content to fetch');
+      return;
+    }
+
+    _statusController.add('Fetching TMDB metadata...');
+    _emitProgress();
+
+    final index = await _indexService.load();
+    bool indexChanged = false;
+    print('📊 Index loaded with ${index.entries.length} entries');
+
+    // Fetch metadata for movies
+    print('🎥 Starting movie metadata fetch (${_movieResults.length} movies)...');
+    for (int i = 0; i < _movieResults.length; i++) {
+      if (_cancelRequested) break;
+
+      final movie = _movieResults[i];
+      print('  [${i + 1}/${_movieResults.length}] Fetching: "${movie.name}"');
+      try {
+        final updatedMovie = await _matchMovieWithTmdb( movie, null);
+        _movieResults[i] = updatedMovie;
+
+        print('    ✅ Found TMDB ID: ${updatedMovie.fetchedData.tmdbId}');
+        print('    📽️  Title: ${updatedMovie.fetchedData.title}');
+        print('    🖼️  Poster: ${updatedMovie.fetchedData.posterPath}');
+
+        // Update index entries for this movie's files
+        if (updatedMovie.fetchedData.tmdbId != null) {
+          for (final item in updatedMovie.movieItems) {
+            final key = LocalScanIndex.makeKey(
+              movie.parentPath,
+              'movie',
+              item.path,
+            );
+            final existing = index.entries[key];
+            if (existing != null) {
+              index.entries[key] = existing.copyWith(
+                tmdbId: updatedMovie.fetchedData.tmdbId,
+                tmdbTitle: updatedMovie.fetchedData.title,
+                tmdbOriginalTitle: updatedMovie.fetchedData.originalTitle,
+                tmdbPosterPath: updatedMovie.fetchedData.posterPath,
+                tmdbBackdropPath: updatedMovie.fetchedData.backdropPath,
+                tmdbOverview: updatedMovie.fetchedData.overview,
+                tmdbYear: updatedMovie.fetchedData.year,
+              );
+              indexChanged = true;
+              print('    💾 Index updated for: ${item.name}');
+            }
+          }
+        } else {
+          print('    ⚠️  No TMDB match found');
+        }
+      } catch (e) {
+        print('    ❌ Error fetching: $e');
+      }
+
+      _processed++;
+      if (_processed % 3 == 0) {
+        _movieResultsController.add(List.unmodifiable(_movieResults));
+      }
+      _emitProgress();
+      await Future.delayed(const Duration(milliseconds: 500)); // Rate limit
+    }
+
+    // Fetch metadata for TV series
+    print('📺 Starting TV series metadata fetch (${_tvResults.length} series)...');
+    for (int i = 0; i < _tvResults.length; i++) {
+      if (_cancelRequested) break;
+
+      final series = _tvResults[i];
+      print('  [${i + 1}/${_tvResults.length}] Fetching: "${series.name}"');
+      try {
+        final updatedSeries = await _matchTvWithTmdb(series, null);
+        _tvResults[i] = updatedSeries;
+
+        print('    ✅ Found TMDB ID: ${updatedSeries.fetchedData.tmdbId}');
+        print('    📽️  Title: ${updatedSeries.fetchedData.title}');
+        print('    🖼️  Poster: ${updatedSeries.fetchedData.posterPath}');
+
+        // Update index entries for this series' episodes
+        if (updatedSeries.fetchedData.tmdbId != null) {
+          for (final season in updatedSeries.seasons) {
+            for (final episode in season.episodes) {
+              final key = LocalScanIndex.makeKey(
+                series.parentPath,
+                'tvSeries',
+                episode.path,
+              );
+              final existing = index.entries[key];
+              if (existing != null) {
+                index.entries[key] = existing.copyWith(
+                  tmdbId: updatedSeries.fetchedData.tmdbId,
+                  tmdbTitle: updatedSeries.fetchedData.title,
+                  tmdbOriginalTitle: updatedSeries.fetchedData.originalTitle,
+                  tmdbPosterPath: updatedSeries.fetchedData.posterPath,
+                  tmdbBackdropPath: updatedSeries.fetchedData.backdropPath,
+                  tmdbOverview: updatedSeries.fetchedData.overview,
+                  tmdbYear: updatedSeries.fetchedData.year,
+                );
+                indexChanged = true;
+                print('    💾 Index updated for: ${episode.name}');
+              }
+            }
+          }
+        } else {
+          print('    ⚠️  No TMDB match found');
+        }
+      } catch (e) {
+        print('    ❌ Error fetching: $e');
+      }
+
+      _processed++;
+      if (_processed % 3 == 0) {
+        _tvResultsController.add(List.unmodifiable(_tvResults));
+      }
+      _emitProgress();
+      await Future.delayed(const Duration(milliseconds: 500)); // Rate limit
+    }
+
+    // Save updated index if any metadata was fetched
+    if (indexChanged) {
+      print('💿 Saving updated index to cache...');
+      await _indexService.save(index);
+      print('✅ Index saved successfully');
+    } else {
+      print('ℹ️  No changes to index, skipping save');
+    }
+
+    _movieResultsController.add(List.unmodifiable(_movieResults));
+    _tvResultsController.add(List.unmodifiable(_tvResults));
+
+    _isFetchingMetadata = false;
+    final finalStatus = _cancelRequested ? 'Metadata fetch cancelled' : 'TMDB metadata fetched';
+    print('🏁 TMDB Fetch Completed - $finalStatus');
+    _statusController.add(finalStatus);
+  }
+
   /// Normalize folder names for TMDB matching
   /// Examples:
   /// - The.Quintessential.Quintuplets => The-Quintessential-Quintuplets
@@ -850,47 +1117,41 @@ class LocalScanService {
     
     return normalized;
   }
+final MovieService _movieService= MovieService();
+  Future<Movie> _matchMovieWithTmdb( Movie movie, String? year) async {
+    final resp = await _movieService.searchMovies(query: movie.name);
+    if (resp.results.isNotEmpty) {
 
-  Future<Movie> _matchMovieWithTmdb(TMDB tmdb, Movie movie, String? year) async {
-    final resp = await tmdb.v3.search.queryMovies(movie.name);
-    if (resp['results'] != null && resp['results'].isNotEmpty) {
-      Map<String, dynamic> best;
-      if (year != null) {
-        best = ((resp['results'] as List).cast<Map<String, dynamic>>().firstWhere(
-          (m) => (m['release_date'] as String?)?.startsWith(year) == true,
-          orElse: () => (resp['results'] as List).first as Map<String, dynamic>,
-        ));
-      } else {
-        best = (resp['results'] as List).first as Map<String, dynamic>;
-      }
+      final  best = resp.results.first;
+      
       return movie.copyWith(
         fetchedData: FetchedData(
-          tmdbId: best['id'] as int?,
-          title: best['title'] as String?,
-          originalTitle: best['original_title'] as String?,
-          posterPath: best['poster_path'] as String?,
-          backdropPath: best['backdrop_path'] as String?,
-          overview: best['overview'] as String?,
-          year: (best['release_date'] as String?)?.split('-').first,
+          tmdbId: best.id,
+          title: best.title,
+          originalTitle: best.originalTitle,
+          posterPath: best.posterPath,
+          backdropPath: best.backdropPath,
+          overview: best.overview,
+          year: best.releaseDate
         ),
       );
     }
     return movie;
   }
 
-  Future<TvSeries> _matchTvWithTmdb(TMDB tmdb, TvSeries series, String? year) async {
-    final resp = await tmdb.v3.search.queryTvShows(series.name);
-    if (resp['results'] != null && resp['results'].isNotEmpty) {
-      final best = (resp['results'] as List).first as Map<String, dynamic>;
+  Future<TvSeries> _matchTvWithTmdb(TvSeries series, String? year) async {
+    final resp = await _movieService.searchTV(query:series.name);
+    if (resp.results.isNotEmpty) {
+      final best = resp.results.first;
       return series.copyWith(
         fetchedData: FetchedData(
-          tmdbId: best['id'] as int?,
-          title: best['name'] as String?,
-          originalTitle: best['original_name'] as String?,
-          posterPath: best['poster_path'] as String?,
-          backdropPath: best['backdrop_path'] as String?,
-          overview: best['overview'] as String?,
-          year: (best['first_air_date'] as String?)?.split('-').first,
+          tmdbId: best.id as int?,
+          title: best.name,
+          originalTitle: best.originalName,
+          posterPath: best.posterPath,
+          backdropPath: best.backdropPath,
+          overview: best.overview,
+          year: best.firstAirDate,
         ),
       );
     }

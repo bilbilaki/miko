@@ -1,7 +1,9 @@
 import 'dart:io'; // Import for Platform check
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Import for HapticFeedback
+import 'package:miko/models/local_library/helper_model.dart';
+import 'package:miko/models/local_library/episode.dart' as local_media;
+// Import for HapticFeedback
 import 'package:miko/providers/god_proovider.dart' as ss;
 import 'package:miko/services/user_data_service.dart';
 import 'package:miko/widgets/tv_detail/anime_detail_header.dart';
@@ -10,8 +12,7 @@ import 'package:miko/showcases/recommendations_page.dart';
 import 'package:miko/utils/ai_translator.dart';
 import 'package:miko/utils/utils.dart' hide ShareItem;
 import 'package:miko/widgets/episode_tile_widget.dart';
-import 'package:share_plus/share_plus.dart';
-import '../widgets/anime_series_card.dart'; // Keep if used elsewhere
+// Keep if used elsewhere
 import '../widgets/tv_detail/anime_detail_app_bar.dart';
 import '../widgets/tv_detail/anime_episode_widgets.dart';
 import '../widgets/tv_detail/anime_recommendations.dart';
@@ -20,7 +21,6 @@ import 'package:miko/utils/colors.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'model.dart' hide Episode;
-import 'model.dart' as m;
 import 'movie_service.dart';
 import 'person_detail_page.dart';
 import 'episodedetailpage.dart';
@@ -29,7 +29,6 @@ import 'package:shimmer/shimmer.dart'; // Import Shimmer
 // Imported extracted widgets and utilities
 import 'package:miko/showcases/mixins/translation_mixin.dart';
 import 'package:miko/showcases/utils/haptic_helper.dart';
-import 'package:miko/showcases/utils/detail_page_navigation.dart';
 import 'package:miko/widgets/tv_detail/tv_show_stat_card.dart';
 import 'package:miko/widgets/tv_detail/tv_show_genres_section.dart';
 import 'package:miko/widgets/tv_detail/tv_show_creators_section.dart';
@@ -38,7 +37,8 @@ import 'package:miko/widgets/tv_detail/tv_show_creators_section.dart';
 class TvShowDetailPageAnime extends StatefulWidget {
   var tvShow;
   String typec;
-  TvShowDetailPageAnime({super.key, required this.tvShow, required this.typec});
+  HelperModel? helperModel;
+  TvShowDetailPageAnime({super.key, required this.tvShow,this.helperModel, required this.typec});
 
   @override
   State<TvShowDetailPageAnime> createState() => _TvShowDetailPageAnimeState();
@@ -929,7 +929,7 @@ EpisodeCardWidget(
                           ),
                           Icon(
                             Icons.play_circle_fill,
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withValues(alpha: 0.8),
                             size: 60,
                           ),
                         ],
@@ -983,13 +983,15 @@ EpisodeCardWidget(
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: seasons.length,
         itemBuilder: (context, index) {
-          ss.Season season = seasons[index];
+          final ss.Season originalSeason = seasons[index];
+          final ss.Season displaySeason =
+              _seasonWithLocalSources(originalSeason);
 
           return Card(
             elevation: 1,
             margin: const EdgeInsets.symmetric(vertical: 6.0),
-            color: AppColors.secondaryBackground.withOpacity(
-              0.4,
+            color: AppColors.secondaryBackground.withValues(
+              alpha: 0.4,
             ), // Slightly transparent background
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
@@ -998,10 +1000,10 @@ EpisodeCardWidget(
                 Clip.antiAlias, // Ensures content respects border radius
             child: ExpansionTile(
               key: PageStorageKey(
-                'season_${season.seasonNumber}',
+                'season_${displaySeason.seasonNumber}',
               ), // Maintain expansion state
               title: Text(
-                'Season ${season.seasonNumber}',
+                'Season ${displaySeason.seasonNumber}',
                 style: const TextStyle(
                   color: Color.fromARGB(255, 255, 228, 108),
                   fontWeight: FontWeight.w600,
@@ -1009,7 +1011,7 @@ EpisodeCardWidget(
                 ),
               ),
               subtitle: Text(
-                '${season.episodes.length} Episode${season.episodes.length == 1 ? '' : 's'}',
+                '${displaySeason.episodes.length} Episode${displaySeason.episodes.length == 1 ? '' : 's'}',
                 style: const TextStyle(
                   color: Color.fromARGB(255, 157, 241, 59),
                   fontSize: 12,
@@ -1018,7 +1020,8 @@ EpisodeCardWidget(
               iconColor:
                   AppColors.accentColor, // Use accent color for expand icon
               collapsedIconColor: AppColors.secondaryText,
-              initiallyExpanded: defaultExpansion || season.seasonNumber == 1,
+              initiallyExpanded:
+                  defaultExpansion || displaySeason.seasonNumber == 1,
               childrenPadding: const EdgeInsets.only(
                 bottom: 8.0,
                 left: 4,
@@ -1026,13 +1029,13 @@ EpisodeCardWidget(
               ),
               children: ListTile.divideTiles(
                 context: context,
-                color: AppColors.dividerColor.withOpacity(0.3),
-                tiles: season.episodes
+                color: AppColors.dividerColor.withValues(alpha: 0.3),
+                tiles: displaySeason.episodes
                     .map(
                       (episode) => EpisodeTileNew(
                         seriesname: widget.tvShow.name,
                         episode: episode,
-                        season: season,
+                        season: displaySeason,
                         id: TvseriesId,
                       ),
                     )
@@ -1042,6 +1045,99 @@ EpisodeCardWidget(
           );
         },
       ),
+    );
+  }
+
+  List<local_media.Episode> get _localEpisodesFromHelper {
+    final episodes = widget.helperModel?.episodes;
+    if (episodes == null || episodes.isEmpty) {
+      return const <local_media.Episode>[];
+    }
+    return episodes.cast<local_media.Episode>();
+  }
+
+  ss.Season _seasonWithLocalSources(ss.Season season) {
+    final localEpisodes = _localEpisodesFromHelper;
+    if (localEpisodes.isEmpty) {
+      return season;
+    }
+
+    bool appliedOverride = false;
+    final List<ss.Episode> mergedEpisodes = season.episodes.map((episode) {
+      final localMatch = _findLocalEpisode(
+        localEpisodes,
+        episode.seasonNumber,
+        episode.episodeNumber,
+      );
+      if (localMatch == null) {
+        return episode;
+      }
+      appliedOverride = true;
+      return _buildEpisodeFromLocal(localMatch, template: episode);
+    }).toList();
+
+    bool appendedNew = false;
+    for (final localEpisode in localEpisodes) {
+      if (localEpisode.seasonNumber != season.seasonNumber) {
+        continue;
+      }
+      final exists = mergedEpisodes.any(
+        (episode) =>
+            episode.seasonNumber == localEpisode.seasonNumber &&
+            episode.episodeNumber == localEpisode.episodeNumber,
+      );
+      if (!exists) {
+        mergedEpisodes.add(_buildEpisodeFromLocal(localEpisode));
+        appendedNew = true;
+      }
+    }
+
+    if (!appliedOverride && !appendedNew) {
+      return season;
+    }
+
+    return ss.Season(
+      seasonNumber: season.seasonNumber,
+      episodes: mergedEpisodes,
+    );
+  }
+
+  local_media.Episode? _findLocalEpisode(
+    List<local_media.Episode> localEpisodes,
+    int seasonNumber,
+    int episodeNumber,
+  ) {
+    for (final localEpisode in localEpisodes) {
+      if (localEpisode.seasonNumber == seasonNumber &&
+          localEpisode.episodeNumber == episodeNumber) {
+        return localEpisode;
+      }
+    }
+    return null;
+  }
+
+  ss.Episode _buildEpisodeFromLocal(
+    local_media.Episode localEpisode, {
+    ss.Episode? template,
+  }) {
+    final localUri = Uri.file(localEpisode.path).toString();
+    final identifier = (localEpisode.name.isNotEmpty
+            ? localEpisode.name
+            : template?.episodeIdentifier) ??
+        'S${localEpisode.seasonNumber.toString().padLeft(2, '0')}'
+            'E${localEpisode.episodeNumber.toString().padLeft(2, '0')}';
+
+    return ss.Episode(
+      seriesNameCsv: template?.seriesNameCsv ?? widget.tvShow.name,
+      seriesTmdbId: template?.seriesTmdbId ?? widget.tvShow.id,
+      episodeIdentifier: identifier,
+      seasonNumber: localEpisode.seasonNumber,
+      episodeNumber: localEpisode.episodeNumber,
+      url1080p: localUri,
+      url720p: localUri,
+      url540p: localUri,
+      url480p: localUri,
+      dubbedUrl: localUri,
     );
   }
 

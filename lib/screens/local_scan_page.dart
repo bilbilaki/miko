@@ -89,7 +89,15 @@ class _LocalScanPageState extends State<LocalScanPage> {
   Widget build(BuildContext context) {
     final p = context.watch<LocalLibraryProvider>();
     final theme = Theme.of(context);
-    final tmdbBase = context.watch<UserDataService>().tmdbBaseUrl;
+    final userDataService = context.watch<UserDataService>();
+    final tmdbBase = userDataService.tmdbBaseUrl;
+    final hasAnyLibraryPath =
+      userDataService.moviesLibraryPaths.isNotEmpty ||
+      userDataService.seriesLibraryPaths.isNotEmpty ||
+      userDataService.musicLibraryPaths.isNotEmpty ||
+      userDataService.musicVideoLibraryPaths.isNotEmpty ||
+      userDataService.photoLibraryPaths.isNotEmpty ||
+      userDataService.mixedLibraryPaths.isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(
@@ -102,6 +110,18 @@ class _LocalScanPageState extends State<LocalScanPage> {
           children: [
             Text('Select content type to scan:', style: theme.textTheme.titleSmall),
             const SizedBox(height: 8),
+            ElevatedButton.icon(
+              onPressed: (!hasAnyLibraryPath || p.isScanning || p.isFetchingMetadata)
+                  ? null
+                  : () async {
+                      await context
+                          .read<LocalLibraryProvider>()
+                          .scanAllAndFetchMetadata(userDataService);
+                    },
+              icon: const Icon(Icons.library_add_check),
+              label: const Text('Scan All & Fetch TMDB'),
+            ),
+            const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -139,6 +159,31 @@ class _LocalScanPageState extends State<LocalScanPage> {
               ],
             ),
             const SizedBox(height: 12),
+            if ((p.movieResults.isNotEmpty || p.tvResults.isNotEmpty) && !p.isScanning)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: ElevatedButton.icon(
+                  onPressed: p.isFetchingMetadata
+                      ? null
+                      : () async {
+                          await context
+                              .read<LocalLibraryProvider>()
+                              .fetchTmdbMetadata();
+                        },
+                  icon: p.isFetchingMetadata
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.cloud_download),
+                  label: Text(
+                    p.isFetchingMetadata
+                        ? 'Fetching Metadata...'
+                        : 'Fetch TMDB Metadata',
+                  ),
+                ),
+              ),
             if (p.isScanning)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

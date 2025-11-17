@@ -653,20 +653,13 @@ Widget _buildBody0(
     itemCount: seriesList.length,
     itemBuilder: (context, index) {
       var series = seriesList[index];
-      return GestureDetector(
-        // Wrap card for tap vibration if the card itself does not handle
-        onTap: () {
-          tVmedium();
-          // Assuming AnimeSeriesCard has its own navigation logic
-          // If not, you'd add navigation here.
-        },
-        child: typec == "movie"
+      return  typec == "movie"
             ? MovieCard(
                 movie: series,
                 typec: typec,
               )
-            : AnimeSeriesCard(series: series, typec: typec),
-      );
+            : AnimeSeriesCard(series: series, typec: typec);
+    
     },
   );
 }

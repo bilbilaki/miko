@@ -12,6 +12,7 @@ import 'package:miko/showcases/tv_detail_page_anime.dart';
 import 'package:miko/utils/colors.dart'; // Assuming AppColors exists
 import 'package:intl/intl.dart'; // For date formatting
 import 'package:miko/services/user_data_service.dart';
+import 'package:miko/utils/utils.dart';
 //import 'package:myapp/screens/settings_screen.dart';
 import 'package:provider/provider.dart';
 import '../showcases/model.dart'; // For accessing UserDataService
@@ -49,6 +50,7 @@ class AnimeSeriesCard extends StatelessWidget {
         TvShow? nms = snapshot.data;
         return InkWell(
           onTap: () {
+            tVmedium();
             if (nms == null) {
               Navigator.push(
                 context,

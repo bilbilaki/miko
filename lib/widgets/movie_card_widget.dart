@@ -9,11 +9,14 @@ import 'package:miko/showcases/movie_service.dart';
 import 'package:miko/utils/colors.dart'; // Assuming AppColors exists
 // For date formatting
 import 'package:miko/services/user_data_service.dart';
+import 'package:miko/utils/utils.dart';
 //import 'package:myapp/screens/settings_screen.dart';
 import 'package:provider/provider.dart';
 // For accessing UserDataService
 import 'package:miko/showcases/model.dart' as mmd;
 import 'package:miko/showcases/movie_detail_page_copy.dart';
+
+import '../models/local_library/helper_model.dart';
 
 class MovieCard extends StatelessWidget {
   final ss.Movie movie;
@@ -37,12 +40,14 @@ class MovieCard extends StatelessWidget {
         mmd.Movie? nms = snapshot.data;
         return InkWell(
           onTap: () {
+            tVmedium();
             if (nms == null) {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) =>
-                      MovieDetailsScreen(movieId: movie.id, typec: "movie"),
+                      MovieDetailsScreen(movieId: movie.id, typec: "movie",                          helperModel: HelperModel(episodes: null, movies: null),
+),
                 ),
               );
             } else {

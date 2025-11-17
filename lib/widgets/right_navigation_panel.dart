@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/screens/dl.dart';
 import 'package:miko/screens/httpcopy.dart';
+import 'package:miko/screens/local_library_grid_screen.dart';
 import 'package:miko/screens/local_screen.dart';
 import 'package:miko/screens/scrap_page.dart';
 import 'package:miko/screens/settings_page.dart';
@@ -229,6 +230,17 @@ class RightNavigationPanel extends ConsumerWidget {
                 onTap: () => _navigateTo(
                   context,
                   SettingsPage(),
+                  isMobileLayout,
+                ),
+              ),          _buildRightNavigationItem(
+                context,
+                ref,
+                icon: Icons.local_florist,
+                title: 'local',
+                showText: showText,
+                onTap: () => _navigateTo(
+                  context,
+                  LocalLibraryGridScreen(),
                   isMobileLayout,
                 ),
               ),

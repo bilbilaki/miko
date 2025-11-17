@@ -1,36 +1,25 @@
 import 'dart:io' show Platform;
-import 'package:background_downloader/background_downloader.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:miko/main.dart';
+import 'package:miko/models/local_library/helper_model.dart';
 
 import 'package:miko/providers/god_proovider.dart' show MovieProvider;
-import 'package:miko/screens/anime_grid_screen.dart';
-import 'package:miko/screens/dl.dart';
 import 'package:miko/screens/offline_screens/movie_detail_screen.dart';
-import 'package:miko/screens/video_player_wplaylist_screen.dart';
 import 'package:miko/widgets/tv_detail/anime_recommendations.dart';
-import 'package:miko/showcases/cast_page.dart';
 import 'package:miko/showcases/recommendations_page.dart';
 import 'package:miko/utils/ai_translator.dart';
 import 'package:miko/utils/utils.dart';
 import 'package:miko/widgets/movie_links_box.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:miko/services/user_data_service.dart';
-import 'package:miko/showcases/movies_by_keyword_screen.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../widgets/tv_detail/anime_detail_utils.dart';
 import 'model.dart';
 import 'movie_service.dart';
-import 'person_detail_page.dart';
 import 'package:share_plus/share_plus.dart';
 
 // Imported extracted widgets
-import 'package:miko/widgets/movie_detail/fade_in_widget.dart';
 import 'package:miko/widgets/movie_detail/movie_detail_loading_view.dart';
 import 'package:miko/widgets/movie_detail/movie_info_card.dart';
 import 'package:miko/widgets/movie_detail/movie_tagline.dart';
@@ -41,19 +30,18 @@ import 'package:miko/widgets/movie_detail/production_countries_section.dart';
 import 'package:miko/widgets/movie_detail/spoken_languages_section.dart';
 import 'package:miko/widgets/movie_detail/movie_overview_section.dart';
 import 'package:miko/widgets/movie_detail/movie_action_buttons.dart';
-import 'package:miko/widgets/movie_detail/movie_basic_info.dart';
 import 'package:miko/widgets/movie_detail/movie_cast_section.dart';
 import 'package:miko/widgets/movie_detail/movie_directors_section.dart';
 import 'package:miko/widgets/movie_detail/movie_crew_chip_section.dart';
 import 'package:miko/showcases/mixins/translation_mixin.dart';
 import 'package:miko/showcases/utils/haptic_helper.dart';
-import 'package:miko/showcases/utils/detail_page_navigation.dart';
 
 // ignore: must_be_immutable
 class MovieDetailPage extends StatefulWidget {
    int id;
+   HelperModel? helperModel;
 
-   MovieDetailPage({super.key, required this.id});
+   MovieDetailPage({super.key,this.helperModel, required this.id});
 
   @override
   State<MovieDetailPage> createState() => _MovieDetailPageState();
@@ -199,6 +187,7 @@ Movie _movie = await _movieService.getMovieDetails(movieId: widget.id);
                         builder: (context) => MovieDetailsScreen(
                           movieId: widget.id,
                           typec: "movie",
+                          helperModel: HelperModel(episodes: null, movies: null),
                         ),
                       ));
                     },
@@ -211,6 +200,8 @@ Movie _movie = await _movieService.getMovieDetails(movieId: widget.id);
                         builder: (context) => MovieDetailsScreen(
                           movieId: widget.id,
                           typec: "movie",
+                                                    helperModel: HelperModel(episodes: null, movies: null),
+
                         ),
                       ));
                     },
@@ -666,9 +657,12 @@ Open in miko by click on ${myItem.internalUrl}
               downloadLinks: downloadLinks,
               isWatched: isWatched,
               onPlayPressed: () {
-                _performHapticFeedback();
+                _performHapticFeedback();if (widget.helperModel!=null){
+
+                showDownloadLinkSelection(context, [widget.helperModel?.movies?.first.path] as List<String>, movie.id, movie.title);   
+                }else {
                 showDownloadLinkSelection(context, downloadLinks, movie.id, movie.title);
-              },
+              }},
               onDownloadPressed: () {
                 _performHapticFeedback();
                 showDownloadLinkSelection(context, downloadLinks, movie.id, movie.title, isForPlay: false);

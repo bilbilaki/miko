@@ -4,6 +4,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:miko/models/local_library/helper_model.dart';
 
 import 'package:miko/providers/god_proovider.dart';
 import 'package:miko/screens/video_player_wplaylist_screen.dart';
@@ -17,8 +18,9 @@ import 'package:miko/utils/colors.dart';
 class MovieDetailsScreen extends StatelessWidget {
    int movieId;
    String typec;
+   HelperModel? helperModel;
    MovieDetailsScreen(
-      {required this.typec, required this.movieId, super.key});
+      {required this.typec, required this.movieId,required this.helperModel, super.key});
 
   // Helper function for haptic feedback
 
