@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/screens/dl.dart';
+import 'package:miko/screens/httpcopy.dart';
+import 'package:miko/screens/local_library_grid_screen.dart';
 import 'package:miko/screens/local_screen.dart';
 import 'package:miko/screens/scrap_page.dart';
+import 'package:miko/screens/settings_page.dart';
+import 'package:miko/screens/url_source_screen.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:miko/utils/utils.dart';
 import '../providers/settings_provider.dart';
@@ -190,6 +194,53 @@ class RightNavigationPanel extends ConsumerWidget {
                 onTap: () => _navigateTo(
                   context,
                   DownloadScreen(downloadManager: DownloadListManager(),),
+                  isMobileLayout,
+                ),
+              ),
+                      _buildRightNavigationItem(
+                context,
+                ref,
+                icon: Icons.music_video,
+                title: 'http2',
+                showText: showText,
+                onTap: () => _navigateTo(
+                  context,
+                  CrawlerHomePage5(),
+                  isMobileLayout,
+                ),
+              ),
+                       _buildRightNavigationItem(
+                context,
+                ref,
+                icon: Icons.music_video,
+                title: 'Url',
+                showText: showText,
+                onTap: () => _navigateTo(
+                  context,
+                  StreamPlayerPage(),
+                  isMobileLayout,
+                ),
+              ),
+                            _buildRightNavigationItem(
+                context,
+                ref,
+                icon: Icons.settings,
+                title: 'Settings',
+                showText: showText,
+                onTap: () => _navigateTo(
+                  context,
+                  SettingsPage(),
+                  isMobileLayout,
+                ),
+              ),          _buildRightNavigationItem(
+                context,
+                ref,
+                icon: Icons.local_florist,
+                title: 'local',
+                showText: showText,
+                onTap: () => _navigateTo(
+                  context,
+                  LocalLibraryGridScreen(),
                   isMobileLayout,
                 ),
               ),

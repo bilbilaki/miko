@@ -6,10 +6,11 @@ import 'package:miko/main.dart';
 import 'package:miko/providers/god_proovider.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/screens/dl.dart';
+import 'package:miko/screens/favorites_screen.dart';
 import 'package:miko/screens/filtrering_screen.dart';
-import 'package:miko/screens/genre_detail_screen.dart';
+import 'package:miko/screens/genres_list_screen.dart';
+import 'package:miko/screens/settings_page.dart';
 import 'package:miko/screens/watchlist_screen.dart';
-import 'package:miko/src/ui/dashboard_screen.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:miko/utils/utils.dart';
 import 'package:miko/widgets/awesome_unified_search_field.dart';
@@ -35,12 +36,12 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
   // late final AppLinks _appLinks;
   // late final Stream<Uri> _uriStream;
   final List<Widget> _pages = [
-        DashboardScreen(),
 
     AnimeGridScreen(typec: "movie"),
     AnimeGridScreen(typec: "tvseries"),
     AnimeGridScreen(typec: "anime"),
     GenreListScreen(),
+    FavoritesScreen(),
     WatchlistScreen(),
 
     /// const WatchlistScreen(),
@@ -122,15 +123,15 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
               isScrollControlled: true,
               builder: (context) {
                 switch (_currentIndex) {
-                  case 1:
+                  case 0:
                     return ContentFilterBottomSheet<MovieProvider>(
                       provider: movieProvider,
                     );
-                  case 2:
+                  case 1:
                     return ContentFilterBottomSheet<TvSeriesProvider>(
                       provider: tvProvider,
                     );
-                  case 3:
+                  case 2:
                     return ContentFilterBottomSheet<AnimeProvider>(
                       provider: animeProvider,
                     );
@@ -146,7 +147,7 @@ class _CenterContentPanelState extends ConsumerState<CenterContentPanel> {
               ),
             ),
           ),
-        ),       drawer: Drawer(
+           ),       drawer: Drawer(
           child: LeftNavigationPanel(isMobileLayout: true, isCollapsed: false),
         ),
         endDrawer: Drawer(child: RightNavigationPanel(isMobileLayout: true, isCollapsed: false)),

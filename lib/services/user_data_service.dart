@@ -20,11 +20,28 @@ class UserDataService extends ChangeNotifier {
   static const String _isWatchedMovieKey = 'isWatchedMovie';
   static const String _isWatchedSeriesKey = 'isWatchedSeries';
   static const String myListKey = 'myList';
+  // Key for user-selected directory path
+  static const String _selectedDirectoryPathKey = 'selectedDirectoryPath';
+  // Keys for local library groups
+  static const String _moviesLibraryPathsKey = 'moviesLibraryPaths';
+  static const String _seriesLibraryPathsKey = 'seriesLibraryPaths';
+  static const String _musicLibraryPathsKey = 'musicLibraryPaths';
+  static const String _musicVideoLibraryPathsKey = 'musicVideoLibraryPaths';
+  static const String _mixedLibraryPathsKey = 'mixedLibraryPaths';
+  static const String _photoLibraryPathsKey = 'photoLibraryPaths';
 late SharedPreferences perfs;
   // Add keys for history, downloads if implemented later
   String _custoombaseurl = 'Farsi';
   SharedPreferences? _prefs;
     String _tmdbBaseUrl = "https://db.inosuke.sbs";
+  String? _selectedDirectoryPath; // Persisted user-chosen directory
+  // Local libraries grouped paths
+  List<String> _moviesLibraryPaths = [];
+  List<String> _seriesLibraryPaths = [];
+  List<String> _musicLibraryPaths = [];
+  List<String> _musicVideoLibraryPaths = [];
+  List<String> _mixedLibraryPaths = [];
+  List<String> _photoLibraryPaths = [];
 
   
   bool _historyformodelsenabled = false;
@@ -53,6 +70,14 @@ late SharedPreferences perfs;
   bool get historyformodelsenabled => _historyformodelsenabled;
   bool get historychatenabled => _historychatenabled;
   String get custoombaseurl => _custoombaseurl;
+  String? get selectedDirectoryPath => _selectedDirectoryPath;
+  // Library groups getters
+  List<String> get moviesLibraryPaths => List.unmodifiable(_moviesLibraryPaths);
+  List<String> get seriesLibraryPaths => List.unmodifiable(_seriesLibraryPaths);
+  List<String> get musicLibraryPaths => List.unmodifiable(_musicLibraryPaths);
+  List<String> get musicVideoLibraryPaths => List.unmodifiable(_musicVideoLibraryPaths);
+  List<String> get mixedLibraryPaths => List.unmodifiable(_mixedLibraryPaths);
+  List<String> get photoLibraryPaths => List.unmodifiable(_photoLibraryPaths);
   List<int> get watchlistTvSeriesIds =>
       List.unmodifiable(_watchlistTvSeriesIds);
 
@@ -117,6 +142,13 @@ String get tmdbBaseUrl => _tmdbBaseUrl;
     _historychatenabled = _prefs?.getBool('historychatenabled') ??
         false; // Use string key for bool
             _tmdbBaseUrl = _prefs?.getString('tmdbBaseUrl') ?? "https://db.inosuke.sbs";
+    _selectedDirectoryPath = _prefs?.getString(_selectedDirectoryPathKey);
+              _moviesLibraryPaths = List<String>.from(_prefs?.getStringList(_moviesLibraryPathsKey) ?? const []);
+              _seriesLibraryPaths = List<String>.from(_prefs?.getStringList(_seriesLibraryPathsKey) ?? const []);
+              _musicLibraryPaths = List<String>.from(_prefs?.getStringList(_musicLibraryPathsKey) ?? const []);
+              _musicVideoLibraryPaths = List<String>.from(_prefs?.getStringList(_musicVideoLibraryPathsKey) ?? const []);
+              _mixedLibraryPaths = List<String>.from(_prefs?.getStringList(_mixedLibraryPathsKey) ?? const []);
+              _photoLibraryPaths = List<String>.from(_prefs?.getStringList(_photoLibraryPathsKey) ?? const []);
 
 
     notifyListeners(); // Notify listeners once prefs are loaded
@@ -154,6 +186,39 @@ Future<void> setTmdbBaseUrl(String value) async {
     final key = _getEpisodeProgressKey(seriesId, seasonNumber, episodeNumber);
     await _prefs!.remove(key);
   }
+
+  // --- Video Progress Methods (with 4 String parameters) ---
+  String _getVideoProgressKey(String videoId, String videoName, String source, String url) {
+    return 'video_progress_${videoId}_${videoName}_${source}_${url.hashCode}';
+  }
+
+  /// Saves the playback position (in seconds) for a specific video.
+  /// Takes 4 String parameters: videoId, videoName, source, and url
+  Future<void> saveVideoProgress(String videoId, String videoName, String source, String url, Duration position) async {
+    final key = _getVideoProgressKey(videoId, videoName, source, url);
+    await _prefs!.setInt(key, position.inSeconds);
+    // No need to notify listeners for this, it's a background save.
+  }
+
+  /// Retrieves the saved playback position for a video.
+  /// Returns null if no progress is saved.
+  /// Takes 4 String parameters: videoId, videoName, source, and url
+  Future<Duration?> getVideoProgress(String videoId, String videoName, String source, String url) async {
+    final key = _getVideoProgressKey(videoId, videoName, source, url);
+    final seconds = _prefs!.getInt(key);
+    if (seconds != null && seconds != seconds - seconds) {
+      return Duration(seconds: seconds);
+    }
+    return null; // Return null if no progress is saved
+  }
+
+  /// Clears the saved progress for a video (e.g., after it's fully watched).
+  /// Takes 4 String parameters: videoId, videoName, source, and url
+  Future<void> clearVideoProgress(String videoId, String videoName, String source, String url) async {
+    final key = _getVideoProgressKey(videoId, videoName, source, url);
+    await _prefs!.remove(key);
+  }
+
   Future<void> _setString(
     String key,
     String newValue,
@@ -427,10 +492,119 @@ Future<void> setTmdbBaseUrl(String value) async {
     await _prefs?.remove('gridSize');
     await _prefs?.remove('decoderPreference');
     await _prefs?.remove('areyouwantfarsi');
+    await _prefs?.remove(_selectedDirectoryPathKey);
+    await _prefs?.remove(_moviesLibraryPathsKey);
+    await _prefs?.remove(_seriesLibraryPathsKey);
+    await _prefs?.remove(_musicLibraryPathsKey);
+    await _prefs?.remove(_musicVideoLibraryPathsKey);
+    await _prefs?.remove(_mixedLibraryPathsKey);
+    await _prefs?.remove(_photoLibraryPathsKey);
 
     // Reload settings to reset to defaults
     await _loadSettings();
 
+    notifyListeners();
+  }
+
+  // Selected directory path setters
+  Future<void> setSelectedDirectoryPath(String? path) async {
+    _selectedDirectoryPath = path;
+    if (path == null || path.isEmpty) {
+      await _prefs?.remove(_selectedDirectoryPathKey);
+    } else {
+      await _prefs?.setString(_selectedDirectoryPathKey, path);
+    }
+    notifyListeners();
+  }
+
+  // --- Library groups: add/remove helpers ---
+  Future<void> addMoviesPath(String path) async {
+    if (path.isEmpty) return;
+    if (!_moviesLibraryPaths.contains(path)) {
+      _moviesLibraryPaths = [..._moviesLibraryPaths, path];
+      await _prefs?.setStringList(_moviesLibraryPathsKey, _moviesLibraryPaths);
+      notifyListeners();
+    }
+  }
+
+  Future<void> removeMoviesPath(String path) async {
+    _moviesLibraryPaths = List.of(_moviesLibraryPaths)..remove(path);
+    await _prefs?.setStringList(_moviesLibraryPathsKey, _moviesLibraryPaths);
+    notifyListeners();
+  }
+
+  Future<void> addSeriesPath(String path) async {
+    if (path.isEmpty) return;
+    if (!_seriesLibraryPaths.contains(path)) {
+      _seriesLibraryPaths = [..._seriesLibraryPaths, path];
+      await _prefs?.setStringList(_seriesLibraryPathsKey, _seriesLibraryPaths);
+      notifyListeners();
+    }
+  }
+
+  Future<void> removeSeriesPath(String path) async {
+    _seriesLibraryPaths = List.of(_seriesLibraryPaths)..remove(path);
+    await _prefs?.setStringList(_seriesLibraryPathsKey, _seriesLibraryPaths);
+    notifyListeners();
+  }
+
+  Future<void> addMusicPath(String path) async {
+    if (path.isEmpty) return;
+    if (!_musicLibraryPaths.contains(path)) {
+      _musicLibraryPaths = [..._musicLibraryPaths, path];
+      await _prefs?.setStringList(_musicLibraryPathsKey, _musicLibraryPaths);
+      notifyListeners();
+    }
+  }
+
+  Future<void> removeMusicPath(String path) async {
+    _musicLibraryPaths = List.of(_musicLibraryPaths)..remove(path);
+    await _prefs?.setStringList(_musicLibraryPathsKey, _musicLibraryPaths);
+    notifyListeners();
+  }
+
+  Future<void> addMusicVideoPath(String path) async {
+    if (path.isEmpty) return;
+    if (!_musicVideoLibraryPaths.contains(path)) {
+      _musicVideoLibraryPaths = [..._musicVideoLibraryPaths, path];
+      await _prefs?.setStringList(_musicVideoLibraryPathsKey, _musicVideoLibraryPaths);
+      notifyListeners();
+    }
+  }
+
+  Future<void> removeMusicVideoPath(String path) async {
+    _musicVideoLibraryPaths = List.of(_musicVideoLibraryPaths)..remove(path);
+    await _prefs?.setStringList(_musicVideoLibraryPathsKey, _musicVideoLibraryPaths);
+    notifyListeners();
+  }
+
+  Future<void> addMixedPath(String path) async {
+    if (path.isEmpty) return;
+    if (!_mixedLibraryPaths.contains(path)) {
+      _mixedLibraryPaths = [..._mixedLibraryPaths, path];
+      await _prefs?.setStringList(_mixedLibraryPathsKey, _mixedLibraryPaths);
+      notifyListeners();
+    }
+  }
+
+  Future<void> removeMixedPath(String path) async {
+    _mixedLibraryPaths = List.of(_mixedLibraryPaths)..remove(path);
+    await _prefs?.setStringList(_mixedLibraryPathsKey, _mixedLibraryPaths);
+    notifyListeners();
+  }
+
+  Future<void> addPhotoPath(String path) async {
+    if (path.isEmpty) return;
+    if (!_photoLibraryPaths.contains(path)) {
+      _photoLibraryPaths = [..._photoLibraryPaths, path];
+      await _prefs?.setStringList(_photoLibraryPathsKey, _photoLibraryPaths);
+      notifyListeners();
+    }
+  }
+
+  Future<void> removePhotoPath(String path) async {
+    _photoLibraryPaths = List.of(_photoLibraryPaths)..remove(path);
+    await _prefs?.setStringList(_photoLibraryPathsKey, _photoLibraryPaths);
     notifyListeners();
   }
 

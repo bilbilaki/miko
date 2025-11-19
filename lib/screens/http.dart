@@ -14,6 +14,7 @@ import 'package:path/path.dart' as p;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:miko/providers/csv_detail_process_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:miko/screens/local_scan_page.dart';
 
 class CrawlerHomePage4 extends StatefulWidget {
   const CrawlerHomePage4({super.key});
@@ -792,6 +793,17 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
             ),
             trailing: ElevatedButton(
               onPressed: () => _navigateTo(context, TmdbDatailsProcess(), true),
+              child: const Text("Open page"),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.storage_rounded),
+            title: const Text("Local Library Scan"),
+            subtitle: const Text(
+              "Scan a folder for movies and series, auto-match with TMDB, and build a local library.",
+            ),
+            trailing: ElevatedButton(
+              onPressed: () => _navigateTo(context, const LocalScanPage(), true),
               child: const Text("Open page"),
             ),
           ),

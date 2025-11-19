@@ -455,12 +455,14 @@ class MovieListPage extends StatelessWidget {
                 if (activeFilters.startDate != null ||
                     activeFilters.endDate != null) {
                   String dateRange = '';
-                  if (activeFilters.startDate != null)
+                  if (activeFilters.startDate != null) {
                     dateRange +=
                         'From: ${activeFilters.startDate!.toLocal().year}-${activeFilters.startDate!.toLocal().month.toString().padLeft(2, '0')}-${activeFilters.startDate!.toLocal().day.toString().padLeft(2, '0')}';
-                  if (activeFilters.endDate != null)
+                  }
+                  if (activeFilters.endDate != null) {
                     dateRange +=
                         ' To: ${activeFilters.endDate!.toLocal().year}-${activeFilters.endDate!.toLocal().month.toString().padLeft(2, '0')}-${activeFilters.endDate!.toLocal().day.toString().padLeft(2, '0')}';
+                  }
                   filterChips.add(_buildActiveFilterChip(
                     'Date: $dateRange',
                     () => provider.applyFiltersAndSort(
