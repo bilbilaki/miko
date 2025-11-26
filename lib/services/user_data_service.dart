@@ -206,7 +206,7 @@ Future<void> setTmdbBaseUrl(String value) async {
   Future<Duration?> getVideoProgress(String videoId, String videoName, String source, String url) async {
     final key = _getVideoProgressKey(videoId, videoName, source, url);
     final seconds = _prefs!.getInt(key);
-    if (seconds != null && seconds != seconds - seconds) {
+    if (seconds != null && seconds > 0) {
       return Duration(seconds: seconds);
     }
     return null; // Return null if no progress is saved

@@ -813,7 +813,6 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
     _userDataService = Provider.of<UserDataService>(context, listen: false);
 
     _completedSubscription = player.stream.completed.listen((completed) {
-      if (widget.source=="local")isFileSource=true;
       if (completed) {
         _clearPlaybackProgress();
         playNext();

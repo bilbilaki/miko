@@ -171,11 +171,11 @@ class _StreamPlayerPageState extends State<StreamPlayerPage> {
               decoration: InputDecoration(
                 hintText: 'Paste video/audio stream URL (e.g., .mp4, .m3u8)',
                 prefixIcon: Icon(Icons.link, color: Theme.of(context).colorScheme.primary),
-                suffixIcon: IconButton(onPressed:() async {final fi = await FilePicker.platform.pickFiles(type: FileType.any );
+                suffixIcon: IconButton(onPressed: () async { final fi = await FilePicker.platform.pickFiles(type: FileType.any );
                if (fi != null) {
                  setState(() {
-                 _urlController.text=fi.files.first.path??_urlController.text;
-               });
+                   _urlController.text = fi.files.first.path ?? _urlController.text;
+                 });
                } 
                
                 }, icon: Icon(Icons.file_open)),
