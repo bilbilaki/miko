@@ -402,7 +402,8 @@ class LocalScanService {
     if (!await dir.exists()) return;
 
     // Get only files directly in the root directory (not in subdirectories)
-    await for (final entity in dir.list(followLinks: false)) {
+    try {
+      await for (final entity in dir.list(followLinks: false)) {
       if (_cancelRequested) break;
       
       if (entity is! File) continue;
@@ -480,6 +481,10 @@ class LocalScanService {
       }
       _emitProgress();
       await Future.delayed(const Duration(milliseconds: 1));
+      }
+    } catch (e) {
+      _statusController.add('Directory listing failed: $e');
+      return;
     }
 
     _tvResultsController.add(List.unmodifiable(_tvResults));
@@ -772,7 +777,8 @@ class LocalScanService {
         break;
     }
 
-    await for (final entity in dir.list(recursive: true, followLinks: false)) {
+    try {
+      await for (final entity in dir.list(recursive: true, followLinks: false)) {
       if (_cancelRequested) break;
       if (entity is File) {
         final ext = entity.path.split('.').last.toLowerCase();
@@ -780,6 +786,13 @@ class LocalScanService {
           files.add(entity.path);
         }
       }
+      }
+    } catch (e) {
+      // Directory listing may throw if storage permissions are missing or
+      // access is otherwise restricted on Android. Fail gracefully and
+      // return whatever files we were able to collect so caller can handle it.
+      _statusController.add('Directory listing failed: $e');
+      return files;
     }
     return files;
   }

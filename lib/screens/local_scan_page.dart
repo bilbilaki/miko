@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:miko/models/local_library/directory_entry.dart';
 import 'package:miko/providers/local_library_provider.dart';
 import 'package:miko/models/local_library/movie.dart';
@@ -64,7 +66,41 @@ class _LocalScanPageState extends State<LocalScanPage> {
 
     // Scan each path for this content type
     for (final path in paths) {
-      await context.read<LocalLibraryProvider>().startScan(path, contentType);
+      final success = await context.read<LocalLibraryProvider>().startScan(path, contentType);
+      if (!success) {
+        final manageStatus = Platform.isAndroid
+            ? await Permission.manageExternalStorage.status
+            : PermissionStatus.denied;
+
+        if (Platform.isAndroid && manageStatus.isPermanentlyDenied) {
+          showDialog(
+              context: context,
+              builder: (_) => AlertDialog(
+                    title: const Text('Permission required'),
+                    content: const Text(
+                        'Storage permission is permanently denied. Please open app settings and enable storage permission to scan your library.'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          openAppSettings();
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('Open Settings'),
+                      ),
+                    ],
+                  ));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Storage permission required to scan selected directory')),
+          );
+        }
+        // stop scanning further paths
+        break;
+      }
     }
   }
 
@@ -108,6 +144,29 @@ class _LocalScanPageState extends State<LocalScanPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+              if (Platform.isAndroid)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      final status = await Permission.manageExternalStorage.status;
+                      if (!status.isGranted) {
+                        final res = await Permission.manageExternalStorage.request();
+                        if (!res.isGranted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Please allow access to files so the app can scan your library.')),
+                          );
+                        }
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Storage permission already granted')),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.settings),
+                    label: const Text('Grant Storage Permission'),
+                  ),
+                ),
             Text('Select content type to scan:', style: theme.textTheme.titleSmall),
             const SizedBox(height: 8),
             ElevatedButton.icon(

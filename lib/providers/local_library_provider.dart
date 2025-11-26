@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:flutter/material.dart';
 import 'package:miko/models/local_library/directory_entry.dart';
@@ -74,7 +76,7 @@ class LocalLibraryProvider extends ChangeNotifier {
     await _service.loadFromCache();
   }
 
-  Future<void> startScan(
+  Future<bool> startScan(
     String rootDir,
     ContentType contentType, {
     bool clearExisting = true,
@@ -82,11 +84,18 @@ class LocalLibraryProvider extends ChangeNotifier {
     _status = 'Starting scan...';
     _progress = 0.0;
     notifyListeners();
+    final ok = await _ensurePermissionsForScan(contentType);
+    if (!ok) {
+      _status = 'Permission denied for scanning files';
+      notifyListeners();
+      return false;
+    }
     await _service.startScan(
       rootDir,
       contentType,
       clearExisting: clearExisting,
     );
+    return true;
   }
 
   void cancel() {
@@ -111,6 +120,15 @@ class LocalLibraryProvider extends ChangeNotifier {
       final paths = entry.value;
       if (paths.isEmpty) continue;
 
+      // Ensure permissions are granted for this content type before scanning.
+      final ok = await _ensurePermissionsForScan(entry.key);
+      if (!ok) {
+        // Abort scanning for all libraries if permissions are missing
+        _status = 'Permission denied for scanning libraries';
+        notifyListeners();
+        return;
+      }
+
       for (var i = 0; i < paths.length; i++) {
         await startScan(
           paths[i],
@@ -121,6 +139,48 @@ class LocalLibraryProvider extends ChangeNotifier {
     }
 
     await _service.fetchTmdbMetadata();
+  }
+
+  /// Ensure the app has the necessary permission(s) for scanning local files.
+  /// Returns true if scanning may proceed, false otherwise.
+  Future<bool> _ensurePermissionsForScan(ContentType contentType) async {
+    // Only Android needs explicit external storage permissions for scanning
+    if (!Platform.isAndroid) return true;
+
+    // First try manage external storage (Android 11+)
+    try {
+      final manageStatus = await Permission.manageExternalStorage.status;
+      if (manageStatus.isGranted) return true;
+    } catch (_) {
+      // Not all platforms have this permission; ignore failures.
+    }
+
+    // Fallback: request legacy storage permission
+    final storageStatus = await Permission.storage.status;
+    if (!storageStatus.isGranted) {
+      final req = await Permission.storage.request();
+      if (req.isGranted) return true;
+    } else {
+      return true;
+    }
+
+    // If still not granted, try to request manageExternalStorage explicitly.
+    try {
+      final reqManage = await Permission.manageExternalStorage.request();
+      if (reqManage.isGranted) return true;
+    } catch (_) {}
+
+    // If either permission is permanently denied, show instructions via status.
+    final nowManage = await Permission.manageExternalStorage.status;
+    final nowStorage = await Permission.storage.status;
+    if (nowManage.isPermanentlyDenied || nowStorage.isPermanentlyDenied) {
+      _status = 'Storage permission permanently denied. Please enable in app settings.';
+      // do not open settings here - the UI can present an option.
+      notifyListeners();
+      return false;
+    }
+
+    return false;
   }
 
   Future<void> fetchTmdbMetadata() async {
