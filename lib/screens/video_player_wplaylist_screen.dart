@@ -43,7 +43,7 @@ class VideoPlayerScreenPlState extends State<VideoPlayerScreenPl> {
   bool isMuted = false;
   bool isPiPEnabled = false;
   Timer? _progressSaveTimer; // Timer to periodically save progress
-  ScrollController _seasonsScrollController = ScrollController();
+  final ScrollController _seasonsScrollController = ScrollController();
   String urlToPlayQuality = '';
   double subtitleSize = 32.0;
   Color subtitleColor = const Color.fromARGB(255, 238, 230, 5);
@@ -82,7 +82,7 @@ class VideoPlayerScreenPlState extends State<VideoPlayerScreenPl> {
   ];
   int currentFitIndex = 0;
   BoxFit get currentFit => fitOptions[currentFitIndex];
-  Map<BoxFit, IconData> _fitIcons = {
+  final Map<BoxFit, IconData> _fitIcons = {
     BoxFit.contain: Icons.fullscreen_exit,
     BoxFit.cover: Icons.fullscreen,
     BoxFit.fill: Icons.photo_size_select_large,
@@ -96,14 +96,18 @@ class VideoPlayerScreenPlState extends State<VideoPlayerScreenPl> {
     ss.Episode episodeToPlay = widget.playlist[currentIndex];
 
     Map<String, String?> currentchoice = {};
-    if (widget.url == episodeToPlay.url1080p && episodeToPlay.url1080p != null)
+    if (widget.url == episodeToPlay.url1080p && episodeToPlay.url1080p != null) {
       currentchoice['1080p'] = episodeToPlay.url1080p;
-    if (widget.url == episodeToPlay.url720p && episodeToPlay.url720p != null)
+    }
+    if (widget.url == episodeToPlay.url720p && episodeToPlay.url720p != null) {
       currentchoice['720p'] = episodeToPlay.url720p;
-    if (widget.url == episodeToPlay.url540p && episodeToPlay.url540p != null)
+    }
+    if (widget.url == episodeToPlay.url540p && episodeToPlay.url540p != null) {
       currentchoice['540p'] = episodeToPlay.url540p;
-    if (widget.url == episodeToPlay.url480p && episodeToPlay.url480p != null)
+    }
+    if (widget.url == episodeToPlay.url480p && episodeToPlay.url480p != null) {
       currentchoice['480p'] = episodeToPlay.url480p;
+    }
 
     return currentchoice;
   }
@@ -396,7 +400,7 @@ class VideoPlayerScreenPlState extends State<VideoPlayerScreenPl> {
   // A new widget for the playlist drawer
   Widget _buildPlaylistDrawer(context) {
     return Drawer(
-      backgroundColor: Colors.black.withOpacity(0.85),
+      backgroundColor: Colors.black.withValues(alpha: 0.85),
       child: _buildSeasonsList(context, [widget.season], widget.tvSeriesId),
     );
   }
@@ -476,7 +480,7 @@ class VideoPlayerScreenPlState extends State<VideoPlayerScreenPl> {
           return Card(
             elevation: 1,
             margin: const EdgeInsets.symmetric(vertical: 6.0),
-            color: AppColors.secondaryBackground.withOpacity(0.4),
+            color: AppColors.secondaryBackground.withValues(alpha: 0.4),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
@@ -508,7 +512,7 @@ class VideoPlayerScreenPlState extends State<VideoPlayerScreenPl> {
               ),
               children: ListTile.divideTiles(
                 context: context,
-                color: AppColors.dividerColor.withOpacity(0.3),
+                color: AppColors.dividerColor.withValues(alpha: 0.3),
                 tiles: season.episodes
                     .map(
                       (episode) => epistile(
@@ -556,7 +560,7 @@ class VideoPlayerScreenPlState extends State<VideoPlayerScreenPl> {
           right: 10,
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -730,7 +734,7 @@ class VideoPlayerScreenPlState extends State<VideoPlayerScreenPl> {
                       playEpisodes(context, url);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accentColor.withOpacity(0.7),
+                      backgroundColor: AppColors.accentColor.withValues(alpha: 0.7),
                       foregroundColor: AppColors.primaryText,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
@@ -961,7 +965,7 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
   ];
   int currentFitIndex = 0;
   BoxFit get currentFit => fitOptions[currentFitIndex];
-  Map<BoxFit, IconData> _fitIcons = {
+  final Map<BoxFit, IconData> _fitIcons = {
     BoxFit.contain: Icons.fullscreen_exit,
     BoxFit.cover: Icons.fullscreen,
     BoxFit.fill: Icons.photo_size_select_large,
@@ -1100,7 +1104,7 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
             right: 16,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
+                color: Colors.black.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(

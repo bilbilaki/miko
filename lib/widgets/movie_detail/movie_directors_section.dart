@@ -11,9 +11,9 @@ class MovieDirectorsSection extends StatelessWidget {
   final List<Crew> directors;
 
   const MovieDirectorsSection({
-    Key? key,
+    super.key,
     required this.directors,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

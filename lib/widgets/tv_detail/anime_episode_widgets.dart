@@ -13,18 +13,18 @@ class EpisodeCardWidget extends StatelessWidget {
   final VoidCallback onTap;
 
   const EpisodeCardWidget({
-    Key? key,
+    super.key,
     required this.episode,
     required this.tvShowId,
     required this.isNext,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Card(
       color: isNext
-          ? Theme.of(context).colorScheme.secondary.withOpacity(0.1)
+          ? Theme.of(context).colorScheme.secondary.withValues(alpha:0.1)
           : Colors.grey[850],
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -100,7 +100,7 @@ class EpisodeCardWidget extends StatelessWidget {
       'Air date: ${episode.formattedAirDate}',
       style: TextStyle(
           color: isNext
-              ? Theme.of(context).colorScheme.secondary.withOpacity(0.8)
+              ? Theme.of(context).colorScheme.secondary.withValues(alpha:0.8)
               : Colors.grey[400],
           fontSize: 14),
     );
@@ -158,11 +158,11 @@ class StatCardWidget extends StatelessWidget {
   final IconData icon;
 
   const StatCardWidget({
-    Key? key,
+    super.key,
     required this.title,
     required this.value,
     required this.icon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

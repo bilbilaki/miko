@@ -1,5 +1,4 @@
 import 'dart:io' show Platform;
-import 'package:flutter/services.dart';
 import 'package:miko/models/local_library/helper_model.dart';
 
 import 'package:miko/providers/god_proovider.dart' show MovieProvider;
@@ -48,7 +47,7 @@ class MovieDetailPage extends StatefulWidget {
 }
 
 class _MovieDetailPageState extends State<MovieDetailPage> with TranslationMixin {
-   MovieService _movieService = MovieService();
+   final MovieService _movieService = MovieService();
   late Future<Map<String, dynamic>> _movieDataFuture;
   MovieResponse? recommendations;
   List<Keyword> _movieKeywords = [];
@@ -76,11 +75,11 @@ String oveview='';
   void _loadMovieData() async {
     _movieDataFuture =
         _movieService.getMovieDetailsWithCredits(movieId: widget.id);
-Movie _movie = await _movieService.getMovieDetails(movieId: widget.id);
+Movie movie = await _movieService.getMovieDetails(movieId: widget.id);
     _movieDataFuture.then((_) {
       if (mounted) {
         setState(() async {
-          movie = _movie;
+          movie = movie;
         });
       }
     }).catchError((error) {
@@ -265,17 +264,17 @@ Movie _movie = await _movieService.getMovieDetails(movieId: widget.id);
                 Shadow(
                   offset: const Offset(2, 2),
                   blurRadius: 8,
-                  color: Colors.black.withOpacity(0.8),
+                  color: Colors.black.withValues(alpha: 0.8),
                 ),
                 Shadow(
                   offset: const Offset(-1, -1),
                   blurRadius: 4,
-                  color: Colors.purple.withOpacity(0.3),
+                  color: Colors.purple.withValues(alpha: 0.3),
                 ),
                 Shadow(
                   offset: const Offset(0, 0),
                   blurRadius: 20,
-                  color: Colors.cyan.withOpacity(0.4),
+                  color: Colors.cyan.withValues(alpha: 0.4),
                 ),
               ],
               foreground: Paint()
@@ -344,8 +343,8 @@ Movie _movie = await _movieService.getMovieDetails(movieId: widget.id);
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withOpacity(0.2),
-                    AppColors.primaryBackground.withOpacity(0.9),
+                    Colors.black.withValues(alpha: 0.2),
+                    AppColors.primaryBackground.withValues(alpha: 0.9),
                     AppColors.primaryBackground,
                   ],
                   stops: const [
@@ -384,7 +383,7 @@ Movie _movie = await _movieService.getMovieDetails(movieId: widget.id);
                     );
                   },
                   style: IconButton.styleFrom(
-                    backgroundColor: Colors.black.withOpacity(0.5),
+                    backgroundColor: Colors.black.withValues(alpha: 0.5),
                     padding: const EdgeInsets.all(4.0),
                   ),
                 ),
@@ -393,7 +392,7 @@ Movie _movie = await _movieService.getMovieDetails(movieId: widget.id);
                   padding: const EdgeInsets.symmetric(
                       horizontal: 6.0, vertical: 4.0),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(4.0),
                   ),
                   child: Text(
@@ -427,7 +426,7 @@ Movie _movie = await _movieService.getMovieDetails(movieId: widget.id);
                     );
                   },
                   style: IconButton.styleFrom(
-                    backgroundColor: Colors.black.withOpacity(0.5),
+                    backgroundColor: Colors.black.withValues(alpha: 0.5),
                     padding: const EdgeInsets.all(4.0),
                   ),
                 ),
@@ -453,7 +452,7 @@ Movie _movie = await _movieService.getMovieDetails(movieId: widget.id);
 Check out this: ${myItem.name}
 Rating: ${myItem.vote}
 Release Date: ${myItem.releaseDate}
-Overview: ${oveview}
+Overview: $oveview
 Open in miko by click on ${myItem.internalUrl}
 ''';
                     SharePlus.instance.share(ShareParams(text: shareContent));
@@ -466,7 +465,7 @@ Open in miko by click on ${myItem.internalUrl}
                     );
                   },
                   style: IconButton.styleFrom(
-                    backgroundColor: Colors.black.withOpacity(0.5),
+                    backgroundColor: Colors.black.withValues(alpha: 0.5),
                     padding: const EdgeInsets.all(4.0),
                   ),
                 ),
@@ -478,7 +477,7 @@ Open in miko by click on ${myItem.internalUrl}
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1.0),
         child: Container(
-          color: AppColors.dividerColor.withOpacity(0.5),
+          color: AppColors.dividerColor.withValues(alpha: 0.5),
           height: 1.0,
         ),
       ),
@@ -607,7 +606,7 @@ Open in miko by click on ${myItem.internalUrl}
                             }
                           },
                           style: IconButton.styleFrom(
-                            backgroundColor: Colors.black.withOpacity(0.5),
+                            backgroundColor: Colors.black.withValues(alpha: 0.5),
                             padding: const EdgeInsets.all(4.0),
                           ),
                         ),

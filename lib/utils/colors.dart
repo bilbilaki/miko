@@ -333,17 +333,17 @@ class AppTheme {
             Shadow(
               offset: Offset(2, 2),
               blurRadius: 8,
-              color: Colors.black.withOpacity(0.6), // Slightly less opaque
+              color: Colors.black.withValues(alpha:0.6), // Slightly less opaque
             ),
             Shadow(
               offset: Offset(-1, -1),
               blurRadius: 4,
-              color: AppColors2.primaryColor.withOpacity(0.3), // Use primary color
+              color: AppColors2.primaryColor.withValues(alpha:0.3), // Use primary color
             ),
             Shadow(
               offset: Offset(0, 0),
               blurRadius: 20,
-              color: AppColors2.secondaryColor.withOpacity(0.4), // Use secondary color
+              color: AppColors2.secondaryColor.withValues(alpha:0.4), // Use secondary color
             ),
           ],
           foreground: Paint()

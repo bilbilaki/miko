@@ -5,7 +5,10 @@ import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
 
 import '../app_keeper.dart';
+import '../models/fileexplorer/fs_entry.dart';
+import '../models/fileexplorer/fs_entry_union.dart';
 import '../providers/local_provider.dart';
+import '../providers/zip_explorer_provider.dart';
 import 'local_screen_components/local_screen_models.dart';
 import 'local_screen_components/local_screen_drawers.dart';
 import 'local_screen_components/local_screen_dialogs.dart';
@@ -13,6 +16,11 @@ import 'local_screen_components/local_screen_item_builders.dart';
 import 'local_screen_components/local_screen_context_menus.dart';
 import 'local_screen_components/local_screen_file_operations.dart';
 import 'local_screen_components/local_screen_appbar_actions.dart';
+import 'local_screen_components/local_screen_path_header.dart';
+import 'local_screen_components/local_screen_tree_sidebar.dart';
+import 'local_screen_components/zip_explorer_view.dart';
+
+// Main tap handler from FsEntry
 
 class LocalScreen extends StatefulWidget {
   const LocalScreen({super.key});
@@ -25,7 +33,7 @@ class LocalScreenState extends State<LocalScreen> {
   // `currentFolderPath` keeps track of the subfolder the user is currently viewing.
   // If null, it means the user is at the root of the `externalPath`.
   String? currentFolderPath;
-
+  final ZipExplorerProvider _zipper = ZipExplorerProvider();
   // State for new features
   ViewMode _viewMode = ViewMode.grid;
   SortMode _sortMode = SortMode.type;
@@ -71,8 +79,6 @@ class LocalScreenState extends State<LocalScreen> {
     }
   }
 
-  // --- NAVIGATION LOGIC ---
-
   /// Navigates into a specific folder and refreshes the displayed content.
   void _openFolder(String folderPath) {
     setState(() {
@@ -80,6 +86,29 @@ class LocalScreenState extends State<LocalScreen> {
     });
     // Tell the provider to refresh its list based on the new folder path
     Provider.of<LocalProvider>(context, listen: false).refresh(folderPath);
+  }
+
+  /// Handles path change from the PathHeader widget
+  Future<void> _handlePathChange(String newPath) async {
+    final provider = Provider.of<LocalProvider>(context, listen: false);
+    final rootPath = provider.externalPath;
+
+    if (rootPath == null) return;
+
+    // Check if the new path is within or equal to the root path
+    if (newPath == rootPath || p.isWithin(rootPath, newPath)) {
+      // Navigate to the new path
+      setState(() {
+        currentFolderPath = newPath == rootPath ? null : newPath;
+      });
+      await provider.refresh(newPath);
+    } else {
+      // If the path is outside the root, change the root path
+      await provider.setPath(newPath);
+      setState(() {
+        currentFolderPath = null; // Reset to root of new path
+      });
+    }
   }
 
   /// Navigates up one level in the directory hierarchy.
@@ -115,14 +144,15 @@ class LocalScreenState extends State<LocalScreen> {
   }
 
   /// Combines all file and folder lists from the provider and sorts them.
-  List<GridItem> _getSortedItems(LocalProvider provider) {
-    final items = [
-      ...provider.folders.map((f) => GridItem(f)),
-      ...provider.movies.map((f) => GridItem(f)),
-      ...provider.audios.map((f) => GridItem(f)),
-      ...provider.images.map((f) => GridItem(f)),
-      ...provider.documents.map((f) => GridItem(f)),
-    ];
+  /// This version uses the new domain model entries (FsEntry) when available
+  ///
+  /// Currently not used in UI, but ready for gradual migration to domain model.
+  /// Will replace _getSortedItems() in future refactoring phases.
+  // ignore: unused_element
+  List<GridItem> _getSortedItemsFromDomainModel(LocalProvider provider) {
+    final items = provider.entries
+        .map((entry) => GridItem.fromFsEntry(entry))
+        .toList();
 
     items.sort((a, b) {
       int comparison;
@@ -132,9 +162,8 @@ class LocalScreenState extends State<LocalScreen> {
           break;
         case SortMode.date:
           // For date, newer comes first if descending, older comes first if ascending
-          comparison = b.entity.statSync().modified.compareTo(
-            a.entity.statSync().modified,
-          );
+          // Note: FsEntry has timestamps, would need to extract here
+          comparison = 0; // TODO: Implement date sorting for FsEntry
           break;
         case SortMode.type:
           // Sort folders first, then files by type, then by name
@@ -145,10 +174,10 @@ class LocalScreenState extends State<LocalScreen> {
           } else {
             String typeA = a.isFolder
                 ? 'folder'
-                : p.extension(a.entity.path).toLowerCase();
+                : p.extension(a.path).toLowerCase();
             String typeB = b.isFolder
                 ? 'folder'
-                : p.extension(b.entity.path).toLowerCase();
+                : p.extension(b.path).toLowerCase();
             comparison = typeA.compareTo(typeB);
             if (comparison == 0) {
               comparison = a.name.toLowerCase().compareTo(b.name.toLowerCase());
@@ -171,7 +200,7 @@ class LocalScreenState extends State<LocalScreen> {
           return _buildEmptyView();
         }
 
-        final sortedItems = _getSortedItems(provider);
+        final sortedItems = _getSortedItemsFromDomainModel(provider);
         // Display the current folder name in the AppBar, or "Local Files" if at root
         final currentDirName = currentFolderPath != null
             ? p.basename(currentFolderPath!)
@@ -195,56 +224,96 @@ class LocalScreenState extends State<LocalScreen> {
                     onPressed: _goUp,
                   )
                 : null,
+            //flexibleSpace: null
             flexibleSpace: IconButton(
               icon: const Icon(Icons.home_sharp),
               onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => StartPage()),
-                );
-              },
-            ),
-            actions: LocalScreenAppBarActions.buildActions(
-              context: context,
-              viewMode: _viewMode,
-              sortMode: _sortMode,
-              sortAscending: _sortAscending,
-              onToggleView: () => setState(() => _viewMode = _viewMode == ViewMode.grid ? ViewMode.list : ViewMode.grid),
-              onShowSizeSlider: () => LocalScreenDialogs.showSizeSliderDialog(context, _gridCrossAxisCount, (newValue) => setState(() => _gridCrossAxisCount = newValue)),
-              onSortSelected: (mode) {
-                if (_sortMode == mode) {
-                  setState(() => _sortAscending = !_sortAscending);
-                } else {
-                  setState(() {
-                    _sortMode = mode;
-                    _sortAscending = true;
-                  });
-                }
-              },
-              onChangeFolder: _promptPathSelection,
-              onRefresh: () => provider.refresh(currentFolderPath),
-              onBatchRename: () => LocalScreenFileOperations.showBatchRenameDialog(context, provider, currentFolderPath, showSnackBar),
-              onClearCache: () async {
-                final confirmed = await LocalScreenDialogs.showConfirmationDialog(
+                Navigator.of(
                   context,
-                  'Clear Cache',
-                  'Are you sure you want to clear all generated thumbnail cache files?',
-                );
-                if (confirmed == true) {
-                  final success = await provider.clearAllThumbnailsCache();
-                  if (success) {
-                    showSnackBar('Thumbnail cache cleared successfully.');
-                  } else {
-                    showSnackBar('Failed to clear thumbnail cache.');
-                  }
-                }
+                ).push(MaterialPageRoute(builder: (_) => StartPage()));
               },
             ),
+            actions: [
+              // Image Gallery Button
+              ...LocalScreenAppBarActions.buildActions(
+                context: context,
+                viewMode: _viewMode,
+                sortMode: _sortMode,
+                sortAscending: _sortAscending,
+                onToggleView: () => setState(
+                  () => _viewMode = _viewMode == ViewMode.grid
+                      ? ViewMode.list
+                      : ViewMode.grid,
+                ),
+                onShowSizeSlider: () => LocalScreenDialogs.showSizeSliderDialog(
+                  context,
+                  _gridCrossAxisCount,
+                  (newValue) => setState(() => _gridCrossAxisCount = newValue),
+                ),
+                onSortSelected: (mode) {
+                  if (_sortMode == mode) {
+                    setState(() => _sortAscending = !_sortAscending);
+                  } else {
+                    setState(() {
+                      _sortMode = mode;
+                      _sortAscending = true;
+                    });
+                  }
+                },
+                onChangeFolder: _promptPathSelection,
+                onRefresh: () => provider.refresh(currentFolderPath),
+                onBatchRename: () =>
+                    LocalScreenFileOperations.showBatchRenameDialog(
+                      context,
+                      provider,
+                      currentFolderPath,
+                      showSnackBar,
+                    ),
+                onClearCache: () async {
+                  final confirmed = await LocalScreenDialogs.showConfirmationDialog(
+                    context,
+                    'Clear Cache',
+                    'Are you sure you want to clear all generated thumbnail cache files?',
+                  );
+                  if (confirmed == true) {
+                    final success = await provider.clearAllThumbnailsCache();
+                    if (success) {
+                      showSnackBar('Thumbnail cache cleared successfully.');
+                    } else {
+                      showSnackBar('Failed to clear thumbnail cache.');
+                    }
+                  }
+                },
+              ),
+            ],
           ),
           drawer: const ComponentLibraryDrawer(), // Your left drawer
           endDrawer: const ComponentBrowserDrawer(), // Your right drawer
-          body: sortedItems.isEmpty
-              ? const Center(child: Text("This folder is empty."))
-              : _buildContent(sortedItems),
+          body: CollapsibleTreeSidebar(
+            rootPath: provider.externalPath!,
+            currentPath: currentFolderPath ?? provider.externalPath,
+            onPathSelected: (path) {
+              setState(() {
+                currentFolderPath = path == provider.externalPath ? null : path;
+              });
+              provider.refresh(path);
+            },
+            child: Column(
+              children: [
+                // Path header
+                PathHeader(
+                  currentPath: currentFolderPath ?? provider.externalPath ?? '',
+                  onPathChanged: _handlePathChange,
+                ),
+                // Content
+                Expanded(
+                  child: sortedItems.isEmpty
+                      ? const Center(child: Text("This folder is empty."))
+                      : _buildContent(sortedItems),
+                ),
+              ],
+            ),
+          ),
         );
       },
     );
@@ -266,6 +335,10 @@ class LocalScreenState extends State<LocalScreen> {
     return GridView.builder(
       padding: const EdgeInsets.all(16.0),
       itemCount: items.length,
+      // Preload items slightly outside viewport for smoother scrolling
+      cacheExtent: 200,
+      // Keep loaded thumbnails alive when scrolled off screen temporarily
+      addAutomaticKeepAlives: true,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: _gridCrossAxisCount.toInt(),
         mainAxisSpacing: 16,
@@ -275,24 +348,103 @@ class LocalScreenState extends State<LocalScreen> {
       itemBuilder: (context, idx) {
         final item = items[idx];
         final provider = Provider.of<LocalProvider>(context, listen: false);
-        return item.isFolder
-            ? LocalScreenItemBuilders.buildFolderTile(
-                item.entity as Directory,
-                () => _openFolder((item.entity as Directory).path),
-                () => _showFolderContextMenu(item.entity as Directory),
-              )
-            : LocalScreenItemBuilders.buildFileTile(
-                item.entity as File,
+
+        final entry = item.entry; // may be null for legacy items
+
+        if (entry != null) {
+          // Domain-model based rendering
+          if (entry.isFolder) {
+            return LocalScreenItemBuilders.buildFolderTileFromEntry(
+              entry,
+              () => _openFolder(entry.path),
+              () => _showFolderContextMenu(Directory(entry.path)),
+            );
+          } else if (entry.kind == FileKind.archive) {
+            return LocalScreenItemBuilders.buildFileTileFromEntry(
+              entry,
+              provider,
+              () => _zipper.enterZipMode(entry.path),
+              () => _showArchiveContextMenu(entry),
+            );
+          } else {
+            return LocalScreenItemBuilders.buildFileTileFromEntry(
+              entry,
+              provider,
+              () => LocalScreenFileOperations.handleEntryTap(
+                context,
+                entry,
                 provider,
-                () => LocalScreenFileOperations.handleFileTap(
-                  context,
-                  item.entity as File,
+                showSnackBar,
+              ),
+              () => _showFileContextMenuFromEntry(entry),
+            );
+          }
+        } else {
+          // Fallback to legacy rendering (optional, can be removed when no legacy)
+          final entity = item.entity!;
+          return entity is Directory
+              ? LocalScreenItemBuilders.buildFolderTile(
+                  entity,
+                  () => _openFolder(entity.path),
+                  () => _showFolderContextMenu(entity),
+                )
+              : LocalScreenItemBuilders.buildFileTile(
+                  entity as File,
                   provider,
-                  showSnackBar,
-                ),
-                () => _showFileContextMenu(item.entity as File),
-              );
+                  () => LocalScreenFileOperations.handleFileTap(
+                    context,
+                    entity,
+                    provider,
+                    showSnackBar,
+                  ),
+                  () => _showFileContextMenu(entity),
+                );
+        }
       },
+    );
+  }
+
+  void _showFileContextMenuFromEntry(FsEntry entry) {
+    final provider = Provider.of<LocalProvider>(context, listen: false);
+    LocalScreenContextMenus.showFileContextMenuForEntry(
+      context,
+      entry,
+      provider,
+      (e) => LocalScreenFileOperations.renameEntry(
+        context,
+        e,
+        provider,
+        showSnackBar,
+      ),
+      (e) => LocalScreenFileOperations.copyEntry(
+        context,
+        e,
+        provider,
+        currentFolderPath,
+        showSnackBar,
+      ),
+      (e) => LocalScreenFileOperations.moveEntry(
+        context,
+        e,
+        provider,
+        currentFolderPath,
+        showSnackBar,
+      ),
+      (e) => LocalScreenFileOperations.deleteEntry(
+        context,
+        e,
+        provider,
+        showSnackBar,
+      ),
+      // Edit content only if document
+      entry.kind == FileKind.document || entry.kind == FileKind.markdown
+          ? (e) => LocalScreenFileOperations.showEntryDocumentDialog(
+              context,
+              e,
+              provider,
+              showSnackBar,
+            )
+          : null,
     );
   }
 
@@ -301,6 +453,9 @@ class LocalScreenState extends State<LocalScreen> {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       itemCount: items.length,
+      // Preload items slightly outside viewport
+      cacheExtent: 150,
+      addAutomaticKeepAlives: true,
       itemBuilder: (context, index) {
         final item = items[index];
         final provider = Provider.of<LocalProvider>(context, listen: false);
@@ -354,12 +509,39 @@ class LocalScreenState extends State<LocalScreen> {
       context,
       file,
       provider,
-      (f) => LocalScreenFileOperations.renameFile(context, f, provider, showSnackBar),
-      (f) => LocalScreenFileOperations.copyFile(context, f, provider, currentFolderPath, showSnackBar),
-      (f) => LocalScreenFileOperations.moveFile(context, f, provider, currentFolderPath, showSnackBar),
-      (f) => LocalScreenFileOperations.deleteFile(context, f, provider, showSnackBar),
+      (f) => LocalScreenFileOperations.renameFile(
+        context,
+        f,
+        provider,
+        showSnackBar,
+      ),
+      (f) => LocalScreenFileOperations.copyFile(
+        context,
+        f,
+        provider,
+        currentFolderPath,
+        showSnackBar,
+      ),
+      (f) => LocalScreenFileOperations.moveFile(
+        context,
+        f,
+        provider,
+        currentFolderPath,
+        showSnackBar,
+      ),
+      (f) => LocalScreenFileOperations.deleteFile(
+        context,
+        f,
+        provider,
+        showSnackBar,
+      ),
       provider.isTextFile(file)
-          ? (f) => LocalScreenFileOperations.showDocumentContentDialog(context, f, provider, showSnackBar)
+          ? (f) => LocalScreenFileOperations.showDocumentContentDialog(
+              context,
+              f,
+              provider,
+              showSnackBar,
+            )
           : null,
     );
   }
@@ -370,13 +552,153 @@ class LocalScreenState extends State<LocalScreen> {
       context,
       folder,
       provider,
-      (d) => LocalScreenFileOperations.renameFolder(context, d, provider, showSnackBar),
-      (d) => LocalScreenFileOperations.copyFolder(context, d, provider, currentFolderPath, showSnackBar),
-      (d) => LocalScreenFileOperations.moveFolder(context, d, provider, currentFolderPath, showSnackBar, _goUp),
-      (d) => LocalScreenFileOperations.deleteFolder(context, d, provider, currentFolderPath, showSnackBar, _goUp),
-      (d) => LocalScreenFileOperations.createNewFolder(context, d, provider, showSnackBar),
+      (d) => LocalScreenFileOperations.renameFolder(
+        context,
+        d,
+        provider,
+        showSnackBar,
+      ),
+      (d) => LocalScreenFileOperations.copyFolder(
+        context,
+        d,
+        provider,
+        currentFolderPath,
+        showSnackBar,
+      ),
+      (d) => LocalScreenFileOperations.moveFolder(
+        context,
+        d,
+        provider,
+        currentFolderPath,
+        showSnackBar,
+        _goUp,
+      ),
+      (d) => LocalScreenFileOperations.deleteFolder(
+        context,
+        d,
+        provider,
+        currentFolderPath,
+        showSnackBar,
+        _goUp,
+      ),
+      (d) => LocalScreenFileOperations.createNewFolder(
+        context,
+        d,
+        provider,
+        showSnackBar,
+      ),
     );
   }
+
+  void _showArchiveContextMenu(FsEntry entry) {
+    final provider = Provider.of<LocalProvider>(context, listen: false);
+
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                title: Text(
+                  entry.name,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: const Text('Archive File'),
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.unarchive),
+                title: const Text('Extract All'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await _handleExtractArchive(entry);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.explore),
+                title: const Text('Browse'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _zipper.enterZipMode(entry.path);
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => Scaffold(
+                        appBar: AppBar(
+                          title: Text(entry.name),
+                          leading: IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () {
+                              _zipper.exitZipMode();
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ),
+                        body: ZipExplorerView(
+                          zipProvider: _zipper,
+                          localProvider: provider,
+                          showSnackBar: showSnackBar,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text('Rename'),
+                onTap: () {
+                  Navigator.pop(context);
+                  LocalScreenFileOperations.renameEntry(
+                    context,
+                    entry,
+                    provider,
+                    showSnackBar,
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text('Delete'),
+                onTap: () {
+                  Navigator.pop(context);
+                  LocalScreenFileOperations.deleteEntry(
+                    context,
+                    entry,
+                    provider,
+                    showSnackBar,
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _handleExtractArchive(FsEntry archiveEntry) async {
+    final destinationPath = await FilePicker.platform.getDirectoryPath();
+    if (destinationPath == null) {
+      showSnackBar('No destination folder selected');
+      return;
+    }
+
+    try {
+      // Use the zip service to extract all files from the archive
+      await _zipper.extractFromZip(
+        sourcePaths: [], // Empty list means extract all
+        destinationPath: destinationPath,
+        onProgress: (progress) => showSnackBar('Extracting...'),
+      );
+      showSnackBar('Archive extracted successfully to $destinationPath');
+    } catch (e) {
+      showSnackBar('Error extracting archive: $e');
+    }
+  }
+
+  /// Load image files from a directory
 
   /// Displays a SnackBar message at the bottom of the screen.
   void showSnackBar(String message) {
@@ -384,11 +706,7 @@ class LocalScreenState extends State<LocalScreen> {
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: const Duration(seconds: 3),
-      ),
+      SnackBar(content: Text(message), duration: const Duration(seconds: 3)),
     );
   }
 }
-

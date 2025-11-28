@@ -16,12 +16,12 @@ class RecommendationCardWidget extends StatelessWidget {
   final bool isMovie;
 
   const RecommendationCardWidget({
-    Key? key,
+    super.key,
     required this.item,
     required this.heroTag,
     required this.onTap,
     this.isMovie = false,
-  }) : super(key: key);
+  });
 
   String get _title => isMovie ? item.title : item.name;
   double get _voteAverage => item.voteAverage;
@@ -102,7 +102,7 @@ class RecommendationCardWidget extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: isMovie
                                 ? AnimeDetailUtils.getRatingColor(_voteAverage)
-                                : Colors.black.withOpacity(0.7),
+                                : Colors.black.withValues(alpha:0.7),
                             borderRadius: isMovie
                                 ? const BorderRadius.only(
                                     topLeft: Radius.circular(8))
@@ -155,14 +155,14 @@ class RecommendationsSectionWidget extends StatelessWidget {
   final bool isMovie;
 
   const RecommendationsSectionWidget({
-    Key? key,
+    super.key,
     required this.recommendations,
     required this.onShowAllPressed,
     required this.onRecommendationTapped,
     required this.recommendationsM,
     this.onMovieTapped,
     this.isMovie = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

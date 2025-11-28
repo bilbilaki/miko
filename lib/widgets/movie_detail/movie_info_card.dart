@@ -8,11 +8,11 @@ class MovieInfoCard extends StatelessWidget {
   final IconData icon;
 
   const MovieInfoCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.value,
     required this.icon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

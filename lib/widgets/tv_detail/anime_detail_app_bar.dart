@@ -36,12 +36,12 @@ class AnimeDetailAppBar extends StatelessWidget {
   final String overview;
 
   const AnimeDetailAppBar({
-    Key? key,
+    super.key,
     required this.tvShow,
     this.translatedTitle,
     required this.onTranslateTitle,
     required this.overview,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -67,17 +67,17 @@ class AnimeDetailAppBar extends StatelessWidget {
               Shadow(
                 offset: const Offset(2, 2),
                 blurRadius: 8,
-                color: Colors.black.withOpacity(0.8),
+                color: Colors.black.withValues(alpha:0.8),
               ),
               Shadow(
                 offset: const Offset(-1, -1),
                 blurRadius: 4,
-                color: Colors.purple.withOpacity(0.3),
+                color: Colors.purple.withValues(alpha:0.3),
               ),
               Shadow(
                 offset: const Offset(0, 0),
                 blurRadius: 20,
-                color: Colors.cyan.withOpacity(0.4),
+                color: Colors.cyan.withValues(alpha:0.4),
               ),
             ],
             foreground: Paint()
@@ -199,7 +199,7 @@ class AnimeDetailAppBar extends StatelessWidget {
         await userDataService.toggleFavoriteAnime(tvSeriesId);
       },
       style: IconButton.styleFrom(
-        backgroundColor: Colors.black.withOpacity(0.5),
+        backgroundColor: Colors.black.withValues(alpha:0.5),
         padding: const EdgeInsets.all(4.0),
       ),
     );
@@ -209,7 +209,7 @@ class AnimeDetailAppBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.5),
+        color: Colors.black.withValues(alpha:0.5),
         borderRadius: BorderRadius.circular(4.0),
       ),
       child: Text(
@@ -235,7 +235,7 @@ class AnimeDetailAppBar extends StatelessWidget {
         await userDataService.toggleWatchlistAnime(tvSeriesId);
       },
       style: IconButton.styleFrom(
-        backgroundColor: Colors.black.withOpacity(0.5),
+        backgroundColor: Colors.black.withValues(alpha:0.5),
         padding: const EdgeInsets.all(4.0),
       ),
     );
@@ -278,14 +278,14 @@ Open in miko by click on ${myItem.internalUrl}
         }
       },
       style: IconButton.styleFrom(
-        backgroundColor: Colors.black.withOpacity(0.5),
+        backgroundColor: Colors.black.withValues(alpha:0.5),
         padding: const EdgeInsets.all(4.0),
       ),
     );
   }
 }
 class SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-   TabBar _tabBar;
+   final TabBar _tabBar;
   SliverAppBarDelegate(this._tabBar);
   @override
   double get minExtent => _tabBar.preferredSize.height;

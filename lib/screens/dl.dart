@@ -141,7 +141,7 @@ class DownloadItem {
         String fileName = name?.isEmpty==true ? (origName.isEmpty==true?task.filename:origName): (origName.isEmpty == true ? task.filename : origName);
         // Construct targetPath for movie: baseDir/Miko/Downloads/MovieTitle/MovieTitle.mp4
         final finalDirPath = p.join(setDefaultPathIfNoneSet.path, fileName);
-        path = p.join(finalDirPath, "${fileName??task.filename}"); // Assuming .mp4 extension
+        path = p.join(finalDirPath, fileName); // Assuming .mp4 extension
       }
     } else {
       final realItem = await movieService.getTvShowDetails(tvShowId: idC);
@@ -341,11 +341,11 @@ class DownloadListItem extends StatelessWidget {
   final VoidCallback onTap;
 
   const DownloadListItem({
-    Key? key,
+    super.key,
     required this.item,
     required this.onDelete,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   String _formatEpisodeInfo() {
     if (item.isMovie) {
@@ -462,7 +462,7 @@ class DownloadListItem extends StatelessWidget {
                   // Static play button (as seen in image)
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.5),
+                      color: Colors.black.withValues(alpha: 128),
                       shape: BoxShape.circle,
                     ),
                     padding: const EdgeInsets.all(4.0),
@@ -540,7 +540,7 @@ class DownloadListItem extends StatelessWidget {
                         vertical: 4.0,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.green.shade700.withOpacity(0.3),
+                        color: Colors.green.shade700.withValues(alpha: 77),
                         borderRadius: BorderRadius.circular(4.0),
                       ),
                       child: Text(
@@ -1118,7 +1118,7 @@ void main() {
 class MyApp extends StatelessWidget {
   final DownloadListManager downloadManager;
 
-  const MyApp({Key? key, required this.downloadManager}) : super(key: key);
+  const MyApp({super.key, required this.downloadManager});
 
   @override
   Widget build(BuildContext context) {
@@ -1141,8 +1141,6 @@ class MyApp extends StatelessWidget {
           onPrimary: Colors.black,
           surface: Colors.grey.shade900, // Used for list item backgrounds
           onSurface: Colors.white,
-          background: Colors.black,
-          onBackground: Colors.white,
         ),
         textTheme:
             TextTheme(

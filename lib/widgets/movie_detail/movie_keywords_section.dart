@@ -10,10 +10,10 @@ class MovieKeywordsSection extends StatelessWidget {
   final MovieService movieService;
 
   const MovieKeywordsSection({
-    Key? key,
+    super.key,
     required this.keywords,
     required this.movieService,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

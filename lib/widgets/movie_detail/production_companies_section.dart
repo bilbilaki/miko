@@ -10,9 +10,9 @@ class ProductionCompaniesSection extends StatelessWidget {
   final List<ProductionCompany> companies;
 
   const ProductionCompaniesSection({
-    Key? key,
+    super.key,
     required this.companies,
-  }) : super(key: key);
+  });
 
   void _performHapticFeedback() {
     if (Platform.isAndroid) {

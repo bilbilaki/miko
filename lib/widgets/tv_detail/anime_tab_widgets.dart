@@ -15,12 +15,12 @@ class OverviewTabWidget extends StatelessWidget {
   final VoidCallback onLongPress;
 
   const OverviewTabWidget({
-    Key? key,
+    super.key,
     required this.tvShow,
     required this.overview,
     required this.onTranslate,
     required this.onLongPress,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -235,10 +235,10 @@ class CastTabWidget extends StatelessWidget {
   final Function(int, String, String?) onCastTapped;
 
   const CastTabWidget({
-    Key? key,
+    super.key,
     required this.creditsFuture,
     required this.onCastTapped,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

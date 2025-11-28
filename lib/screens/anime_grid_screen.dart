@@ -102,7 +102,7 @@ ScrollController custroller= ScrollController();
                             top: Radius.circular(20)),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withValues(alpha: 26),
                             blurRadius: 10,
                             spreadRadius: 5,
                           ),
@@ -129,15 +129,15 @@ ScrollController custroller= ScrollController();
      ) );
   }
 
-   mo.MovieService _movieService = mo.MovieService();
+   final mo.MovieService _movieService = mo.MovieService();
 
   bool _isLoading2 = false;
-   ScrollController _scrollController = ScrollController();
+   final ScrollController _scrollController = ScrollController();
 
   // Search fields
-   TextEditingController _searchController2 = TextEditingController();
+   final TextEditingController _searchController2 = TextEditingController();
 
-   ScrollController _searchScrollController2 = ScrollController();
+   final ScrollController _searchScrollController2 = ScrollController();
 
   Timer? _debounce;
   MultiSearchResponse? _searchResponse;
@@ -401,8 +401,8 @@ ScrollController custroller= ScrollController();
       return Center(
           child: Shimmer.fromColors(
         // Shimmer effect for loading search body
-        baseColor: AppColors.secondaryBackground.withOpacity(0.5),
-        highlightColor: AppColors.secondaryBackground.withOpacity(0.1),
+        baseColor: AppColors.secondaryBackground.withValues(alpha: 128),
+        highlightColor: AppColors.secondaryBackground.withValues(alpha: 26),
         child: ListView.builder(
           itemCount: 5, // Show a few shimmer items
           itemBuilder: (context, index) => Card(
@@ -619,8 +619,8 @@ Widget _buildBody0(
     Center(
       child: Shimmer.fromColors(
         // Shimmer effect for main grid loading
-        baseColor: AppColors.secondaryBackground.withOpacity(0.5),
-        highlightColor: AppColors.secondaryBackground.withOpacity(0.1),
+        baseColor: AppColors.secondaryBackground.withValues(alpha: 128),
+        highlightColor: AppColors.secondaryBackground.withValues(alpha: 26),
         child: MasonryGridView.count(
           padding: const EdgeInsets.all(5.0),
           crossAxisCount: 3,

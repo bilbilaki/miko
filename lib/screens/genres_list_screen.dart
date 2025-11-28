@@ -115,16 +115,16 @@ class GenreListScreen extends StatelessWidget {
                             fit: BoxFit.cover,
                             colorFilter: ColorFilter.mode(
                               const Color.fromARGB(40, 78, 54, 81)
-                                  .withOpacity(0.3),
+                                  .withValues(alpha:0.3),
                               BlendMode.srcATop,
                             ),
                           ),
                           gradient: LinearGradient(
                             colors: [
                               const Color.fromARGB(255, 0, 0, 0)
-                                  .withOpacity(0.5),
+                                  .withValues(alpha:0.5),
                               const Color.fromARGB(179, 255, 255, 255)
-                                  .withOpacity(0.8)
+                                  .withValues(alpha:0.8)
                             ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
@@ -144,17 +144,17 @@ class GenreListScreen extends StatelessWidget {
                 Shadow(
                   offset: const Offset(2, 2),
                   blurRadius: 8,
-                  color: Colors.black.withOpacity(0.8),
+                  color: Colors.black.withValues(alpha:0.8),
                 ),
                 Shadow(
                   offset: const Offset(-1, -1),
                   blurRadius: 4,
-                  color: Colors.purple.withOpacity(0.3),
+                  color: Colors.purple.withValues(alpha:0.3),
                 ),
                 Shadow(
                   offset: const Offset(0, 0),
                   blurRadius: 20,
-                  color: Colors.cyan.withOpacity(0.4),
+                  color: Colors.cyan.withValues(alpha:0.4),
                 ),
               ],
               foreground: Paint()

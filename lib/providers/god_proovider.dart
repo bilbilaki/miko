@@ -67,26 +67,26 @@ extension TvSeriesAnimeFilter on TvSeriesAnime {
     }
     // Filter by release date range
     if (startDate != null) {
-      if (this.firstAirDate == null || this.firstAirDate!.isBefore(startDate)) return false;
+      if (firstAirDate == null || firstAirDate!.isBefore(startDate)) return false;
     }
     if (endDate != null) {
-      if (this.firstAirDate == null || this.firstAirDate!.isAfter(endDate)) return false;
+      if (firstAirDate == null || firstAirDate!.isAfter(endDate)) return false;
     }
     // Filter by language
     if (languages != null && languages.isNotEmpty) {
       final langs = languages.map((l) => l.toLowerCase()).toSet();
-      if (!langs.contains(this.originalLanguage.toLowerCase())) return false;
+      if (!langs.contains(originalLanguage.toLowerCase())) return false;
     }
     // Filter by runtime
     if (minRuntime != null) {
-      if (this.runtime == null || this.runtime! < minRuntime) return false;
+      if (runtime == null || runtime! < minRuntime) return false;
     }
     if (maxRuntime != null) {
-      if (this.runtime == null || this.runtime! > maxRuntime) return false;
+      if (runtime == null || runtime! > maxRuntime) return false;
     }
     // Filter by vote average
-    if (minVoteAverage != null && this.voteAverage < minVoteAverage) return false;
-    if (maxVoteAverage != null && this.voteAverage > maxVoteAverage) return false;
+    if (minVoteAverage != null && voteAverage < minVoteAverage) return false;
+    if (maxVoteAverage != null && voteAverage > maxVoteAverage) return false;
     return true;
   }
 }
@@ -1239,7 +1239,7 @@ class MovieProvider extends ContentProvider<Movie> {
   bool get isLooaded => _status == LoadingStatus.loaded;
   bool get isInitialized => _isInitialized;
 int _currentPage = 0;
-  int _perPage = 50; // Items per page (adjust for performance, e.g., 20-100)
+  final int _perPage = 50; // Items per page (adjust for performance, e.g., 20-100)
   bool _isLoadingNextPage = false;
   bool get isLoadingNextPage => _isLoadingNextPage;
   bool get hasMorePages => (_currentPage + 1) * _perPage < masterList.length;
@@ -1403,7 +1403,7 @@ class TvSeriesProvider extends ContentProvider<TvSeriesAnime> {
   @override
   Set<String> get allAvailableCountries => {}; // TV Series does not have this property
 int _currentPage = 0;
-  int _perPage = 50; // Items per page (adjust for performance, e.g., 20-100)
+  final int _perPage = 50; // Items per page (adjust for performance, e.g., 20-100)
   bool _isLoadingNextPage = false;
   bool get isLoadingNextPage => _isLoadingNextPage;
   bool get hasMorePages => (_currentPage + 1) * _perPage < masterList.length;
@@ -1684,7 +1684,7 @@ class AnimeProvider extends ContentProvider<TvSeriesAnime> {
   @override
   Set<String> get allAvailableCountries => {}; // Anime does not have this property
 int _currentPage = 0;
-  int _perPage = 50; // Items per page (adjust for performance, e.g., 20-100)
+  final int _perPage = 50; // Items per page (adjust for performance, e.g., 20-100)
   bool _isLoadingNextPage = false;
   bool get isLoadingNextPage => _isLoadingNextPage;
   bool get hasMorePages => (_currentPage + 1) * _perPage < masterList.length;

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:miko/providers/god_proovider.dart' as ss;
-import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/screens/offline_screens/anime_detail_screen.dart';
 import 'package:miko/showcases/movie_service.dart';
 import 'package:miko/showcases/tv_detail_page_anime.dart';
@@ -95,7 +94,7 @@ class AnimeSeriesCard extends StatelessWidget {
                             0,
                             0,
                             0,
-                          ).withOpacity(0.4),
+                          ).withValues(alpha: 102),
                           child: posterUrl != null && posterUrl.isNotEmpty
                               ? CachedNetworkImage(
                                   filterQuality: FilterQuality.high,
@@ -114,7 +113,7 @@ class AnimeSeriesCard extends StatelessWidget {
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2.5,
                                         color: AppColors.accentColor
-                                            .withOpacity(0.8),
+                                            .withValues(alpha: 204),
                                       ),
                                     ),
                                   ),
@@ -304,7 +303,7 @@ class AnimeSeriesCard extends StatelessWidget {
                                   ),
                                   TextSpan(
                                     text:
-                                        '${series.originalLanguage.toUpperCase()}',
+                                        series.originalLanguage.toUpperCase(),
                                     style: TextStyle(
                                       color: Colors.blue, // Value color
                                       fontSize: 10.5,
@@ -335,9 +334,9 @@ class AnimeSeriesCard extends StatelessWidget {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.6),
+        color: Colors.black.withValues(alpha: 153),
         shape: BoxShape.circle,
-        border: Border.all(color: color.withOpacity(0.5), width: 0.5),
+        border: Border.all(color: color.withValues(alpha: 128), width: 0.5),
       ),
       child: Material(
         color: Colors.transparent,

@@ -11,6 +11,7 @@ import 'package:miko/screens/url_source_screen.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:miko/utils/utils.dart';
 import '../providers/settings_provider.dart';
+import '../screens/subtitle_generation.dart.dart';
 
 class RightNavigationPanel extends ConsumerWidget {
   final bool isMobileLayout;
@@ -241,6 +242,18 @@ class RightNavigationPanel extends ConsumerWidget {
                 onTap: () => _navigateTo(
                   context,
                   LocalLibraryGridScreen(),
+                  isMobileLayout,
+                ),
+              ),
+                     _buildRightNavigationItem(
+                context,
+                ref,
+                icon: Icons.subtitles,
+                title: 'Subtitle Generator',
+                showText: showText,
+                onTap: () => _navigateTo(
+                  context,
+                  SubtitleGeneration(),
                   isMobileLayout,
                 ),
               ),

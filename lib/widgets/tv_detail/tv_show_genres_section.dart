@@ -6,9 +6,9 @@ class TvShowGenresSection extends StatelessWidget {
   final List<Genre> genres;
 
   const TvShowGenresSection({
-    Key? key,
+    super.key,
     required this.genres,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

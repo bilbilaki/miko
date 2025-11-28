@@ -1,6 +1,8 @@
 // lib/screens/tv_series_grid_screen.dart
 // Added for Platform.isAndroid
 
+// ignore_for_file: must_be_immutable
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -22,7 +24,7 @@ class AnimeDetailsScreen extends StatelessWidget {
    HelperModel? helperModel;
   AnimeDetailsScreen(
       {required this.tvSeriesId,this.helperModel, required this.typec, super.key});
-   ScrollController _seasonsScrollController = ScrollController();
+   final ScrollController _seasonsScrollController = ScrollController();
 
   // Haptic feedback function instance for this class
 
@@ -84,8 +86,7 @@ class AnimeDetailsScreen extends StatelessWidget {
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(1.0),
               child: Container(
-                color:
-                    const Color.fromARGB(255, 255, 255, 255).withOpacity(0.5),
+                color: const Color.fromARGB(255, 255, 255, 255).withValues(alpha: 128),
                 height: 1.0,
               ),
             ),
@@ -145,8 +146,8 @@ class AnimeDetailsScreen extends StatelessWidget {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withOpacity(0.2),
-                          AppColors.primaryBackground.withOpacity(0.8),
+                          Colors.black.withValues(alpha: 51),
+                          AppColors.primaryBackground.withValues(alpha: 204),
                           AppColors.primaryBackground,
                         ],
                         stops: const [
@@ -188,7 +189,7 @@ class AnimeDetailsScreen extends StatelessWidget {
                             triggerVibration(); // Vibrate on favorite tap
                           },
                           style: IconButton.styleFrom(
-                            backgroundColor: Colors.black.withOpacity(0.5),
+                            backgroundColor: Colors.black.withValues(alpha: 128),
                             padding: const EdgeInsets.all(4.0),
                           ),
                         ),
@@ -198,7 +199,7 @@ class AnimeDetailsScreen extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6.0, vertical: 4.0),
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.5),
+                            color: Colors.black.withValues(alpha: 128),
                             borderRadius: BorderRadius.circular(4.0),
                           ),
                           child: Text(
@@ -235,7 +236,7 @@ class AnimeDetailsScreen extends StatelessWidget {
                             triggerVibration(); // Vibrate on watchlist tap
                           },
                           style: IconButton.styleFrom(
-                            backgroundColor: Colors.black.withOpacity(0.5),
+                            backgroundColor: Colors.black.withValues(alpha: 128),
                             padding: const EdgeInsets.all(4.0),
                           ),
                         ),
@@ -323,17 +324,17 @@ class AnimeDetailsScreen extends StatelessWidget {
                                     Shadow(
                                       offset: Offset(2, 2),
                                       blurRadius: 8,
-                                      color: Colors.black.withOpacity(0.8),
+                                      color: Colors.black.withValues(alpha: 204),
                                     ),
                                     Shadow(
                                       offset: Offset(-1, -1),
                                       blurRadius: 4,
-                                      color: Colors.purple.withOpacity(0.3),
+                                      color: Colors.purple.withValues(alpha: 77),
                                     ),
                                     Shadow(
                                       offset: Offset(0, 0),
                                       blurRadius: 20,
-                                      color: Colors.cyan.withOpacity(0.4),
+                                      color: Colors.cyan.withValues(alpha: 102),
                                     ),
                                   ],
                                   foreground: Paint()
@@ -450,7 +451,7 @@ class AnimeDetailsScreen extends StatelessWidget {
                           .map((keyword) => Chip(
                                 label: Text(keyword),
                                 backgroundColor: AppColors.secondaryBackground
-                                    .withOpacity(0.7),
+                                    .withValues(alpha: 179),
                                 labelStyle: const TextStyle(
                                     fontSize: 11,
                                     color: AppColors.secondaryText),
@@ -539,7 +540,7 @@ class AnimeDetailsScreen extends StatelessWidget {
             elevation: 1,
             margin: const EdgeInsets.symmetric(vertical: 6.0),
             color: AppColors.secondaryBackground
-                .withOpacity(0.4), // Slightly transparent background
+                .withValues(alpha: 102), // Slightly transparent background
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             clipBehavior:
@@ -577,7 +578,7 @@ class AnimeDetailsScreen extends StatelessWidget {
               children: ListTile.divideTiles(
                 // Add subtle dividers between episodes
                 context: context,
-                color: AppColors.dividerColor.withOpacity(0.3),
+                color: AppColors.dividerColor.withValues(alpha: 77),
                 tiles: season.episodes
                     .map((episode) => GestureDetector(
                           // Wrap EpisodeTileNew for tap vibration

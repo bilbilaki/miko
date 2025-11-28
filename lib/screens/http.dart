@@ -751,7 +751,7 @@ class _CrawlerHomePage4State extends State<CrawlerHomePage4> {
           Container(
             height: 200,
             padding: const EdgeInsets.all(8.0),
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha :0.2),
             child: ListView.builder(
               reverse: true,
               itemCount: _logMessages.length,

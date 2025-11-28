@@ -13,12 +13,12 @@ class MovieCrewChipSection extends StatelessWidget {
   final VoidCallback? onSeeAll;
 
   const MovieCrewChipSection({
-    Key? key,
+    super.key,
     required this.title,
     required this.crewMembers,
     this.maxDisplay,
     this.onSeeAll,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -6,8 +6,7 @@ class ContentFilterBottomSheet<T extends ContentProvider<dynamic>>
     extends StatefulWidget {
   final T provider;
 
-  const ContentFilterBottomSheet({Key? key, required this.provider})
-      : super(key: key);
+  const ContentFilterBottomSheet({super.key, required this.provider});
 
   @override
   _ContentFilterBottomSheetState<T> createState() =>
@@ -297,7 +296,7 @@ class _ContentFilterBottomSheetState<T extends ContentProvider<dynamic>>
             }
             onChanged(newSelectedOptions);
           },
-          selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+          selectedColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
           checkmarkColor: Theme.of(context).colorScheme.primary,
         );
       }).toList(),
@@ -352,7 +351,7 @@ class _ContentFilterBottomSheetState<T extends ContentProvider<dynamic>>
 // You'll replace `MovieListPage` (or create similar for TvSeries/Anime) with your actual list screen.
 
 class MovieListPage extends StatelessWidget {
-  const MovieListPage({Key? key}) : super(key: key);
+  const MovieListPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -545,8 +544,8 @@ class MovieListPage extends StatelessWidget {
 //     return Center(
 //       child: Shimmer.fromColors(
 //         // Shimmer effect for main grid loading
-//         baseColor: AppColors.secondaryBackground.withOpacity(0.5),
-//         highlightColor: AppColors.secondaryBackground.withOpacity(0.1),
+//         baseColor: AppColors.secondaryBackground.withValues(alpha: 0.5),
+//         highlightColor: AppColors.secondaryBackground.withValues(alpha: 0.1),
 //         child: MasonryGridView.count(
 //           padding: const EdgeInsets.all(5.0),
 //           crossAxisCount: 3,

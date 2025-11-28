@@ -7,9 +7,9 @@ class ProductionCountriesSection extends StatelessWidget {
   final List<ProductionCountry> countries;
 
   const ProductionCountriesSection({
-    Key? key,
+    super.key,
     required this.countries,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -29,9 +29,9 @@ void showDownloadLinkSelection(
           children: links.map((link) {
             // Try to guess quality from URL (very basic)
             String qualityGuess = "Unknown";
-            if (link.contains('1080p'))
+            if (link.contains('1080p')) {
               qualityGuess = "1080p ";
-            else if (link.contains('720p'))
+            } else if (link.contains('720p'))
               qualityGuess = "720p ";
             else if (link.contains('480p'))
               qualityGuess = "480p ";
@@ -70,7 +70,7 @@ void showDownloadLinkSelection(
                               task: DownloadTask(
                                 url: link,
                                 taskId:
-                                    '${title}.${id}', // Added entry.key for unique task ID per resolution
+                                    '$title.$id', // Added entry.key for unique task ID per resolution
                               ),
                               idC: id, // Dummy ID
                               movieService: MovieService(),

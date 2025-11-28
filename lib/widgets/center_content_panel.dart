@@ -9,7 +9,6 @@ import 'package:miko/screens/dl.dart';
 import 'package:miko/screens/favorites_screen.dart';
 import 'package:miko/screens/filtrering_screen.dart';
 import 'package:miko/screens/genres_list_screen.dart';
-import 'package:miko/screens/settings_page.dart';
 import 'package:miko/screens/watchlist_screen.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:miko/utils/utils.dart';

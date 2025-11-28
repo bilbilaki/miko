@@ -12,24 +12,18 @@ class Episode extends ContentItem {
   final ScanStatus scanStatus;
 
   Episode({
-    String? id,
+    super.id,
     required this.seasonNumber,
     required this.episodeNumber,
-    required String name,
-    required String path,
-    required String parentPath,
-    required Metadata metadata,
+    required super.name,
+    required super.path,
+    required super.parentPath,
+    required super.metadata,
     this.tvSeriesId,
     this.tvSeriesName,
     this.fetchedData,
     this.scanStatus = ScanStatus.complete,
-  }) : super(
-    id: id,
-    path: path,
-    parentPath: parentPath,
-    name: name,
-    metadata: metadata,
-  );
+  });
 
   @override
   Episode copyWith({

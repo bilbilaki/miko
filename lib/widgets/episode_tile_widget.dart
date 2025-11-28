@@ -128,7 +128,7 @@ class EpisodeTileNew extends StatelessWidget {
                       ElevatedButton.icon(
                         onPressed: () => playEpisode(context, url),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.accentColor.withOpacity(
+                          backgroundColor: AppColors.accentColor.withValues(alpha:
                             0.7,
                           ),
                           foregroundColor: AppColors.primaryText,
@@ -191,7 +191,7 @@ class EpisodeTileNew extends StatelessWidget {
                           foregroundColor:
                               AppColors.primaryText, // Text/icon color (white)
                           side: BorderSide(
-                            color: AppColors.primaryText.withOpacity(
+                            color: AppColors.primaryText.withValues(alpha:
                               0.4,
                             ), // Subtle white border
                             width: 1,

@@ -911,7 +911,6 @@ class _ScraperPageState extends State<ScraperPage> {
   bool _loading = false;
   String? _status;
   List<Map<String, dynamic>> _results = [];
-  List<Map<String, dynamic>> _rawInputs = [];
   String _outputFormat = 'json'; // 'json' or 'csv'
 
   @override
@@ -1007,7 +1006,6 @@ class _ScraperPageState extends State<ScraperPage> {
         _loading = true;
         _status = 'Pick a JSON file…';
         _results = [];
-        _rawInputs = [];
       });
 
       final typeGroup = XTypeGroup(label: 'json', extensions: ['json']);
@@ -1033,7 +1031,6 @@ class _ScraperPageState extends State<ScraperPage> {
 
       final List<Map<String, dynamic>> items = _normalizeInput(decoded);
       setState(() {
-        _rawInputs = items;
         _status = 'Found ${items.length} item(s). Processing…';
       });
 
@@ -1065,7 +1062,7 @@ class _ScraperPageState extends State<ScraperPage> {
     if (decoded is List) {
       return decoded
           .cast<Map>()
-          .map((e) => Map<String, dynamic>.from(e as Map))
+          .map((e) => Map<String, dynamic>.from(e))
           .toList();
     }
     if (decoded is Map) {

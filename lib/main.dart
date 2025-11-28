@@ -1,5 +1,8 @@
+// ignore_for_file: prefer_const_constructors_in_immutables, strict_top_level_inference
+
 import 'dart:async';
 
+import 'package:cross_platform_video_thumbnails/cross_platform_video_thumbnails.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:miko/app_keeper.dart';
@@ -19,12 +22,16 @@ import 'package:media_kit/media_kit.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as pr;
 import 'package:tmdb_api/tmdb_api.dart';
+
+import 'providers/zip_explorer_provider.dart';
+import 'services/service_locator.dart';
 final persistentCache = PersistentTranslationCache(ttl: Duration(days: 365), maxEntries: 5000);
 final downloadManager = DownloadListManager();
 TMDB tmdb = TMDB(ApiKeys(tmdbapiv3, tmdbapitokensc));
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
+  await CrossPlatformVideoThumbnails.initialize();
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
 
@@ -42,6 +49,14 @@ await persistentCache.init(); // at app startup
         ChangeNotifierProvider(create: (context) => TvSeriesProvider()),
         ChangeNotifierProvider(create: (context) => LocalProvider()),
         ChangeNotifierProvider(create: (context) => LocalLibraryProvider()),
+                ChangeNotifierProvider(
+          create: (context) => ZipExplorerProvider()
+        ),
+                ChangeNotifierProvider(
+          create: (context) => UserDataService(),
+        ), // Add UserDataService
+            ...ServiceLocator.getSingleProviders(),
+    ...ServiceLocator.getProviders(),
 
 
         ChangeNotifierProvider(
@@ -166,7 +181,7 @@ class _DataLoadingScreenState extends State<DataLoadingScreen> {
     _tvSeriesProvider.addListener(_updateCounts);
 
     // Also poll frequently to catch any updates we might miss
-    _pollTimer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
+    _pollTimer = Timer.periodic(const Duration(milliseconds: 1100), (timer) {
       _updateCounts();
     });
 
@@ -218,7 +233,7 @@ class _DataLoadingScreenState extends State<DataLoadingScreen> {
       _updateCounts();
       
       // Check every 100ms
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 1200));
       
       // Break if there's an error
       if (_animeProvider.status == LoadingStatus.error ||
@@ -239,7 +254,7 @@ class _DataLoadingScreenState extends State<DataLoadingScreen> {
     _updateCounts();
 
     // Wait 2 seconds to let user see the final counts
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 3));
 
     if (!mounted) return;
 
@@ -404,7 +419,7 @@ class _DataLoadingScreenState extends State<DataLoadingScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 24),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.grey[900]?.withOpacity(0.5),
+        color: Colors.grey[900]?.withValues(alpha: 128),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isLoaded ? color : Colors.grey[700]!,
@@ -413,7 +428,7 @@ class _DataLoadingScreenState extends State<DataLoadingScreen> {
         boxShadow: [
           if (isLoaded)
             BoxShadow(
-              color: color.withOpacity(0.3),
+              color: color.withValues(alpha: 77),
               blurRadius: 10,
               spreadRadius: 2,
             ),
@@ -425,7 +440,7 @@ class _DataLoadingScreenState extends State<DataLoadingScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 51),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(

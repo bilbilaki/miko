@@ -291,7 +291,7 @@ class JsonFileTabularDataStore implements TabularDataStore {
 
     final index = await _readIndex();
     final items = (index['items'] as List).cast<Map>().map((e) {
-      return Map<String, dynamic>.from(e as Map);
+      return Map<String, dynamic>.from(e);
     }).toList();
 
     items.removeWhere((e) => e['id'] == datasetId);
@@ -328,7 +328,7 @@ class JsonFileTabularDataStore implements TabularDataStore {
     }
     final index = await _readIndex();
     final items = (index['items'] as List).cast<Map>().map((e) {
-      return Map<String, dynamic>.from(e as Map);
+      return Map<String, dynamic>.from(e);
     }).toList();
     items.removeWhere((e) => e['id'] == id);
     await _writeIndex({'items': items});
@@ -397,7 +397,7 @@ class CsvFileTabularDataStore implements TabularDataStore {
 
     final index = await _readIndex();
     final items = (index['items'] as List).cast<Map>().map((e) {
-      return Map<String, dynamic>.from(e as Map);
+      return Map<String, dynamic>.from(e);
     }).toList();
     items.removeWhere((e) => e['id'] == datasetId);
     items.add(
@@ -435,7 +435,7 @@ class CsvFileTabularDataStore implements TabularDataStore {
     }
     final index = await _readIndex();
     final items = (index['items'] as List).cast<Map>().map((e) {
-      return Map<String, dynamic>.from(e as Map);
+      return Map<String, dynamic>.from(e);
     }).toList();
     items.removeWhere((e) => e['id'] == id);
     await _writeIndex({'items': items});

@@ -9,12 +9,12 @@ class MovieActionButtons extends StatelessWidget {
   final VoidCallback onDownloadPressed;
 
   const MovieActionButtons({
-    Key? key,
+    super.key,
     required this.downloadLinks,
     required this.isWatched,
     required this.onPlayPressed,
     required this.onDownloadPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

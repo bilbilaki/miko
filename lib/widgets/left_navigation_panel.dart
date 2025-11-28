@@ -20,7 +20,7 @@ class LeftNavigationPanel extends ConsumerWidget {
   final bool isMobileLayout;
   final bool isCollapsed; // Only relevant for desktop
 
-  LeftNavigationPanel({
+  const LeftNavigationPanel({
     super.key,
     required this.isMobileLayout,
     required this.isCollapsed, // Pass collapsed state

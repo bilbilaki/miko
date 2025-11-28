@@ -3,7 +3,7 @@ import 'package:shimmer/shimmer.dart';
 
 /// Loading view with shimmer effect for movie detail page
 class MovieDetailLoadingView extends StatelessWidget {
-  const MovieDetailLoadingView({Key? key}) : super(key: key);
+  const MovieDetailLoadingView({super.key});
 
   @override
   Widget build(BuildContext context) {

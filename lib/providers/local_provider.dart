@@ -1,14 +1,21 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:cross_platform_video_thumbnails/cross_platform_video_thumbnails.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:path/path.dart' as p;
+import 'package:file_magic_number/file_magic_number.dart';
 
 import 'package:pool/pool.dart'; // FIX: Import the pool package
+import '../models/fileexplorer/fs_entry.dart';
+import '../models/fileexplorer/fs_entry_union.dart';
+import '../repositories/local_fs_repository.dart';
 
 /// A provider for managing and interacting with a user-selected external directory.
 /// - Stores path with SharedPreferences
@@ -22,23 +29,81 @@ class LocalProvider extends ChangeNotifier {
   static const _kThumbnailCacheMapKey =
       'thumbnail_cache_map'; // New key for thumbnail paths map
 
+  // Domain model layer - new repository for FsEntry conversion
+  final LocalFsRepository _fsRepository = LocalFsRepository();
+
+  // Cached FsEntry list for the current directory
+  List<FsEntry> _currentEntries = [];
+
   String? _basePath;
-  bool isSmb=false;
+  bool isSmb = false;
   String? _currentPath; // Track the path currently listing
+  @deprecated
   List<Directory> _folders = [];
+  @deprecated
   List<File> _movies = [];
+  @deprecated
   List<File> _audios = [];
-  List<File> _documents = []; // New list for documents/text files
-  List<File> _images = []; // New list for image files
+  @deprecated
+  List<File> _documents = [];
+  @deprecated
+  List<File> _images = [];
+  @deprecated
+  List<File> _archive = [];
+  @deprecated
+  List<File> _unknown = [];
+
+  @deprecated
+  List<Directory> get folders => List.unmodifiable(_folders);
+  @deprecated
+  List<File> get movies => List.unmodifiable(_movies);
+  @deprecated
+  List<File> get audios => List.unmodifiable(_audios);
+  @deprecated
+  List<File> get documents => List.unmodifiable(_documents);
+  @deprecated
+  List<File> get images => List.unmodifiable(_images);
+  @deprecated
+  List<File> get archive => List.unmodifiable(_images);
+  @deprecated
+  List<File> get unknown => List.unmodifiable(_images);
 
   String? get externalPath => _basePath;
-  bool? get _isSmb => isSmb; 
-  List<Directory> get folders => List.unmodifiable(_folders);
-  List<File> get movies => List.unmodifiable(_movies);
-  List<File> get audios => List.unmodifiable(_audios);
-  List<File> get documents =>
-      List.unmodifiable(_documents); // Getter for documents
-  List<File> get images => List.unmodifiable(_images); // Getter for images
+  bool? get _isSmb => isSmb;
+  final List<String> _selectedFiles = [];
+  bool get hasSelection => _selectedFiles.isNotEmpty;
+
+  // New domain model getters - replaces typed lists with filtered FsEntry
+  /// All entries in the current directory (files and folders)
+  List<FsEntry> get entries => List.unmodifiable(_currentEntries);
+
+  /// Only folder entries
+  List<FsEntry> get folderEntries =>
+      _currentEntries.where((e) => e.isFolder).toList();
+
+  /// Only file entries (all types)
+  List<FsEntry> get fileEntries =>
+      _currentEntries.where((e) => e.isFile).toList();
+
+  /// Only image file entries
+  List<FsEntry> get imageEntries =>
+      _currentEntries.where((e) => e.kind == FileKind.image).toList();
+
+  /// Only video file entries
+  List<FsEntry> get videoEntries =>
+      _currentEntries.where((e) => e.kind == FileKind.video).toList();
+
+  /// Only audio file entries
+  List<FsEntry> get audioEntries =>
+      _currentEntries.where((e) => e.kind == FileKind.audio).toList();
+
+  /// Only document file entries
+  List<FsEntry> get documentEntries =>
+      _currentEntries.where((e) => e.kind == FileKind.document).toList();
+  List<FsEntry> get archiveEntries =>
+      _currentEntries.where((e) => e.kind == FileKind.archive).toList();
+  List<FsEntry> get unknownEntries =>
+      _currentEntries.where((e) => e.kind == FileKind.unknown).toList();
 
   /// The directory being currently listed (for subfolder navigation)
   String? get currentPath => _currentPath ?? _basePath;
@@ -161,6 +226,11 @@ class LocalProvider extends ChangeNotifier {
       } else if (isAudioFile(File(mediaPath))) {
         // FIX: Correctly generate and use the thumbnail for audio files.
       } else if (isTextFile(File(mediaPath))) {
+        // FIX: Correctly generate
+        // and use the thumbnail for document/text files.
+      } else if (isArchiveFile(File(mediaPath))) {
+        // FIX: Correctly generate and use the thumbnail for document/text files.
+      } else if (isUnknownFile(File(mediaPath))) {
         // FIX: Correctly generate and use the thumbnail for document/text files.
       }
     } catch (e) {
@@ -261,7 +331,18 @@ class LocalProvider extends ChangeNotifier {
       tempDir.path,
       '${p.basenameWithoutExtension(videoPath)}_temp_thumb.jpg',
     );
-
+    // Generate a single thumbnail
+    final thumbnail = await CrossPlatformVideoThumbnails.generateThumbnail(
+      videoPath,
+      ThumbnailOptions(
+        timePosition: 8.0, // 5 seconds into the video
+        width: 320,
+        height: 240,
+        quality: 0.8,
+        format: ThumbnailFormat.jpeg,
+      ),
+    );
+    File(tempThumbOutput).writeAsBytes(thumbnail.data);
     final result = await Process.run('ffmpeg', [
       '-i',
       videoPath,
@@ -274,13 +355,10 @@ class LocalProvider extends ChangeNotifier {
       tempThumbOutput,
     ]);
 
-    if (result.exitCode == 0) {
-      final file = File(tempThumbOutput);
-      if (await file.exists()) {
-        final bytes = await file.readAsBytes();
-        await file.delete(); // Clean up this temporary file after reading bytes
-        return bytes;
-      }
+    if (thumbnail.data!=[]||thumbnail.data!=[0]||thumbnail.data.isNotEmpty) {
+
+        return Uint8List.fromList(thumbnail.data);
+      
     } else {
       if (kDebugMode) {
         print(
@@ -369,6 +447,9 @@ class LocalProvider extends ChangeNotifier {
     _audios = [];
     _documents = [];
     _images = [];
+    _archive = [];
+    _unknown = [];
+    _currentEntries = [];
     notifyListeners();
   }
 
@@ -379,6 +460,9 @@ class LocalProvider extends ChangeNotifier {
     _audios = [];
     _images = [];
     _documents = []; // Clear previous lists
+    _archive = [];
+    _unknown = [];
+    _currentEntries = []; // Clear domain model entries
 
     // Determine the path to load: if not provided, use root (_basePath)
     String? dirPath = folder ?? _basePath;
@@ -386,9 +470,14 @@ class LocalProvider extends ChangeNotifier {
 
     _currentPath = dirPath;
 
-    final dir = Directory(dirPath);
-    if (await dir.exists()) {
-      try {
+    try {
+      // Use repository to get FsEntry objects (new domain model)
+      _currentEntries = await _fsRepository.listContents(dirPath);
+
+      // Maintain backward compatibility by populating legacy typed lists
+      // from the FsEntry objects
+      final dir = Directory(dirPath);
+      if (await dir.exists()) {
         final entries = dir.listSync();
         _folders = entries.whereType<Directory>().toList();
 
@@ -403,11 +492,15 @@ class LocalProvider extends ChangeNotifier {
             _images.add(file);
           } else if (isTextFile(file)) {
             _documents.add(file); // Include general text/document files
+          } else if (isArchiveFile(file)) {
+            _archive.add(file); // Include general text/document files
+          } else if (isUnknownFile(file)) {
+            _unknown.add(file); // Include general text/document files
           }
         }
-      } catch (e) {
-        if (kDebugMode) print("Error listing directory $dirPath: $e");
       }
+    } catch (e) {
+      if (kDebugMode) print("Error listing directory $dirPath: $e");
     }
   }
 
@@ -416,6 +509,45 @@ class LocalProvider extends ChangeNotifier {
     final ext = p.extension(file.path).toLowerCase();
     const videoExts = {'.mp4', '.avi', '.mkv', '.mov', '.webm', '.flv', '.wmv'};
     return videoExts.contains(ext);
+  }
+
+  /// Toggle file selection for copying to workspace
+  void toggleFileSelection(String filePath) {
+    if (_selectedFiles.contains(filePath)) {
+      _selectedFiles.remove(filePath);
+    } else {
+      _selectedFiles.add(filePath);
+    }
+    notifyListeners();
+  }
+
+  /// Select multiple files
+  void selectFiles(List<String> filePaths) {
+    _selectedFiles.clear();
+    _selectedFiles.addAll(filePaths);
+    notifyListeners();
+  }
+
+  /// Clear all selections
+  void clearSelection() {
+    _selectedFiles.clear();
+    notifyListeners();
+  }
+
+  /// Check if a file is selected
+  bool isFileSelected(String filePath) {
+    return _selectedFiles.contains(filePath);
+  }
+
+  /// Select all files in current directory
+  void selectAll() {
+    _selectedFiles.clear();
+    _selectedFiles.addAll(_folders.map((d) => d.path));
+    _selectedFiles.addAll(_movies.map((f) => f.path));
+    _selectedFiles.addAll(_audios.map((f) => f.path));
+    _selectedFiles.addAll(_images.map((f) => f.path));
+    _selectedFiles.addAll(_documents.map((f) => f.path));
+    notifyListeners();
   }
 
   /// True if file extension is a common audio type.
@@ -458,15 +590,119 @@ class LocalProvider extends ChangeNotifier {
     const textExts = {
       '.txt', '.md', '.json', '.xml', '.yaml', '.yml', '.csv', '.log',
       '.html', '.htm', '.css', '.js', '.dart', '.java', '.py', '.c', '.cpp',
-      '.h', '.hpp',
+      '.h', '.hpp', '.go', '.mod',
       // Document types (true parsing requires external libraries)
-      '.pdf', '.docx', '.xlsx', '.pptx', '.odt', '.rtf',
+      '.pdf',
+      '.docx',
+      '.xlsx',
+      '.pptx',
+      '.odt',
+      '.rtf',
+      '.vtt',
+      '.ass',
+      '.sh',
+      '.conf',
+      '.config',
+      '.gitignore',
+      '.env',
+      '.example',
+      '.local',
     };
     // Exclude if it's already identified as a specific multimedia type
     if (isMovieFile(file) || isAudioFile(file) || isImageFile(file)) {
       return false;
     }
     return textExts.contains(ext);
+  }
+
+  bool isArchiveFile(File file) {
+    final ext = p.extension(file.path).toLowerCase();
+    // Common text file extensions. Expand as needed.
+    const archiveExts = {
+      '.zip',
+      '.rar',
+      '.7z',
+      '.tar',
+      '.gz',
+      '.bz2',
+      '.xz',
+      '.iso',
+      '.AppImage',
+      '.deb',
+    };
+    // Exclude if it's already identified as a specific multimedia type
+    if (isMovieFile(file) ||
+        isAudioFile(file) ||
+        isImageFile(file) ||
+        (isTextFile(file))) {
+      return false;
+    }
+    return archiveExts.contains(ext);
+  }
+
+  bool isUnknownFile(File file) {
+    final ext = p.extension(file.path).toLowerCase();
+    // Common text file extensions. Expand as needed.
+
+    // Exclude if it's already identified as a specific multimedia type
+    if (isMovieFile(file) ||
+        isAudioFile(file) ||
+        isImageFile(file) ||
+        isTextFile(file) ||
+        isArchiveFile(file)) {
+      return false;
+    }
+    return ext.contains(".") ? false : true;
+  }
+
+  /// Detects FileKind from magic number for files without extension
+  /// This is used as a fallback for unknown files
+  Future<FileKind> detectFileKindFromMagicNumber(String filePath) async {
+    try {
+      final fileMagicNumberType =
+          await FileMagicNumber.detectFileTypeFromPathOrBlob(filePath);
+
+      // Map from FileMagicNumberType to FileKind
+      switch (fileMagicNumberType) {
+        // Archives
+        case FileMagicNumberType.zip:
+        case FileMagicNumberType.rar:
+        case FileMagicNumberType.sevenZ:
+        case FileMagicNumberType.tar:
+          return FileKind.archive;
+        // Images
+        case FileMagicNumberType.png:
+        case FileMagicNumberType.jpg:
+        case FileMagicNumberType.gif:
+        case FileMagicNumberType.bmp:
+        case FileMagicNumberType.tiff:
+        case FileMagicNumberType.heic:
+        case FileMagicNumberType.webp:
+          return FileKind.image;
+        // Videos
+        case FileMagicNumberType.mp4:
+        case FileMagicNumberType.avi:
+          return FileKind.video;
+        // Audio
+        case FileMagicNumberType.mp3:
+        case FileMagicNumberType.wav:
+          return FileKind.audio;
+        // Documents
+        case FileMagicNumberType.pdf:
+        case FileMagicNumberType.sqlite:
+          return FileKind.document;
+        // Fallback
+        case FileMagicNumberType.unknown:
+        case FileMagicNumberType.emptyFile:
+        default:
+          return FileKind.unknown;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error detecting file kind from magic number: $e');
+      }
+      return FileKind.unknown;
+    }
   }
 
   /// Manually refresh folder/file list and notify listeners.
@@ -479,9 +715,7 @@ class LocalProvider extends ChangeNotifier {
 
   /// Create a new folder under the current path.
   Future<bool> createFolder(String name) async {
-    if (_isSmb==true){
-      
-    }
+    if (_isSmb == true) {}
     if (_currentPath == null) return false;
     final newDir = Directory(p.join(_currentPath!, name));
     if (await newDir.exists()) {

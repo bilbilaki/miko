@@ -19,7 +19,6 @@ extension _Ln on double {
     // Quick ln approximation (sufficient for our formatting use)
     final x = this;
     final n = (x - 1.0) / (x + 1.0);
-    final n2 = n * n;
     var sum = 0.0;
     for (var i = 1; i < 20; i += 2) {
       sum += (1 / i) * (n.pow(i));

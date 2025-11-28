@@ -205,7 +205,7 @@ class _SeriesTab extends StatelessWidget {
               tvSeries: series,
               movie: null,
               title: tmdbTitle ?? series.name,
-              subtitle: '${seasonCount} season(s) · ${episodeCount} episode(s)',
+              subtitle: '$seasonCount season(s) · $episodeCount episode(s)',
               posterPath: posterPath,
               height: index % 4 == 0 ? 230 : (index % 4 == 1 ? 210 : (index % 4 == 2 ? 250 : 220)),
             );

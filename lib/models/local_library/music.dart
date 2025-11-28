@@ -6,25 +6,22 @@ import 'scan_status.dart';
 
 /// Represents a single music file variant
 class MusicItem extends ContentItem {
+  @override
   final String id;
   final FetchedData? fetchedData;
   final ScanStatus scanStatus;
 
   MusicItem({
     String? id,
-    required String path,
-    required String parentPath,
-    required String name,
-    required Metadata metadata,
+    required super.path,
+    required super.parentPath,
+    required super.name,
+    required super.metadata,
     this.fetchedData,
     this.scanStatus = ScanStatus.pending,
   }) : id = id ?? const Uuid().v4(),
        super(
     id: id ?? const Uuid().v4(),
-    path: path,
-    parentPath: parentPath,
-    name: name,
-    metadata: metadata,
   );
 
   @override

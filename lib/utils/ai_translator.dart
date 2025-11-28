@@ -1,12 +1,10 @@
 import 'package:miko/configs/consts2.dart';
 import 'package:miko/main.dart';
-import 'package:miko/models/cache.dart';
 import 'package:miko/services/user_data_service.dart';
 import 'package:openai_dart/openai_dart.dart' as openai;
 import 'dart:convert';
 
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
@@ -210,7 +208,7 @@ class _TranslatableTextState extends State<TranslatableText> {
 }
 class _Lru<K, V> {
   final int capacity;
-  final _map = LinkedHashMap<K, V>();
+  final _map = <K, V>{};
   _Lru(this.capacity);
   V? get(K k) {
     final v = _map.remove(k);
@@ -467,7 +465,7 @@ class MovieTvTranslator {
 
 Future<String> translateTextForMoviesAndTV(String text) async {
   final userDataService = UserDataService();
-  final targetLanguage = userDataService.custoombaseurl ?? 'en';
+  final targetLanguage = userDataService.custoombaseurl;
 
   return persistentCache.runOrGet(text, targetLanguage, () async {
     final res = await client.createChatCompletion(

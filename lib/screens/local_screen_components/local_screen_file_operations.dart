@@ -3,9 +3,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:swipe_image_gallery/swipe_image_gallery.dart';
+import '../../models/fileexplorer/fs_entry_union.dart';
 import '../../providers/local_provider.dart';
+import '../../providers/zip_explorer_provider.dart';
 import '../video_player_wplaylist_screen.dart';
+import 'code_editor_dialog.dart';
 import 'local_screen_dialogs.dart';
+import 'zip_operation_dialogs.dart';
 
 class LocalScreenFileOperations {
   /// Handles file tap actions based on file type
@@ -79,36 +83,12 @@ class LocalScreenFileOperations {
       return;
     }
 
-    TextEditingController contentController = TextEditingController(
-      text: initialContent,
-    );
 
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text('Edit: ${p.basename(documentFile.path)}'),
-          content: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.8,
-            height: MediaQuery.of(context).size.height * 0.6,
-            child: TextField(
-              controller: contentController,
-              maxLines: null,
-              expands: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Document content',
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final String newContent = contentController.text;
+        return  CodeEditorDialog(
+         filePath: documentFile.path, initialContent: initialContent, onSave: (String newContent)async { 
                 final bool success = await provider.saveDocumentContent(
                   documentFile.path,
                   newContent,
@@ -118,13 +98,10 @@ class LocalScreenFileOperations {
                   Navigator.of(context).pop();
                 } else {
                   showSnackBar('Failed to save file.');
-                }
-              },
-              child: const Text('Save'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final String? newFileName = await LocalScreenDialogs.showInputDialog(
+                } 
+                
+                },
+         onSaveAs: (String newContent)async  {                final String? newFileName = await LocalScreenDialogs.showInputDialog(
                   context,
                   'Save As',
                   'Enter new file name (e.g., my_document.txt):',
@@ -137,7 +114,7 @@ class LocalScreenFileOperations {
                   );
                   final bool success = await provider.saveDocumentContentAs(
                     newFilePath,
-                    contentController.text,
+                    newContent,
                   );
                   if (success) {
                     showSnackBar('File saved as $newFileName successfully.');
@@ -146,11 +123,7 @@ class LocalScreenFileOperations {
                     showSnackBar('Failed to save file as $newFileName.');
                   }
                 }
-              },
-              child: const Text('Save As'),
-            ),
-          ],
-        );
+         });
       },
     );
   }
@@ -438,7 +411,6 @@ class LocalScreenFileOperations {
       }
     }
   }
-
   /// Displays a dialog for batch renaming files in the current directory
   static Future<void> showBatchRenameDialog(
     BuildContext context,
@@ -476,4 +448,219 @@ class LocalScreenFileOperations {
       },
     );
   }
+
+  /// Browse a zip file and enter zip exploration mode
+  static Future<void> browseZipFile(
+    BuildContext context,
+    File zipFile,
+    ZipExplorerProvider zipProvider,
+    Function(String) showSnackBar,
+  ) async {
+    showSnackBar('Opening ZIP file...');
+    
+    final success = await zipProvider.enterZipMode(zipFile.path);
+    
+    if (success) {
+      showSnackBar('ZIP file opened: ${p.basename(zipFile.path)}');
+      // Note: Navigation to ZipExplorerView would be handled by the calling screen
+    } else {
+      showSnackBar('Failed to open ZIP file');
+    }
+  }
+
+  /// Edit a file from within a zip archive
+  static Future<void> editFileInZip(
+    BuildContext context,
+    String filePath,
+    ZipExplorerProvider zipProvider,
+    Function(String) showSnackBar,
+  ) async {
+              LocalProvider provider = LocalProvider();
+
+    showSnackBar('Loading file from ZIP...');
+    
+    final content = await zipProvider.readFileFromZip(filePath);
+    
+    if (content == null) {
+      showSnackBar('Failed to read file from ZIP');
+      return;
+    }
+
+    await showDialog(
+      context: context,
+      builder: (context) => CodeEditorDialog(
+        filePath: filePath,
+        initialContent: content,
+        onSave: (newContent) async {
+          showSnackBar('Saving file to ZIP...');
+          final success = await zipProvider.writeFileToZip(filePath, newContent);
+          if (success) {
+            showSnackBar('File saved to ZIP successfully');
+          } else {
+            showSnackBar('Failed to save file to ZIP');
+          }
+        }, onSaveAs: (String newContent )async {     final String? newFileName = await LocalScreenDialogs.showInputDialog(
+                  context,
+                  'Save As',
+                  'Enter new file name (e.g., my_document.txt):',
+                  p.basename(filePath),
+                );
+                if (newFileName != null && newFileName.isNotEmpty) {
+                  final String newFilePath = p.join(
+                    p.dirname(filePath),
+                    newFileName,
+                  );
+                  final bool success = await provider.saveDocumentContentAs(
+                    newFilePath,
+                    newContent,
+                  );
+                  if (success) {
+                    showSnackBar('File saved as $newFileName successfully.');
+                    Navigator.of(context).pop();
+                  } else {
+                    showSnackBar('Failed to save file as $newFileName.');
+                  }
+                } },
+      ),
+    );
+  }
+
+  /// Handle extracting selected files from zip
+  static Future<void> extractSelectedFromZip(
+    BuildContext context,
+    List<String> entryPaths,
+    ZipExplorerProvider zipProvider,
+    LocalProvider localProvider,
+    Function(String) showSnackBar,
+  ) async {
+    await ZipOperationDialogs.showExtractSelectedDialog(
+      context,
+      entryPaths,
+      zipProvider,
+      localProvider,
+      showSnackBar,
+    );
+  }
+
+  /// Handle deleting entries from zip
+  static Future<void> deleteFromZip(
+    BuildContext context,
+    List<String> entryPaths,
+    ZipExplorerProvider zipProvider,
+    Function(String) showSnackBar,
+  ) async {
+    final confirmed = await LocalScreenDialogs.showConfirmationDialog(
+      context,
+      'Delete from ZIP',
+      'Are you sure you want to delete ${entryPaths.length} item(s) from the ZIP archive?',
+    );
+    
+    if (confirmed == true) {
+      showSnackBar('Deleting from ZIP...');
+      
+      final success = await zipProvider.removeFromZip(entryPaths);
+      
+      if (success) {
+        showSnackBar('Successfully deleted ${entryPaths.length} item(s)');
+      } else {
+        showSnackBar('Failed to delete items from ZIP');
+      }
+    }
+  }
+
+  /// Handle renaming an entry in zip
+  static Future<void> renameInZip(
+    BuildContext context,
+    String entryPath,
+    ZipExplorerProvider zipProvider,
+    Function(String) showSnackBar,
+  ) async {
+    final oldName = p.basename(entryPath);
+    final String? newName = await LocalScreenDialogs.showInputDialog(
+      context,
+      'Rename Entry',
+      'Enter new name for "$oldName":',
+      oldName,
+    );
+    
+    if (newName != null && newName.isNotEmpty && newName != oldName) {
+      final newPath = p.join(p.dirname(entryPath), newName);
+      
+      showSnackBar('Renaming in ZIP...');
+      
+      final success = await zipProvider.renameInZip(entryPath, newPath);
+      
+      if (success) {
+        showSnackBar('Entry renamed to "$newName"');
+      } else {
+        showSnackBar('Failed to rename entry');
+      }
+    }
+  }
+
+  // --- NAVIGATION LOGIC ---
+static Future<void> handleEntryTap(
+  BuildContext context,
+  FsEntry entry,
+  LocalProvider provider,
+  Function(String) showSnackBar,
+) async {
+  final file = File(entry.path);
+  // Reuse existing logic
+  return handleFileTap(context, file, provider, showSnackBar);
+}
+static Future<void> renameEntry(
+  BuildContext context,
+  FsEntry entry,
+  LocalProvider provider,
+  Function(String) showSnackBar,
+) async {
+  final file = File(entry.path);
+  return renameFile(context, file, provider, showSnackBar);
+}
+
+static Future<void> deleteEntry(
+  BuildContext context,
+  FsEntry entry,
+  LocalProvider provider,
+  Function(String) showSnackBar,
+) async {
+  final file = File(entry.path);
+  return deleteFile(context, file, provider, showSnackBar);
+}
+
+static Future<void> copyEntry(
+  BuildContext context,
+  FsEntry entry,
+  LocalProvider provider,
+  String? currentFolderPath,
+  Function(String) showSnackBar,
+) async {
+  final file = File(entry.path);
+  return copyFile(context, file, provider, currentFolderPath, showSnackBar);
+}
+
+static Future<void> moveEntry(
+  BuildContext context,
+  FsEntry entry,
+  LocalProvider provider,
+  String? currentFolderPath,
+  Function(String) showSnackBar,
+) async {
+  final file = File(entry.path);
+  return moveFile(context, file, provider, currentFolderPath, showSnackBar);
+}
+
+// For opening/editing document content:
+static Future<void> showEntryDocumentDialog(
+  BuildContext context,
+  FsEntry entry,
+  LocalProvider provider,
+  Function(String) showSnackBar,
+) async {
+  final file = File(entry.path);
+  return showDocumentContentDialog(context, file, provider, showSnackBar);
+}
+  /// Displays a dialog for batch renaming files in the current directory
+
 }

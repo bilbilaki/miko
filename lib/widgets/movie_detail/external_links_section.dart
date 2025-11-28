@@ -7,10 +7,10 @@ class ExternalLinksSection extends StatelessWidget {
   final String? imdbId;
 
   const ExternalLinksSection({
-    Key? key,
+    super.key,
     this.homepage,
     this.imdbId,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

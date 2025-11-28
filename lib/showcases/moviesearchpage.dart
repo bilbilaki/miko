@@ -136,7 +136,7 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
           decoration: InputDecoration(
             hintText: 'Search Movies...',
             border: InputBorder.none,
-            hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+            hintStyle: TextStyle(color: Colors.white.withValues(alpha:0.7)),
           ),
           style: const TextStyle(color: Colors.white),
         ),

@@ -157,13 +157,13 @@ class _UnifiedSearchBottomSheetState extends State<UnifiedSearchBottomSheet> {
               height: 5,
               margin: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.secondaryText.withOpacity(0.5),
+                color: AppColors.secondaryText.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
             // Search Bar
             Container(
-              color: AppColors.secondaryBackground.withOpacity(0.95),
+              color: AppColors.secondaryBackground.withValues(alpha: 0.95),
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               child: Row(
                 children: [
@@ -179,7 +179,7 @@ class _UnifiedSearchBottomSheetState extends State<UnifiedSearchBottomSheet> {
                       cursorColor: AppColors.accentColor,
                       decoration: InputDecoration(
                         hintText: 'Search Movies, TV & Anime...',
-                        hintStyle: TextStyle(color: AppColors.secondaryText.withOpacity(0.7)),
+                        hintStyle: TextStyle(color: AppColors.secondaryText.withValues(alpha: 0.7)),
                         border: InputBorder.none,
                         suffixIcon: _searchController.text.isNotEmpty
                             ? IconButton(

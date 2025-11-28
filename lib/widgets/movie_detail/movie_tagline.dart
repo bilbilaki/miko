@@ -6,9 +6,9 @@ class MovieTagline extends StatelessWidget {
   final String tagline;
 
   const MovieTagline({
-    Key? key,
+    super.key,
     required this.tagline,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class MovieTagline extends StatelessWidget {
         style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w400,
-          color: Colors.white.withOpacity(0.85),
+          color: Colors.white.withValues(alpha:0.85),
           letterSpacing: 0.8,
           height: 1.4,
           decorationStyle: GoogleFonts.dmSerifText().decorationStyle,
@@ -32,12 +32,12 @@ class MovieTagline extends StatelessWidget {
             Shadow(
               offset: const Offset(1, 1),
               blurRadius: 4,
-              color: Colors.black.withOpacity(0.6),
+              color: Colors.black.withValues(alpha:0.6),
             ),
             Shadow(
               offset: const Offset(0, 0),
               blurRadius: 8,
-              color: Colors.blue.withOpacity(0.2),
+              color: Colors.blue.withValues(alpha:0.2),
             ),
           ],
         ),

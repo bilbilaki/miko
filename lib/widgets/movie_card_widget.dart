@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:miko/providers/god_proovider.dart' as ss;
-import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/screens/offline_screens/movie_detail_screen.dart';
 import 'package:miko/showcases/movie_service.dart';
 //import 'package:myapp/screens/anime_details_screen.dart';
@@ -80,8 +79,8 @@ class MovieCard extends StatelessWidget {
                         ), // Consistent border radius
                         child: Container(
                           decoration: BoxDecoration(
-                            color: AppColors2.onBackgroundLight.withOpacity(
-                              0.6,
+                            color: AppColors2.onBackgroundLight.withValues(
+                            alpha:   0.6,
                             ), // Subtle background for image
                           ),
                           child: posterUrl != null && posterUrl.isNotEmpty
@@ -102,7 +101,7 @@ class MovieCard extends StatelessWidget {
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2.5,
                                         color: AppColors2.accentColor
-                                            .withOpacity(0.8),
+                                            .withValues(alpha: 0.8),
                                       ),
                                     ),
                                   ),
@@ -294,7 +293,7 @@ class MovieCard extends StatelessWidget {
                                   ),
                                   TextSpan(
                                     text:
-                                        '${movie.originalLanguage.toUpperCase()}',
+                                        movie.originalLanguage.toUpperCase(),
                                     style: TextStyle(
                                       color: Colors.blue, // Value color
                                       fontSize: 10.5,
@@ -326,7 +325,7 @@ class MovieCard extends StatelessWidget {
                                   ),
                                   TextSpan(
                                     text:
-                                        '${movie.popularity.toStringAsFixed(1)}',
+                                        movie.popularity.toStringAsFixed(1),
                                     style: TextStyle(
                                       color: Colors.blue, // Value color
                                       fontSize: 10.5,
@@ -357,10 +356,10 @@ class MovieCard extends StatelessWidget {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.6), // Darker, well-defined background
+        color: Colors.black.withValues(alpha:0.6), // Darker, well-defined background
         shape: BoxShape.circle,
         border: Border.all(
-          color: color.withOpacity(0.5), // Subtle border based on icon color
+          color: color.withValues(alpha:0.5), // Subtle border based on icon color
           width: 0.5,
         ),
       ),

@@ -9,10 +9,10 @@ class TvShowCreatorsSection extends StatelessWidget {
   final Function(int, String, String?) onCreatorTap;
 
   const TvShowCreatorsSection({
-    Key? key,
+    super.key,
     required this.creators,
     required this.onCreatorTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

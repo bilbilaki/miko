@@ -128,7 +128,7 @@ class _AwesomeUnifiedSearchFieldState extends State<AwesomeUnifiedSearchField> {
             message: 'Downloads',
             child: Ink(
               decoration: ShapeDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.12),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha:0.12),
                 shape: const CircleBorder(),
               ),
               child: IconButton(
@@ -165,7 +165,7 @@ class _AwesomeUnifiedSearchFieldState extends State<AwesomeUnifiedSearchField> {
                 decoration: ShapeDecoration(
                   color: Theme.of(
                     context,
-                  ).colorScheme.primary.withOpacity(0.12),
+                  ).colorScheme.primary.withValues(alpha:0.12),
                   shape: const CircleBorder(),
                 ),
                 child: IconButton(

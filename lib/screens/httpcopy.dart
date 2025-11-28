@@ -32,7 +32,7 @@ class _CrawlerHomePage5State extends State<CrawlerHomePage5> {
   final _fileNameController = TextEditingController();
   String _selectedExtension = ".mkv";
   bool _createZip = false;
-  bool _processAsSeries = true;
+  final bool _processAsSeries = true;
 
   // Crawler control state
   bool _isProcessing = false;
@@ -233,8 +233,9 @@ class _CrawlerHomePage5State extends State<CrawlerHomePage5> {
                     for (var btn in buttons) {
                       String href = btn['href'] ?? '';
                       String text = btn.text.trim();
-                      if (text.contains('1080p')) qualities['1080p'] = href;
-                      else if (text.contains('720p')) qualities['720p'] = href;
+                      if (text.contains('1080p')) {
+                        qualities['1080p'] = href;
+                      } else if (text.contains('720p')) qualities['720p'] = href;
                       else if (text.contains('480p')) qualities['480p'] = href;
                       else if (text.contains('زیرنویس')) subUrl = href;
                     }
@@ -619,7 +620,7 @@ class _CrawlerHomePage5State extends State<CrawlerHomePage5> {
           Container(
             height: 200,
             padding: const EdgeInsets.all(8.0),
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             child: ListView.builder(
               reverse: true,
               itemCount: _logMessages.length,

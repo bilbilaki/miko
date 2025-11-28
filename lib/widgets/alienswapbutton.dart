@@ -113,11 +113,11 @@ class _AlienFloatSwapMenuState extends State<AlienFloatSwapMenu> {
                     decoration: BoxDecoration(
                       color: isHovered
                           ? Colors.deepPurple.shade700 // Different color when hovered
-                          : const Color.fromARGB(255, 76, 2, 78).withOpacity(0.9),
+                          : const Color.fromARGB(255, 76, 2, 78).withValues(alpha:0.9),
                       borderRadius: BorderRadius.circular(30), // Pill shape
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(isHovered ? 0.4 : 0.2),
+                          color: Colors.black.withValues(alpha:isHovered ? 0.4 : 0.2),
                           blurRadius: isHovered ? 12 : 6,
                           offset:  Offset(1, 4),
                         ),
@@ -146,7 +146,7 @@ class _AlienFloatSwapMenuState extends State<AlienFloatSwapMenu> {
                 ),
               ),
             );
-          }).toList(),
+          }),
           // The main draggable floating action button
           Positioned(
             left: currentButtonPosition.dx - 35, // Adjust for 70px button size
@@ -193,19 +193,19 @@ class _AlienFloatSwapMenuState extends State<AlienFloatSwapMenu> {
                   boxShadow: dragging
                       ? [
                           BoxShadow(
-                            color: Colors.greenAccent.shade100.withOpacity(0.6),
+                            color: Colors.greenAccent.shade100.withValues(alpha:0.6),
                             blurRadius: 40,
                             spreadRadius: 10,
                           ),
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.4),
+                            color: Colors.black.withValues(alpha:0.4),
                             blurRadius: 15,
                             offset: const Offset(1, 8),
                           ),
                         ]
                       : [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
+                            color: Colors.black.withValues(alpha:0.3),
                             blurRadius: 10,
                             offset: const Offset(1, 5),
                           ),

@@ -134,7 +134,7 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
         _buildInitialPlaceholderView(context),
         Positioned.fill(
           child: Container(
-            color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.7),
+            color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 179),
             child: const Center(child: CircularProgressIndicator()),
           ),
         ),
@@ -161,17 +161,17 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
                   Shadow(
                     offset: const Offset(2, 2),
                     blurRadius: 8,
-                    color: Colors.black.withOpacity(0.8),
+                    color: Colors.black.withValues(alpha: 204),
                   ),
                   Shadow(
                     offset: const Offset(-1, -1),
                     blurRadius: 4,
-                    color: Colors.purple.withOpacity(0.3),
+                    color: Colors.purple.withValues(alpha: 77),
                   ),
                   Shadow(
                     offset: const Offset(0, 0),
                     blurRadius: 20,
-                    color: Colors.cyan.withOpacity(0.4),
+                    color: Colors.cyan.withValues(alpha: 102),
                   ),
                 ],
                 foreground: Paint()
@@ -220,7 +220,7 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
         _buildInitialPlaceholderView(context),
         Positioned.fill(
           child: Container(
-            color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.95),
+            color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 242),
             child: Center(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
@@ -279,7 +279,7 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
   }
 
   Widget _buildPersonDetailView(BuildContext context, Person person) {
-    final userDataService = Provider.of<UserDataService>(context);
+    Provider.of<UserDataService>(context);
 
     return CustomScrollView(
       slivers: [
@@ -309,17 +309,17 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
                   Shadow(
                     offset: const Offset(2, 2),
                     blurRadius: 8,
-                    color: Colors.black.withOpacity(0.8),
+                    color: Colors.black.withValues(alpha: 204),
                   ),
                   Shadow(
                     offset: const Offset(-1, -1),
                     blurRadius: 4,
-                    color: Colors.purple.withOpacity(0.3),
+                    color: Colors.purple.withValues(alpha: 77),
                   ),
                   Shadow(
                     offset: const Offset(0, 0),
                     blurRadius: 20,
-                    color: Colors.cyan.withOpacity(0.4),
+                    color: Colors.cyan.withValues(alpha: 102),
                   ),
                 ],
                 foreground: Paint()
@@ -398,7 +398,7 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
                     }
                   },
                   style: IconButton.styleFrom(
-                    backgroundColor: Colors.black.withOpacity(0.5),
+                    backgroundColor: Colors.black.withValues(alpha: 128),
                     padding: const EdgeInsets.all(4.0),
                   ),
                 ),
@@ -525,7 +525,7 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
         imageUrl == "null" )
      {
       return Container(
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest ,
         child: Center(
           child: Icon(
             Icons.person_outline,
@@ -545,7 +545,7 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
         errorListener: (value) =>
             debugPrint('Image load error: $value'), // For debugging
         placeholder: (context, url) => Container(
-          color: Theme.of(context).colorScheme.surfaceVariant,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest ,
           child: Center(
             child: CircularProgressIndicator(
               color: Theme.of(context).colorScheme.secondary,
@@ -554,7 +554,7 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
           ),
         ),
         errorWidget: (context, url, error) => Container(
-          color: Theme.of(context).colorScheme.surfaceVariant,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest ,
           child: Center(
             child: Icon(
               Icons.broken_image_outlined,

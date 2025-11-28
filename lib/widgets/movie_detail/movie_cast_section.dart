@@ -15,11 +15,11 @@ class MovieCastSection extends StatelessWidget {
   final String movieTitle;
 
   const MovieCastSection({
-    Key? key,
+    super.key,
     required this.cast,
     required this.movieId,
     required this.movieTitle,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

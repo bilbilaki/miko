@@ -192,7 +192,7 @@ class _TvShowPageState extends State<TvShowPage1> {
                       const BorderRadius.vertical(top: Radius.circular(20)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha:0.1),
                       blurRadius: 10,
                       spreadRadius: 5,
                     ),
@@ -717,7 +717,7 @@ class _TvShowPageState extends State<TvShowPage1> {
                             end: Alignment.bottomCenter,
                             colors: [
                               Colors.transparent,
-                              Colors.black.withOpacity(0.8),
+                              Colors.black.withValues(alpha:0.8),
                             ],
                           ),
                         ),
@@ -731,7 +731,7 @@ class _TvShowPageState extends State<TvShowPage1> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.7),
+                          color: Colors.black.withValues(alpha:0.7),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -753,7 +753,7 @@ class _TvShowPageState extends State<TvShowPage1> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.blue.withOpacity(0.8),
+                            color: Colors.blue.withValues(alpha:0.8),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -778,7 +778,7 @@ class _TvShowPageState extends State<TvShowPage1> {
                           borderRadius: BorderRadius.circular(4),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
+                              color: Colors.black.withValues(alpha:0.3),
                               blurRadius: 4,
                               offset: const Offset(0, 2),
                             ),
@@ -815,7 +815,7 @@ class _TvShowPageState extends State<TvShowPage1> {
                             borderRadius: BorderRadius.circular(4),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
+                                color: Colors.black.withValues(alpha:0.3),
                                 blurRadius: 4,
                                 offset: const Offset(0, 2),
                               ),

@@ -12,13 +12,13 @@ class MovieBasicInfo extends StatelessWidget {
   final bool showDetailedInfo;
 
   const MovieBasicInfo({
-    Key? key,
+    super.key,
     required this.movie,
     this.translatedTitle,
     required this.isTranslating,
     required this.onTranslate,
     this.showDetailedInfo = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +109,7 @@ class MovieBasicInfo extends StatelessWidget {
                           ),
                     onPressed: onTranslate,
                     style: IconButton.styleFrom(
-                      backgroundColor: Colors.black.withOpacity(0.5),
+                      backgroundColor: Colors.black.withValues(alpha:0.5),
                       padding: const EdgeInsets.all(4.0),
                     ),
                   ),

@@ -24,8 +24,9 @@ Future<Directory> getTargetDirectory({
   }
 
   String targetPath = p.join(baseDir.path, appFolderName);
-  if (folderUnderApp.isNotEmpty)
+  if (folderUnderApp.isNotEmpty) {
     targetPath = p.join(targetPath, folderUnderApp);
+  }
   if (userSubdir.isNotEmpty) targetPath = p.join(targetPath, userSubdir);
 
   final dir = Directory(targetPath);

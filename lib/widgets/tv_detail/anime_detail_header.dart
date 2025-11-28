@@ -13,13 +13,13 @@ class AnimeDetailHeader extends StatelessWidget {
   final bool isTranslating;
 
   const AnimeDetailHeader({
-    Key? key,
+    super.key,
     required this.tvShow,
     required this.showShimmer,
     this.translatedTitle,
     required this.onTranslate,
     required this.isTranslating,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +164,7 @@ class AnimeDetailHeader extends StatelessWidget {
           : const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
       onPressed: onTranslate,
       style: IconButton.styleFrom(
-        backgroundColor: Colors.black.withOpacity(0.5),
+        backgroundColor: Colors.black.withValues(alpha:0.5),
         padding: const EdgeInsets.all(4.0),
       ),
     );

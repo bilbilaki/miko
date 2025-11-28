@@ -83,7 +83,7 @@ class _TinyPlayer extends ConsumerWidget {
           border: Border.all(color: Colors.grey.shade800, width: 4),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               blurRadius: 10,
               spreadRadius: 2,
             )
@@ -196,7 +196,7 @@ class _ChannelListView extends ConsumerWidget {
             }
           },
           groupSeparatorBuilder: (String groupByValue) => Container(
-            color: Theme.of(context).primaryColor.withOpacity(0.2),
+            color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
               groupByValue,
@@ -232,7 +232,7 @@ class _ChannelListItem extends ConsumerWidget {
     final isSelected = selectedChannel?.id == channel.id;
 
     return ListTile(
-      tileColor: isSelected ? Theme.of(context).primaryColor.withOpacity(0.3) : null,
+      tileColor: isSelected ? Theme.of(context).primaryColor.withValues(alpha: 0.3) : null,
       leading: channel.logoUrl.isNotEmpty
           ? Image.network(
               channel.logoUrl,

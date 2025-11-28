@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:miko/services/user_data_service.dart';
-import 'package:miko/widgets/tv_detail/anime_detail_utils.dart';
 
 /// Widget for displaying movie overview with translation support
 class MovieOverviewSection extends StatelessWidget {
@@ -9,11 +7,11 @@ class MovieOverviewSection extends StatelessWidget {
   final VoidCallback? onLongPress;
 
   const MovieOverviewSection({
-    Key? key,
+    super.key,
     required this.overview,
     required this.onTranslate,
     this.onLongPress,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -119,7 +119,7 @@ Future<void> _translateOverviewForEpisode(int key, String original) async {
   }
 
   Widget _buildEpisodeListItem(BuildContext context, Episode episode) {
-    final int key = episode.id ?? episode.episodeNumber;
+    final int key = episode.id;
     final bool isTranslating = _isTranslatingMap[key] == true;
     final String? translated = _translatedOverviews[key];
 
@@ -209,7 +209,7 @@ IconButton(
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Overview translated'), duration: Duration(seconds:1)));
     }
   },
-//  style: IconButton.styleFrom(backgroundColor: Colors.black.withOpacity(0.5), padding: const EdgeInsets.all(1.0)),
+//  style: IconButton.styleFrom(backgroundColor: Colors.black.withValues(alpha:0.5), padding: const EdgeInsets.all(1.0)),
 ),
 
 

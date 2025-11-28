@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -210,8 +212,8 @@ class SearchAppBarTextFieldState extends State<SearchAppBarTextField> {
       isDense: true,
       filled: true,
       fillColor: theme.brightness == Brightness.dark
-          ? scheme.surface.withOpacity(0.24)
-          : scheme.surfaceContainerHighest.withOpacity(0.72),
+          ? scheme.surface.withValues(alpha:0.24)
+          : scheme.surfaceContainerHighest.withValues(alpha:0.72),
       prefixIcon: const Icon(Icons.search_rounded),
       // Animated clear button; if a custom suffixIcon is supplied by the caller, we won't override it.
       suffixIcon: ValueListenableBuilder<TextEditingValue>(
@@ -248,7 +250,7 @@ class SearchAppBarTextFieldState extends State<SearchAppBarTextField> {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(28),
         borderSide: BorderSide(
-          color: scheme.primary.withOpacity(0.32),
+          color: scheme.primary.withValues(alpha:0.32),
           width: 1.2,
         ),
       ),

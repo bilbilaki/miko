@@ -7,9 +7,9 @@ class SpokenLanguagesSection extends StatelessWidget {
   final List<SpokenLanguage> languages;
 
   const SpokenLanguagesSection({
-    Key? key,
+    super.key,
     required this.languages,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

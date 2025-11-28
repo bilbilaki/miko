@@ -467,7 +467,6 @@ EpisodeCardWidget(
           if (tvShow.networks != null && tvShow.networks!.isNotEmpty) ...[
             Text('Networks', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
-            // TODO: Add actual network display code here if needed
             SizedBox(
               height: 150, // Example height
               child: ListView.builder(

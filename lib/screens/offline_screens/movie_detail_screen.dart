@@ -15,6 +15,7 @@ import 'package:provider/provider.dart';
 // Ensure correct provider import
 import 'package:miko/utils/colors.dart';
 
+// ignore: must_be_immutable
 class MovieDetailsScreen extends StatelessWidget {
    int movieId;
    String typec;
@@ -132,8 +133,8 @@ class MovieDetailsScreen extends StatelessWidget {
                               end: Alignment.bottomCenter,
                               colors: [
                                 Colors.transparent,
-                                Colors.black.withOpacity(0.2),
-                                AppColors.primaryBackground.withOpacity(0.9),
+                                Colors.black.withValues(alpha: 51),
+                                AppColors.primaryBackground.withValues(alpha: 229),
                                 AppColors.primaryBackground,
                               ],
                               stops: const [
@@ -177,7 +178,7 @@ class MovieDetailsScreen extends StatelessWidget {
                                 );
                               },
                               style: IconButton.styleFrom(
-                                backgroundColor: Colors.black.withOpacity(0.5),
+                                backgroundColor: Colors.black.withValues(alpha: 128),
                                 padding: const EdgeInsets.all(4.0),
                               ),
                             ),
@@ -187,7 +188,7 @@ class MovieDetailsScreen extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 6.0, vertical: 4.0),
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.5),
+                                color: Colors.black.withValues(alpha: 128),
                                 borderRadius: BorderRadius.circular(4.0),
                               ),
                               child: Text(
@@ -227,7 +228,7 @@ class MovieDetailsScreen extends StatelessWidget {
                                 );
                               },
                               style: IconButton.styleFrom(
-                                backgroundColor: Colors.black.withOpacity(0.5),
+                                backgroundColor: Colors.black.withValues(alpha: 128),
                                 padding: const EdgeInsets.all(4.0),
                               ),
                             ),
@@ -250,7 +251,7 @@ class MovieDetailsScreen extends StatelessWidget {
                     const Size.fromHeight(1.0), // Creates the border size
                 child: Container(
                   // Creates the border container
-                  color: AppColors.dividerColor.withOpacity(0.5),
+                  color: AppColors.dividerColor.withValues(alpha: 128),
                   height: 1.0,
                 )),
           ),
@@ -319,17 +320,17 @@ class MovieDetailsScreen extends StatelessWidget {
                                 Shadow(
                                   offset: Offset(2, 2),
                                   blurRadius: 8,
-                                  color: Colors.black.withOpacity(0.8),
+                                  color: Colors.black.withValues(alpha: 204),
                                 ),
                                 Shadow(
                                   offset: Offset(-1, -1),
                                   blurRadius: 4,
-                                  color: Colors.purple.withOpacity(0.3),
+                                  color: Colors.purple.withValues(alpha: 77),
                                 ),
                                 Shadow(
                                   offset: Offset(0, 0),
                                   blurRadius: 20,
-                                  color: Colors.cyan.withOpacity(0.4),
+                                  color: Colors.cyan.withValues(alpha: 102),
                                 ),
                               ],
                               foreground: Paint()
