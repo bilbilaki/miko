@@ -114,7 +114,7 @@ class LocalProvider extends ChangeNotifier {
   late SharedPreferences _prefs; // Initialized in _initPrefsAndCacheDir
   Map<String, String> _persistedThumbnailPaths = {};
   String?
-  _thumbnailCacheDirPath; // Path to the app's dedicated thumbnail cache directory
+      _thumbnailCacheDirPath; // Path to the app's dedicated thumbnail cache directory
 
   bool _ffmpegChecked = false; // Flag to check ffmpeg existence only once
 
@@ -355,10 +355,10 @@ class LocalProvider extends ChangeNotifier {
       tempThumbOutput,
     ]);
 
-    if (thumbnail.data!=[]||thumbnail.data!=[0]||thumbnail.data.isNotEmpty) {
-
-        return Uint8List.fromList(thumbnail.data);
-      
+    if (thumbnail.data != [] ||
+        thumbnail.data != [0] ||
+        thumbnail.data.isNotEmpty) {
+      return Uint8List.fromList(thumbnail.data);
     } else {
       if (kDebugMode) {
         print(
@@ -398,7 +398,7 @@ class LocalProvider extends ChangeNotifier {
   /// Returns true if permission is granted, false otherwise
   Future<bool> requestAndroidStoragePermission() async {
     if (!Platform.isAndroid) return true;
-    
+
     try {
       var status = await Permission.manageExternalStorage.status;
       if (!status.isGranted) {
@@ -433,22 +433,29 @@ class LocalProvider extends ChangeNotifier {
   }
 
   /// Get available Windows drive letters
+  /// Uses parallel checks for better performance
   Future<List<String>> getWindowsDrives() async {
     if (!Platform.isWindows) return [];
-    
-    final List<String> drives = [];
-    for (int i = 65; i <= 90; i++) {
-      final driveLetter = String.fromCharCode(i);
-      final drivePath = '$driveLetter:\\';
-      try {
-        if (await Directory(drivePath).exists()) {
-          drives.add(drivePath);
+
+    // Create list of all possible drive paths A-Z
+    final drivePaths = List.generate(
+      26,
+      (i) => '${String.fromCharCode(65 + i)}:\\',
+    );
+
+    // Check all drives in parallel
+    final existChecks = await Future.wait(
+      drivePaths.map((path) async {
+        try {
+          return await Directory(path).exists() ? path : null;
+        } catch (e) {
+          return null;
         }
-      } catch (e) {
-        // Drive doesn't exist or is not accessible
-      }
-    }
-    return drives;
+      }),
+    );
+
+    // Filter out non-existent drives and return
+    return existChecks.whereType<String>().toList();
   }
 
   /// Checks if a path is stored; if not, sets a default OS-specific home directory.

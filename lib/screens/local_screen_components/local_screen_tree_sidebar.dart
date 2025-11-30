@@ -33,29 +33,36 @@ class PlatformPaths {
   }
 
   /// Get available drive letters on Windows
+  /// Get available drive letters on Windows
+  /// Uses parallel checks for better performance
   static Future<List<String>> getWindowsDrives() async {
     if (!Platform.isWindows) return [];
-    
-    final List<String> drives = [];
-    // Check common drive letters A-Z
-    for (int i = 65; i <= 90; i++) {
-      final driveLetter = String.fromCharCode(i);
-      final drivePath = '$driveLetter:\\';
-      try {
-        if (await Directory(drivePath).exists()) {
-          drives.add(drivePath);
+
+    // Create list of all possible drive paths A-Z
+    final drivePaths = List.generate(
+      26,
+      (i) => '${String.fromCharCode(65 + i)}:\\',
+    );
+
+    // Check all drives in parallel
+    final existChecks = await Future.wait(
+      drivePaths.map((path) async {
+        try {
+          return await Directory(path).exists() ? path : null;
+        } catch (e) {
+          return null;
         }
-      } catch (e) {
-        // Drive doesn't exist or is not accessible
-      }
-    }
-    return drives;
+      }),
+    );
+
+    // Filter out non-existent drives and return
+    return existChecks.whereType<String>().toList();
   }
 
   /// Get standard directories based on platform
   static Future<List<SystemDirectory>> getSystemDirectories() async {
     final List<SystemDirectory> dirs = [];
-    
+
     try {
       if (Platform.isAndroid) {
         // Android standard directories
@@ -131,7 +138,7 @@ class PlatformPaths {
     } catch (e) {
       // Silently fail if unable to load system directories
     }
-    
+
     return dirs;
   }
 }
@@ -175,7 +182,7 @@ class _TreeSidebarState extends State<TreeSidebar> {
 
   Future<void> _loadSystemDirectories() async {
     final dirs = await PlatformPaths.getSystemDirectories();
-    
+
     if (mounted) {
       setState(() {
         // Separate drives from other directories on Windows
@@ -213,7 +220,8 @@ class _TreeSidebarState extends State<TreeSidebar> {
       final entities = await dir.list().toList();
       final subdirs = entities
           .whereType<Directory>()
-          .where((d) => !p.basename(d.path).startsWith('.')) // Skip hidden folders
+          .where(
+              (d) => !p.basename(d.path).startsWith('.')) // Skip hidden folders
           .toList();
 
       subdirs.sort((a, b) => p.basename(a.path).toLowerCase().compareTo(
@@ -250,15 +258,18 @@ class _TreeSidebarState extends State<TreeSidebar> {
   }
 
   Widget _buildSystemDirItem(SystemDirectory sysDir) {
-    final isSelected = widget.currentPath != null && 
-                       p.equals(sysDir.path, widget.currentPath!);
+    final isSelected = widget.currentPath != null &&
+        p.equals(sysDir.path, widget.currentPath!);
 
     return InkWell(
       onTap: () => widget.onPathSelected(sysDir.path),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
         color: isSelected
-            ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha:0.3)
+            ? Theme.of(context)
+                .colorScheme
+                .primaryContainer
+                .withValues(alpha: 0.3)
             : null,
         child: Row(
           children: [
@@ -273,9 +284,8 @@ class _TreeSidebarState extends State<TreeSidebar> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : null,
+                  color:
+                      isSelected ? Theme.of(context).colorScheme.primary : null,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -297,7 +307,10 @@ class _TreeSidebarState extends State<TreeSidebar> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
         color: isSelected
-            ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3)
+            ? Theme.of(context)
+                .colorScheme
+                .primaryContainer
+                .withValues(alpha: 0.3)
             : null,
         child: Row(
           children: [
@@ -309,9 +322,8 @@ class _TreeSidebarState extends State<TreeSidebar> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : null,
+                  color:
+                      isSelected ? Theme.of(context).colorScheme.primary : null,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -325,9 +337,9 @@ class _TreeSidebarState extends State<TreeSidebar> {
   Widget _buildTreeNode(String dirPath, int depth) {
     final isExpanded = _expandedDirs[dirPath] ?? false;
     final subdirs = _cachedSubdirs[dirPath] ?? [];
-    final isSelected = widget.currentPath != null && 
-                       (dirPath == widget.currentPath || 
-                        p.equals(dirPath, widget.currentPath!));
+    final isSelected = widget.currentPath != null &&
+        (dirPath == widget.currentPath ||
+            p.equals(dirPath, widget.currentPath!));
     final folderName = p.basename(dirPath);
     final hasChildren = subdirs.isNotEmpty;
 
@@ -344,7 +356,10 @@ class _TreeSidebarState extends State<TreeSidebar> {
               bottom: 6.0,
             ),
             color: isSelected
-                ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha:0.3)
+                ? Theme.of(context)
+                    .colorScheme
+                    .primaryContainer
+                    .withValues(alpha: 0.3)
                 : null,
             child: Row(
               children: [
@@ -374,7 +389,8 @@ class _TreeSidebarState extends State<TreeSidebar> {
                     folderName,
                     style: TextStyle(
                       fontSize: 13,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
                       color: isSelected
                           ? Theme.of(context).colorScheme.primary
                           : null,
@@ -398,7 +414,7 @@ class _TreeSidebarState extends State<TreeSidebar> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 800;
     final isTablet = screenWidth > 600 && screenWidth <= 800;
-    
+
     if (isDesktop) {
       // Desktop: fixed width or percentage of screen
       return widget.width ?? 280.0;
@@ -416,7 +432,7 @@ class _TreeSidebarState extends State<TreeSidebar> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth <= 600;
     final responsiveWidth = _calculateResponsiveWidth(context);
-    
+
     return Container(
       width: responsiveWidth,
       decoration: BoxDecoration(
@@ -484,10 +500,11 @@ class _TreeSidebarState extends State<TreeSidebar> {
                       minHeight: isMobile ? 32 : 40,
                     ),
                     tooltip: 'Close',
-                    onPressed: widget.onClose ?? () {
-                      // Default behavior: navigate back if possible
-                      Navigator.of(context).maybePop();
-                    },
+                    onPressed: widget.onClose ??
+                        () {
+                          // Default behavior: navigate back if possible
+                          Navigator.of(context).maybePop();
+                        },
                   ),
                 ],
               ],
@@ -507,9 +524,9 @@ class _TreeSidebarState extends State<TreeSidebar> {
                     if (Platform.isWindows && _drives.isNotEmpty) ...[
                       Padding(
                         padding: EdgeInsets.fromLTRB(
-                          isMobile ? 8 : 12, 
-                          isMobile ? 8 : 12, 
-                          isMobile ? 8 : 12, 
+                          isMobile ? 8 : 12,
+                          isMobile ? 8 : 12,
+                          isMobile ? 8 : 12,
                           6,
                         ),
                         child: Text(
@@ -529,9 +546,9 @@ class _TreeSidebarState extends State<TreeSidebar> {
                     if (_systemDirs.isNotEmpty) ...[
                       Padding(
                         padding: EdgeInsets.fromLTRB(
-                          isMobile ? 8 : 12, 
-                          isMobile ? 8 : 12, 
-                          isMobile ? 8 : 12, 
+                          isMobile ? 8 : 12,
+                          isMobile ? 8 : 12,
+                          isMobile ? 8 : 12,
                           6,
                         ),
                         child: Text(
@@ -544,15 +561,16 @@ class _TreeSidebarState extends State<TreeSidebar> {
                           ),
                         ),
                       ),
-                      ..._systemDirs.map((sysDir) => _buildSystemDirItem(sysDir)),
+                      ..._systemDirs
+                          .map((sysDir) => _buildSystemDirItem(sysDir)),
                       const Divider(height: 16),
                     ],
                     // Current Root Directory
                     Padding(
                       padding: EdgeInsets.fromLTRB(
-                        isMobile ? 8 : 12, 
-                        8, 
-                        isMobile ? 8 : 12, 
+                        isMobile ? 8 : 12,
+                        8,
+                        isMobile ? 8 : 12,
                         6,
                       ),
                       child: Text(
@@ -632,7 +650,10 @@ class _CollapsibleTreeSidebarState extends State<CollapsibleTreeSidebar> {
             bottom: 0,
             child: Container(
               width: 28,
-              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.9),
+              color: Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerHighest
+                  .withValues(alpha: 0.9),
               child: Center(
                 child: IconButton(
                   padding: EdgeInsets.zero,
@@ -717,9 +738,7 @@ class _CollapsibleTreeSidebarState extends State<CollapsibleTreeSidebar> {
               visualDensity: VisualDensity.compact,
               iconSize: 18,
               icon: Icon(
-                _isSidebarVisible
-                    ? Icons.chevron_left
-                    : Icons.chevron_right,
+                _isSidebarVisible ? Icons.chevron_left : Icons.chevron_right,
               ),
               onPressed: _toggleSidebar,
               tooltip: _isSidebarVisible ? 'Hide sidebar' : 'Show sidebar',

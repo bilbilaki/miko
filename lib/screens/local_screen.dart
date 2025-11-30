@@ -49,7 +49,7 @@ class LocalScreenState extends State<LocalScreen> {
 
   Future<void> _initialize() async {
     final provider = Provider.of<LocalProvider>(context, listen: false);
-    
+
     // On Android, request storage permission first
     if (Platform.isAndroid) {
       final hasPermission = await provider.requestAndroidStoragePermission();
@@ -57,7 +57,7 @@ class LocalScreenState extends State<LocalScreen> {
         showSnackBar('Storage permission is required to browse files.');
       }
     }
-    
+
     await provider.setDefaultPathIfNoneSet();
 
     // Determine a sensible default grid size based on platform and screen size
@@ -69,7 +69,7 @@ class LocalScreenState extends State<LocalScreen> {
       // Mobile: fewer columns
       _gridCrossAxisCount = screenWidth > 600 ? 3.0 : 2.0;
     }
-    
+
     await provider.loadPath(); // Load saved path from SharedPreferences
     if (provider.externalPath == null) {
       _promptPathSelection(); // If no path saved, prompt user to select one
@@ -164,9 +164,8 @@ class LocalScreenState extends State<LocalScreen> {
   /// Will replace _getSortedItems() in future refactoring phases.
   // ignore: unused_element
   List<GridItem> _getSortedItemsFromDomainModel(LocalProvider provider) {
-    final items = provider.entries
-        .map((entry) => GridItem.fromFsEntry(entry))
-        .toList();
+    final items =
+        provider.entries.map((entry) => GridItem.fromFsEntry(entry)).toList();
 
     items.sort((a, b) {
       int comparison;
@@ -186,12 +185,10 @@ class LocalScreenState extends State<LocalScreen> {
           } else if (!a.isFolder && b.isFolder) {
             comparison = 1;
           } else {
-            String typeA = a.isFolder
-                ? 'folder'
-                : p.extension(a.path).toLowerCase();
-            String typeB = b.isFolder
-                ? 'folder'
-                : p.extension(b.path).toLowerCase();
+            String typeA =
+                a.isFolder ? 'folder' : p.extension(a.path).toLowerCase();
+            String typeB =
+                b.isFolder ? 'folder' : p.extension(b.path).toLowerCase();
             comparison = typeA.compareTo(typeB);
             if (comparison == 0) {
               comparison = a.name.toLowerCase().compareTo(b.name.toLowerCase());
@@ -209,7 +206,7 @@ class LocalScreenState extends State<LocalScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth <= 600;
-    
+
     return Consumer<LocalProvider>(
       builder: (context, provider, _) {
         // Show an empty view if no external path is set, prompting user to choose one
@@ -226,16 +223,17 @@ class LocalScreenState extends State<LocalScreen> {
         // Calculate if we can go back
         final canGoBack = currentFolderPath != null &&
             !p.equals(currentFolderPath!, provider.externalPath!);
-        
+
         // Calculate if we're at root but can navigate up (parent exists)
         final canNavigateUpFromRoot = currentFolderPath == null &&
             provider.externalPath != null &&
-            Directory(provider.externalPath!).parent.path != provider.externalPath!;
+            Directory(provider.externalPath!).parent.path !=
+                provider.externalPath!;
 
         return Scaffold(
           appBar: AppBar(
             title: Text(
-              currentDirName, 
+              currentDirName,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: isMobile ? 16 : 20,
@@ -252,7 +250,8 @@ class LocalScreenState extends State<LocalScreen> {
             flexibleSpace: Align(
               alignment: Alignment.centerLeft,
               child: Padding(
-                padding: EdgeInsets.only(left: (canGoBack || canNavigateUpFromRoot) ? 56 : 16),
+                padding: EdgeInsets.only(
+                    left: (canGoBack || canNavigateUpFromRoot) ? 56 : 16),
                 child: IconButton(
                   icon: Icon(Icons.home_sharp, size: isMobile ? 20 : 24),
                   onPressed: () {
@@ -295,13 +294,14 @@ class LocalScreenState extends State<LocalScreen> {
                 onRefresh: () => provider.refresh(currentFolderPath),
                 onBatchRename: () =>
                     LocalScreenFileOperations.showBatchRenameDialog(
-                      context,
-                      provider,
-                      currentFolderPath,
-                      showSnackBar,
-                    ),
+                  context,
+                  provider,
+                  currentFolderPath,
+                  showSnackBar,
+                ),
                 onClearCache: () async {
-                  final confirmed = await LocalScreenDialogs.showConfirmationDialog(
+                  final confirmed =
+                      await LocalScreenDialogs.showConfirmationDialog(
                     context,
                     'Clear Cache',
                     'Are you sure you want to clear all generated thumbnail cache files?',
@@ -363,10 +363,10 @@ class LocalScreenState extends State<LocalScreen> {
   Widget _buildGridView(List<GridItem> items) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth <= 600;
-    
+
     // Responsive aspect ratio
     double aspectRatio = _gridCrossAxisCount <= 3 ? 0.8 : 1.0;
-    
+
     // Responsive padding and spacing
     final padding = isMobile ? 8.0 : 16.0;
     final spacing = isMobile ? 8.0 : 16.0;
@@ -478,11 +478,11 @@ class LocalScreenState extends State<LocalScreen> {
       // Edit content only if document
       entry.kind == FileKind.document || entry.kind == FileKind.markdown
           ? (e) => LocalScreenFileOperations.showEntryDocumentDialog(
-              context,
-              e,
-              provider,
-              showSnackBar,
-            )
+                context,
+                e,
+                provider,
+                showSnackBar,
+              )
           : null,
     );
   }
@@ -523,7 +523,7 @@ class LocalScreenState extends State<LocalScreen> {
   Widget _buildEmptyView() {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth <= 600;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -617,11 +617,11 @@ class LocalScreenState extends State<LocalScreen> {
       ),
       provider.isTextFile(file)
           ? (f) => LocalScreenFileOperations.showDocumentContentDialog(
-              context,
-              f,
-              provider,
-              showSnackBar,
-            )
+                context,
+                f,
+                provider,
+                showSnackBar,
+              )
           : null,
     );
   }
