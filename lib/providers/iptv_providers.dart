@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:miko/models/iptv_repository.dart';
 import 'package:miko/models/channel.dart';

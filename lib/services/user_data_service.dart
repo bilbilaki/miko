@@ -6,34 +6,72 @@ import 'package:flutter/material.dart';
 enum AppThemeMode { system, light, dark }
 
 // Enum for grid layout preference
-enum GridLayout { grid3x3, grid1x2, custom } // Add more as needed
+enum GridLayout { grid3x3, grid1x2, custom }
 
+/// Optimized UserDataService with better structure and extensibility
+/// Maintains backward compatibility with existing API
 class UserDataService extends ChangeNotifier {
+  // ==================== CONSTANTS ====================
+  // Preference Keys - Organized by category
+
+  // Favorites & Watchlist Keys
   static const String _favoriteMoviesKey = 'favoriteMovies';
   static const String _favoriteTvSeriesKey = 'favoriteTvSeries';
   static const String _favoriteAnimeKey = 'favoriteAnime';
   static const String _watchlistMoviesKey = 'watchlistMovies';
   static const String _watchlistAnimeKey = 'watchlistAnime';
   static const String _watchlistTvSeriesKey = 'watchlistTvSeries';
+
+  // Watch Progress Keys
   static const String _isWatchedEpisodeKey = 'isWatchedEpisode';
   static const String _isWatchedSeasonKey = 'isWatchedSeason';
   static const String _isWatchedMovieKey = 'isWatchedMovie';
   static const String _isWatchedSeriesKey = 'isWatchedSeries';
+
+  // Library & Directory Keys
   static const String myListKey = 'myList';
-  // Key for user-selected directory path
   static const String _selectedDirectoryPathKey = 'selectedDirectoryPath';
-  // Keys for local library groups
   static const String _moviesLibraryPathsKey = 'moviesLibraryPaths';
   static const String _seriesLibraryPathsKey = 'seriesLibraryPaths';
   static const String _musicLibraryPathsKey = 'musicLibraryPaths';
   static const String _musicVideoLibraryPathsKey = 'musicVideoLibraryPaths';
   static const String _mixedLibraryPathsKey = 'mixedLibraryPaths';
   static const String _photoLibraryPathsKey = 'photoLibraryPaths';
-late SharedPreferences perfs;
+
+  // Settings Keys
+  static const String _themeModKey = 'themeMode';
+  static const String _homeGridLayoutKey = 'homeGridLayout';
+  static const String _useHardwareDecoderKey = 'useHardwareDecoder';
+  static const String _useSecondaryPlayerKey = 'useSecondaryPlayer';
+  static const String _externalDownloadManagerKey =
+      'externalDownloadManagerPackage';
+  static const String _externalPlayerKey = 'externalPlayerPackage';
+  static const String _areyouwantfarsiKey = 'areyouwantfarsi';
+  static const String _externalPlayerSettingKey = 'externalPlayer';
+  static const String _downloadManagerSettingKey = 'downloadManager';
+  static const String _gridSizeKey = 'gridSize';
+  static const String _decoderPreferenceKey = 'decoderPreference';
+  static const String _customBaseUrlKey = 'custoombaseurl';
+  static const String _historyForModelsEnabledKey = 'historyformodelsenabled';
+  static const String _historyChatEnabledKey = 'historychatenabled';
+  static const String _tmdbBaseUrlKey = 'tmdbBaseUrl';
+
+  // AI Settings Keys - Subtitle Generation
+  static const String _aiSubtitleBaseUrlKey = 'aiSubtitleBaseUrl';
+  static const String _aiSubtitleApiKeyKey = 'aiSubtitleApiKey';
+  static const String _aiSubtitleModelIdKey = 'aiSubtitleModelId';
+
+  // AI Settings Keys - Translation
+  static const String _aiTranslationBaseUrlKey = 'aiTranslationBaseUrl';
+  static const String _aiTranslationApiKeyKey = 'aiTranslationApiKey';
+  static const String _aiTranslationModelIdKey = 'aiTranslationModelId';
+
+  // ==================== PRIVATE FIELDS ====================
+  SharedPreferences? _prefs;
+  late SharedPreferences perfs;
   // Add keys for history, downloads if implemented later
   String _custoombaseurl = 'Farsi';
-  SharedPreferences? _prefs;
-    String _tmdbBaseUrl = "https://db.inosuke.sbs";
+  String _tmdbBaseUrl = "https://db.inosuke.sbs";
   String? _selectedDirectoryPath; // Persisted user-chosen directory
   // Local libraries grouped paths
   List<String> _moviesLibraryPaths = [];
@@ -43,9 +81,18 @@ late SharedPreferences perfs;
   List<String> _mixedLibraryPaths = [];
   List<String> _photoLibraryPaths = [];
 
-  
   bool _historyformodelsenabled = false;
   bool _historychatenabled = true;
+
+  // AI Settings - Subtitle Generation
+  String _aiSubtitleBaseUrl = '';
+  String _aiSubtitleApiKey = '';
+  String _aiSubtitleModelId = '';
+
+  // AI Settings - Translation
+  String _aiTranslationBaseUrl = '';
+  String _aiTranslationApiKey = '';
+  String _aiTranslationModelId = '';
   List<int> _favoriteMovieIds = [];
   List<int> _favoriteAnimeIds = [];
   List<int> _favoriteTvSeriesIds = [];
@@ -75,7 +122,8 @@ late SharedPreferences perfs;
   List<String> get moviesLibraryPaths => List.unmodifiable(_moviesLibraryPaths);
   List<String> get seriesLibraryPaths => List.unmodifiable(_seriesLibraryPaths);
   List<String> get musicLibraryPaths => List.unmodifiable(_musicLibraryPaths);
-  List<String> get musicVideoLibraryPaths => List.unmodifiable(_musicVideoLibraryPaths);
+  List<String> get musicVideoLibraryPaths =>
+      List.unmodifiable(_musicVideoLibraryPaths);
   List<String> get mixedLibraryPaths => List.unmodifiable(_mixedLibraryPaths);
   List<String> get photoLibraryPaths => List.unmodifiable(_photoLibraryPaths);
   List<int> get watchlistTvSeriesIds =>
@@ -88,13 +136,12 @@ late SharedPreferences perfs;
   bool _useSecondaryPlayer = false;
   String? _externalDownloadManagerPackage;
   String? _externalPlayerPackage;
-  bool? _areyouwantfarsi= true;
-  // Default settings values
+  bool? _areyouwantfarsi = true;
+  // Settings
   String _externalPlayer = '';
   String _downloadManager = '';
-  late double _gridSize = 3; // Example: number of columns
-  String _decoderPreference =
-      'default'; // Example: 'default', 'hardware', 'software'
+  double _gridSize = 3.0;
+  String _decoderPreference = 'default';
   // Getters
   AppThemeMode get themeMode => _themeMode;
   GridLayout get homeGridLayout => _homeGridLayout;
@@ -108,152 +155,239 @@ late SharedPreferences perfs;
   String get downloadManager => _downloadManager;
   double get gridSize => _gridSize;
   String get decoderPreference => _decoderPreference;
-String get tmdbBaseUrl => _tmdbBaseUrl;
+  String get tmdbBaseUrl => _tmdbBaseUrl;
 
+  // AI Settings Getters - Subtitle Generation
+  String get aiSubtitleBaseUrl => _aiSubtitleBaseUrl;
+  String get aiSubtitleApiKey => _aiSubtitleApiKey;
+  String get aiSubtitleModelId => _aiSubtitleModelId;
 
-  
+  // AI Settings Getters - Translation
+  String get aiTranslationBaseUrl => _aiTranslationBaseUrl;
+  String get aiTranslationApiKey => _aiTranslationApiKey;
+  String get aiTranslationModelId => _aiTranslationModelId;
 
+  // ==================== INITIALIZATION ====================
   UserDataService() {
     _init();
   }
+
   Future<void> _init() async {
     _prefs ??= await SharedPreferences.getInstance();
-    perfs=_prefs??await SharedPreferences.getInstance();
-  
-    await _loadPreferences();
-    await _loadSettings();
+    perfs = _prefs ?? await SharedPreferences.getInstance();
+    await _loadAllPreferences();
   }
-  Future<void> _loadPreferences() async {
-    _prefs = await SharedPreferences.getInstance();
-    _favoriteMovieIds = _getIntList(_favoriteMoviesKey);
-    _isWatchedEpisodeIds = _getIntList(_isWatchedEpisodeKey);
-    _isWatchedSeasonIds = _getIntList(_isWatchedSeasonKey);
-    _isWatchedSeriesIds = _getIntList(_isWatchedSeriesKey);
-    _isWatchedMovieIds = _getIntList(_isWatchedMovieKey);
 
+  /// Centralized loading of all preferences
+  Future<void> _loadAllPreferences() async {
+    _prefs = await SharedPreferences.getInstance();
+
+    // Load Favorites & Watchlists
+    _favoriteMovieIds = _getIntList(_favoriteMoviesKey);
     _favoriteAnimeIds = _getIntList(_favoriteAnimeKey);
     _favoriteTvSeriesIds = _getIntList(_favoriteTvSeriesKey);
     _watchlistMovieIds = _getIntList(_watchlistMoviesKey);
     _watchlistAnimeIds = _getIntList(_watchlistAnimeKey);
     _watchlistTvSeriesIds = _getIntList(_watchlistTvSeriesKey);
-    _custoombaseurl = _prefs?.getString('custoombaseurl') ?? '';
-    _historyformodelsenabled =
-        _prefs?.getBool('historyformodelsenabled') ?? false;
-    _historychatenabled = _prefs?.getBool('historychatenabled') ??
-        false; // Use string key for bool
-            _tmdbBaseUrl = _prefs?.getString('tmdbBaseUrl') ?? "https://db.inosuke.sbs";
+
+    // Load Watch Progress
+    _isWatchedEpisodeIds = _getIntList(_isWatchedEpisodeKey);
+    _isWatchedSeasonIds = _getIntList(_isWatchedSeasonKey);
+    _isWatchedSeriesIds = _getIntList(_isWatchedSeriesKey);
+    _isWatchedMovieIds = _getIntList(_isWatchedMovieKey);
+
+    // Load Library Paths
     _selectedDirectoryPath = _prefs?.getString(_selectedDirectoryPathKey);
-              _moviesLibraryPaths = List<String>.from(_prefs?.getStringList(_moviesLibraryPathsKey) ?? const []);
-              _seriesLibraryPaths = List<String>.from(_prefs?.getStringList(_seriesLibraryPathsKey) ?? const []);
-              _musicLibraryPaths = List<String>.from(_prefs?.getStringList(_musicLibraryPathsKey) ?? const []);
-              _musicVideoLibraryPaths = List<String>.from(_prefs?.getStringList(_musicVideoLibraryPathsKey) ?? const []);
-              _mixedLibraryPaths = List<String>.from(_prefs?.getStringList(_mixedLibraryPathsKey) ?? const []);
-              _photoLibraryPaths = List<String>.from(_prefs?.getStringList(_photoLibraryPathsKey) ?? const []);
+    _moviesLibraryPaths = _getStringList(_moviesLibraryPathsKey);
+    _seriesLibraryPaths = _getStringList(_seriesLibraryPathsKey);
+    _musicLibraryPaths = _getStringList(_musicLibraryPathsKey);
+    _musicVideoLibraryPaths = _getStringList(_musicVideoLibraryPathsKey);
+    _mixedLibraryPaths = _getStringList(_mixedLibraryPathsKey);
+    _photoLibraryPaths = _getStringList(_photoLibraryPathsKey);
 
+    // Load Settings
+    _custoombaseurl = _prefs?.getString(_customBaseUrlKey) ?? 'Farsi';
+    _tmdbBaseUrl =
+        _prefs?.getString(_tmdbBaseUrlKey) ?? "https://db.inosuke.sbs";
+    _historyformodelsenabled =
+        _prefs?.getBool(_historyForModelsEnabledKey) ?? false;
+    _historychatenabled = _prefs?.getBool(_historyChatEnabledKey) ?? false;
 
-    notifyListeners(); // Notify listeners once prefs are loaded
+    // Load AI Settings
+    _aiSubtitleBaseUrl = _prefs?.getString(_aiSubtitleBaseUrlKey) ?? '';
+    _aiSubtitleApiKey = _prefs?.getString(_aiSubtitleApiKeyKey) ?? '';
+    _aiSubtitleModelId = _prefs?.getString(_aiSubtitleModelIdKey) ?? '';
+
+    _aiTranslationBaseUrl = _prefs?.getString(_aiTranslationBaseUrlKey) ?? '';
+    _aiTranslationApiKey = _prefs?.getString(_aiTranslationApiKeyKey) ?? '';
+    _aiTranslationModelId = _prefs?.getString(_aiTranslationModelIdKey) ?? '';
+
+    await _loadSettings();
+    notifyListeners();
   }
- String _getEpisodeProgressKey(int seriesId, int seasonNumber, int episodeNumber) {
+
+  // ==================== PLAYBACK PROGRESS ====================
+  /// Generate unique key for episode progress
+  String _getEpisodeProgressKey(
+    int seriesId,
+    int seasonNumber,
+    int episodeNumber,
+  ) {
     return 'progress_${seriesId}_${seasonNumber}_$episodeNumber';
   }
 
-  /// Saves the playback position (in seconds) for a specific episode.
-  Future<void> saveEpisodeProgress(int seriesId, int seasonNumber, int episodeNumber, Duration position) async {
+  /// Save playback position for a specific episode
+  Future<void> saveEpisodeProgress(
+    int seriesId,
+    int seasonNumber,
+    int episodeNumber,
+    Duration position,
+  ) async {
     final key = _getEpisodeProgressKey(seriesId, seasonNumber, episodeNumber);
     await _prefs!.setInt(key, position.inSeconds);
     // No need to notify listeners for this, it's a background save.
   }
 
-  /// Retrieves the saved playback position for an episode.
-  /// Returns null if no progress is saved.
-  Future<Duration?> getEpisodeProgress(int seriesId, int seasonNumber, int episodeNumber) async {
+  /// Retrieve saved playback position for an episode
+  Future<Duration?> getEpisodeProgress(
+    int seriesId,
+    int seasonNumber,
+    int episodeNumber,
+  ) async {
     final key = _getEpisodeProgressKey(seriesId, seasonNumber, episodeNumber);
-    final seconds = _prefs!.getInt(key);
-    if (seconds != null && seconds!= seconds-seconds) {
+    final seconds = _prefs?.getInt(key);
+    if (seconds != null && seconds != 0) {
       return Duration(seconds: seconds);
     }
-    return null; // Return zero duration if no progress is saved
+    return null;
   }
-Future<void> setTmdbBaseUrl(String value) async {
+
+  Future<void> setTmdbBaseUrl(String value) async {
     _tmdbBaseUrl = value;
     await _prefs?.setString('tmdbBaseUrl', value.toString());
     notifyListeners();
   }
 
-
-  /// Clears the saved progress for an episode (e.g., after it's fully watched).
-  Future<void> clearEpisodeProgress(int seriesId, int seasonNumber, int episodeNumber) async {
+  /// Clear saved progress for an episode
+  Future<void> clearEpisodeProgress(
+    int seriesId,
+    int seasonNumber,
+    int episodeNumber,
+  ) async {
     final key = _getEpisodeProgressKey(seriesId, seasonNumber, episodeNumber);
-    await _prefs!.remove(key);
+    await _prefs?.remove(key);
   }
 
-  // --- Video Progress Methods (with 4 String parameters) ---
-  String _getVideoProgressKey(String videoId, String videoName, String source, String url) {
+  /// Generate unique key for video progress (with 4 parameters)
+  String _getVideoProgressKey(
+    String videoId,
+    String videoName,
+    String source,
+    String url,
+  ) {
     return 'video_progress_${videoId}_${videoName}_${source}_${url.hashCode}';
   }
 
-  /// Saves the playback position (in seconds) for a specific video.
-  /// Takes 4 String parameters: videoId, videoName, source, and url
-  Future<void> saveVideoProgress(String videoId, String videoName, String source, String url, Duration position) async {
+  /// Save playback position for a video
+  Future<void> saveVideoProgress(
+    String videoId,
+    String videoName,
+    String source,
+    String url,
+    Duration position,
+  ) async {
     final key = _getVideoProgressKey(videoId, videoName, source, url);
-    await _prefs!.setInt(key, position.inSeconds);
-    // No need to notify listeners for this, it's a background save.
+    await _prefs?.setInt(key, position.inSeconds);
   }
 
-  /// Retrieves the saved playback position for a video.
-  /// Returns null if no progress is saved.
-  /// Takes 4 String parameters: videoId, videoName, source, and url
-  Future<Duration?> getVideoProgress(String videoId, String videoName, String source, String url) async {
+  /// Retrieve saved playback position for a video
+  Future<Duration?> getVideoProgress(
+    String videoId,
+    String videoName,
+    String source,
+    String url,
+  ) async {
     final key = _getVideoProgressKey(videoId, videoName, source, url);
-    final seconds = _prefs!.getInt(key);
-    if (seconds != null && seconds != seconds - seconds) {
+    final seconds = _prefs?.getInt(key);
+    if (seconds != null && seconds != 0) {
       return Duration(seconds: seconds);
     }
-    return null; // Return null if no progress is saved
+    return null;
   }
 
-  /// Clears the saved progress for a video (e.g., after it's fully watched).
-  /// Takes 4 String parameters: videoId, videoName, source, and url
-  Future<void> clearVideoProgress(String videoId, String videoName, String source, String url) async {
+  /// Clear saved progress for a video
+  Future<void> clearVideoProgress(
+    String videoId,
+    String videoName,
+    String source,
+    String url,
+  ) async {
     final key = _getVideoProgressKey(videoId, videoName, source, url);
-    await _prefs!.remove(key);
+    await _prefs?.remove(key);
   }
 
+  /// Generic string setter with change detection
   Future<void> _setString(
     String key,
     String newValue,
     String currentValue,
   ) async {
     if (currentValue == newValue) return;
-    // Update internal state immediately for responsiveness
+
     switch (key) {
-      case 'custoombaseurl':
+      case _customBaseUrlKey:
         _custoombaseurl = newValue;
         break;
       default:
         debugPrint("Warning: Unhandled key in _setString: $key");
         return;
     }
-    notifyListeners(); // Notify UI immediately
-    await _prefs?.setString(key, newValue); // Save asynchronously
+
+    notifyListeners();
+    await _prefs?.setString(key, newValue);
   }
 
+  // ==================== UTILITY METHODS ====================
+  /// Helper to get list of integers from SharedPreferences
   List<int> _getIntList(String key) {
     final List<String>? stringList = _prefs?.getStringList(key);
     if (stringList == null) return [];
     return stringList.map((id) => int.tryParse(id)).whereType<int>().toList();
   }
 
-  /// Set watched episode info. Only [url] is required, others are optional.
+  /// Helper to get list of strings from SharedPreferences
+  List<String> _getStringList(String key) {
+    return List<String>.from(_prefs?.getStringList(key) ?? const []);
+  }
+
+  /// Helper to set list of integers to SharedPreferences
+  Future<void> _setIntList(String key, List<int> list) async {
+    await _prefs?.setStringList(key, list.map((id) => id.toString()).toList());
+  }
+
+  /// Helper to set list of strings to SharedPreferences
+  Future<void> _setStringList(String key, List<String> list) async {
+    await _prefs?.setStringList(key, list);
+  }
+
+  // ==================== WATCHED STATUS ====================
+  /// Store watched episode information
   Future<void> _setIntListIsWatched(
-      seriesId, seasonNumber, episodeNumber, url) async {
-    // Compose a unique string key for the watched episode using the provided info
-    final String watchedKey = [seriesId, seasonNumber, episodeNumber, url]
-        .where((e) => e != null)
-        .join(":");
-    // Store as a string in a list (for flexibility)
+    seriesId,
+    seasonNumber,
+    episodeNumber,
+    url,
+  ) async {
+    final String watchedKey = [
+      seriesId,
+      seasonNumber,
+      episodeNumber,
+      url,
+    ].where((e) => e != null).join(":");
+
     final List<String> watchedList =
         _prefs?.getStringList(_isWatchedEpisodeKey) ?? [];
+
     if (!watchedList.contains(watchedKey)) {
       watchedList.add(watchedKey);
       await _prefs?.setStringList(_isWatchedEpisodeKey, watchedList);
@@ -261,252 +395,284 @@ Future<void> setTmdbBaseUrl(String value) async {
     }
   }
 
-  /// Check if an episode is watched by matching all provided info (url required)
+  /// Check if episode is watched
   bool isWatchedEpisode(
     dynamic seriesId,
     dynamic seasonNumber,
     dynamic episodeNumber,
     dynamic url,
   ) {
-    final String watchedKey = [seriesId, seasonNumber, episodeNumber, url]
-        .where((e) => e != null)
-        .join(":");
+    final String watchedKey = [
+      seriesId,
+      seasonNumber,
+      episodeNumber,
+      url,
+    ].where((e) => e != null).join(":");
     final List<String> watchedList =
         _prefs?.getStringList(_isWatchedEpisodeKey) ?? [];
     return watchedList.contains(watchedKey);
   }
 
-  /// Toggle watched state for an episode by id, season, episode, and url
-  Future<void> toggleIsWatchedLink(dynamic seriesId, dynamic seasonNumber,
-      dynamic episodeNumber, dynamic url) async {
-    final String watchedKey = [seriesId, seasonNumber, episodeNumber, url]
-        .where((e) => e != null)
-        .join(":");
+  /// Toggle watched state for an episode
+  Future<void> toggleIsWatchedLink(
+    dynamic seriesId,
+    dynamic seasonNumber,
+    dynamic episodeNumber,
+    dynamic url,
+  ) async {
+    final String watchedKey = [
+      seriesId,
+      seasonNumber,
+      episodeNumber,
+      url,
+    ].where((e) => e != null).join(":");
     final List<String> watchedList =
         _prefs?.getStringList(_isWatchedEpisodeKey) ?? [];
 
-      watchedList.add(watchedKey);
-    
+    watchedList.add(watchedKey);
     await _prefs?.setStringList(_isWatchedEpisodeKey, watchedList);
     notifyListeners();
   }
 
-  /// Check if a season is watched by matching all provided info
-  bool isWatchedSeason(
-    seriesId,
-    seasonNumber,
-  ) {
-    final String watchedKey =
-        [seriesId, seasonNumber].where((e) => e != null).join(":");
+  /// Check if season is watched
+  bool isWatchedSeason(seriesId, seasonNumber) {
+    final String watchedKey = [
+      seriesId,
+      seasonNumber,
+    ].where((e) => e != null).join(":");
     final List<String> watchedList =
         _prefs?.getStringList(_isWatchedEpisodeKey) ?? [];
     return watchedList.contains(watchedKey);
   }
 
-  /// Check if a series is watched by matching the series ID
-  bool isWatchedSeries(
-    seriesId,
-  ) {
+  /// Check if series is watched
+  bool isWatchedSeries(seriesId) {
     final String watchedKey = [seriesId].where((e) => e != null).join(":");
     final List<String> watchedList =
         _prefs?.getStringList(_isWatchedEpisodeKey) ?? [];
     return watchedList.contains(watchedKey);
   }
 
-  /// Check if a media is watched by its URL
-  bool isWatched(
-    url,
-  ) {
+  /// Check if media is watched by URL
+  bool isWatched(url) {
     final String watchedKey = [url].where((e) => e != null).join(":");
     final List<String> watchedList =
         _prefs?.getStringList(_isWatchedEpisodeKey) ?? [];
     return watchedList.contains(watchedKey);
   }
 
-  /// Check if a movie is watched by its ID and URL
-  bool isWatchedMovie(
-    movieId,
-    url,
-  ) {
+  /// Check if movie is watched
+  bool isWatchedMovie(movieId, url) {
     final String watchedKey = [movieId, url].where((e) => e != null).join(":");
     final List<String> watchedList =
         _prefs?.getStringList(_isWatchedEpisodeKey) ?? [];
     return watchedList.contains(watchedKey);
   }
 
-  Future<void> _setIntList(String key, List<int> list) async {
-    await _prefs?.setStringList(key, list.map((id) => id.toString()).toList());
+  /// Toggle watched state by URL
+  Future<void> toggleIsWatched(url) async {
+    await _setIntListIsWatched(url, url, url, url);
+    notifyListeners();
   }
 
-  // --- Favorites ---
+  // ==================== FAVORITES ==s in favorites
   bool isFavoriteMovie(int movieId) => _favoriteMovieIds.contains(movieId);
+
+  /// Check if anime is in favorites
   bool isFavoriteAnime(int animeId) => _favoriteAnimeIds.contains(animeId);
+
+  /// Check if TV series is in favorites
   bool isFavoriteTvSeries(int seriesId) =>
       _favoriteTvSeriesIds.contains(seriesId);
 
+  /// Toggle favorite status for movie
   Future<void> toggleFavoriteMovie(int movieId) async {
-    isFavoriteMovie(movieId)
-        ? _favoriteMovieIds.remove(movieId)
-        : _favoriteMovieIds.add(movieId);
+    if (isFavoriteMovie(movieId)) {
+      _favoriteMovieIds.remove(movieId);
+    } else {
+      _favoriteMovieIds.add(movieId);
+    }
     await _setIntList(_favoriteMoviesKey, _favoriteMovieIds);
     notifyListeners();
   }
 
-// Generic Bool Setter
+  /// Generic bool setter with change detection
   Future<void> _setBool(String key, bool newValue, bool currentValue) async {
     if (currentValue == newValue) return;
+
     switch (key) {
-      case 'historyformodelsenabled':
+      case _historyForModelsEnabledKey:
         _historyformodelsenabled = newValue;
         break;
-      case 'historychatenabled':
+      case _historyChatEnabledKey:
         _historychatenabled = newValue;
         break;
       default:
         debugPrint("Warning: Unhandled key in _setBool: $key");
         return;
     }
+
     notifyListeners();
-    await _prefs?.setBool(
-      key,
-      newValue,
-    ); // Use string key for bools per original load logic
+    await _prefs?.setBool(key, newValue);
   }
 
+  /// Toggle favorite status for anime
   Future<void> toggleFavoriteAnime(int animeId) async {
-    isFavoriteAnime(animeId)
-        ? _favoriteAnimeIds.remove(animeId)
-        : _favoriteAnimeIds.add(animeId);
+    if (isFavoriteAnime(animeId)) {
+      _favoriteAnimeIds.remove(animeId);
+    } else {
+      _favoriteAnimeIds.add(animeId);
+    }
     await _setIntList(_favoriteAnimeKey, _favoriteAnimeIds);
     notifyListeners();
   }
 
-  // Future<void> toggleIsWatchedLink(
-  //     seriesId, seasonNumber, episodeNumber, url) async {
-  //   isWatchedEpisode(seriesId, seasonNumber, episodeNumber, url)
-  //       ? _isWatchedEpisodeIds.remove(url)
-  //       : _isWatchedEpisodeIds.add(url);
-  //   await _setIntListIsWatched(seriesId, seasonNumber, episodeNumber, url);
-  //   notifyListeners();
-  // }
-
-  Future<void> toggleIsWatched(url) async {
-    isWatched(url)
-        ? _isWatchedEpisodeIds.remove(url)
-        : _isWatchedEpisodeIds.add(url);
-    await _setIntListIsWatched(url, url, url, url);
-    notifyListeners();
-  }
-
+  /// Toggle favorite status for TV series
   Future<void> toggleFavoriteTvSeries(int seriesId) async {
-    isFavoriteTvSeries(seriesId)
-        ? _favoriteTvSeriesIds.remove(seriesId)
-        : _favoriteTvSeriesIds.add(seriesId);
+    if (isFavoriteTvSeries(seriesId)) {
+      _favoriteTvSeriesIds.remove(seriesId);
+    } else {
+      _favoriteTvSeriesIds.add(seriesId);
+    }
     await _setIntList(_favoriteTvSeriesKey, _favoriteTvSeriesIds);
     notifyListeners();
   }
 
-  // --- Watchlist ---
+  // ==================== WATCHLIST ==s in watchlist
   bool isOnWatchlistMovie(int movieId) => _watchlistMovieIds.contains(movieId);
+
+  /// Check if anime is in watchlist
   bool isOnWatchlistAnime(int animeId) => _watchlistAnimeIds.contains(animeId);
 
+  /// Check if TV series is in watchlist
   bool isOnWatchlistTvSeries(int seriesId) =>
       _watchlistTvSeriesIds.contains(seriesId);
 
+  /// Toggle watchlist status for movie
   Future<void> toggleWatchlistMovie(int movieId) async {
-    isOnWatchlistMovie(movieId)
-        ? _watchlistMovieIds.remove(movieId)
-        : _watchlistMovieIds.add(movieId);
+    if (isOnWatchlistMovie(movieId)) {
+      _watchlistMovieIds.remove(movieId);
+    } else {
+      _watchlistMovieIds.add(movieId);
+    }
     await _setIntList(_watchlistMoviesKey, _watchlistMovieIds);
     notifyListeners();
   }
 
+  /// Toggle watchlist status for anime
   Future<void> toggleWatchlistAnime(int animeId) async {
-    isOnWatchlistAnime(animeId)
-        ? _watchlistAnimeIds.remove(animeId)
-        : _watchlistAnimeIds.add(animeId);
+    if (isOnWatchlistAnime(animeId)) {
+      _watchlistAnimeIds.remove(animeId);
+    } else {
+      _watchlistAnimeIds.add(animeId);
+    }
     await _setIntList(_watchlistAnimeKey, _watchlistAnimeIds);
     notifyListeners();
   }
 
+  /// Toggle watchlist status for TV series
   Future<void> toggleWatchlistTvSeries(int seriesId) async {
-    isOnWatchlistTvSeries(seriesId)
-        ? _watchlistTvSeriesIds.remove(seriesId)
-        : _watchlistTvSeriesIds.add(seriesId);
+    if (isOnWatchlistTvSeries(seriesId)) {
+      _watchlistTvSeriesIds.remove(seriesId);
+    } else {
+      _watchlistTvSeriesIds.add(seriesId);
+    }
     await _setIntList(_watchlistTvSeriesKey, _watchlistTvSeriesIds);
     notifyListeners();
   }
 
-  // Future<void> setExternalPlayer(String ext) async {
-  //   await _prefs?.setString('externalPlayer', ext);
-  // }
-
-  // --- Clear All (Optional - useful for debugging/settings) ---
-  Future<void> setHistoryformodelsenabled(bool value) =>
-      _setBool('historyformodelsenabled', value, _historyformodelsenabled);
-  Future<void> setHistorychatenabled(bool value) =>
-      _setBool('historychatenabled', value, _historychatenabled);
+  // ==================== SETTINGS SETTERS ==
   Future<void> setCustoombaseurl(String value) =>
-      _setString('custoombaseurl', value, _custoombaseurl);
+      _setString(_customBaseUrlKey, value, _custoombaseurl);
+
+  /// Set history for models enabled
+  Future<void> setHistoryformodelsenabled(bool value) =>
+      _setBool(_historyForModelsEnabledKey, value, _historyformodelsenabled);
+
+  /// Set history chat enabled
+  Future<void> setHistorychatenabled(bool value) =>
+      _setBool(_historyChatEnabledKey, value, _historychatenabled);
   Future<void> clearAllUserData() async {
-    _favoriteMovieIds.clear();
+  _favoriteMovieIds.clear();
     _favoriteAnimeIds.clear();
+    _favoriteTvSeriesIds.clear();
+    _watchlistMovieIds.clear();
+    _watchlistAnimeIds.clear();
+    _watchlistTvSeriesIds.clear();
     _isWatchedEpisodeIds.clear();
     _isWatchedMovieIds.clear();
     _isWatchedSeasonIds.clear();
     _isWatchedSeriesIds.clear();
-    _favoriteTvSeriesIds.clear();
-    _watchlistMovieIds.clear();
-    _watchlistAnimeIds.clear();
+    _moviesLibraryPaths.clear();
+    _seriesLibraryPaths.clear();
+    _musicLibraryPaths.clear();
+    _musicVideoLibraryPaths.clear();
+    _mixedLibraryPaths.clear();
+    _photoLibraryPaths.clear();
 
-    await _prefs?.remove('tmdbBaseUrl');
-
-    _watchlistTvSeriesIds.clear();
     _custoombaseurl = '';
-    await _prefs?.remove(_favoriteMoviesKey);
-    await _prefs?.remove(_favoriteAnimeKey);
+    _selectedDirectoryPath = null;
 
-    await _prefs?.remove(_favoriteTvSeriesKey);
-    await _prefs?.remove(_watchlistMoviesKey);
-    await _prefs?.remove(_watchlistAnimeKey);
+    // Clear AI settings
+    _aiSubtitleBaseUrl = '';
+    _aiSubtitleApiKey = '';
+    _aiSubtitleModelId = '';
+    _aiTranslationBaseUrl = '';
+    _aiTranslationApiKey = '';
+    _aiTranslationModelId = '';
 
-    await _prefs?.remove(_watchlistTvSeriesKey);
-    await _prefs?.remove(_isWatchedEpisodeKey);
-    await _prefs?.remove(_isWatchedMovieKey);
-    await _prefs?.remove(_isWatchedSeasonKey);
-    await _prefs?.remove(_isWatchedSeriesKey);
-    await _prefs?.remove('custoombaseurl');
-    // Clear settings keys
-    await _prefs?.remove('themeMode');
-    await _prefs?.remove('historyformodelsenabled');
-    await _prefs?.remove('historychatenabled');
-    await _prefs?.remove('homeGridLayout');
-    await _prefs?.remove('useHardwareDecoder');
-    await _prefs?.remove('useSecondaryPlayer');
-    await _prefs?.remove('externalDownloadManagerPackage');
-    await _prefs?.remove('externalPlayerPackage');
+    // Remove all keys from SharedPreferences
+    final keysToRemove = [
+      _favoriteMoviesKey,
+      _favoriteAnimeKey,
+      _favoriteTvSeriesKey,
+      _watchlistMoviesKey,
+      _watchlistAnimeKey,
+      _watchlistTvSeriesKey,
+      _isWatchedEpisodeKey,
+      _isWatchedMovieKey,
+      _isWatchedSeasonKey,
+      _isWatchedSeriesKey,
+      _customBaseUrlKey,
+      _tmdbBaseUrlKey,
+      _themeModKey,
+      _homeGridLayoutKey,
+      _useHardwareDecoderKey,
+      _useSecondaryPlayerKey,
+      _externalDownloadManagerKey,
+      _externalPlayerKey,
+      _externalPlayerSettingKey,
+      _downloadManagerSettingKey,
+      _gridSizeKey,
+      _decoderPreferenceKey,
+      _areyouwantfarsiKey,
+      _historyForModelsEnabledKey,
+      _historyChatEnabledKey,
+      _selectedDirectoryPathKey,
+      _moviesLibraryPathsKey,
+      _seriesLibraryPathsKey,
+      _musicLibraryPathsKey,
+      _musicVideoLibraryPathsKey,
+      _mixedLibraryPathsKey,
+      _photoLibraryPathsKey,
+      _aiSubtitleBaseUrlKey,
+      _aiSubtitleApiKeyKey,
+      _aiSubtitleModelIdKey,
+      _aiTranslationBaseUrlKey,
+      _aiTranslationApiKeyKey,
+      _aiTranslationModelIdKey,
+    ];
 
-    // Clear new settings
-    await _prefs?.remove('externalPlayer');
-    await _prefs?.remove('downloadManager');
-    await _prefs?.remove('gridSize');
-    await _prefs?.remove('decoderPreference');
-    await _prefs?.remove('areyouwantfarsi');
-    await _prefs?.remove(_selectedDirectoryPathKey);
-    await _prefs?.remove(_moviesLibraryPathsKey);
-    await _prefs?.remove(_seriesLibraryPathsKey);
-    await _prefs?.remove(_musicLibraryPathsKey);
-    await _prefs?.remove(_musicVideoLibraryPathsKey);
-    await _prefs?.remove(_mixedLibraryPathsKey);
-    await _prefs?.remove(_photoLibraryPathsKey);
+    for (final key in keysToRemove) {
+      await _prefs?.remove(key);
+    }
 
     // Reload settings to reset to defaults
     await _loadSettings();
-
     notifyListeners();
   }
-
-  // Selected directory path setters
+  // ==================== DIRECTORY & LIBRARY MANAGEMENT ====================
+  /// Set selected directory path
   Future<void> setSelectedDirectoryPath(String? path) async {
     _selectedDirectoryPath = path;
     if (path == null || path.isEmpty) {
@@ -517,104 +683,108 @@ Future<void> setTmdbBaseUrl(String value) async {
     notifyListeners();
   }
 
-  // --- Library groups: add/remove helpers ---
+  /// Add path to movies library
   Future<void> addMoviesPath(String path) async {
-    if (path.isEmpty) return;
-    if (!_moviesLibraryPaths.contains(path)) {
-      _moviesLibraryPaths = [..._moviesLibraryPaths, path];
-      await _prefs?.setStringList(_moviesLibraryPathsKey, _moviesLibraryPaths);
-      notifyListeners();
-    }
+    if (path.isEmpty || _moviesLibraryPaths.contains(path)) return;
+    _moviesLibraryPaths = [..._moviesLibraryPaths, path];
+    await _setStringList(_moviesLibraryPathsKey, _moviesLibraryPaths);
+    notifyListeners();
   }
 
+  /// Remove path from movies library
   Future<void> removeMoviesPath(String path) async {
     _moviesLibraryPaths = List.of(_moviesLibraryPaths)..remove(path);
-    await _prefs?.setStringList(_moviesLibraryPathsKey, _moviesLibraryPaths);
+    await _setStringList(_moviesLibraryPathsKey, _moviesLibraryPaths);
     notifyListeners();
   }
 
+  /// Add path to series library
   Future<void> addSeriesPath(String path) async {
-    if (path.isEmpty) return;
-    if (!_seriesLibraryPaths.contains(path)) {
-      _seriesLibraryPaths = [..._seriesLibraryPaths, path];
-      await _prefs?.setStringList(_seriesLibraryPathsKey, _seriesLibraryPaths);
-      notifyListeners();
-    }
+    if (path.isEmpty || _seriesLibraryPaths.contains(path)) return;
+    _seriesLibraryPaths = [..._seriesLibraryPaths, path];
+    await _setStringList(_seriesLibraryPathsKey, _seriesLibraryPaths);
+    notifyListeners();
   }
 
+  /// Remove path from series library
   Future<void> removeSeriesPath(String path) async {
     _seriesLibraryPaths = List.of(_seriesLibraryPaths)..remove(path);
-    await _prefs?.setStringList(_seriesLibraryPathsKey, _seriesLibraryPaths);
+    await _setStringList(_seriesLibraryPathsKey, _seriesLibraryPaths);
     notifyListeners();
   }
+
+  /// Add path to music library
 
   Future<void> addMusicPath(String path) async {
-    if (path.isEmpty) return;
-    if (!_musicLibraryPaths.contains(path)) {
-      _musicLibraryPaths = [..._musicLibraryPaths, path];
-      await _prefs?.setStringList(_musicLibraryPathsKey, _musicLibraryPaths);
-      notifyListeners();
-    }
+    if (path.isEmpty || _musicLibraryPaths.contains(path)) return;
+    _musicLibraryPaths = [..._musicLibraryPaths, path];
+    await _setStringList(_musicLibraryPathsKey, _musicLibraryPaths);
+    notifyListeners();
   }
 
+  /// Remove path from music library
   Future<void> removeMusicPath(String path) async {
     _musicLibraryPaths = List.of(_musicLibraryPaths)..remove(path);
-    await _prefs?.setStringList(_musicLibraryPathsKey, _musicLibraryPaths);
+    await _setStringList(_musicLibraryPathsKey, _musicLibraryPaths);
     notifyListeners();
   }
+
+  /// Add path to music video library
 
   Future<void> addMusicVideoPath(String path) async {
-    if (path.isEmpty) return;
-    if (!_musicVideoLibraryPaths.contains(path)) {
-      _musicVideoLibraryPaths = [..._musicVideoLibraryPaths, path];
-      await _prefs?.setStringList(_musicVideoLibraryPathsKey, _musicVideoLibraryPaths);
-      notifyListeners();
-    }
+    if (path.isEmpty || _musicVideoLibraryPaths.contains(path)) return;
+    _musicVideoLibraryPaths = [..._musicVideoLibraryPaths, path];
+    await _setStringList(_musicVideoLibraryPathsKey, _musicVideoLibraryPaths);
+    notifyListeners();
   }
 
+  /// Remove path from music video library
   Future<void> removeMusicVideoPath(String path) async {
     _musicVideoLibraryPaths = List.of(_musicVideoLibraryPaths)..remove(path);
-    await _prefs?.setStringList(_musicVideoLibraryPathsKey, _musicVideoLibraryPaths);
+    await _setStringList(_musicVideoLibraryPathsKey, _musicVideoLibraryPaths);
     notifyListeners();
   }
+
+  /// Add path to mixed library
 
   Future<void> addMixedPath(String path) async {
-    if (path.isEmpty) return;
-    if (!_mixedLibraryPaths.contains(path)) {
-      _mixedLibraryPaths = [..._mixedLibraryPaths, path];
-      await _prefs?.setStringList(_mixedLibraryPathsKey, _mixedLibraryPaths);
-      notifyListeners();
-    }
+    if (path.isEmpty || _mixedLibraryPaths.contains(path)) return;
+    _mixedLibraryPaths = [..._mixedLibraryPaths, path];
+    await _setStringList(_mixedLibraryPathsKey, _mixedLibraryPaths);
+    notifyListeners();
   }
 
+  /// Remove path from mixed library
   Future<void> removeMixedPath(String path) async {
     _mixedLibraryPaths = List.of(_mixedLibraryPaths)..remove(path);
-    await _prefs?.setStringList(_mixedLibraryPathsKey, _mixedLibraryPaths);
+    await _setStringList(_mixedLibraryPathsKey, _mixedLibraryPaths);
     notifyListeners();
   }
+
+  /// Add path to photo library
 
   Future<void> addPhotoPath(String path) async {
-    if (path.isEmpty) return;
-    if (!_photoLibraryPaths.contains(path)) {
-      _photoLibraryPaths = [..._photoLibraryPaths, path];
-      await _prefs?.setStringList(_photoLibraryPathsKey, _photoLibraryPaths);
-      notifyListeners();
-    }
-  }
-
-  Future<void> removePhotoPath(String path) async {
-    _photoLibraryPaths = List.of(_photoLibraryPaths)..remove(path);
-    await _prefs?.setStringList(_photoLibraryPathsKey, _photoLibraryPaths);
+    if (path.isEmpty || _photoLibraryPaths.contains(path)) return;
+    _photoLibraryPaths = [..._photoLibraryPaths, path];
+    await _setStringList(_photoLibraryPathsKey, _photoLibraryPaths);
     notifyListeners();
   }
 
+  /// Remove path from photo library
+  Future<void> removePhotoPath(String path) async {
+    _photoLibraryPaths = List.of(_photoLibraryPaths)..remove(path);
+    await _setStringList(_photoLibraryPathsKey, _photoLibraryPaths);
+    notifyListeners();
+  }
+
+  /// Generic value getter for dynamic access
   dynamic getValue(String key) {
     switch (key) {
-      case 'custoombaseurl':
+      case _customBaseUrlKey:
         return _custoombaseurl;
-      case 'historyformodelsenabled':
+      case _historyForModelsEnabledKey:
         return _historyformodelsenabled;
-      case 'historychatenabled':
+      case _historyChatEnabledKey:
         return _historychatenabled;
       default:
         debugPrint(
@@ -624,114 +794,160 @@ Future<void> setTmdbBaseUrl(String value) async {
     }
   }
 
-  // Load settings from SharedPreferences
+  /// Load UI and player settings
   Future<void> _loadSettings() async {
-    // Load Theme Mode
     final themeModeIndex =
-        _prefs?.getInt('themeMode') ?? AppThemeMode.system.index;
+        _prefs?.getInt(_themeModKey) ?? AppThemeMode.system.index;
     _themeMode = AppThemeMode.values[themeModeIndex];
 
-    // Load Home Grid Layout
     final homeGridLayoutIndex =
-        _prefs?.getInt('homeGridLayout') ?? GridLayout.grid3x3.index;
+        _prefs?.getInt(_homeGridLayoutKey) ?? GridLayout.grid3x3.index;
     _homeGridLayout = GridLayout.values[homeGridLayoutIndex];
 
-    // Load Player Settings
-    _useHardwareDecoder = _prefs?.getBool('useHardwareDecoder') ?? true;
-    _useSecondaryPlayer = _prefs?.getBool('useSecondaryPlayer') ?? false;
-    _areyouwantfarsi = _prefs?.getBool('areyouwantfarsi')??true;
+    _useHardwareDecoder = _prefs?.getBool(_useHardwareDecoderKey) ?? true;
+    _useSecondaryPlayer = _prefs?.getBool(_useSecondaryPlayerKey) ?? false;
+    _areyouwantfarsi = _prefs?.getBool(_areyouwantfarsiKey) ?? true;
 
-    // Load External App Packages
-    _externalDownloadManagerPackage =
-        _prefs?.getString('externalDownloadManagerPackage');
-    _externalPlayerPackage = _prefs?.getString('externalPlayerPackage');
+    _externalDownloadManagerPackage = _prefs?.getString(
+      _externalDownloadManagerKey,
+    );
+    _externalPlayerPackage = _prefs?.getString(_externalPlayerKey);
 
-    // Load new settings
-    _externalPlayer = _prefs?.getString('externalPlayer') ?? '';
-    _downloadManager = _prefs?.getString('downloadManager') ?? '';
-    _gridSize = _prefs?.getDouble('gridSize') ?? 3.0;
-    _decoderPreference = _prefs?.getString('decoderPreference') ?? 'default';
-    notifyListeners(); // Notify listeners after loading
+    _externalPlayer = _prefs?.getString(_externalPlayerSettingKey) ?? '';
+    _downloadManager = _prefs?.getString(_downloadManagerSettingKey) ?? '';
+    _gridSize = _prefs?.getDouble(_gridSizeKey) ?? 3.0;
+    _decoderPreference = _prefs?.getString(_decoderPreferenceKey) ?? 'default';
   }
 
-  // Save Theme Mode
+  /// Set theme mode
   Future<void> setThemeMode(AppThemeMode mode) async {
     _themeMode = mode;
-    await _prefs?.setInt('themeMode', mode.index);
+    await _prefs?.setInt(_themeModKey, mode.index);
     notifyListeners();
   }
 
-  // Save Home Grid Layout
+  /// Set home grid layout
   Future<void> setHomeGridLayout(GridLayout layout) async {
     _homeGridLayout = layout;
-    await _prefs?.setInt('homeGridLayout', layout.index);
+    await _prefs?.setInt(_homeGridLayoutKey, layout.index);
     notifyListeners();
   }
 
-  // Save Hardware Decoder setting
+  /// Set hardware decoder preference
   Future<void> setUseHardwareDecoder(bool value) async {
     _useHardwareDecoder = value;
-    await _prefs?.setBool('useHardwareDecoder', value);
+    await _prefs?.setBool(_useHardwareDecoderKey, value);
     notifyListeners();
   }
 
-  // Save Secondary Player setting
+  /// Set secondary player preference
   Future<void> setUseSecondaryPlayer(bool value) async {
     _useSecondaryPlayer = value;
-    await _prefs?.setBool('useSecondaryPlayer', value);
+    await _prefs?.setBool(_useSecondaryPlayerKey, value);
     notifyListeners();
   }
 
+  /// Set Farsi preference
   Future<void> setAreuwanfarsi(bool value) async {
     _areyouwantfarsi = value;
-    await _prefs?.setBool('areyouwantfarsi', value);
+    await _prefs?.setBool(_areyouwantfarsiKey, value);
     notifyListeners();
   }
 
-  // Save External Download Manager Package
+  /// Set external download manager package
   Future<void> setExternalDownloadManagerPackage(String? packageName) async {
     _externalDownloadManagerPackage = packageName;
     if (packageName == null || packageName.isEmpty) {
-      await _prefs?.remove('externalDownloadManagerPackage');
+      await _prefs?.remove(_externalDownloadManagerKey);
     } else {
-      await _prefs?.setString('externalDownloadManagerPackage', packageName);
+      await _prefs?.setString(_externalDownloadManagerKey, packageName);
     }
     notifyListeners();
   }
 
-  // Save External Player Package
+  /// Set external player package
   Future<void> setExternalPlayerPackage(String? packageName) async {
     _externalPlayerPackage = packageName;
     if (packageName == null || packageName.isEmpty) {
-      await _prefs?.remove('externalPlayerPackage');
+      await _prefs?.remove(_externalPlayerKey);
     } else {
-      await _prefs?.setString('externalPlayerPackage', packageName);
+      await _prefs?.setString(_externalPlayerKey, packageName);
     }
     notifyListeners();
   }
 
-  // Setters for settings
+  /// Set external player
   Future<void> setExternalPlayer(String value) async {
     _externalPlayer = value;
-    await _prefs?.setString('externalPlayer', value);
+    await _prefs?.setString(_externalPlayerSettingKey, value);
     notifyListeners();
   }
 
+  /// Set download manager
   Future<void> setDownloadManager(String value) async {
     _downloadManager = value;
-    await _prefs?.setString('downloadManager', value);
+    await _prefs?.setString(_downloadManagerSettingKey, value);
     notifyListeners();
   }
 
+  /// Set grid size
   Future<void> setGridSize(double value) async {
     _gridSize = value;
-    await _prefs?.setDouble('gridSize', value);
+    await _prefs?.setDouble(_gridSizeKey, value);
     notifyListeners();
   }
 
+  /// Set decoder preference
   Future<void> setDecoderPreference(String value) async {
     _decoderPreference = value;
-    await _prefs?.setString('decoderPreference', value);
+    await _prefs?.setString(_decoderPreferenceKey, value);
+    notifyListeners();
+  }
+
+  // ==================== AI SETTINGS ====================
+  // Subtitle Generation AI Settings
+
+  /// Set AI subtitle base URL
+  Future<void> setAiSubtitleBaseUrl(String value) async {
+    _aiSubtitleBaseUrl = value;
+    await _prefs?.setString(_aiSubtitleBaseUrlKey, value);
+    notifyListeners();
+  }
+
+  /// Set AI subtitle API key
+  Future<void> setAiSubtitleApiKey(String value) async {
+    _aiSubtitleApiKey = value;
+    await _prefs?.setString(_aiSubtitleApiKeyKey, value);
+    notifyListeners();
+  }
+
+  /// Set AI subtitle model ID
+  Future<void> setAiSubtitleModelId(String value) async {
+    _aiSubtitleModelId = value;
+    await _prefs?.setString(_aiSubtitleModelIdKey, value);
+    notifyListeners();
+  }
+
+  // Translation AI Settings
+
+  /// Set AI translation base URL
+  Future<void> setAiTranslationBaseUrl(String value) async {
+    _aiTranslationBaseUrl = value;
+    await _prefs?.setString(_aiTranslationBaseUrlKey, value);
+    notifyListeners();
+  }
+
+  /// Set AI translation API key
+  Future<void> setAiTranslationApiKey(String value) async {
+    _aiTranslationApiKey = value;
+    await _prefs?.setString(_aiTranslationApiKeyKey, value);
+    notifyListeners();
+  }
+
+  /// Set AI translation model ID
+  Future<void> setAiTranslationModelId(String value) async {
+    _aiTranslationModelId = value;
+    await _prefs?.setString(_aiTranslationModelIdKey, value);
     notifyListeners();
   }
 }

@@ -25,7 +25,6 @@ class LazyThumbnailWidget extends StatefulWidget {
 class _LazyThumbnailWidgetState extends State<LazyThumbnailWidget> {
   Uint8List? _thumbnailData;
   bool _isLoading = false;
-  bool _hasError = false;
   bool _hasTriedLoading = false;
 
   @override
@@ -35,7 +34,6 @@ class _LazyThumbnailWidgetState extends State<LazyThumbnailWidget> {
     if (oldWidget.filePath != widget.filePath) {
       _thumbnailData = null;
       _isLoading = false;
-      _hasError = false;
       _hasTriedLoading = false;
     }
   }
@@ -56,13 +54,11 @@ class _LazyThumbnailWidgetState extends State<LazyThumbnailWidget> {
       setState(() {
         _thumbnailData = Uint8List.fromList([data ?? 0]);
         _isLoading = false;
-        _hasError = data == null;
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _hasError = true;
       });
     }
   }

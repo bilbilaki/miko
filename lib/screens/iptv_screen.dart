@@ -193,6 +193,7 @@ class _ChannelListView extends ConsumerWidget {
               case ChannelGrouping.language: return channel.language;
               case ChannelGrouping.country: return channel.country;
               case ChannelGrouping.subdivision: return channel.subdivision;
+              
             }
           },
           groupSeparatorBuilder: (String groupByValue) => Container(

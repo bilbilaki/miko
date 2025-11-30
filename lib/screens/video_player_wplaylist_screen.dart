@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -6,8 +7,10 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:miko/providers/god_proovider.dart' as ss;
 import 'package:miko/services/user_data_service.dart';
+import 'package:miko/services/local_file_playlist_service.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:provider/provider.dart';
+import 'package:path/path.dart' as p;
 
 //var userdata = UserDataService().decoderPreference;
 
@@ -19,6 +22,7 @@ class VideoPlayerScreenPl extends StatefulWidget {
   List<ss.Episode> playlist;
   int initialIndex;
   String url;
+  bool isLocalSource = false;
 
   VideoPlayerScreenPl({
     required this.seriesname,
@@ -53,7 +57,8 @@ class VideoPlayerScreenPlState extends State<VideoPlayerScreenPl> {
       widget.playlist.isNotEmpty ? widget.playlist[currentIndex] : null;
   StreamSubscription? _completedSubscription;
   StreamSubscription? _errorSubscription;
-
+bool showSettings =
+      false;
   Timer? _hideTimer;
   String currentQuality = 'Auto';
   bool streamHasError = false;
@@ -96,7 +101,8 @@ class VideoPlayerScreenPlState extends State<VideoPlayerScreenPl> {
     ss.Episode episodeToPlay = widget.playlist[currentIndex];
 
     Map<String, String?> currentchoice = {};
-    if (widget.url == episodeToPlay.url1080p && episodeToPlay.url1080p != null) {
+    if (widget.url == episodeToPlay.url1080p &&
+        episodeToPlay.url1080p != null) {
       currentchoice['1080p'] = episodeToPlay.url1080p;
     }
     if (widget.url == episodeToPlay.url720p && episodeToPlay.url720p != null) {
@@ -110,6 +116,52 @@ class VideoPlayerScreenPlState extends State<VideoPlayerScreenPl> {
     }
 
     return currentchoice;
+  }
+   void _showSettings() {
+    setState(() {
+      showSettings = true;
+    });
+
+    _hideTimer?.cancel();
+    _hideTimer = Timer(const Duration(seconds: 5), () {
+      // Increased timer slightly for usability
+      if (mounted) {
+        setState(() {
+          showSettings = false;
+        });
+      }
+    });
+  }
+  // New method to select and set external subtitle
+  Future<void> _selectSubtitle() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['srt', 'ass', 'vtt', 'sub'],
+    );
+    if (result != null && result.files.single.path != null) {
+       player.setSubtitleTrack(
+        SubtitleTrack.uri(result.files.single.path!),
+      );
+      // Optionally hide settings after selection
+      setState(() {
+        showSettings = false;
+      });
+    }
+  }
+
+  // New method to select and set external audio
+  Future<void> _selectAudio() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['mp3', 'aac', 'm4a', 'wav'],
+    );
+    if (result != null && result.files.single.path != null) {
+       player.setAudioTrack(AudioTrack.uri(result.files.single.path!));
+      // Optionally hide settings after selection
+      setState(() {
+        showSettings = false;
+      });
+    }
   }
 
   Future<String> _showQualitySelectionDialog() async {
@@ -237,8 +289,25 @@ class VideoPlayerScreenPlState extends State<VideoPlayerScreenPl> {
     }
 
     debugPrint("Opening media: $urlToPlay");
-    await player.open(Media(Uri.decodeComponent(urlToPlay)), play: false);
+    if (widget.isLocalSource) {
+      final playlist = await LocalFilePlaylistService.buildPlaylistFromFolder(
+        urlToPlay,
+      );
 
+      if (playlist.isEmpty) {
+        debugPrint('No video files found in folder');
+        await player.open(Media(Uri.decodeComponent(urlToPlay)), play: false);
+      }
+
+      // Find current file index
+      final currentIndex = LocalFilePlaylistService.findCurrentFileIndex(
+        playlist,
+        urlToPlay,
+      );
+      await player.open(Playlist(playlist), play: false);
+    } else {
+      await player.open(Media(Uri.decodeComponent(urlToPlay)), play: false);
+    }
     _userDataService.toggleIsWatchedLink(
       widget.seriesname,
       widget.tvSeriesId,
@@ -566,6 +635,78 @@ class VideoPlayerScreenPlState extends State<VideoPlayerScreenPl> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                    if (showSettings)
+                    Container(
+                      width: 250, // Wider to accommodate buttons
+                      padding: const EdgeInsets.all(8),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Subtitle size slider row
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.text_fields,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              Expanded(
+                                child: Slider(
+                                  value: subtitleSize,
+                                  min: 16.0,
+                                  max: 48.0,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      subtitleSize = value;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          // Button for selecting external subtitle
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _selectSubtitle,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                foregroundColor: Colors.white,
+                              ),
+                              child: const Text('Select External Subtitle'),
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          // Button for selecting external audio
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _selectAudio,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                foregroundColor: Colors.white,
+                              ),
+                              child: const Text('Select External Audio'),
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          // Optional close button
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                showSettings = false;
+                              });
+                            },
+                            child: const Text(
+                              'Close',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                 IconButton(
                   onPressed: _showQualitySelectionDialog,
                   icon: Icon(Icons.hd_rounded),
@@ -637,6 +778,10 @@ class VideoPlayerScreenPlState extends State<VideoPlayerScreenPl> {
                     playEpisode(currentIndex + 1); // Consider bounds check
                   },
                 ),
+                     IconButton(
+                    icon: Icon(Icons.settings, color: Colors.white),
+                    onPressed: _showSettings, // Updated to show settings panel
+                  ),
               ],
             ),
           ),
@@ -734,7 +879,9 @@ class VideoPlayerScreenPlState extends State<VideoPlayerScreenPl> {
                       playEpisodes(context, url);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accentColor.withValues(alpha: 0.7),
+                      backgroundColor: AppColors.accentColor.withValues(
+                        alpha: 0.7,
+                      ),
                       foregroundColor: AppColors.primaryText,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
@@ -770,20 +917,21 @@ class VideoPlayerScreenPlState extends State<VideoPlayerScreenPl> {
   }
 }
 
-
 class VideoPlayerScreen extends StatefulWidget {
   final String videoUrl;
   final String videoName;
   final String source;
-  final String? exterSubtitle;
-  final String? exterAudio;
-  final List? playlistitem;
-  const VideoPlayerScreen({
+  String? exterSubtitle;
+  String? exterAudio;
+  List? playlistitem;
+  VideoPlayerScreen({
     required this.videoUrl,
     this.playlistitem,
     super.key,
     required this.videoName,
-    required this.source, this.exterSubtitle, this.exterAudio,
+    required this.source,
+    this.exterSubtitle,
+    this.exterAudio,
   });
 
   @override
@@ -802,14 +950,15 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
   String urlToPlayQuality = '';
   double subtitleSize = 32.0;
   Color subtitleColor = const Color.fromARGB(255, 238, 230, 5);
-  bool showSettings = false; // Renamed from showSubtitleControls to showSettings
+  bool showSettings =
+      false; // Renamed from showSubtitleControls to showSettings
   late int currentIndex;
   StreamSubscription? _completedSubscription;
   StreamSubscription? _errorSubscription;
   Timer? _hideTimer;
   String currentQuality = 'Auto';
   bool streamHasError = false;
-  bool isFileSource=false;
+  bool isFileSource = false;
   @override
   void initState() {
     super.initState();
@@ -830,8 +979,12 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadAndPlayEpisode(0, isInitialPlay: true);
+
+      // Build playlist from local folder in background if it's a local file
     });
   }
+
+  /// Initialize playlist from local folder in background
 
   Future<void> _loadAndPlayEpisode(
     int index, {
@@ -843,24 +996,44 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
     });
 
     String urlToPlay;
+
     if (specificUrl != null) {
       urlToPlay = specificUrl;
     } else {
       urlToPlay = widget.videoUrl;
     }
-
-    await player.open(Media(Uri.decodeComponent(urlToPlay)), play: false);
-    // Fixed condition: set subtitle if not null and not empty
-    if (widget.exterSubtitle != null && widget.exterSubtitle!.isNotEmpty) {
-      await player.setSubtitleTrack(
-        SubtitleTrack.uri(widget.exterSubtitle!),
+    String videoname = p.basenameWithoutExtension(urlToPlay);
+    String parentfolder = p.dirname(urlToPlay);
+    if (widget.source == "local") {
+      final playlist = await LocalFilePlaylistService.buildPlaylistFromFolder(
+        urlToPlay,
       );
+
+      if (playlist.isEmpty) {
+        debugPrint('No video files found in folder');
+        await player.open(Media(Uri.decodeComponent(urlToPlay)), play: false);
+      }
+
+      // Find current file index
+      final currentIndex = LocalFilePlaylistService.findCurrentFileIndex(
+        playlist,
+        urlToPlay,
+      );
+      await player.open(Playlist(playlist), play: false);
+    } else {
+      await player.open(Media(Uri.decodeComponent(urlToPlay)), play: false);
+    } // Set external subtitle if provided
+    if (widget.exterSubtitle != null) {
+      player.setSubtitleTrack(SubtitleTrack.uri(widget.exterSubtitle!));
+    } else if (File('$parentfolder/$videoname.srt').existsSync() ||
+        File('$parentfolder/$videoname.ass').existsSync() ||
+        File('$parentfolder/$videoname.vtt').existsSync() ||
+        File('$parentfolder/$videoname.sub').existsSync()) {
+      await player.setSubtitleTrack(SubtitleTrack.uri(urlToPlay));
     }
     // Fixed condition: set audio if not null and not empty
-    if (widget.exterAudio != null && widget.exterAudio!.isNotEmpty) {
-      await player.setAudioTrack(
-        AudioTrack.uri(widget.exterAudio!),
-      );
+    if (widget.exterAudio != null) {
+      await player.setAudioTrack(AudioTrack.uri(widget.exterAudio!));
     }
 
     _userDataService.toggleIsWatchedLink(
@@ -899,7 +1072,7 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
       allowedExtensions: ['srt', 'ass', 'vtt', 'sub'],
     );
     if (result != null && result.files.single.path != null) {
-      await player.setSubtitleTrack(
+       player.setSubtitleTrack(
         SubtitleTrack.uri(result.files.single.path!),
       );
       // Optionally hide settings after selection
@@ -916,9 +1089,7 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
       allowedExtensions: ['mp3', 'aac', 'm4a', 'wav'],
     );
     if (result != null && result.files.single.path != null) {
-      await player.setAudioTrack(
-        AudioTrack.uri(result.files.single.path!),
-      );
+       player.setAudioTrack(AudioTrack.uri(result.files.single.path!));
       // Optionally hide settings after selection
       setState(() {
         showSettings = false;
@@ -937,7 +1108,6 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
   void playEpisode(int index) {
     _loadAndPlayEpisode(index, isInitialPlay: true);
   }
-
 
   final List<String> qualityOptions = ['Auto', '1080p', '720p', '480p', '360p'];
   String formatDuration(Duration duration) {
@@ -981,7 +1151,8 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
     });
 
     _hideTimer?.cancel();
-    _hideTimer = Timer(const Duration(seconds: 5), () { // Increased timer slightly for usability
+    _hideTimer = Timer(const Duration(seconds: 5), () {
+      // Increased timer slightly for usability
       if (mounted) {
         setState(() {
           showSettings = false;
@@ -1191,14 +1362,14 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
                     onPressed: _cycleBoxFit,
                   ),
                   IconButton(
-                    icon:  Icon(
+                    icon: Icon(
                       Icons.picture_in_picture_outlined,
                       color: Colors.white,
                     ),
                     onPressed: () async {},
                   ),
                   IconButton(
-                    icon:  Icon(Icons.settings, color: Colors.white),
+                    icon: Icon(Icons.settings, color: Colors.white),
                     onPressed: _showSettings, // Updated to show settings panel
                   ),
                 ],

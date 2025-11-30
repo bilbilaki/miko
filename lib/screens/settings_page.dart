@@ -6,6 +6,7 @@ import 'package:miko/services/user_data_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/subtitletranslator/app_settings.dart';
+import '../services/ai_models_service.dart';
 import '../services/settings_service.dart';
 part 'settings_page/library_settings.dart';
 part 'settings_page/subtitle_generation_settings.dart';

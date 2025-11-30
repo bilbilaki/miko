@@ -3,13 +3,13 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:csv/csv.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 
 import 'package:url_launcher/url_launcher.dart';
 // Generated full Riverpod providers with all functionalities for the provided linked classes.
 // The main provider will extend existing functionality
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Assuming that the main provider is MovieProvider and TvSeriesProvider manage episodes as providers.
 // This example provides an enhanced implementation of both movies and TV series classes.

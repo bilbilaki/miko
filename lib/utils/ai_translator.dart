@@ -458,19 +458,20 @@ class MovieTvTranslator {
   MovieTvTranslator() ;
 
 
-  final client = openai.OpenAIClient(
-    apiKey: webVieApiKey,
-    baseUrl: webViewBaseUrl,
-  );
+
 
 Future<String> translateTextForMoviesAndTV(String text) async {
+
   final userDataService = UserDataService();
   final targetLanguage = userDataService.custoombaseurl;
-
+  final client = openai.OpenAIClient(
+    apiKey: userDataService.aiTranslationApiKey,
+    baseUrl: userDataService.aiTranslationBaseUrl,
+  );
   return persistentCache.runOrGet(text, targetLanguage, () async {
     final res = await client.createChatCompletion(
       request: openai.CreateChatCompletionRequest(
-        model: openai.ChatCompletionModel.modelId("gemini-2.5-flash-lite"),
+        model: openai.ChatCompletionModel.modelId(userDataService.aiTranslationModelId),
         messages: [
           openai.ChatCompletionMessage.system(content: 'just translate and return translated content'),
           openai.ChatCompletionMessage.user(

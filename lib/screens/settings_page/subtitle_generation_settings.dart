@@ -1,6 +1,5 @@
 part of '../settings_page.dart';
 
-
 class SubtitlesGenSettings extends StatefulWidget {
   const SubtitlesGenSettings({super.key});
 
@@ -11,12 +10,28 @@ class SubtitlesGenSettings extends StatefulWidget {
 class _SubtitlesGenSettingsState extends State<SubtitlesGenSettings> {
   late AppSettings _settings;
   final _formKey = GlobalKey<FormState>();
-  final _baseUrlController = TextEditingController();
-  final _apiKeyController = TextEditingController();
-  final _modelIdController = TextEditingController();
+
+  // Subtitle Generation Controllers
+  final _subtitleBaseUrlController = TextEditingController();
+  final _subtitleApiKeyController = TextEditingController();
+  final _subtitleModelIdController = TextEditingController();
+
+  // Translation Controllers
+  final _translationBaseUrlController = TextEditingController();
+  final _translationApiKeyController = TextEditingController();
+  final _translationModelIdController = TextEditingController();
+
   final _batchSizeController = TextEditingController();
   final _maxRetriesController = TextEditingController();
   bool _isLoading = true;
+
+  // Separate model lists for subtitle and translation
+  List<String> _availableSubtitleModels = [];
+  List<String> _availableTranslationModels = [];
+  bool _isFetchingSubtitleModels = false;
+  bool _isFetchingTranslationModels = false;
+  String? _subtitleModelFetchError;
+  String? _translationModelFetchError;
 
   @override
   void initState() {
@@ -26,23 +41,157 @@ class _SubtitlesGenSettingsState extends State<SubtitlesGenSettings> {
 
   @override
   void dispose() {
-    _baseUrlController.dispose();
-    _apiKeyController.dispose();
-    _modelIdController.dispose();
+    _subtitleBaseUrlController.dispose();
+    _subtitleApiKeyController.dispose();
+    _subtitleModelIdController.dispose();
+    _translationBaseUrlController.dispose();
+    _translationApiKeyController.dispose();
+    _translationModelIdController.dispose();
     _batchSizeController.dispose();
     _maxRetriesController.dispose();
     super.dispose();
   }
 
+  Future<void> _fetchSubtitleModels() async {
+    final baseUrl = _subtitleBaseUrlController.text.trim();
+    final apiKey = _subtitleApiKeyController.text.trim();
+
+    if (baseUrl.isEmpty) {
+      setState(() {
+        _subtitleModelFetchError = 'Base URL is required';
+        _availableSubtitleModels = [];
+      });
+      return;
+    }
+
+    if (apiKey.isEmpty) {
+      setState(() {
+        _subtitleModelFetchError = 'API Key is required';
+        _availableSubtitleModels = [];
+      });
+      return;
+    }
+
+    setState(() {
+      _isFetchingSubtitleModels = true;
+      _subtitleModelFetchError = null;
+      _availableSubtitleModels = [];
+    });
+
+    try {
+      final models = await AiModelsService.fetchAvailableModels(
+        baseUrl: baseUrl,
+        apiKey: apiKey,
+        provider: _settings.provider,
+        maxRetries: _settings.maxRetries,
+      );
+
+      if (mounted) {
+        setState(() {
+          _availableSubtitleModels = models;
+          _isFetchingSubtitleModels = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isFetchingSubtitleModels = false;
+          _subtitleModelFetchError = e.toString().replaceFirst(
+            'Exception: ',
+            '',
+          );
+          _availableSubtitleModels = [];
+        });
+      }
+    }
+  }
+
+  Future<void> _fetchTranslationModels() async {
+    final baseUrl = _translationBaseUrlController.text.trim();
+    final apiKey = _translationApiKeyController.text.trim();
+
+    if (baseUrl.isEmpty) {
+      setState(() {
+        _translationModelFetchError = 'Base URL is required';
+        _availableTranslationModels = [];
+      });
+      return;
+    }
+
+    if (apiKey.isEmpty) {
+      setState(() {
+        _translationModelFetchError = 'API Key is required';
+        _availableTranslationModels = [];
+      });
+      return;
+    }
+
+    setState(() {
+      _isFetchingTranslationModels = true;
+      _translationModelFetchError = null;
+      _availableTranslationModels = [];
+    });
+
+    try {
+      final models = await AiModelsService.fetchAvailableModels(
+        baseUrl: baseUrl,
+        apiKey: apiKey,
+        provider: _settings.provider,
+        maxRetries: _settings.maxRetries,
+      );
+
+      if (mounted) {
+        setState(() {
+          _availableTranslationModels = models;
+          _isFetchingTranslationModels = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isFetchingTranslationModels = false;
+          _translationModelFetchError = e.toString().replaceFirst(
+            'Exception: ',
+            '',
+          );
+          _availableTranslationModels = [];
+        });
+      }
+    }
+  }
+
   Future<void> _loadSettings() async {
     final settings = await SettingsService.loadSettings();
+    final userDataService = Provider.of<UserDataService>(
+      context,
+      listen: false,
+    );
+
     setState(() {
       _settings = settings;
-      _baseUrlController.text = settings.baseUrl.isEmpty 
-          ? settings.defaultBaseUrl 
-          : settings.baseUrl;
-      _apiKeyController.text = settings.apiKey;
-      _modelIdController.text = settings.modelId;
+
+      // Load subtitle generation settings from UserDataService
+      _subtitleBaseUrlController.text =
+          userDataService.aiSubtitleBaseUrl.isEmpty
+          ? settings.defaultBaseUrl
+          : userDataService.aiSubtitleBaseUrl;
+      _subtitleApiKeyController.text = userDataService.aiSubtitleApiKey;
+      _subtitleModelIdController.text =
+          userDataService.aiSubtitleModelId.isEmpty
+          ? settings.modelId
+          : userDataService.aiSubtitleModelId;
+
+      // Load translation settings from UserDataService
+      _translationBaseUrlController.text =
+          userDataService.aiTranslationBaseUrl.isEmpty
+          ? settings.defaultBaseUrl
+          : userDataService.aiTranslationBaseUrl;
+      _translationApiKeyController.text = userDataService.aiTranslationApiKey;
+      _translationModelIdController.text =
+          userDataService.aiTranslationModelId.isEmpty
+          ? settings.modelId
+          : userDataService.aiTranslationModelId;
+
       _batchSizeController.text = settings.batchSize.toString();
       _maxRetriesController.text = settings.maxRetries.toString();
       _isLoading = false;
@@ -52,10 +201,35 @@ class _SubtitlesGenSettingsState extends State<SubtitlesGenSettings> {
   Future<void> _saveSettings() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final userDataService = Provider.of<UserDataService>(
+      context,
+      listen: false,
+    );
+
+    // Save subtitle generation AI settings
+    await userDataService.setAiSubtitleBaseUrl(
+      _subtitleBaseUrlController.text.trim(),
+    );
+    await userDataService.setAiSubtitleApiKey(
+      _subtitleApiKeyController.text.trim(),
+    );
+    await userDataService.setAiSubtitleModelId(
+      _subtitleModelIdController.text.trim(),
+    );
+
+    // Save translation AI settings
+    await userDataService.setAiTranslationBaseUrl(
+      _translationBaseUrlController.text.trim(),
+    );
+    await userDataService.setAiTranslationApiKey(
+      _translationApiKeyController.text.trim(),
+    );
+    await userDataService.setAiTranslationModelId(
+      _translationModelIdController.text.trim(),
+    );
+
+    // Save other settings to AppSettings
     final newSettings = _settings.copyWith(
-      baseUrl: _baseUrlController.text.trim(),
-      apiKey: _apiKeyController.text.trim(),
-      modelId: _modelIdController.text.trim(),
       batchSize: int.tryParse(_batchSizeController.text) ?? 100,
       maxRetries: int.tryParse(_maxRetriesController.text) ?? 5,
     );
@@ -74,7 +248,9 @@ class _SubtitlesGenSettingsState extends State<SubtitlesGenSettings> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Reset Settings'),
-        content: const Text('Are you sure you want to reset all settings to default?'),
+        content: const Text(
+          'Are you sure you want to reset all settings to default?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -101,7 +277,7 @@ class _SubtitlesGenSettingsState extends State<SubtitlesGenSettings> {
   void _updateProvider(AiProvider provider) {
     setState(() {
       _settings = _settings.copyWith(provider: provider);
-      _baseUrlController.text = _settings.defaultBaseUrl;
+      _subtitleBaseUrlController.text = _settings.baseUrl;
     });
   }
 
@@ -160,9 +336,7 @@ class _SubtitlesGenSettingsState extends State<SubtitlesGenSettings> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
@@ -212,16 +386,23 @@ class _SubtitlesGenSettingsState extends State<SubtitlesGenSettings> {
                 ),
                 _buildProviderButton(
                   label: 'Google AI',
-                  iconUrl: 'https://ai.google.dev/static/site-assets/images/share.png',
+                  iconUrl:
+                      'https://ai.google.dev/static/site-assets/images/share.png',
                   consoleUrl: 'https://aistudio.google.com/apikey',
                   isSelected: _settings.provider == AiProvider.genai,
                   onTap: () => _updateProvider(AiProvider.genai),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
+            const Divider(),
+            const Text(
+              'AI Settings for Subtitle Generation',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
             TextFormField(
-              controller: _baseUrlController,
+              controller: _subtitleBaseUrlController,
               decoration: InputDecoration(
                 labelText: 'Base URL',
                 hintText: _settings.defaultBaseUrl,
@@ -236,7 +417,7 @@ class _SubtitlesGenSettingsState extends State<SubtitlesGenSettings> {
             ),
             const SizedBox(height: 16),
             TextFormField(
-              controller: _apiKeyController,
+              controller: _subtitleApiKeyController,
               decoration: const InputDecoration(
                 labelText: 'API Key',
                 hintText: 'sk-fhhgfgh...',
@@ -251,19 +432,295 @@ class _SubtitlesGenSettingsState extends State<SubtitlesGenSettings> {
               },
             ),
             const SizedBox(height: 16),
+            // Model ID section with fetch models button
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _subtitleModelIdController,
+                        decoration: const InputDecoration(
+                          labelText: 'Model ID',
+                          hintText: 'gpt-4o-mini, gemini-pro...',
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Model ID is required';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: _isFetchingSubtitleModels
+                              ? null
+                              : _fetchSubtitleModels,
+                          icon: _isFetchingSubtitleModels
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.cloud_download),
+                          label: const Text('Fetch'),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text('Models', style: TextStyle(fontSize: 10)),
+                      ],
+                    ),
+                  ],
+                ),
+                // Error message if fetching failed
+                if (_subtitleModelFetchError != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      'Error: $_subtitleModelFetchError',
+                      style: TextStyle(
+                        color: Colors.red.shade400,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                // Available models list
+                if (_availableSubtitleModels.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade400),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      constraints: const BoxConstraints(maxHeight: 200),
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        itemCount: _availableSubtitleModels.length,
+                        separatorBuilder: (_, __) =>
+                            Divider(height: 1, color: Colors.grey.shade300),
+                        itemBuilder: (context, index) {
+                          final model = _availableSubtitleModels[index];
+                          final isSelected =
+                              _subtitleModelIdController.text == model;
+                          return Material(
+                            child: InkWell(
+                              onTap: () {
+                                setState(() {
+                                  _subtitleModelIdController.text = model;
+                                });
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 10,
+                                ),
+                                color: isSelected
+                                    ? Colors.cyan.withOpacity(0.15)
+                                    : null,
+                                child: Row(
+                                  children: [
+                                    if (isSelected)
+                                      const Padding(
+                                        padding: EdgeInsets.only(right: 8),
+                                        child: Icon(
+                                          Icons.check_circle,
+                                          color: Colors.cyan,
+                                          size: 18,
+                                        ),
+                                      ),
+                                    Expanded(
+                                      child: Text(
+                                        model,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: isSelected
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            const Divider(),
+            const Text(
+              'AI Settings for Translate In App Content',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
             TextFormField(
-              controller: _modelIdController,
-              decoration: const InputDecoration(
-                labelText: 'Model ID',
-                hintText: 'gpt-4o-mini, gemini-pro...',
-                border: OutlineInputBorder(),
+              controller: _translationBaseUrlController,
+              decoration: InputDecoration(
+                labelText: 'Base URL',
+                hintText: _settings.defaultBaseUrl,
+                border: const OutlineInputBorder(),
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Model ID is required';
+                  return 'Base URL is required';
                 }
                 return null;
               },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _translationApiKeyController,
+              decoration: const InputDecoration(
+                labelText: 'API Key',
+                hintText: 'sk-fhhgfgh...',
+                border: OutlineInputBorder(),
+              ),
+              obscureText: true,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'API Key is required';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            // Model ID section with fetch models button
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _translationModelIdController,
+                        decoration: const InputDecoration(
+                          labelText: 'Model ID',
+                          hintText: 'gpt-4o-mini, gemini-pro...',
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Model ID is required';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: _isFetchingTranslationModels
+                              ? null
+                              : _fetchTranslationModels,
+                          icon: _isFetchingTranslationModels
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.cloud_download),
+                          label: const Text('Fetch'),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text('Models', style: TextStyle(fontSize: 10)),
+                      ],
+                    ),
+                  ],
+                ),
+                // Error message if fetching failed
+                if (_translationModelFetchError != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      'Error: $_translationModelFetchError',
+                      style: TextStyle(
+                        color: Colors.red.shade400,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                // Available models list
+                if (_availableTranslationModels.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade400),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      constraints: const BoxConstraints(maxHeight: 200),
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        itemCount: _availableTranslationModels.length,
+                        separatorBuilder: (_, __) =>
+                            Divider(height: 1, color: Colors.grey.shade300),
+                        itemBuilder: (context, index) {
+                          final model = _availableTranslationModels[index];
+                          final isSelected =
+                              _translationModelIdController.text == model;
+                          return Material(
+                            child: InkWell(
+                              onTap: () {
+                                setState(() {
+                                  _translationModelIdController.text = model;
+                                });
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 10,
+                                ),
+                                color: isSelected
+                                    ? Colors.cyan.withOpacity(0.15)
+                                    : null,
+                                child: Row(
+                                  children: [
+                                    if (isSelected)
+                                      const Padding(
+                                        padding: EdgeInsets.only(right: 8),
+                                        child: Icon(
+                                          Icons.check_circle,
+                                          color: Colors.cyan,
+                                          size: 18,
+                                        ),
+                                      ),
+                                    Expanded(
+                                      child: Text(
+                                        model,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: isSelected
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -304,7 +761,9 @@ class _SubtitlesGenSettingsState extends State<SubtitlesGenSettings> {
             const SizedBox(height: 16),
             SwitchListTile(
               title: const Text('Enable reuse and cache (Experimental)'),
-              subtitle: const Text('May reduce API calls but could affect accuracy'),
+              subtitle: const Text(
+                'May reduce API calls but could affect accuracy',
+              ),
               value: _settings.enableCache,
               onChanged: _updateCache,
             ),
