@@ -1,12 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:miko/showcases/model.dart' as m;
+import 'package:miko/utils/ai_translator.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:shimmer/shimmer.dart';
 import 'anime_detail_utils.dart';
 
-/// Builds an episode card widget
-class EpisodeCardWidget extends StatelessWidget {
+/// Builds an episode card widget with translation support
+class EpisodeCardWidget extends StatefulWidget {
   final m.Episode episode;
   final int tvShowId;
   final bool isNext;
@@ -21,14 +22,53 @@ class EpisodeCardWidget extends StatelessWidget {
   });
 
   @override
+  State<EpisodeCardWidget> createState() => _EpisodeCardWidgetState();
+}
+
+class _EpisodeCardWidgetState extends State<EpisodeCardWidget> {
+  String? _translatedOverview;
+  String? _translatedTitle;
+  bool _isTranslating = false;
+  final _translator = MovieTvTranslator();
+
+  Future<void> _translateContent() async {
+    if (_translatedOverview != null) {
+      setState(() {
+        _translatedOverview = null;
+        _translatedTitle = null;
+      });
+      return;
+    }
+
+    setState(() => _isTranslating = true);
+    try {
+      // Translate both title and overview
+      final results = await Future.wait([
+        _translator.translateTextForMoviesAndTV(widget.episode.name),
+        if (widget.episode.overview.isNotEmpty)
+          _translator.translateTextForMoviesAndTV(widget.episode.overview),
+      ]);
+      
+      setState(() {
+        _translatedTitle = results[0];
+        if (results.length > 1) {
+          _translatedOverview = results[1];
+        }
+      });
+    } finally {
+      setState(() => _isTranslating = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Card(
-      color: isNext
-          ? Theme.of(context).colorScheme.secondary.withValues(alpha:0.1)
+      color: widget.isNext
+          ? Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1)
           : Colors.grey[850],
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: onTap,
+        onTap: widget.onTap,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -39,14 +79,14 @@ class EpisodeCardWidget extends StatelessWidget {
               _buildEpisodeTitle(),
               const SizedBox(height: 8),
               _buildAirDateText(context),
-              if (episode.runtime != null) ...[
+              if (widget.episode.runtime != null) ...[
                 const SizedBox(height: 4),
                 _buildRuntimeText(context),
               ],
               const SizedBox(height: 12),
-              if (episode.stillPath != null) _buildStillImage(),
+              if (widget.episode.stillPath != null) _buildStillImage(),
               const SizedBox(height: 12),
-              _buildOverviewText(),
+              _buildOverviewWithTranslation(),
             ],
           ),
         ),
@@ -59,25 +99,25 @@ class EpisodeCardWidget extends StatelessWidget {
       Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-            color: isNext
+            color: widget.isNext
                 ? Theme.of(context).colorScheme.secondary
                 : Colors.grey[700],
             borderRadius: BorderRadius.circular(4)),
         child: Text(
-          'S${episode.seasonNumber} | E${episode.episodeNumber}',
+          'S${widget.episode.seasonNumber} | E${widget.episode.episodeNumber}',
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
         ),
       ),
       const SizedBox(width: 8),
-      if (episode.episodeType != 'standard')
+      if (widget.episode.episodeType != 'standard')
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: AnimeDetailUtils.getEpisodeTypeColor(episode.episodeType),
+            color: AnimeDetailUtils.getEpisodeTypeColor(widget.episode.episodeType),
             borderRadius: BorderRadius.circular(4),
           ),
           child: Text(
-            episode.episodeType.replaceAll('_', ' ').toUpperCase(),
+            widget.episode.episodeType.replaceAll('_', ' ').toUpperCase(),
             style: const TextStyle(
               color: Colors.white,
               fontSize: 10,
@@ -85,22 +125,43 @@ class EpisodeCardWidget extends StatelessWidget {
             ),
           ),
         ),
+      const Spacer(),
+      IconButton(
+        icon: _isTranslating
+            ? SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : Icon(
+                Icons.auto_awesome,
+                color: _translatedOverview != null ? Colors.cyan : Colors.white54,
+                size: 18,
+              ),
+        onPressed: _translateContent,
+        tooltip: _translatedOverview != null ? 'Show original' : 'Translate',
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+      ),
     ]);
   }
 
   Widget _buildEpisodeTitle() {
     return Text(
-      episode.name,
+      _translatedTitle ?? widget.episode.name,
       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
     );
   }
 
   Widget _buildAirDateText(BuildContext context) {
     return Text(
-      'Air date: ${episode.formattedAirDate}',
+      'Air date: ${widget.episode.formattedAirDate}',
       style: TextStyle(
-          color: isNext
-              ? Theme.of(context).colorScheme.secondary.withValues(alpha:0.8)
+          color: widget.isNext
+              ? Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8)
               : Colors.grey[400],
           fontSize: 14),
     );
@@ -108,7 +169,7 @@ class EpisodeCardWidget extends StatelessWidget {
 
   Widget _buildRuntimeText(BuildContext context) {
     return Text(
-      'Runtime: ${episode.formattedRuntime}',
+      'Runtime: ${widget.episode.formattedRuntime}',
       style: TextStyle(color: Colors.grey[400], fontSize: 14),
     );
   }
@@ -118,7 +179,7 @@ class EpisodeCardWidget extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       child: CachedNetworkImage(
         filterQuality: FilterQuality.high,
-        imageUrl: episode.fullStillPath,
+        imageUrl: widget.episode.fullStillPath,
         fit: BoxFit.cover,
         width: double.infinity,
         height: 200,
@@ -141,9 +202,13 @@ class EpisodeCardWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildOverviewText() {
+  Widget _buildOverviewWithTranslation() {
+    final displayOverview = _translatedOverview ?? widget.episode.overview;
+    if (displayOverview.isEmpty) {
+      return const SizedBox.shrink();
+    }
     return Text(
-      episode.overview,
+      displayOverview,
       style: const TextStyle(fontSize: 14),
       maxLines: 6,
       overflow: TextOverflow.ellipsis,
