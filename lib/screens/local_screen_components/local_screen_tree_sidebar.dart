@@ -33,7 +33,6 @@ class PlatformPaths {
   }
 
   /// Get available drive letters on Windows
-  /// Get available drive letters on Windows
   /// Uses parallel checks for better performance
   static Future<List<String>> getWindowsDrives() async {
     if (!Platform.isWindows) return [];
@@ -275,7 +274,8 @@ class _TreeSidebarState extends State<TreeSidebar> {
           children: [
             // Show drive icon for Windows drives
             sysDir.isDrive
-                ? Icon(Icons.storage, size: 18, color: Colors.blueGrey)
+                ? Icon(Icons.storage,
+                    size: 18, color: Theme.of(context).colorScheme.secondary)
                 : FolderIconHelper.getIcon(sysDir.name, size: 18),
             const SizedBox(width: 12),
             Expanded(
@@ -314,7 +314,8 @@ class _TreeSidebarState extends State<TreeSidebar> {
             : null,
         child: Row(
           children: [
-            Icon(Icons.storage, size: 18, color: Colors.blueGrey),
+            Icon(Icons.storage,
+                size: 18, color: Theme.of(context).colorScheme.secondary),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -676,6 +677,7 @@ class _CollapsibleTreeSidebarState extends State<CollapsibleTreeSidebar> {
               left: 0,
               top: 0,
               bottom: 0,
+              right: 0, // Cover entire screen
               child: Row(
                 children: [
                   // Sidebar
@@ -692,12 +694,13 @@ class _CollapsibleTreeSidebarState extends State<CollapsibleTreeSidebar> {
                       onClose: _closeSidebar,
                     ),
                   ),
-                  // Tap outside to close
-                  GestureDetector(
-                    onTap: _closeSidebar,
-                    child: Container(
-                      width: screenWidth,
-                      color: Colors.black38,
+                  // Tap outside to close - Expanded fills remaining space
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: _closeSidebar,
+                      child: Container(
+                        color: Colors.black38,
+                      ),
                     ),
                   ),
                 ],

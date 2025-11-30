@@ -468,12 +468,15 @@ class LocalProvider extends ChangeNotifier {
           // Request permission first
           final hasPermission = await requestAndroidStoragePermission();
           if (hasPermission) {
-            // On Android, the correct path is /storage/emulated/0
-            defaultDir = Directory('/storage/emulated/0');
-            // Verify the directory exists
-            if (!await defaultDir.exists()) {
-              // Fallback to getExternalStorageDirectory if main path doesn't exist
-              defaultDir = await getExternalStorageDirectory();
+            // Use the platform home path method for consistency
+            final homePath = getPlatformHomePath();
+            if (homePath != null) {
+              defaultDir = Directory(homePath);
+              // Verify the directory exists
+              if (!await defaultDir.exists()) {
+                // Fallback to getExternalStorageDirectory if main path doesn't exist
+                defaultDir = await getExternalStorageDirectory();
+              }
             }
           }
         } else if (Platform.isWindows) {
