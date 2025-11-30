@@ -1197,7 +1197,7 @@ EpisodeCardWidget(
     MovieTvTranslator translator = MovieTvTranslator();
     debugPrint(oveview);
     String translatedOverView = await translator.translateTextForMoviesAndTV(
-      oveview,
+      oveview,context
     );
     debugPrint(translatedOverView);
     debugPrint(oveview);
@@ -1213,7 +1213,7 @@ EpisodeCardWidget(
     setState(() => _isTranslatingSeasonMap[seasonId] = true);
     try {
       final translator = MovieTvTranslator();
-      final translated = await translator.translateTextForMoviesAndTV(original);
+      final translated = await translator.translateTextForMoviesAndTV(original,context);
       setState(() => _translatedSeasonOverviews[seasonId] = translated);
     } finally {
       setState(() => _isTranslatingSeasonMap[seasonId] = false);

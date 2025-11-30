@@ -29,7 +29,7 @@ mixin TranslationMixin<T extends StatefulWidget> on State<T> {
   Future<void> translateTitle(String original) async {
     setState(() => _isTranslating = true);
     try {
-      final translated = await _translator.translateTextForMoviesAndTV(original);
+      final translated = await _translator.translateTextForMoviesAndTV(original,context);
       setState(() {
         _translatedTitle = translated;
       });
@@ -59,7 +59,7 @@ mixin TranslationMixin<T extends StatefulWidget> on State<T> {
     }
     
     try {
-      final translated = await _translator.translateTextForMoviesAndTV(original);
+      final translated = await _translator.translateTextForMoviesAndTV(original,context);
       setState(() {
         _overviewTranslated = true;
         _overviewText = translated;
@@ -83,7 +83,7 @@ mixin TranslationMixin<T extends StatefulWidget> on State<T> {
 
     setState(() => _translatingKeys.add(key));
     try {
-      final translated = await _translator.translateTextForMoviesAndTV(content);
+      final translated = await _translator.translateTextForMoviesAndTV(content,context);
       setState(() {
         _translationCache[key] = translated;
         _translatingKeys.remove(key);

@@ -60,7 +60,7 @@ class _TranslatableContentWidgetState extends State<TranslatableContentWidget> {
 
     setState(() => _isTranslating = true);
     try {
-      final translated = await MovieTvTranslator().translateTextForMoviesAndTV(widget.text);
+      final translated = await MovieTvTranslator().translateTextForMoviesAndTV(widget.text,context);
       setState(() => _translatedText = translated);
       widget.onTranslated?.call(translated);
     } finally {

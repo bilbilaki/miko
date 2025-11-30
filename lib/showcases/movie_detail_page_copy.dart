@@ -37,21 +37,22 @@ import 'package:miko/showcases/utils/haptic_helper.dart';
 
 // ignore: must_be_immutable
 class MovieDetailPage extends StatefulWidget {
-   int id;
-   HelperModel? helperModel;
+  int id;
+  HelperModel? helperModel;
 
-   MovieDetailPage({super.key,this.helperModel, required this.id});
+  MovieDetailPage({super.key, this.helperModel, required this.id});
 
   @override
   State<MovieDetailPage> createState() => _MovieDetailPageState();
 }
 
-class _MovieDetailPageState extends State<MovieDetailPage> with TranslationMixin {
-   final MovieService _movieService = MovieService();
+class _MovieDetailPageState extends State<MovieDetailPage>
+    with TranslationMixin {
+  final MovieService _movieService = MovieService();
   late Future<Map<String, dynamic>> _movieDataFuture;
   MovieResponse? recommendations;
   List<Keyword> _movieKeywords = [];
-  late Movie movie;
+  Movie? _movie;
   List<String> downloadLinks = [''];
   bool tr = false;
 
@@ -59,8 +60,8 @@ class _MovieDetailPageState extends State<MovieDetailPage> with TranslationMixin
   void _performHapticFeedback() {
     HapticHelper.performHapticFeedback();
   }
-  
-String oveview='';
+
+  String oveview = '';
   @override
   void initState() {
     super.initState();
@@ -73,20 +74,21 @@ String oveview='';
   }
 
   void _loadMovieData() async {
-    _movieDataFuture =
-        _movieService.getMovieDetailsWithCredits(movieId: widget.id);
-Movie movie = await _movieService.getMovieDetails(movieId: widget.id);
-    _movieDataFuture.then((_) {
+    _movieDataFuture = _movieService.getMovieDetailsWithCredits(
+      movieId: widget.id,
+    );
+    try {
+      Movie movie = await _movieService.getMovieDetails(movieId: widget.id);
       if (mounted) {
-        setState(() async {
-          movie = movie;
+        setState(() {
+          _movie = movie;
         });
       }
-    }).catchError((error) {
+    } catch (error) {
       if (mounted) {
         setState(() {});
       }
-    });
+    }
   }
 
   @override
@@ -109,7 +111,11 @@ Movie movie = await _movieService.getMovieDetails(movieId: widget.id);
             _movieKeywords = detailedMovie.keywords;
 
             return _buildDetailView(
-                context, detailedMovie, credits, userDataService);
+              context,
+              detailedMovie,
+              credits,
+              userDataService,
+            );
           } else {
             return _buildRetryableView(context, userDataService);
           }
@@ -129,8 +135,11 @@ Movie movie = await _movieService.getMovieDetails(movieId: widget.id);
       });
       return _buildLoadingView();
     } else {
-      return _buildErrorView(context,
-          "Error when We Try to Load Data From TMDB!!", userDataService);
+      return _buildErrorView(
+        context,
+        "Error when We Try to Load Data From TMDB!!",
+        userDataService,
+      );
     }
   }
 
@@ -138,13 +147,85 @@ Movie movie = await _movieService.getMovieDetails(movieId: widget.id);
     return const MovieDetailLoadingView();
   }
 
+  Widget _buildErrorOnlyView(
+    BuildContext context,
+    String errorMessage,
+    userDataService,
+  ) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 60, color: Colors.red),
+            const SizedBox(height: 16),
+            SelectableText(
+              'Error loading movie details',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(color: Colors.white),
+            ),
+            const SizedBox(height: 8),
+            SelectableText(
+              errorMessage,
+              textAlign: TextAlign.center,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                _performHapticFeedback();
+                _retryCount = 0;
+                setState(() {
+                  _loadMovieData();
+                });
+              },
+              child: const Text('Try Again'),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                _performHapticFeedback();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => MovieDetailsScreen(
+                      movieId: widget.id,
+                      typec: "movie",
+                      helperModel: HelperModel(episodes: null, movies: null),
+                    ),
+                  ),
+                );
+              },
+              child: const Text('Try Loading using old interface'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildErrorView(
-      BuildContext context, String errorMessage, userDataService) {
+    BuildContext context,
+    String errorMessage,
+    userDataService,
+  ) {
+    // If movie data is not available, show error-only view
+    if (_movie == null) {
+      return _buildErrorOnlyView(context, errorMessage, userDataService);
+    }
     return Column(
       children: [
         Expanded(
-          child: _buildDetailView(context, movie, null, userDataService,
-              showDetailedInfo: false),
+          child: _buildDetailView(
+            context,
+            _movie!,
+            null,
+            userDataService,
+            showDetailedInfo: false,
+          ),
         ),
         Container(
           color: Colors.black87,
@@ -156,18 +237,20 @@ Movie movie = await _movieService.getMovieDetails(movieId: widget.id);
                 children: [
                   const Icon(Icons.error_outline, size: 60, color: Colors.red),
                   const SizedBox(height: 16),
-                  SelectableText('Error loading movie details',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(color: Colors.white)),
+                  SelectableText(
+                    'Error loading movie details',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleLarge?.copyWith(color: Colors.white),
+                  ),
                   const SizedBox(height: 8),
-                  SelectableText(errorMessage,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(color: Colors.white70)),
+                  SelectableText(
+                    errorMessage,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+                  ),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
@@ -182,27 +265,36 @@ Movie movie = await _movieService.getMovieDetails(movieId: widget.id);
                   ElevatedButton(
                     onPressed: () {
                       _performHapticFeedback();
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => MovieDetailsScreen(
-                          movieId: widget.id,
-                          typec: "movie",
-                          helperModel: HelperModel(episodes: null, movies: null),
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => MovieDetailsScreen(
+                            movieId: widget.id,
+                            typec: "movie",
+                            helperModel: HelperModel(
+                              episodes: null,
+                              movies: null,
+                            ),
+                          ),
                         ),
-                      ));
+                      );
                     },
                     child: const Text('Try Loading using old interface'),
                   ),
                   ElevatedButton(
                     onPressed: () {
                       _performHapticFeedback();
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => MovieDetailsScreen(
-                          movieId: widget.id,
-                          typec: "movie",
-                                                    helperModel: HelperModel(episodes: null, movies: null),
-
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => MovieDetailsScreen(
+                            movieId: widget.id,
+                            typec: "movie",
+                            helperModel: HelperModel(
+                              episodes: null,
+                              movies: null,
+                            ),
+                          ),
                         ),
-                      ));
+                      );
                     },
                     child: const Text('Try Loading using old interface'),
                   ),
@@ -216,8 +308,12 @@ Movie movie = await _movieService.getMovieDetails(movieId: widget.id);
   }
 
   Widget _buildDetailView(
-      BuildContext context, Movie movie, MovieCredits? credits, userDataService,
-      {bool showDetailedInfo = true}) {
+    BuildContext context,
+    Movie movie,
+    MovieCredits? credits,
+    userDataService, {
+    bool showDetailedInfo = true,
+  }) {
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification scrollInfo) {
         if (Platform.isAndroid && scrollInfo is ScrollUpdateNotification) {
@@ -232,7 +328,12 @@ Movie movie = await _movieService.getMovieDetails(movieId: widget.id);
           _buildAppBar(context, movie, userDataService),
           SliverToBoxAdapter(
             child: _buildMovieDetails(
-                context, movie, credits, showDetailedInfo, userDataService),
+              context,
+              movie,
+              credits,
+              showDetailedInfo,
+              userDataService,
+            ),
           ),
         ],
       ),
@@ -253,92 +354,103 @@ Movie movie = await _movieService.getMovieDetails(movieId: widget.id);
       expandedHeight: 600,
       pinned: true,
       flexibleSpace: FlexibleSpaceBar(
-        title: Text(translatedTitle ?? movie.title,
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
-              // color: Colors.white,
-              letterSpacing: 1.5,
-              height: 1.2,
-              shadows: [
-                Shadow(
-                  offset: const Offset(2, 2),
-                  blurRadius: 8,
-                  color: Colors.black.withValues(alpha: 0.8),
-                ),
-                Shadow(
-                  offset: const Offset(-1, -1),
-                  blurRadius: 4,
-                  color: Colors.purple.withValues(alpha: 0.3),
-                ),
-                Shadow(
-                  offset: const Offset(0, 0),
-                  blurRadius: 20,
-                  color: Colors.cyan.withValues(alpha: 0.4),
-                ),
-              ],
-              foreground: Paint()
-                ..shader = const LinearGradient(
-                  colors: [
-                    Color(0xFFFF6B6B),
-                    Color(0xFF4ECDC4),
-                    Color(0xFF45B7D1),
-                    Color(0xFF96CEB4),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ).createShader(const Rect.fromLTWH(0, 0, 300, 100)),
-            )),
-        background: Stack(fit: StackFit.expand, children: [
-          backdropUrl.isNotEmpty
-              ? CachedNetworkImage(
-                  filterQuality: FilterQuality.high,
-                  imageUrl: backdropUrl,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => const Center(
+        title: Text(
+          translatedTitle ?? movie.title,
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
+            // color: Colors.white,
+            letterSpacing: 1.5,
+            height: 1.2,
+            shadows: [
+              Shadow(
+                offset: const Offset(2, 2),
+                blurRadius: 8,
+                color: Colors.black.withValues(alpha: 0.8),
+              ),
+              Shadow(
+                offset: const Offset(-1, -1),
+                blurRadius: 4,
+                color: Colors.purple.withValues(alpha: 0.3),
+              ),
+              Shadow(
+                offset: const Offset(0, 0),
+                blurRadius: 20,
+                color: Colors.cyan.withValues(alpha: 0.4),
+              ),
+            ],
+            foreground: Paint()
+              ..shader = const LinearGradient(
+                colors: [
+                  Color(0xFFFF6B6B),
+                  Color(0xFF4ECDC4),
+                  Color(0xFF45B7D1),
+                  Color(0xFF96CEB4),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ).createShader(const Rect.fromLTWH(0, 0, 300, 100)),
+          ),
+        ),
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            backdropUrl.isNotEmpty
+                ? CachedNetworkImage(
+                    filterQuality: FilterQuality.high,
+                    imageUrl: backdropUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => const Center(
                       child: CircularProgressIndicator(
-                          strokeWidth: 1, color: AppColors.accentColor)),
-                  errorWidget: (context, url, error) =>
-                      // Custom fallback logic: try poster if backdrop fails
-                      posterUrl.isNotEmpty
-                          ? CachedNetworkImage(
-                              filterQuality: FilterQuality.high,
-                              imageUrl: posterUrl,
-                              fit: BoxFit.contain,
-                              placeholder: (context, url) => const Center(
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 1,
-                                      color: AppColors.accentColor)),
-                              errorWidget: (context, url, error) =>
-                                  const Center(
-                                child: Icon(
-                                    Icons
-                                        .image_not_supported_outlined, // Standardized icon
-                                    size: 100,
-                                    color: AppColors.secondaryText),
+                        strokeWidth: 1,
+                        color: AppColors.accentColor,
+                      ),
+                    ),
+                    errorWidget: (context, url, error) =>
+                        // Custom fallback logic: try poster if backdrop fails
+                        posterUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                            filterQuality: FilterQuality.high,
+                            imageUrl: posterUrl,
+                            fit: BoxFit.contain,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 1,
+                                color: AppColors.accentColor,
                               ),
-                              fadeInDuration: const Duration(milliseconds: 200),
-                              fadeOutDuration:
-                                  const Duration(milliseconds: 100),
-                            )
-                          : const Center(
-                              child: Icon(
-                                  Icons
-                                      .image_not_supported_outlined, // Standardized icon
-                                  size: 100,
-                                  color: AppColors.secondaryText),
                             ),
-                  fadeInDuration: const Duration(milliseconds: 200),
-                  fadeOutDuration: const Duration(milliseconds: 100),
-                )
-              : const Center(
-                  child: Icon(
+                            errorWidget: (context, url, error) => const Center(
+                              child: Icon(
+                                Icons
+                                    .image_not_supported_outlined, // Standardized icon
+                                size: 100,
+                                color: AppColors.secondaryText,
+                              ),
+                            ),
+                            fadeInDuration: const Duration(milliseconds: 200),
+                            fadeOutDuration: const Duration(milliseconds: 100),
+                          )
+                        : const Center(
+                            child: Icon(
+                              Icons
+                                  .image_not_supported_outlined, // Standardized icon
+                              size: 100,
+                              color: AppColors.secondaryText,
+                            ),
+                          ),
+                    fadeInDuration: const Duration(milliseconds: 200),
+                    fadeOutDuration: const Duration(milliseconds: 100),
+                  )
+                : const Center(
+                    child: Icon(
                       Icons.image_not_supported_outlined, // Standardized icon
                       size: 100,
-                      color: AppColors.secondaryText)),
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
+                      color: AppColors.secondaryText,
+                    ),
+                  ),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
@@ -347,132 +459,132 @@ Movie movie = await _movieService.getMovieDetails(movieId: widget.id);
                     AppColors.primaryBackground.withValues(alpha: 0.9),
                     AppColors.primaryBackground,
                   ],
-                  stops: const [
-                    0.0,
-                    0.5,
-                    0.9,
-                    1.0
-                  ]),
-            ),
-          ),
-         
-          Positioned(
-            top: 8.0,
-            right: 8.0,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(
-                    isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: isFavorite ? Colors.red : Colors.white,
-                    size: 20,
-                  ),
-                  onPressed: () async {
-                    _performHapticFeedback();
-                    await userDataService.toggleFavoriteMovie(movie.id);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          isFavorite
-                              ? 'Removed from Favorites'
-                              : 'Added to Favorites',
-                        ),
-                        duration: const Duration(seconds: 1),
-                      ),
-                    );
-                  },
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.black.withValues(alpha: 0.5),
-                    padding: const EdgeInsets.all(4.0),
-                  ),
+                  stops: const [0.0, 0.5, 0.9, 1.0],
                 ),
-                const SizedBox(width: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 6.0, vertical: 4.0),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(4.0),
-                  ),
-                  child: Text(
-                    '${movie.voteAverage.toStringAsFixed(1)}/10',
-                    style: const TextStyle(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryText,
+              ),
+            ),
+
+            Positioned(
+              top: 8.0,
+              right: 8.0,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: isFavorite ? Colors.red : Colors.white,
+                      size: 20,
+                    ),
+                    onPressed: () async {
+                      _performHapticFeedback();
+                      await userDataService.toggleFavoriteMovie(movie.id);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            isFavorite
+                                ? 'Removed from Favorites'
+                                : 'Added to Favorites',
+                          ),
+                          duration: const Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.black.withValues(alpha: 0.5),
+                      padding: const EdgeInsets.all(4.0),
                     ),
                   ),
-                ),
-                const SizedBox(width: 4),
-                IconButton(
-                  icon: Icon(
-                    isInWatchlist ? Icons.bookmark : Icons.bookmark_border,
-                    color: isInWatchlist ? Colors.green : Colors.white,
-                    size: 20,
-                  ),
-                  onPressed: () async {
-                    _performHapticFeedback();
-                    await userDataService.toggleWatchlistMovie(movie.id);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          isInWatchlist
-                              ? 'Removed from Watchlist'
-                              : 'Added to Watchlist',
-                        ),
-                        duration: const Duration(seconds: 1),
+                  const SizedBox(width: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6.0,
+                      vertical: 4.0,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(4.0),
+                    ),
+                    child: Text(
+                      '${movie.voteAverage.toStringAsFixed(1)}/10',
+                      style: const TextStyle(
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryText,
                       ),
-                    );
-                  },
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.black.withValues(alpha: 0.5),
-                    padding: const EdgeInsets.all(4.0),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 4),
-                IconButton(
-                  icon: Icon(
-                    Icons.share,
-                    color: Colors.purpleAccent,
-                    size: 20,
+                  const SizedBox(width: 4),
+                  IconButton(
+                    icon: Icon(
+                      isInWatchlist ? Icons.bookmark : Icons.bookmark_border,
+                      color: isInWatchlist ? Colors.green : Colors.white,
+                      size: 20,
+                    ),
+                    onPressed: () async {
+                      _performHapticFeedback();
+                      await userDataService.toggleWatchlistMovie(movie.id);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            isInWatchlist
+                                ? 'Removed from Watchlist'
+                                : 'Added to Watchlist',
+                          ),
+                          duration: const Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.black.withValues(alpha: 0.5),
+                      padding: const EdgeInsets.all(4.0),
+                    ),
                   ),
-                  onPressed: () async {
-                    _performHapticFeedback();
-                    var myItem = ShareItem(
-                      name: movie.title,
-                      vote: movie.voteAverage,
-                      releaseDate: movie.releaseDate,
-                      overview: movie.overview,
-                      posterUrl: movie.fullPosterPath,
-                      internalUrl:
-                          'https://inosuke.page.link/miko/movie${movie.id}', // Replace with a real URL
-                    );
-                     String shareContent = '''
+                  const SizedBox(width: 4),
+                  IconButton(
+                    icon: Icon(
+                      Icons.share,
+                      color: Colors.purpleAccent,
+                      size: 20,
+                    ),
+                    onPressed: () async {
+                      _performHapticFeedback();
+                      var myItem = ShareItem(
+                        name: movie.title,
+                        vote: movie.voteAverage,
+                        releaseDate: movie.releaseDate,
+                        overview: movie.overview,
+                        posterUrl: movie.fullPosterPath,
+                        internalUrl:
+                            'https://inosuke.page.link/miko/movie${movie.id}', // Replace with a real URL
+                      );
+                      String shareContent =
+                          '''
 Check out this: ${myItem.name}
 Rating: ${myItem.vote}
 Release Date: ${myItem.releaseDate}
 Overview: $oveview
 Open in miko by click on ${myItem.internalUrl}
 ''';
-                    SharePlus.instance.share(ShareParams(text: shareContent));
+                      SharePlus.instance.share(ShareParams(text: shareContent));
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Share item ...'),
-                        duration: const Duration(seconds: 1),
-                      ),
-                    );
-                  },
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.black.withValues(alpha: 0.5),
-                    padding: const EdgeInsets.all(4.0),
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Share item ...'),
+                          duration: const Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.black.withValues(alpha: 0.5),
+                      padding: const EdgeInsets.all(4.0),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          )
-        ]),
+          ],
+        ),
       ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1.0),
@@ -484,22 +596,34 @@ Open in miko by click on ${myItem.internalUrl}
     );
   }
 
-  void dllink(BuildContext context) async{
-    var mmovie = Provider.of<MovieProvider>(context, listen: false)
-        .getMovieById(widget.id);
+  void dllink(BuildContext context, Movie movie) async {
+    var mmovie = Provider.of<MovieProvider>(
+      context,
+      listen: false,
+    ).getMovieById(widget.id);
     if (mmovie != null) {
       final downloadLink = mmovie.getDownloadLinksList();
       downloadLinks = downloadLink;
-     if (tr== false){
-      oveview = movie.overview; }
+      if (tr == false) {
+        oveview = movie.overview;
+      }
     }
   }
 
-  Widget _buildMovieDetails(BuildContext context, Movie movie,
-      MovieCredits? credits, bool showDetailedInfo, userDataService) {
-    dllink(context);
+  Widget _buildMovieDetails(
+    BuildContext context,
+    Movie movie,
+    MovieCredits? credits,
+    bool showDetailedInfo,
+    userDataService,
+  ) {
+    dllink(context, movie);
     bool isWatched = userDataService.isWatchedEpisode(
-        widget.id, widget.id, widget.id, widget.id);
+      widget.id,
+      widget.id,
+      widget.id,
+      widget.id,
+    );
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -525,17 +649,20 @@ Open in miko by click on ${myItem.internalUrl}
                             imageUrl: movie.fullPosterPath,
                             fit: BoxFit.cover,
                             placeholder: (context, url) => const Center(
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 1,
-                                    color: AppColors.accentColor)),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 1,
+                                color: AppColors.accentColor,
+                              ),
+                            ),
                             errorWidget: (context, url, error) => Container(
                               color: Colors.grey[800],
                               child: const Center(
                                 child: Icon(
-                                    Icons
-                                        .image_not_supported_outlined, // Standardized icon
-                                    size: 30,
-                                    color: AppColors.secondaryText),
+                                  Icons
+                                      .image_not_supported_outlined, // Standardized icon
+                                  size: 30,
+                                  color: AppColors.secondaryText,
+                                ),
                               ),
                             ),
                             fadeInDuration: const Duration(milliseconds: 300),
@@ -545,22 +672,23 @@ Open in miko by click on ${myItem.internalUrl}
                             color: Colors.grey[800],
                             child: const Center(
                               child: Icon(
-                                  Icons
-                                      .image_not_supported_outlined, // Standardized icon
-                                  size: 30,
-                                  color: AppColors.secondaryText),
+                                Icons
+                                    .image_not_supported_outlined, // Standardized icon
+                                size: 30,
+                                color: AppColors.secondaryText,
+                              ),
                             ),
                           ),
                   ),
                 ),
               ),
-                          const SizedBox(width: 16),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SelectableText(
-                     translatedTitle?? movie.title,
+                      translatedTitle ?? movie.title,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 8),
@@ -577,7 +705,7 @@ Open in miko by click on ${myItem.internalUrl}
                           '${movie.voteAverage.toStringAsFixed(1)} (${movie.voteCount} votes)',
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
-                                       IconButton(
+                        IconButton(
                           icon: isTranslating
                               ? SizedBox(
                                   width: 20,
@@ -606,11 +734,12 @@ Open in miko by click on ${myItem.internalUrl}
                             }
                           },
                           style: IconButton.styleFrom(
-                            backgroundColor: Colors.black.withValues(alpha: 0.5),
+                            backgroundColor: Colors.black.withValues(
+                              alpha: 0.5,
+                            ),
                             padding: const EdgeInsets.all(4.0),
                           ),
                         ),
-
                       ],
                     ),
                     if (showDetailedInfo && movie.runtime != null)
@@ -656,15 +785,32 @@ Open in miko by click on ${myItem.internalUrl}
               downloadLinks: downloadLinks,
               isWatched: isWatched,
               onPlayPressed: () {
-                _performHapticFeedback();if (widget.helperModel!=null){
-
-                showDownloadLinkSelection(context, [widget.helperModel?.movies?.first.path] as List<String>, movie.id, movie.title);   
-                }else {
-                showDownloadLinkSelection(context, downloadLinks, movie.id, movie.title);
-              }},
+                _performHapticFeedback();
+                if (widget.helperModel != null) {
+                  showDownloadLinkSelection(
+                    context,
+                    [widget.helperModel?.movies?.first.path] as List<String>,
+                    movie.id,
+                    movie.title,
+                  );
+                } else {
+                  showDownloadLinkSelection(
+                    context,
+                    downloadLinks,
+                    movie.id,
+                    movie.title,
+                  );
+                }
+              },
               onDownloadPressed: () {
                 _performHapticFeedback();
-                showDownloadLinkSelection(context, downloadLinks, movie.id, movie.title, isForPlay: false);
+                showDownloadLinkSelection(
+                  context,
+                  downloadLinks,
+                  movie.id,
+                  movie.title,
+                  isForPlay: false,
+                );
               },
             ),
             const SizedBox(height: 4),
@@ -674,8 +820,6 @@ Open in miko by click on ${myItem.internalUrl}
             ),
           ],
 
-      
-              
           MovieOverviewSection(
             overview: oveview,
             onTranslate: () async {
@@ -692,9 +836,7 @@ Open in miko by click on ${myItem.internalUrl}
               keywords: _movieKeywords,
               movieService: _movieService,
             ),
-          if (showDetailedInfo &&
-              credits != null &&
-              credits.cast.isNotEmpty)
+          if (showDetailedInfo && credits != null && credits.cast.isNotEmpty)
             MovieCastSection(
               cast: credits.cast,
               movieId: movie.id,
@@ -760,47 +902,50 @@ Open in miko by click on ${myItem.internalUrl}
             ),
           ],
           const SizedBox(height: 32),
-          RecommendationsSectionWidget( recommendations: null, onShowAllPressed: () {
-                    _performHapticFeedback();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RecommendationsPage(
-                          movieId: widget.id,
-                          movieTitle: movie.title,
-                          typec: "movie",
-                        ),
-                      ),
-                    );
-                  }, onRecommendationTapped: () {
-        _performHapticFeedback();
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MovieDetailPage(id: movie.id),
+          RecommendationsSectionWidget(
+            recommendations: null,
+            onShowAllPressed: () {
+              _performHapticFeedback();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RecommendationsPage(
+                    movieId: widget.id,
+                    movieTitle: movie.title,
+                    typec: "movie",
+                  ),
+                ),
+              );
+            },
+            onRecommendationTapped: () {
+              _performHapticFeedback();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MovieDetailPage(id: movie.id),
+                ),
+              );
+            },
+            recommendationsM: recommendations,
           ),
-        );
-      }, recommendationsM: recommendations,),
         ],
       ),
     );
   }
 
-
-  
   void gentranslate() async {
-  MovieTvTranslator translator = MovieTvTranslator();
-  debugPrint(oveview);
-String translatedOverView = await translator.translateTextForMoviesAndTV(oveview);
-debugPrint(translatedOverView);
-  debugPrint(oveview);
-  setState(() {  
-    tr = true;
-        oveview = translatedOverView;
-  
+    MovieTvTranslator translator = MovieTvTranslator();
+    debugPrint(oveview);
+    String translatedOverView = await translator.translateTextForMoviesAndTV(
+      oveview,context
+    );
+    debugPrint(translatedOverView);
+    debugPrint(oveview);
+    setState(() {
+      tr = true;
+      oveview = translatedOverView;
 
-  debugPrint(oveview);
-  });
+      debugPrint(oveview);
+    });
   }
-  }
-
+}

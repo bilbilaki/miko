@@ -2,13 +2,14 @@ import 'package:miko/configs/consts2.dart';
 import 'package:miko/main.dart';
 import 'package:miko/services/user_data_service.dart';
 import 'package:openai_dart/openai_dart.dart' as openai;
+import 'package:path/path.dart';
+import 'package:provider/provider.dart';
 import 'dart:convert';
 
 import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
-
 
 typedef OpenRoute =
     Future<void> Function(String route, Map<String, dynamic>? args);
@@ -101,7 +102,7 @@ class Assistant {
         model: openai.ChatCompletionModel.modelId(modelId),
         messages: history,
         tools: [_searchTool, _openRouteTool, _recommendTool, _factTool],
-       // toolChoice: openai.ChatCompletionToolChoiceOption(openai.ChatCompletionToolChoiceOption.auto),
+        // toolChoice: openai.ChatCompletionToolChoiceOption(openai.ChatCompletionToolChoiceOption.auto),
       ),
     );
 
@@ -153,6 +154,7 @@ class Assistant {
     return res2.choices.first.message.content ?? '';
   }
 }
+
 class TranslatableText extends StatefulWidget {
   const TranslatableText(
     this.text, {
@@ -206,6 +208,7 @@ class _TranslatableTextState extends State<TranslatableText> {
     );
   }
 }
+
 class _Lru<K, V> {
   final int capacity;
   final _map = <K, V>{};
@@ -456,27 +459,30 @@ class TranslationService {
 /// Singleton translator for movie and TV show content
 class MovieTvTranslator {
   static final MovieTvTranslator _instance = MovieTvTranslator._internal();
-  
+
   factory MovieTvTranslator() => _instance;
-  
+
   MovieTvTranslator._internal();
 
-  Future<String> translateTextForMoviesAndTV(String text) async {
-    final userDataService = UserDataService();
-    final targetLanguage = userDataService.translationTargetLanguage.isNotEmpty 
-        ? userDataService.translationTargetLanguage 
+  Future<String> translateTextForMoviesAndTV(String text,BuildContext context) async {
+    final userDataService = Provider.of<UserDataService>(context,listen: false);
+    final targetLanguage = userDataService.translationTargetLanguage.isNotEmpty
+        ? userDataService.translationTargetLanguage
         : userDataService.custoombaseurl;
-    final client = openai.OpenAIClient(
-      apiKey: userDataService.aiTranslationApiKey,
-      baseUrl: userDataService.aiTranslationBaseUrl,
+    openai.OpenAIClient client = openai.OpenAIClient(
+      apiKey: userDataService.aiSubtitleApiKey,
+      baseUrl: userDataService.aiSubtitleBaseUrl,
     );
     return persistentCache.runOrGet(text, targetLanguage, () async {
       final res = await client.createChatCompletion(
         request: openai.CreateChatCompletionRequest(
-          model: openai.ChatCompletionModel.modelId(userDataService.aiTranslationModelId),
+          model: openai.ChatCompletionModel.modelId(
+            userDataService.aiSubtitleModelId,
+          ),
           messages: [
             openai.ChatCompletionMessage.system(
-              content: 'You are a professional translator specializing in movie and TV show content. Translate the given text accurately and naturally.',
+              content:
+                  'You are a professional translator specializing in movie and TV show content. Translate the given text accurately and naturally.',
             ),
             openai.ChatCompletionMessage.user(
               content: openai.ChatCompletionUserMessageContent.string(
@@ -484,7 +490,7 @@ class MovieTvTranslator {
               ),
             ),
           ],
-          temperature: 0.7,
+//temperature: 0.7,
         ),
       );
       return (res.choices.first.message.content ?? '').trim();

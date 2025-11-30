@@ -37,7 +37,7 @@ Future<void> _translateOverviewForEpisode(int key, String original) async {
     setState(() => _isTranslatingMap[key] = true);
     try {
       final translated = await _translator.translateTextForMoviesAndTV(
-        original,
+        original,context
       );
       setState(() => _translatedOverviews[key] = translated);
     } finally {

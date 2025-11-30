@@ -154,7 +154,7 @@ class _EpisodeDetailPageState extends State<EpisodeDetailPage> {
                             final translator = MovieTvTranslator();
                             debugPrint(trans);
                             final translatedOverView = await translator
-                                .translateTextForMoviesAndTV(trans);
+                                .translateTextForMoviesAndTV(trans,context);
                             debugPrint(translatedOverView);
                             debugPrint(trans);
                             setState(() {

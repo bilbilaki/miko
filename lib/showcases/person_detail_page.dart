@@ -40,7 +40,7 @@ class _PersonDetailPageState extends State<PersonDetailPage> {
     setState(() => _isTranslating = true);
     try {
       final translated = await _translator.translateTextForMoviesAndTV(
-        original,
+        original,context
       );
       setState(() {
         _translatedTitle = translated;

@@ -62,7 +62,7 @@ class _AnimeDetailAppBarState extends State<AnimeDetailAppBar> {
 
     setState(() => _isTranslatingTagline = true);
     try {
-      final translated = await MovieTvTranslator().translateTextForMoviesAndTV(widget.tvShow.tagline!);
+      final translated = await MovieTvTranslator().translateTextForMoviesAndTV(widget.tvShow.tagline!,context);
       setState(() => _translatedTagline = translated);
     } finally {
       setState(() => _isTranslatingTagline = false);

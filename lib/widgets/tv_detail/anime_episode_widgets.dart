@@ -43,13 +43,13 @@ class _EpisodeCardWidgetState extends State<EpisodeCardWidget> {
     try {
       // Translate title
       final translatedTitle = await MovieTvTranslator()
-          .translateTextForMoviesAndTV(widget.episode.name);
+          .translateTextForMoviesAndTV(widget.episode.name,context);
       
       // Translate overview if not empty
       String? translatedOverview;
       if (widget.episode.overview.isNotEmpty) {
         translatedOverview = await MovieTvTranslator()
-            .translateTextForMoviesAndTV(widget.episode.overview);
+            .translateTextForMoviesAndTV(widget.episode.overview,context);
       }
       
       setState(() {

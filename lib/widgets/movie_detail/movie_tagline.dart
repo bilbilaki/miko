@@ -32,7 +32,7 @@ class _MovieTaglineState extends State<MovieTagline> {
     }
     setState(() => _isTranslating = true);
     try {
-      final translated = await MovieTvTranslator().translateTextForMoviesAndTV(widget.tagline);
+      final translated = await MovieTvTranslator().translateTextForMoviesAndTV(widget.tagline,context);
       setState(() => _translatedTagline = translated);
     } finally {
       setState(() => _isTranslating = false);
