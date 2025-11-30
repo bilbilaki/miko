@@ -65,6 +65,7 @@ class UserDataService extends ChangeNotifier {
   static const String _aiTranslationBaseUrlKey = 'aiTranslationBaseUrl';
   static const String _aiTranslationApiKeyKey = 'aiTranslationApiKey';
   static const String _aiTranslationModelIdKey = 'aiTranslationModelId';
+  static const String _translationTargetLanguageKey = 'translationTargetLanguage';
 
   // ==================== PRIVATE FIELDS ====================
   SharedPreferences? _prefs;
@@ -93,6 +94,7 @@ class UserDataService extends ChangeNotifier {
   String _aiTranslationBaseUrl = '';
   String _aiTranslationApiKey = '';
   String _aiTranslationModelId = '';
+  String _translationTargetLanguage = 'Farsi';
   List<int> _favoriteMovieIds = [];
   List<int> _favoriteAnimeIds = [];
   List<int> _favoriteTvSeriesIds = [];
@@ -166,6 +168,7 @@ class UserDataService extends ChangeNotifier {
   String get aiTranslationBaseUrl => _aiTranslationBaseUrl;
   String get aiTranslationApiKey => _aiTranslationApiKey;
   String get aiTranslationModelId => _aiTranslationModelId;
+  String get translationTargetLanguage => _translationTargetLanguage;
 
   // ==================== INITIALIZATION ====================
   UserDataService() {
@@ -221,6 +224,7 @@ class UserDataService extends ChangeNotifier {
     _aiTranslationBaseUrl = _prefs?.getString(_aiTranslationBaseUrlKey) ?? '';
     _aiTranslationApiKey = _prefs?.getString(_aiTranslationApiKeyKey) ?? '';
     _aiTranslationModelId = _prefs?.getString(_aiTranslationModelIdKey) ?? '';
+    _translationTargetLanguage = _prefs?.getString(_translationTargetLanguageKey) ?? 'Farsi';
 
     await _loadSettings();
     notifyListeners();
@@ -620,6 +624,7 @@ class UserDataService extends ChangeNotifier {
     _aiTranslationBaseUrl = '';
     _aiTranslationApiKey = '';
     _aiTranslationModelId = '';
+    _translationTargetLanguage = 'Farsi';
 
     // Remove all keys from SharedPreferences
     final keysToRemove = [
@@ -661,6 +666,7 @@ class UserDataService extends ChangeNotifier {
       _aiTranslationBaseUrlKey,
       _aiTranslationApiKeyKey,
       _aiTranslationModelIdKey,
+      _translationTargetLanguageKey,
     ];
 
     for (final key in keysToRemove) {
@@ -948,6 +954,13 @@ class UserDataService extends ChangeNotifier {
   Future<void> setAiTranslationModelId(String value) async {
     _aiTranslationModelId = value;
     await _prefs?.setString(_aiTranslationModelIdKey, value);
+    notifyListeners();
+  }
+
+  /// Set translation target language
+  Future<void> setTranslationTargetLanguage(String value) async {
+    _translationTargetLanguage = value;
+    await _prefs?.setString(_translationTargetLanguageKey, value);
     notifyListeners();
   }
 }

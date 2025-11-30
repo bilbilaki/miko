@@ -685,6 +685,7 @@ Open in miko by click on ${myItem.internalUrl}
             onLongPress: () {
               showTextInputDialog(context, userDataService);
             },
+            isTranslated: tr,
           ),
           if (showDetailedInfo && _movieKeywords.isNotEmpty)
             MovieKeywordsSection(

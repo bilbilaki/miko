@@ -453,37 +453,35 @@ class TranslationService {
   }
 }
 class MovieTvTranslator {
+  MovieTvTranslator();
 
-
-  MovieTvTranslator() ;
-
-
-
-
-Future<String> translateTextForMoviesAndTV(String text) async {
-
-  final userDataService = UserDataService();
-  final targetLanguage = userDataService.custoombaseurl;
-  final client = openai.OpenAIClient(
-    apiKey: userDataService.aiTranslationApiKey,
-    baseUrl: userDataService.aiTranslationBaseUrl,
-  );
-  return persistentCache.runOrGet(text, targetLanguage, () async {
-    final res = await client.createChatCompletion(
-      request: openai.CreateChatCompletionRequest(
-        model: openai.ChatCompletionModel.modelId(userDataService.aiTranslationModelId),
-        messages: [
-          openai.ChatCompletionMessage.system(content: 'just translate and return translated content'),
-          openai.ChatCompletionMessage.user(
-            content: openai.ChatCompletionUserMessageContent.string(
-              '''I am a highly skilled movie and TV show translator. I will translate the given text into $targetLanguage, ensuring the translation is natural, idiomatic, and suitable for subtitles or dubbing in a film or series. I will maintain the original tone, character voice, and colloquialisms. Provide only the translated text, nothing else.\n\n"          "Translate this: $text'''
-            ),
-          ),
-        ],
-        temperature: 0.9,
-      ),
+  Future<String> translateTextForMoviesAndTV(String text) async {
+    final userDataService = UserDataService();
+    final targetLanguage = userDataService.translationTargetLanguage.isNotEmpty 
+        ? userDataService.translationTargetLanguage 
+        : userDataService.custoombaseurl;
+    final client = openai.OpenAIClient(
+      apiKey: userDataService.aiTranslationApiKey,
+      baseUrl: userDataService.aiTranslationBaseUrl,
     );
-    return (res.choices.first.message.content ?? '').trim();
-  });
-}
+    return persistentCache.runOrGet(text, targetLanguage, () async {
+      final res = await client.createChatCompletion(
+        request: openai.CreateChatCompletionRequest(
+          model: openai.ChatCompletionModel.modelId(userDataService.aiTranslationModelId),
+          messages: [
+            openai.ChatCompletionMessage.system(
+              content: 'You are a professional translator specializing in movie and TV show content. Translate the given text accurately and naturally.',
+            ),
+            openai.ChatCompletionMessage.user(
+              content: openai.ChatCompletionUserMessageContent.string(
+                'Translate the following text into $targetLanguage. Maintain the original tone and style. Only provide the translated text, nothing else:\n\n$text',
+              ),
+            ),
+          ],
+          temperature: 0.7,
+        ),
+      );
+      return (res.choices.first.message.content ?? '').trim();
+    });
+  }
 }

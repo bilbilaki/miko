@@ -59,6 +59,10 @@ class _TvShowDetailPageAnimeState extends State<TvShowDetailPageAnime>
   Future<TVCredits>? creditsFuture;
   Future<YoutubeVideoForSeries>? _videosFuture;
 
+  // Season overview translation state
+  final Map<int, String?> _translatedSeasonOverviews = {};
+  final Map<int, bool> _isTranslatingSeasonMap = {};
+
   final List<Tab> _tabs = [
     Tab(text: 'OVERVIEW'),
     Tab(text: 'List of Episodes'),
@@ -596,6 +600,10 @@ EpisodeCardWidget(
       itemCount: sortedSeasons.length,
       itemBuilder: (context, index) {
         final season = sortedSeasons[index];
+        final int seasonKey = season.id ?? season.seasonNumber;
+        final bool isTranslating = _isTranslatingSeasonMap[seasonKey] == true;
+        final String? translatedOverview = _translatedSeasonOverviews[seasonKey];
+        
         return Card(
           margin: const EdgeInsets.only(bottom: 16.0),
           clipBehavior: Clip.antiAlias,
@@ -682,13 +690,57 @@ EpisodeCardWidget(
                         ],
                         const SizedBox(height: 8),
                         if (season.overview != null &&
-                            season.overview!.isNotEmpty)
+                            season.overview!.isNotEmpty) ...[
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: isTranslating
+                                    ? SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : Icon(
+                                        Icons.auto_awesome,
+                                        color: translatedOverview != null
+                                            ? Colors.cyan
+                                            : Colors.white,
+                                        size: 16,
+                                      ),
+                                onPressed: () async {
+                                  HapticHelper.performHapticFeedback();
+                                  if (translatedOverview != null) {
+                                    setState(() => _translatedSeasonOverviews.remove(seasonKey));
+                                    return;
+                                  }
+                                  await _translateSeasonOverview(
+                                    seasonKey,
+                                    season.overview!,
+                                  );
+                                },
+                                tooltip: translatedOverview != null
+                                    ? 'Show original'
+                                    : 'Translate overview',
+                              ),
+                              const Text(
+                                'Overview',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
                           Text(
-                            season.overview!,
+                            translatedOverview ?? season.overview!,
                             maxLines: 4,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(fontSize: 15),
                           ),
+                        ],
                       ],
                     ),
                   ),
@@ -1155,5 +1207,16 @@ EpisodeCardWidget(
 
       debugPrint(oveview);
     });
+  }
+
+  Future<void> _translateSeasonOverview(int seasonId, String original) async {
+    setState(() => _isTranslatingSeasonMap[seasonId] = true);
+    try {
+      final translator = MovieTvTranslator();
+      final translated = await translator.translateTextForMoviesAndTV(original);
+      setState(() => _translatedSeasonOverviews[seasonId] = translated);
+    } finally {
+      setState(() => _isTranslatingSeasonMap[seasonId] = false);
+    }
   }
 }
