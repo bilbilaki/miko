@@ -394,18 +394,61 @@ class LocalProvider extends ChangeNotifier {
   }
 
   // Add this method to your LocalProvider class
-  Future andprims() async {
-    if (Platform.isAndroid) {
+  /// Request and check Android storage permissions
+  /// Returns true if permission is granted, false otherwise
+  Future<bool> requestAndroidStoragePermission() async {
+    if (!Platform.isAndroid) return true;
+    
+    try {
       var status = await Permission.manageExternalStorage.status;
       if (!status.isGranted) {
-        // This will open the system settings page for your app.
-        // The user needs to manually grant the permission.
-        await Permission.manageExternalStorage.request();
+        // Request permission
+        final result = await Permission.manageExternalStorage.request();
+        return result.isGranted;
       }
-      // After the user returns from settings, check the status again.
-      return await Permission.manageExternalStorage.status.isGranted;
+      return status.isGranted;
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error requesting storage permission: $e");
+      }
+      return false;
     }
-    return true;
+  }
+
+  /// Legacy method name for backward compatibility
+  Future<bool> andprims() async {
+    return requestAndroidStoragePermission();
+  }
+
+  /// Get the platform-specific home directory path
+  String? getPlatformHomePath() {
+    if (Platform.isAndroid) {
+      return '/storage/emulated/0';
+    } else if (Platform.isLinux || Platform.isMacOS) {
+      return Platform.environment['HOME'];
+    } else if (Platform.isWindows) {
+      return Platform.environment['USERPROFILE'];
+    }
+    return null;
+  }
+
+  /// Get available Windows drive letters
+  Future<List<String>> getWindowsDrives() async {
+    if (!Platform.isWindows) return [];
+    
+    final List<String> drives = [];
+    for (int i = 65; i <= 90; i++) {
+      final driveLetter = String.fromCharCode(i);
+      final drivePath = '$driveLetter:\\';
+      try {
+        if (await Directory(drivePath).exists()) {
+          drives.add(drivePath);
+        }
+      } catch (e) {
+        // Drive doesn't exist or is not accessible
+      }
+    }
+    return drives;
   }
 
   /// Checks if a path is stored; if not, sets a default OS-specific home directory.
@@ -415,14 +458,34 @@ class LocalProvider extends ChangeNotifier {
       Directory? defaultDir;
       try {
         if (Platform.isAndroid) {
-          final what = await andprims();
-          if (what == true) {
-            // On Android, this is /storage/emulated/0
-            defaultDir = Directory("/storage/0/emulated/");
+          // Request permission first
+          final hasPermission = await requestAndroidStoragePermission();
+          if (hasPermission) {
+            // On Android, the correct path is /storage/emulated/0
+            defaultDir = Directory('/storage/emulated/0');
+            // Verify the directory exists
+            if (!await defaultDir.exists()) {
+              // Fallback to getExternalStorageDirectory if main path doesn't exist
+              defaultDir = await getExternalStorageDirectory();
+            }
           }
-        } else if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
-          // On Desktop, this is the user's home folder
-          defaultDir = await getExternalStorageDirectory();
+        } else if (Platform.isWindows) {
+          // On Windows, try to get the first available drive or user profile
+          final drives = await getWindowsDrives();
+          if (drives.isNotEmpty) {
+            defaultDir = Directory(drives.first);
+          } else {
+            final homePath = getPlatformHomePath();
+            if (homePath != null) {
+              defaultDir = Directory(homePath);
+            }
+          }
+        } else if (Platform.isLinux || Platform.isMacOS) {
+          // On Linux/macOS, use home directory
+          final homePath = getPlatformHomePath();
+          if (homePath != null) {
+            defaultDir = Directory(homePath);
+          }
         }
       } catch (e) {
         if (kDebugMode) {
@@ -430,7 +493,7 @@ class LocalProvider extends ChangeNotifier {
         }
       }
 
-      if (defaultDir != null) {
+      if (defaultDir != null && await defaultDir.exists()) {
         // Use your existing setPath method to initialize the app state
         await setPath(defaultDir.path);
       }

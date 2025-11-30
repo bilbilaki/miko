@@ -48,14 +48,28 @@ class LocalScreenState extends State<LocalScreen> {
   }
 
   Future<void> _initialize() async {
-    final localProvider = LocalProvider();
     final provider = Provider.of<LocalProvider>(context, listen: false);
-    await localProvider.setDefaultPathIfNoneSet();
-
-    // Determine a sensible default grid size based on platform
-    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-      _gridCrossAxisCount = 4.0;
+    
+    // On Android, request storage permission first
+    if (Platform.isAndroid) {
+      final hasPermission = await provider.requestAndroidStoragePermission();
+      if (!hasPermission) {
+        showSnackBar('Storage permission is required to browse files.');
+      }
     }
+    
+    await provider.setDefaultPathIfNoneSet();
+
+    // Determine a sensible default grid size based on platform and screen size
+    final screenWidth = MediaQuery.of(context).size.width;
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      // Desktop: more columns for larger screens
+      _gridCrossAxisCount = screenWidth > 1200 ? 5.0 : 4.0;
+    } else if (Platform.isAndroid || Platform.isIOS) {
+      // Mobile: fewer columns
+      _gridCrossAxisCount = screenWidth > 600 ? 3.0 : 2.0;
+    }
+    
     await provider.loadPath(); // Load saved path from SharedPreferences
     if (provider.externalPath == null) {
       _promptPathSelection(); // If no path saved, prompt user to select one
@@ -193,6 +207,9 @@ class LocalScreenState extends State<LocalScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth <= 600;
+    
     return Consumer<LocalProvider>(
       builder: (context, provider, _) {
         // Show an empty view if no external path is set, prompting user to choose one
@@ -206,32 +223,46 @@ class LocalScreenState extends State<LocalScreen> {
             ? p.basename(currentFolderPath!)
             : "Local Files";
 
+        // Calculate if we can go back
+        final canGoBack = currentFolderPath != null &&
+            !p.equals(currentFolderPath!, provider.externalPath!);
+        
+        // Calculate if we're at root but can navigate up (parent exists)
+        final canNavigateUpFromRoot = currentFolderPath == null &&
+            provider.externalPath != null &&
+            Directory(provider.externalPath!).parent.path != provider.externalPath!;
+
         return Scaffold(
           appBar: AppBar(
-            title: Text(currentDirName, overflow: TextOverflow.ellipsis),
-            leading:
-                (currentFolderPath != null &&
-                        !p.equals(
-                          currentFolderPath!,
-                          provider.externalPath!,
-                        )) ||
-                    (currentFolderPath == null &&
-                        provider.externalPath != null &&
-                        Directory(provider.externalPath!).parent.path !=
-                            provider.externalPath!)
+            title: Text(
+              currentDirName, 
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: isMobile ? 16 : 20,
+              ),
+            ),
+            leading: (canGoBack || canNavigateUpFromRoot)
                 ? IconButton(
                     icon: const Icon(Icons.arrow_back),
                     onPressed: _goUp,
+                    tooltip: 'Go back',
                   )
                 : null,
-            //flexibleSpace: null
-            flexibleSpace: IconButton(
-              icon: const Icon(Icons.home_sharp),
-              onPressed: () {
-                Navigator.of(
-                  context,
-                ).push(MaterialPageRoute(builder: (_) => StartPage()));
-              },
+            // Home button in app bar
+            flexibleSpace: Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: EdgeInsets.only(left: (canGoBack || canNavigateUpFromRoot) ? 56 : 16),
+                child: IconButton(
+                  icon: Icon(Icons.home_sharp, size: isMobile ? 20 : 24),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => StartPage()),
+                    );
+                  },
+                  tooltip: 'Go to home screen',
+                ),
+              ),
             ),
             actions: [
               // Image Gallery Button
@@ -330,10 +361,18 @@ class LocalScreenState extends State<LocalScreen> {
 
   // --- Grid View Builder ---
   Widget _buildGridView(List<GridItem> items) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth <= 600;
+    
+    // Responsive aspect ratio
     double aspectRatio = _gridCrossAxisCount <= 3 ? 0.8 : 1.0;
+    
+    // Responsive padding and spacing
+    final padding = isMobile ? 8.0 : 16.0;
+    final spacing = isMobile ? 8.0 : 16.0;
 
     return GridView.builder(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(padding),
       itemCount: items.length,
       // Preload items slightly outside viewport for smoother scrolling
       cacheExtent: 200,
@@ -341,8 +380,8 @@ class LocalScreenState extends State<LocalScreen> {
       addAutomaticKeepAlives: true,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: _gridCrossAxisCount.toInt(),
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
+        mainAxisSpacing: spacing,
+        crossAxisSpacing: spacing,
         childAspectRatio: aspectRatio,
       ),
       itemBuilder: (context, idx) {
@@ -482,20 +521,61 @@ class LocalScreenState extends State<LocalScreen> {
 
   /// Displays a view when no base path is selected, prompting user for selection.
   Widget _buildEmptyView() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth <= 600;
+    
     return Scaffold(
-      appBar: AppBar(title: const Text("Local Files")),
+      appBar: AppBar(
+        title: Text(
+          "Local Files",
+          style: TextStyle(fontSize: isMobile ? 16 : 20),
+        ),
+      ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text("Please select a folder to view your local files."),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.folder_open),
-              label: const Text("Choose Folder"),
-              onPressed: _promptPathSelection,
-            ),
-          ],
+        child: Padding(
+          padding: EdgeInsets.all(isMobile ? 16 : 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.folder_open,
+                size: isMobile ? 64 : 80,
+                color: Colors.grey,
+              ),
+              SizedBox(height: isMobile ? 16 : 24),
+              Text(
+                "Please select a folder to view your local files.",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: isMobile ? 14 : 16),
+              ),
+              if (Platform.isAndroid) ...[
+                SizedBox(height: isMobile ? 8 : 12),
+                Text(
+                  "Storage permission is required to browse files.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: isMobile ? 12 : 14,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+              SizedBox(height: isMobile ? 20 : 24),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.folder_open),
+                label: Text(
+                  "Choose Folder",
+                  style: TextStyle(fontSize: isMobile ? 14 : 16),
+                ),
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 20 : 24,
+                    vertical: isMobile ? 12 : 16,
+                  ),
+                ),
+                onPressed: _promptPathSelection,
+              ),
+            ],
+          ),
         ),
       ),
     );
