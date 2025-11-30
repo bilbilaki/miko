@@ -51,7 +51,6 @@ class AnimeDetailAppBar extends StatefulWidget {
 class _AnimeDetailAppBarState extends State<AnimeDetailAppBar> {
   String? _translatedTagline;
   bool _isTranslatingTagline = false;
-  final _translator = MovieTvTranslator();
 
   Future<void> _translateTagline() async {
     if (_translatedTagline != null) {
@@ -63,7 +62,7 @@ class _AnimeDetailAppBarState extends State<AnimeDetailAppBar> {
 
     setState(() => _isTranslatingTagline = true);
     try {
-      final translated = await _translator.translateTextForMoviesAndTV(widget.tvShow.tagline!);
+      final translated = await MovieTvTranslator().translateTextForMoviesAndTV(widget.tvShow.tagline!);
       setState(() => _translatedTagline = translated);
     } finally {
       setState(() => _isTranslatingTagline = false);

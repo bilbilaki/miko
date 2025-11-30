@@ -24,7 +24,6 @@ class MovieTagline extends StatefulWidget {
 class _MovieTaglineState extends State<MovieTagline> {
   String? _translatedTagline;
   bool _isTranslating = false;
-  final _translator = MovieTvTranslator();
 
   Future<void> _translateTagline() async {
     if (_translatedTagline != null) {
@@ -33,7 +32,7 @@ class _MovieTaglineState extends State<MovieTagline> {
     }
     setState(() => _isTranslating = true);
     try {
-      final translated = await _translator.translateTextForMoviesAndTV(widget.tagline);
+      final translated = await MovieTvTranslator().translateTextForMoviesAndTV(widget.tagline);
       setState(() => _translatedTagline = translated);
     } finally {
       setState(() => _isTranslating = false);

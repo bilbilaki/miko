@@ -29,10 +29,9 @@ class _EpisodeCardWidgetState extends State<EpisodeCardWidget> {
   String? _translatedOverview;
   String? _translatedTitle;
   bool _isTranslating = false;
-  final _translator = MovieTvTranslator();
 
   Future<void> _translateContent() async {
-    if (_translatedOverview != null) {
+    if (_translatedOverview != null || _translatedTitle != null) {
       setState(() {
         _translatedOverview = null;
         _translatedTitle = null;
@@ -42,18 +41,20 @@ class _EpisodeCardWidgetState extends State<EpisodeCardWidget> {
 
     setState(() => _isTranslating = true);
     try {
-      // Translate both title and overview
-      final results = await Future.wait([
-        _translator.translateTextForMoviesAndTV(widget.episode.name),
-        if (widget.episode.overview.isNotEmpty)
-          _translator.translateTextForMoviesAndTV(widget.episode.overview),
-      ]);
+      // Translate title
+      final translatedTitle = await MovieTvTranslator()
+          .translateTextForMoviesAndTV(widget.episode.name);
+      
+      // Translate overview if not empty
+      String? translatedOverview;
+      if (widget.episode.overview.isNotEmpty) {
+        translatedOverview = await MovieTvTranslator()
+            .translateTextForMoviesAndTV(widget.episode.overview);
+      }
       
       setState(() {
-        _translatedTitle = results[0];
-        if (results.length > 1) {
-          _translatedOverview = results[1];
-        }
+        _translatedTitle = translatedTitle;
+        _translatedOverview = translatedOverview;
       });
     } finally {
       setState(() => _isTranslating = false);

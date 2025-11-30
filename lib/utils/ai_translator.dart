@@ -452,8 +452,14 @@ class TranslationService {
     return List<String>.generate(texts.length, (i) => out[i] ?? texts[i]);
   }
 }
+
+/// Singleton translator for movie and TV show content
 class MovieTvTranslator {
-  MovieTvTranslator();
+  static final MovieTvTranslator _instance = MovieTvTranslator._internal();
+  
+  factory MovieTvTranslator() => _instance;
+  
+  MovieTvTranslator._internal();
 
   Future<String> translateTextForMoviesAndTV(String text) async {
     final userDataService = UserDataService();

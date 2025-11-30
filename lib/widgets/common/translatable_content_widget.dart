@@ -51,7 +51,6 @@ class TranslatableContentWidget extends StatefulWidget {
 class _TranslatableContentWidgetState extends State<TranslatableContentWidget> {
   String? _translatedText;
   bool _isTranslating = false;
-  final _translator = MovieTvTranslator();
 
   Future<void> _toggleTranslation() async {
     if (_translatedText != null) {
@@ -61,7 +60,7 @@ class _TranslatableContentWidgetState extends State<TranslatableContentWidget> {
 
     setState(() => _isTranslating = true);
     try {
-      final translated = await _translator.translateTextForMoviesAndTV(widget.text);
+      final translated = await MovieTvTranslator().translateTextForMoviesAndTV(widget.text);
       setState(() => _translatedText = translated);
       widget.onTranslated?.call(translated);
     } finally {
