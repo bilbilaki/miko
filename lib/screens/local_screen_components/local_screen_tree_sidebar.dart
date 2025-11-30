@@ -64,8 +64,8 @@ class PlatformPaths {
 
     try {
       if (Platform.isAndroid) {
-        // Android standard directories
-        const androidBase = '/storage/emulated/0';
+        // Android standard directories - use centralized path
+        final androidBase = getHomePath() ?? '/storage/emulated/0';
         final androidDirs = [
           ('DCIM', FolderType.images),
           ('Pictures', FolderType.images),

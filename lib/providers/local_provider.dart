@@ -355,9 +355,7 @@ class LocalProvider extends ChangeNotifier {
       tempThumbOutput,
     ]);
 
-    if (thumbnail.data != [] ||
-        thumbnail.data != [0] ||
-        thumbnail.data.isNotEmpty) {
+    if (thumbnail.data.isNotEmpty) {
       return Uint8List.fromList(thumbnail.data);
     } else {
       if (kDebugMode) {
