@@ -138,8 +138,14 @@ class _PathHeaderState extends State<PathHeader> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth <= 600;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 8 : 12,
+        vertical: isMobile ? 6 : 8,
+      ),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         border: Border(
@@ -155,7 +161,10 @@ class _PathHeaderState extends State<PathHeader> {
             child: GestureDetector(
               onTap: _isEditing ? null : _startEditing,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 8 : 12,
+                  vertical: isMobile ? 6 : 8,
+                ),
                 decoration: BoxDecoration(
                   color: _isEditing
                       ? Theme.of(context).colorScheme.surface
@@ -172,7 +181,7 @@ class _PathHeaderState extends State<PathHeader> {
                     ? TextField(
                         controller: _controller,
                         focusNode: _focusNode,
-                        style: const TextStyle(fontSize: 14),
+                        style: TextStyle(fontSize: isMobile ? 12 : 14),
                         decoration: const InputDecoration(
                           isDense: true,
                           border: InputBorder.none,
@@ -185,15 +194,15 @@ class _PathHeaderState extends State<PathHeader> {
                         children: [
                           Icon(
                             Icons.folder_open,
-                            size: 18,
+                            size: isMobile ? 16 : 18,
                             color: Theme.of(context).colorScheme.primary,
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: isMobile ? 4 : 8),
                           Expanded(
                             child: Text(
                               widget.currentPath,
-                              style: const TextStyle(
-                                fontSize: 14,
+                              style: TextStyle(
+                                fontSize: isMobile ? 12 : 14,
                                 fontFamily: 'monospace',
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -204,42 +213,71 @@ class _PathHeaderState extends State<PathHeader> {
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          // Action buttons
-          IconButton(
-            icon: const Icon(Icons.content_copy, size: 20),
-            tooltip: 'Copy path',
-            onPressed: _copyPath,
-            visualDensity: VisualDensity.compact,
-          ),
-          IconButton(
-            icon: const Icon(Icons.content_paste, size: 20),
-            tooltip: 'Paste path',
-            onPressed: _pastePath,
-            visualDensity: VisualDensity.compact,
-          ),
+          SizedBox(width: isMobile ? 4 : 8),
+          // Action buttons - show only essential on mobile
+          if (!isMobile || !_isEditing) ...[
+            IconButton(
+              icon: Icon(Icons.content_copy, size: isMobile ? 18 : 20),
+              tooltip: 'Copy path',
+              onPressed: _copyPath,
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.all(isMobile ? 4 : 8),
+              constraints: BoxConstraints(
+                minWidth: isMobile ? 32 : 40,
+                minHeight: isMobile ? 32 : 40,
+              ),
+            ),
+          ],
+          if (!isMobile || _isEditing) ...[
+            IconButton(
+              icon: Icon(Icons.content_paste, size: isMobile ? 18 : 20),
+              tooltip: 'Paste path',
+              onPressed: _pastePath,
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.all(isMobile ? 4 : 8),
+              constraints: BoxConstraints(
+                minWidth: isMobile ? 32 : 40,
+                minHeight: isMobile ? 32 : 40,
+              ),
+            ),
+          ],
           if (_isEditing) ...[
             IconButton(
-              icon: const Icon(Icons.close, size: 20),
+              icon: Icon(Icons.close, size: isMobile ? 18 : 20),
               tooltip: 'Cancel',
               onPressed: () {
                 _controller.text = widget.currentPath;
                 setState(() => _isEditing = false);
               },
               visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.all(isMobile ? 4 : 8),
+              constraints: BoxConstraints(
+                minWidth: isMobile ? 32 : 40,
+                minHeight: isMobile ? 32 : 40,
+              ),
             ),
             IconButton(
-              icon: const Icon(Icons.check, size: 20),
+              icon: Icon(Icons.check, size: isMobile ? 18 : 20),
               tooltip: 'Apply',
               onPressed: _submitPath,
               visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.all(isMobile ? 4 : 8),
+              constraints: BoxConstraints(
+                minWidth: isMobile ? 32 : 40,
+                minHeight: isMobile ? 32 : 40,
+              ),
             ),
           ] else
             IconButton(
-              icon: const Icon(Icons.edit, size: 20),
+              icon: Icon(Icons.edit, size: isMobile ? 18 : 20),
               tooltip: 'Edit path',
               onPressed: _startEditing,
               visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.all(isMobile ? 4 : 8),
+              constraints: BoxConstraints(
+                minWidth: isMobile ? 32 : 40,
+                minHeight: isMobile ? 32 : 40,
+              ),
             ),
         ],
       ),

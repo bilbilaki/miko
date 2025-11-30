@@ -114,7 +114,7 @@ class LocalProvider extends ChangeNotifier {
   late SharedPreferences _prefs; // Initialized in _initPrefsAndCacheDir
   Map<String, String> _persistedThumbnailPaths = {};
   String?
-  _thumbnailCacheDirPath; // Path to the app's dedicated thumbnail cache directory
+      _thumbnailCacheDirPath; // Path to the app's dedicated thumbnail cache directory
 
   bool _ffmpegChecked = false; // Flag to check ffmpeg existence only once
 
@@ -355,10 +355,8 @@ class LocalProvider extends ChangeNotifier {
       tempThumbOutput,
     ]);
 
-    if (thumbnail.data!=[]||thumbnail.data!=[0]||thumbnail.data.isNotEmpty) {
-
-        return Uint8List.fromList(thumbnail.data);
-      
+    if (thumbnail.data.isNotEmpty) {
+      return Uint8List.fromList(thumbnail.data);
     } else {
       if (kDebugMode) {
         print(
@@ -394,18 +392,68 @@ class LocalProvider extends ChangeNotifier {
   }
 
   // Add this method to your LocalProvider class
-  Future andprims() async {
-    if (Platform.isAndroid) {
+  /// Request and check Android storage permissions
+  /// Returns true if permission is granted, false otherwise
+  Future<bool> requestAndroidStoragePermission() async {
+    if (!Platform.isAndroid) return true;
+
+    try {
       var status = await Permission.manageExternalStorage.status;
       if (!status.isGranted) {
-        // This will open the system settings page for your app.
-        // The user needs to manually grant the permission.
-        await Permission.manageExternalStorage.request();
+        // Request permission
+        final result = await Permission.manageExternalStorage.request();
+        return result.isGranted;
       }
-      // After the user returns from settings, check the status again.
-      return await Permission.manageExternalStorage.status.isGranted;
+      return status.isGranted;
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error requesting storage permission: $e");
+      }
+      return false;
     }
-    return true;
+  }
+
+  /// Legacy method name for backward compatibility
+  Future<bool> andprims() async {
+    return requestAndroidStoragePermission();
+  }
+
+  /// Get the platform-specific home directory path
+  String? getPlatformHomePath() {
+    if (Platform.isAndroid) {
+      return '/storage/emulated/0';
+    } else if (Platform.isLinux || Platform.isMacOS) {
+      return Platform.environment['HOME'];
+    } else if (Platform.isWindows) {
+      return Platform.environment['USERPROFILE'];
+    }
+    return null;
+  }
+
+  /// Get available Windows drive letters
+  /// Uses parallel checks for better performance
+  Future<List<String>> getWindowsDrives() async {
+    if (!Platform.isWindows) return [];
+
+    // Create list of all possible drive paths A-Z
+    final drivePaths = List.generate(
+      26,
+      (i) => '${String.fromCharCode(65 + i)}:\\',
+    );
+
+    // Check all drives in parallel
+    final existChecks = await Future.wait(
+      drivePaths.map((path) async {
+        try {
+          return await Directory(path).exists() ? path : null;
+        } catch (e) {
+          return null;
+        }
+      }),
+    );
+
+    // Filter out non-existent drives and return
+    return existChecks.whereType<String>().toList();
   }
 
   /// Checks if a path is stored; if not, sets a default OS-specific home directory.
@@ -415,14 +463,37 @@ class LocalProvider extends ChangeNotifier {
       Directory? defaultDir;
       try {
         if (Platform.isAndroid) {
-          final what = await andprims();
-          if (what == true) {
-            // On Android, this is /storage/emulated/0
-            defaultDir = Directory("/storage/0/emulated/");
+          // Request permission first
+          final hasPermission = await requestAndroidStoragePermission();
+          if (hasPermission) {
+            // Use the platform home path method for consistency
+            final homePath = getPlatformHomePath();
+            if (homePath != null) {
+              defaultDir = Directory(homePath);
+              // Verify the directory exists
+              if (!await defaultDir.exists()) {
+                // Fallback to getExternalStorageDirectory if main path doesn't exist
+                defaultDir = await getExternalStorageDirectory();
+              }
+            }
           }
-        } else if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
-          // On Desktop, this is the user's home folder
-          defaultDir = await getExternalStorageDirectory();
+        } else if (Platform.isWindows) {
+          // On Windows, try to get the first available drive or user profile
+          final drives = await getWindowsDrives();
+          if (drives.isNotEmpty) {
+            defaultDir = Directory(drives.first);
+          } else {
+            final homePath = getPlatformHomePath();
+            if (homePath != null) {
+              defaultDir = Directory(homePath);
+            }
+          }
+        } else if (Platform.isLinux || Platform.isMacOS) {
+          // On Linux/macOS, use home directory
+          final homePath = getPlatformHomePath();
+          if (homePath != null) {
+            defaultDir = Directory(homePath);
+          }
         }
       } catch (e) {
         if (kDebugMode) {
@@ -430,7 +501,7 @@ class LocalProvider extends ChangeNotifier {
         }
       }
 
-      if (defaultDir != null) {
+      if (defaultDir != null && await defaultDir.exists()) {
         // Use your existing setPath method to initialize the app state
         await setPath(defaultDir.path);
       }
