@@ -20,6 +20,7 @@ class _SubtitlesGenSettingsState extends State<SubtitlesGenSettings> {
   final _translationBaseUrlController = TextEditingController();
   final _translationApiKeyController = TextEditingController();
   final _translationModelIdController = TextEditingController();
+  final _translationTargetLanguageController = TextEditingController();
 
   final _batchSizeController = TextEditingController();
   final _maxRetriesController = TextEditingController();
@@ -32,6 +33,27 @@ class _SubtitlesGenSettingsState extends State<SubtitlesGenSettings> {
   bool _isFetchingTranslationModels = false;
   String? _subtitleModelFetchError;
   String? _translationModelFetchError;
+
+  // Common translation target languages
+  static const List<String> _commonLanguages = [
+    'English',
+    'Farsi',
+    'Arabic',
+    'Spanish',
+    'French',
+    'German',
+    'Italian',
+    'Portuguese',
+    'Russian',
+    'Chinese',
+    'Japanese',
+    'Korean',
+    'Turkish',
+    'Hindi',
+    'Dutch',
+    'Polish',
+    'Swedish',
+  ];
 
   @override
   void initState() {
@@ -47,6 +69,7 @@ class _SubtitlesGenSettingsState extends State<SubtitlesGenSettings> {
     _translationBaseUrlController.dispose();
     _translationApiKeyController.dispose();
     _translationModelIdController.dispose();
+    _translationTargetLanguageController.dispose();
     _batchSizeController.dispose();
     _maxRetriesController.dispose();
     super.dispose();
@@ -191,6 +214,10 @@ class _SubtitlesGenSettingsState extends State<SubtitlesGenSettings> {
           userDataService.aiTranslationModelId.isEmpty
           ? settings.modelId
           : userDataService.aiTranslationModelId;
+      _translationTargetLanguageController.text =
+          userDataService.translationTargetLanguage.isEmpty
+          ? 'Farsi'
+          : userDataService.translationTargetLanguage;
 
       _batchSizeController.text = settings.batchSize.toString();
       _maxRetriesController.text = settings.maxRetries.toString();
@@ -226,6 +253,9 @@ class _SubtitlesGenSettingsState extends State<SubtitlesGenSettings> {
     );
     await userDataService.setAiTranslationModelId(
       _translationModelIdController.text.trim(),
+    );
+    await userDataService.setTranslationTargetLanguage(
+      _translationTargetLanguageController.text.trim(),
     );
 
     // Save other settings to AppSettings
@@ -721,6 +751,86 @@ class _SubtitlesGenSettingsState extends State<SubtitlesGenSettings> {
                     ),
                   ),
               ],
+            ),
+            const SizedBox(height: 16),
+            // Target Language Selection with Autocomplete
+            Row(
+              children: [
+                Expanded(
+                  child: Autocomplete<String>(
+                    initialValue: TextEditingValue(
+                      text: _translationTargetLanguageController.text,
+                    ),
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      if (textEditingValue.text.isEmpty) {
+                        return _commonLanguages;
+                      }
+                      return _commonLanguages.where((String option) {
+                        return option.toLowerCase().contains(
+                          textEditingValue.text.toLowerCase(),
+                        );
+                      });
+                    },
+                    onSelected: (String selection) {
+                      _translationTargetLanguageController.text = selection;
+                    },
+                    fieldViewBuilder: (
+                      BuildContext context,
+                      TextEditingController fieldController,
+                      FocusNode focusNode,
+                      VoidCallback onFieldSubmitted,
+                    ) {
+                      // Sync the field controller with our controller
+                      if (fieldController.text.isEmpty && 
+                          _translationTargetLanguageController.text.isNotEmpty) {
+                        fieldController.text = _translationTargetLanguageController.text;
+                      }
+                      fieldController.addListener(() {
+                        _translationTargetLanguageController.text = fieldController.text;
+                      });
+                      return TextFormField(
+                        controller: fieldController,
+                        focusNode: focusNode,
+                        decoration: InputDecoration(
+                          labelText: 'Translation Target Language',
+                          hintText: 'Select or type language (e.g., Farsi, English)',
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.translate),
+                          suffixIcon: PopupMenuButton<String>(
+                            icon: const Icon(Icons.arrow_drop_down),
+                            onSelected: (String value) {
+                              fieldController.text = value;
+                              _translationTargetLanguageController.text = value;
+                            },
+                            itemBuilder: (BuildContext context) {
+                              return _commonLanguages.map((String language) {
+                                return PopupMenuItem<String>(
+                                  value: language,
+                                  child: Text(language),
+                                );
+                              }).toList();
+                            },
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Target language is required';
+                          }
+                          return null;
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'The language that movie/TV show titles, overviews, and other content will be translated into.',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
             ),
             const SizedBox(height: 16),
             TextFormField(

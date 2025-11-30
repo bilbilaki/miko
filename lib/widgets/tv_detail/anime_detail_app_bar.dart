@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:miko/showcases/model.dart';
+import 'package:miko/utils/ai_translator.dart';
 import 'package:miko/utils/colors.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
@@ -28,8 +29,8 @@ class ShareItem {
   });
 }
 
-/// Builds the app bar for anime/TV show detail page
-class AnimeDetailAppBar extends StatelessWidget {
+/// Builds the app bar for anime/TV show detail page with translation support
+class AnimeDetailAppBar extends StatefulWidget {
   final TvShow tvShow;
   final String? translatedTitle;
   final VoidCallback onTranslateTitle;
@@ -44,11 +45,36 @@ class AnimeDetailAppBar extends StatelessWidget {
   });
 
   @override
+  State<AnimeDetailAppBar> createState() => _AnimeDetailAppBarState();
+}
+
+class _AnimeDetailAppBarState extends State<AnimeDetailAppBar> {
+  String? _translatedTagline;
+  bool _isTranslatingTagline = false;
+
+  Future<void> _translateTagline() async {
+    if (_translatedTagline != null) {
+      setState(() => _translatedTagline = null);
+      return;
+    }
+
+    if (widget.tvShow.tagline == null || widget.tvShow.tagline!.isEmpty) return;
+
+    setState(() => _isTranslatingTagline = true);
+    try {
+      final translated = await MovieTvTranslator().translateTextForMoviesAndTV(widget.tvShow.tagline!);
+      setState(() => _translatedTagline = translated);
+    } finally {
+      setState(() => _isTranslatingTagline = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    int tvSeriesId = tvShow.id;
+    int tvSeriesId = widget.tvShow.id;
     var userDataService = Provider.of<UserDataService>(context);
-    String backdropUrl = tvShow.fullBackdropPath;
-    String posterUrl = tvShow.fullPosterPath;
+    String backdropUrl = widget.tvShow.fullBackdropPath;
+    String posterUrl = widget.tvShow.fullPosterPath;
     bool isFavorite = userDataService.isFavoriteAnime(tvSeriesId);
     bool isInWatchlist = userDataService.isOnWatchlistAnime(tvSeriesId);
 
@@ -57,7 +83,7 @@ class AnimeDetailAppBar extends StatelessWidget {
       pinned: true,
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
-          translatedTitle ?? tvShow.name,
+          widget.translatedTitle ?? widget.tvShow.name,
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w900,
@@ -67,17 +93,17 @@ class AnimeDetailAppBar extends StatelessWidget {
               Shadow(
                 offset: const Offset(2, 2),
                 blurRadius: 8,
-                color: Colors.black.withValues(alpha:0.8),
+                color: Colors.black.withValues(alpha: 0.8),
               ),
               Shadow(
                 offset: const Offset(-1, -1),
                 blurRadius: 4,
-                color: Colors.purple.withValues(alpha:0.3),
+                color: Colors.purple.withValues(alpha: 0.3),
               ),
               Shadow(
                 offset: const Offset(0, 0),
                 blurRadius: 20,
-                color: Colors.cyan.withValues(alpha:0.4),
+                color: Colors.cyan.withValues(alpha: 0.4),
               ),
             ],
             foreground: Paint()
@@ -148,33 +174,61 @@ class AnimeDetailAppBar extends StatelessWidget {
                   children: [
                     _buildFavoriteButton(context, userDataService, isFavorite, tvSeriesId),
                     const SizedBox(width: 4),
-                    _buildRatingBubble(tvShow),
+                    _buildRatingBubble(widget.tvShow),
                     const SizedBox(width: 4),
                     _buildWatchlistButton(context, userDataService, isInWatchlist, tvSeriesId),
                     const SizedBox(width: 4),
-                    _buildShareButton(context, tvShow, overview),
+                    _buildShareButton(context, widget.tvShow, widget.overview),
                   ],
                 ),
               ),
-              // Tagline
-              if (tvShow.tagline != null && tvShow.tagline!.isNotEmpty)
+              // Tagline with translation support
+              if (widget.tvShow.tagline != null && widget.tvShow.tagline!.isNotEmpty)
                 Positioned(
                   bottom: 60,
                   left: 16,
                   right: 16,
-                  child: Text(
-                    '"${tvShow.tagline!}"',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontStyle: FontStyle.italic,
-                      fontSize: 14,
-                      shadows: [
-                        Shadow(
-                          blurRadius: 5.0,
-                          color: Colors.black,
-                          offset: Offset(1.0, 1.0),
+                  child: GestureDetector(
+                    onTap: _translateTagline,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            '"${_translatedTagline ?? widget.tvShow.tagline!}"',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontStyle: FontStyle.italic,
+                              fontSize: 14,
+                              shadows: [
+                                Shadow(
+                                  blurRadius: 5.0,
+                                  color: Colors.black,
+                                  offset: Offset(1.0, 1.0),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
+                        const SizedBox(width: 4),
+                        if (_isTranslatingTagline)
+                          SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        else
+                          Icon(
+                            Icons.auto_awesome,
+                            size: 14,
+                            color: _translatedTagline != null 
+                                ? Colors.cyan 
+                                : Colors.white54,
+                          ),
                       ],
                     ),
                   ),
@@ -199,7 +253,7 @@ class AnimeDetailAppBar extends StatelessWidget {
         await userDataService.toggleFavoriteAnime(tvSeriesId);
       },
       style: IconButton.styleFrom(
-        backgroundColor: Colors.black.withValues(alpha:0.5),
+        backgroundColor: Colors.black.withValues(alpha: 0.5),
         padding: const EdgeInsets.all(4.0),
       ),
     );
@@ -209,7 +263,7 @@ class AnimeDetailAppBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha:0.5),
+        color: Colors.black.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(4.0),
       ),
       child: Text(
@@ -235,7 +289,7 @@ class AnimeDetailAppBar extends StatelessWidget {
         await userDataService.toggleWatchlistAnime(tvSeriesId);
       },
       style: IconButton.styleFrom(
-        backgroundColor: Colors.black.withValues(alpha:0.5),
+        backgroundColor: Colors.black.withValues(alpha: 0.5),
         padding: const EdgeInsets.all(4.0),
       ),
     );
@@ -278,12 +332,13 @@ Open in miko by click on ${myItem.internalUrl}
         }
       },
       style: IconButton.styleFrom(
-        backgroundColor: Colors.black.withValues(alpha:0.5),
+        backgroundColor: Colors.black.withValues(alpha: 0.5),
         padding: const EdgeInsets.all(4.0),
       ),
     );
   }
 }
+
 class SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
    final TabBar _tabBar;
   SliverAppBarDelegate(this._tabBar);
