@@ -540,7 +540,10 @@ class LocalScreenState extends State<LocalScreen> {
               Icon(
                 Icons.folder_open,
                 size: isMobile ? 64 : 80,
-                color: Colors.grey,
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.5),
               ),
               SizedBox(height: isMobile ? 16 : 24),
               Text(
@@ -555,7 +558,10 @@ class LocalScreenState extends State<LocalScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: isMobile ? 12 : 14,
-                    color: Colors.grey,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.6),
                   ),
                 ),
               ],

@@ -699,7 +699,10 @@ class _CollapsibleTreeSidebarState extends State<CollapsibleTreeSidebar> {
                     child: GestureDetector(
                       onTap: _closeSidebar,
                       child: Container(
-                        color: Colors.black38,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .scrim
+                            .withValues(alpha: 0.5),
                       ),
                     ),
                   ),
