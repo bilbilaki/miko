@@ -9,7 +9,7 @@ class LocalScanIndexEntry {
   final String contentType; // directory_entry.ContentType name
   final int sizeBytes;
   final DateTime modified;
-  
+
   // TMDB metadata (optional, fetched on demand)
   final int? tmdbId;
   final String? tmdbTitle;
@@ -18,6 +18,11 @@ class LocalScanIndexEntry {
   final String? tmdbBackdropPath;
   final String? tmdbOverview;
   final String? tmdbYear;
+  final String? tmdbMediaType; // 'movie' or 'tv'
+
+  // Local offline assets
+  final String? localPosterPath;
+  final String? localBackdropPath;
 
   const LocalScanIndexEntry({
     required this.path,
@@ -32,6 +37,9 @@ class LocalScanIndexEntry {
     this.tmdbBackdropPath,
     this.tmdbOverview,
     this.tmdbYear,
+    this.tmdbMediaType,
+    this.localPosterPath,
+    this.localBackdropPath,
   });
 
   LocalScanIndexEntry copyWith({
@@ -47,6 +55,9 @@ class LocalScanIndexEntry {
     String? tmdbBackdropPath,
     String? tmdbOverview,
     String? tmdbYear,
+    String? tmdbMediaType,
+    String? localPosterPath,
+    String? localBackdropPath,
   }) {
     return LocalScanIndexEntry(
       path: path ?? this.path,
@@ -61,23 +72,29 @@ class LocalScanIndexEntry {
       tmdbBackdropPath: tmdbBackdropPath ?? this.tmdbBackdropPath,
       tmdbOverview: tmdbOverview ?? this.tmdbOverview,
       tmdbYear: tmdbYear ?? this.tmdbYear,
+      tmdbMediaType: tmdbMediaType ?? this.tmdbMediaType,
+      localPosterPath: localPosterPath ?? this.localPosterPath,
+      localBackdropPath: localBackdropPath ?? this.localBackdropPath,
     );
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'path': path,
-        'rootDir': rootDir,
-        'contentType': contentType,
-        'sizeBytes': sizeBytes,
-        'modified': modified.toIso8601String(),
-        if (tmdbId != null) 'tmdbId': tmdbId,
-        if (tmdbTitle != null) 'tmdbTitle': tmdbTitle,
-        if (tmdbOriginalTitle != null) 'tmdbOriginalTitle': tmdbOriginalTitle,
-        if (tmdbPosterPath != null) 'tmdbPosterPath': tmdbPosterPath,
-        if (tmdbBackdropPath != null) 'tmdbBackdropPath': tmdbBackdropPath,
-        if (tmdbOverview != null) 'tmdbOverview': tmdbOverview,
-        if (tmdbYear != null) 'tmdbYear': tmdbYear,
-      };
+    'path': path,
+    'rootDir': rootDir,
+    'contentType': contentType,
+    'sizeBytes': sizeBytes,
+    'modified': modified.toIso8601String(),
+    if (tmdbId != null) 'tmdbId': tmdbId,
+    if (tmdbTitle != null) 'tmdbTitle': tmdbTitle,
+    if (tmdbOriginalTitle != null) 'tmdbOriginalTitle': tmdbOriginalTitle,
+    if (tmdbPosterPath != null) 'tmdbPosterPath': tmdbPosterPath,
+    if (tmdbBackdropPath != null) 'tmdbBackdropPath': tmdbBackdropPath,
+    if (tmdbOverview != null) 'tmdbOverview': tmdbOverview,
+    if (tmdbYear != null) 'tmdbYear': tmdbYear,
+    if (tmdbMediaType != null) 'tmdbMediaType': tmdbMediaType,
+    if (localPosterPath != null) 'localPosterPath': localPosterPath,
+    if (localBackdropPath != null) 'localBackdropPath': localBackdropPath,
+  };
 
   factory LocalScanIndexEntry.fromJson(Map<String, dynamic> json) {
     return LocalScanIndexEntry(
@@ -93,6 +110,9 @@ class LocalScanIndexEntry {
       tmdbBackdropPath: json['tmdbBackdropPath'] as String?,
       tmdbOverview: json['tmdbOverview'] as String?,
       tmdbYear: json['tmdbYear'] as String?,
+      tmdbMediaType: json['tmdbMediaType'] as String?,
+      localPosterPath: json['localPosterPath'] as String?,
+      localBackdropPath: json['localBackdropPath'] as String?,
     );
   }
 }
@@ -103,7 +123,7 @@ class LocalScanIndex {
   final Map<String, LocalScanIndexEntry> entries;
 
   LocalScanIndex({Map<String, LocalScanIndexEntry>? entries})
-      : entries = entries ?? <String, LocalScanIndexEntry>{};
+    : entries = entries ?? <String, LocalScanIndexEntry>{};
 
   /// Serialize to JSON map suitable for jsonEncode.
   Map<String, dynamic> toJson() {
@@ -130,20 +150,17 @@ class LocalScanIndex {
     return LocalScanIndex(entries: map);
   }
 
-    /// Utility to build the composite key consistently. Public so that
-    /// services can generate keys in the same way this model does.
-    static String makeKey(String rootDir, String contentType, String path) =>
+  /// Utility to build the composite key consistently. Public so that
+  /// services can generate keys in the same way this model does.
+  static String makeKey(String rootDir, String contentType, String path) =>
       '$rootDir|$contentType|$path';
 
   /// Get a stable key for a given entry.
-    String keyFor(LocalScanIndexEntry entry) =>
+  String keyFor(LocalScanIndexEntry entry) =>
       makeKey(entry.rootDir, entry.contentType, entry.path);
 
   /// Helper to access entries for a specific root + content type pair.
-  Iterable<LocalScanIndexEntry> entriesFor(
-    String rootDir,
-    String contentType,
-  ) {
+  Iterable<LocalScanIndexEntry> entriesFor(String rootDir, String contentType) {
     return entries.values.where(
       (e) => e.rootDir == rootDir && e.contentType == contentType,
     );

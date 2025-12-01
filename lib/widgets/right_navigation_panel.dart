@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/screens/dl.dart';
-import 'package:miko/screens/httpcopy.dart';
+import 'package:miko/screens/update_bia2anime_resources.dart';
 import 'package:miko/screens/local_library_grid_screen.dart';
 import 'package:miko/screens/local_screen.dart';
 import 'package:miko/screens/scrap_page.dart';
@@ -163,30 +163,25 @@ class RightNavigationPanel extends ConsumerWidget {
                   isMobileLayout,
                 ),
               ),
-                _buildRightNavigationItem(
+              _buildRightNavigationItem(
                 context,
                 ref,
                 icon: Icons.library_add_check,
                 title: 'Local Files',
                 showText: showText,
-                onTap: () => _navigateTo(
-                  context,
-                  LocalScreen(),
-                  isMobileLayout,
-                ),
-              ),  _buildRightNavigationItem(
+                onTap: () =>
+                    _navigateTo(context, LocalScreen(), isMobileLayout),
+              ),
+              _buildRightNavigationItem(
                 context,
                 ref,
                 icon: Icons.network_wifi_sharp,
                 title: 'Scrap Page',
                 showText: showText,
-                onTap: () => _navigateTo(
-                  context,
-                  DataExplorerScreen(),
-                  isMobileLayout,
-                ),
+                onTap: () =>
+                    _navigateTo(context, DataExplorerScreen(), isMobileLayout),
               ),
-               _buildRightNavigationItem(
+              _buildRightNavigationItem(
                 context,
                 ref,
                 icon: Icons.music_video,
@@ -194,11 +189,11 @@ class RightNavigationPanel extends ConsumerWidget {
                 showText: showText,
                 onTap: () => _navigateTo(
                   context,
-                  DownloadScreen(downloadManager: DownloadListManager(),),
+                  DownloadScreen(downloadManager: DownloadListManager()),
                   isMobileLayout,
                 ),
               ),
-                      _buildRightNavigationItem(
+              _buildRightNavigationItem(
                 context,
                 ref,
                 icon: Icons.music_video,
@@ -206,34 +201,29 @@ class RightNavigationPanel extends ConsumerWidget {
                 showText: showText,
                 onTap: () => _navigateTo(
                   context,
-                  CrawlerHomePage5(),
+                  UpdateBia2AnimeResources(),
                   isMobileLayout,
                 ),
               ),
-                       _buildRightNavigationItem(
+              _buildRightNavigationItem(
                 context,
                 ref,
                 icon: Icons.music_video,
                 title: 'Url',
                 showText: showText,
-                onTap: () => _navigateTo(
-                  context,
-                  StreamPlayerPage(),
-                  isMobileLayout,
-                ),
+                onTap: () =>
+                    _navigateTo(context, StreamPlayerPage(), isMobileLayout),
               ),
-                            _buildRightNavigationItem(
+              _buildRightNavigationItem(
                 context,
                 ref,
                 icon: Icons.settings,
                 title: 'Settings',
                 showText: showText,
-                onTap: () => _navigateTo(
-                  context,
-                  SettingsPage(),
-                  isMobileLayout,
-                ),
-              ),          _buildRightNavigationItem(
+                onTap: () =>
+                    _navigateTo(context, SettingsPage(), isMobileLayout),
+              ),
+              _buildRightNavigationItem(
                 context,
                 ref,
                 icon: Icons.local_florist,
@@ -245,19 +235,15 @@ class RightNavigationPanel extends ConsumerWidget {
                   isMobileLayout,
                 ),
               ),
-                     _buildRightNavigationItem(
+              _buildRightNavigationItem(
                 context,
                 ref,
                 icon: Icons.subtitles,
                 title: 'Subtitle Generator',
                 showText: showText,
-                onTap: () => _navigateTo(
-                  context,
-                  SubtitleGeneration(),
-                  isMobileLayout,
-                ),
+                onTap: () =>
+                    _navigateTo(context, SubtitleGeneration(), isMobileLayout),
               ),
-      
 
               const Divider(color: AppColors.dividerColor, height: 1),
 

@@ -5,18 +5,16 @@ import 'package:miko/configs/consts2.dart';
 import 'model.dart';
 
 class MovieService {
-  static const String _baseUrl =
-      'https://linod.worker-inosuke.workers.dev/3';
-  static const String _apiKey =
-      tmdbapitokensc;
+  static const String _baseUrl = 'https://linod.worker-inosuke.workers.dev/3';
+  static const String _apiKey = tmdbapitokensc;
 
   final http.Client _client;
   MovieService({http.Client? client}) : _client = client ?? http.Client();
 
   Map<String, String> get _headers => {
-        'Authorization': 'Bearer $_apiKey',
-        'Accept': 'application/json',
-      };
+    'Authorization': 'Bearer $_apiKey',
+    'Accept': 'application/json',
+  };
 
   Future<Map<String, Object>> mtom(id) async {
     final results = await getMovieDetailsWithCredits(movieId: id);
@@ -53,11 +51,14 @@ class MovieService {
     // return nm;
   }
 
-  Future<MovieResponse> getPopularMovies(
-      {int page = 1, String language = 'en-US'}) async {
+  Future<MovieResponse> getPopularMovies({
+    int page = 1,
+    String language = 'en-US',
+  }) async {
     try {
-      final url =
-          Uri.parse('$_baseUrl/movie/popular?language=$language&page=$page&include_adult=true');
+      final url = Uri.parse(
+        '$_baseUrl/movie/popular?language=$language&page=$page&include_adult=true',
+      );
 
       final response = await _client.get(url, headers: _headers);
 
@@ -72,22 +73,40 @@ class MovieService {
     }
   }
 
-  Future<Movie> getMovieDetails(
-      {required int movieId, String language = 'en-US'}) async {
-      final url = Uri.parse('$_baseUrl/movie/$movieId?language=$language&include_adult=true');
+  Future<Movie> getMovieDetails({
+    required int movieId,
+    String language = 'en-US',
+  }) async {
+    final url = Uri.parse(
+      '$_baseUrl/movie/$movieId?language=$language&include_adult=true',
+    );
 
-      final response = await _client.get(url, headers: _headers);
-     // if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        return Movie.fromJson(data);
-      
+    final response = await _client.get(url, headers: _headers);
+    // if (response.statusCode == 200) {
+    final Map<String, dynamic> data = json.decode(response.body);
+    return Movie.fromJson(data);
   }
 
-  Future<MovieCredits> getMovieCredits(
-      {required int movieId, String language = 'en-US'}) async {
+  Future<Map<String, dynamic>> getRawMovieDetails({
+    required int movieId,
+    String language = 'en-US',
+  }) async {
+    final url = Uri.parse(
+      '$_baseUrl/movie/$movieId?language=$language&include_adult=true',
+    );
+
+    final response = await _client.get(url, headers: _headers);
+    return json.decode(response.body);
+  }
+
+  Future<MovieCredits> getMovieCredits({
+    required int movieId,
+    String language = 'en-US',
+  }) async {
     try {
-      final url =
-          Uri.parse('$_baseUrl/movie/$movieId/credits?language=$language&include_adult=true');
+      final url = Uri.parse(
+        '$_baseUrl/movie/$movieId/credits?language=$language&include_adult=true',
+      );
 
       final response = await _client.get(url, headers: _headers);
 
@@ -102,10 +121,14 @@ class MovieService {
     }
   }
 
-  Future<Person> getPersonDetails(
-      {required int personId, String language = 'en-US'}) async {
+  Future<Person> getPersonDetails({
+    required int personId,
+    String language = 'en-US',
+  }) async {
     try {
-      final url = Uri.parse('$_baseUrl/person/$personId?language=$language&include_adult=true');
+      final url = Uri.parse(
+        '$_baseUrl/person/$personId?language=$language&include_adult=true',
+      );
 
       final response = await _client.get(url, headers: _headers);
 
@@ -114,7 +137,8 @@ class MovieService {
         return Person.fromJson(data);
       } else {
         throw Exception(
-            'Failed to load person details: ${response.statusCode}');
+          'Failed to load person details: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Error fetching person details: $e');
@@ -122,11 +146,15 @@ class MovieService {
   }
 
   // Helper method to get both movie details and credits in parallel
-  Future<MovieResponse> getMovieRecommendations(
-      {required int movieId, int page = 1, String language = 'en-US'}) async {
+  Future<MovieResponse> getMovieRecommendations({
+    required int movieId,
+    int page = 1,
+    String language = 'en-US',
+  }) async {
     try {
       final url = Uri.parse(
-          '$_baseUrl/movie/$movieId/recommendations?language=$language&page=$page&include_adult=true');
+        '$_baseUrl/movie/$movieId/recommendations?language=$language&page=$page&include_adult=true',
+      );
 
       final response = await _client.get(url, headers: _headers);
 
@@ -135,25 +163,37 @@ class MovieService {
         return MovieResponse.fromJson(data);
       } else {
         throw Exception(
-            'Failed to load movie recommendations: ${response.statusCode}');
+          'Failed to load movie recommendations: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Error fetching movie recommendations: $e');
     }
   }
 
-  Future<Map<String, dynamic>> getMovieDetailsWithCredits(
-      {required int movieId, String language = 'en-US'}) async {
+  Future<Map<String, dynamic>> getMovieDetailsWithCredits({
+    required int movieId,
+    String language = 'en-US',
+  }) async {
     try {
-      final detailsFuture =
-          getMovieDetails(movieId: movieId, language: language);
-      final creditsFuture =
-          getMovieCredits(movieId: movieId, language: language);
-      final recommendationsFuture =
-          getMovieRecommendations(movieId: movieId, language: language);
+      final detailsFuture = getMovieDetails(
+        movieId: movieId,
+        language: language,
+      );
+      final creditsFuture = getMovieCredits(
+        movieId: movieId,
+        language: language,
+      );
+      final recommendationsFuture = getMovieRecommendations(
+        movieId: movieId,
+        language: language,
+      );
 
-      final results = await Future.wait(
-          [detailsFuture, creditsFuture, recommendationsFuture]);
+      final results = await Future.wait([
+        detailsFuture,
+        creditsFuture,
+        recommendationsFuture,
+      ]);
 
       return {
         'details': results[0] as Movie,
@@ -165,11 +205,14 @@ class MovieService {
     }
   }
 
-  Future<TvShowResponse> getPopularTvShows(
-      {int page = 1, String language = 'en-US'}) async {
+  Future<TvShowResponse> getPopularTvShows({
+    int page = 1,
+    String language = 'en-US',
+  }) async {
     try {
-      final url =
-          Uri.parse('$_baseUrl/tv/popular?language=$language&page=$page&include_adult=true');
+      final url = Uri.parse(
+        '$_baseUrl/tv/popular?language=$language&page=$page&include_adult=true',
+      );
 
       final response = await _client.get(url, headers: _headers);
 
@@ -184,11 +227,15 @@ class MovieService {
     }
   }
 
-  Future<TvShowResponse> getTvShowRecommendations(
-      {required int tvShowId, int page = 1, String language = 'en-US'}) async {
+  Future<TvShowResponse> getTvShowRecommendations({
+    required int tvShowId,
+    int page = 1,
+    String language = 'en-US',
+  }) async {
     try {
       final url = Uri.parse(
-          '$_baseUrl/tv/$tvShowId/recommendations?language=$language&page=$page&include_adult=true');
+        '$_baseUrl/tv/$tvShowId/recommendations?language=$language&page=$page&include_adult=true',
+      );
 
       final response = await _client.get(url, headers: _headers);
 
@@ -197,20 +244,27 @@ class MovieService {
         return TvShowResponse.fromJson(data);
       } else {
         throw Exception(
-            'Failed to load TV show recommendations: ${response.statusCode}');
+          'Failed to load TV show recommendations: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Error fetching TV show recommendations: $e');
     }
   }
 
-  Future<Map<String, dynamic>> getTvShowDetailsWithRecommendations(
-      {required int tvShowId, String language = 'en-US'}) async {
+  Future<Map<String, dynamic>> getTvShowDetailsWithRecommendations({
+    required int tvShowId,
+    String language = 'en-US',
+  }) async {
     try {
-      final detailsFuture =
-          getTvShowDetails(tvShowId: tvShowId, language: language);
-      final recommendationsFuture =
-          getTvShowRecommendations(tvShowId: tvShowId, language: language);
+      final detailsFuture = getTvShowDetails(
+        tvShowId: tvShowId,
+        language: language,
+      );
+      final recommendationsFuture = getTvShowRecommendations(
+        tvShowId: tvShowId,
+        language: language,
+      );
 
       final results = await Future.wait([detailsFuture, recommendationsFuture]);
 
@@ -223,10 +277,14 @@ class MovieService {
     }
   }
 
-  Future<TvShow> getTvShowDetails(
-      {required int tvShowId, String language = 'en-US'}) async {
+  Future<TvShow> getTvShowDetails({
+    required int tvShowId,
+    String language = 'en-US',
+  }) async {
     try {
-      final url = Uri.parse('$_baseUrl/tv/$tvShowId?language=$language&include_adult=true');
+      final url = Uri.parse(
+        '$_baseUrl/tv/$tvShowId?language=$language&include_adult=true',
+      );
 
       final response = await _client.get(url, headers: _headers);
 
@@ -235,7 +293,31 @@ class MovieService {
         return TvShow.fromJson(data);
       } else {
         throw Exception(
-            'Failed to load TV show details: ${response.statusCode}');
+          'Failed to load TV show details: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Error fetching TV show details: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> getRawTvShowDetails({
+    required int tvShowId,
+    String language = 'en-US',
+  }) async {
+    try {
+      final url = Uri.parse(
+        '$_baseUrl/tv/$tvShowId?language=$language&include_adult=true',
+      );
+
+      final response = await _client.get(url, headers: _headers);
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception(
+          'Failed to load TV show details: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Error fetching TV show details: $e');
@@ -249,7 +331,8 @@ class MovieService {
   }) async {
     try {
       final url = Uri.parse(
-          '$_baseUrl/tv/$tvShowId/season/$seasonNumber?language=$language&include_adult=true');
+        '$_baseUrl/tv/$tvShowId/season/$seasonNumber?language=$language&include_adult=true',
+      );
 
       final response = await _client.get(url, headers: _headers);
 
@@ -258,7 +341,8 @@ class MovieService {
         return SeasonDetails.fromJson(data);
       } else {
         throw Exception(
-            'Failed to load TV show season details: ${response.statusCode}');
+          'Failed to load TV show season details: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Error fetching TV show season details: $e');
@@ -270,7 +354,9 @@ class MovieService {
     String language = 'en-US',
   }) async {
     try {
-      final url = Uri.parse('$_baseUrl/tv/$tvShowId/videos?language=$language&include_adult=true');
+      final url = Uri.parse(
+        '$_baseUrl/tv/$tvShowId/videos?language=$language&include_adult=true',
+      );
 
       final response = await _client.get(url, headers: _headers);
 
@@ -279,7 +365,8 @@ class MovieService {
         return YoutubeVideoForSeries.fromJson(data);
       } else {
         throw Exception(
-            'Failed to load TV show videos: ${response.statusCode}');
+          'Failed to load TV show videos: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Error fetching TV show videos: $e');
@@ -294,7 +381,8 @@ class MovieService {
   }) async {
     try {
       final url = Uri.parse(
-          '$_baseUrl/tv/$tvShowId/season/$seasonNumber/episode/$episodeNumber?language=$language&include_adult=true');
+        '$_baseUrl/tv/$tvShowId/season/$seasonNumber/episode/$episodeNumber?language=$language&include_adult=true',
+      );
 
       final response = await _client.get(url, headers: _headers);
 
@@ -303,7 +391,8 @@ class MovieService {
         return EpisodeDetails.fromJson(data);
       } else {
         throw Exception(
-            'Failed to load TV show episode details: ${response.statusCode}');
+          'Failed to load TV show episode details: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Error fetching TV show episode details: $e');
@@ -333,8 +422,9 @@ class MovieService {
 
       // Construct the URL
       final url = Uri.parse('$_baseUrl/search/movie').replace(
-        queryParameters:
-            queryParams.map((key, value) => MapEntry(key, value.toString())),
+        queryParameters: queryParams.map(
+          (key, value) => MapEntry(key, value.toString()),
+        ),
       );
 
       // Make the API call
@@ -365,9 +455,9 @@ class MovieService {
         'page': page.toString(),
       };
 
-      final url = Uri.parse('$_baseUrl/search/multi').replace(
-        queryParameters: queryParams,
-      );
+      final url = Uri.parse(
+        '$_baseUrl/search/multi',
+      ).replace(queryParameters: queryParams);
 
       final response = await _client.get(url, headers: _headers);
 
@@ -376,7 +466,8 @@ class MovieService {
         return MultiSearchResponse.fromJson(data);
       } else {
         throw Exception(
-            'Failed to perform multi-search: ${response.statusCode}');
+          'Failed to perform multi-search: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Error performing multi-search: $e');
@@ -389,14 +480,11 @@ class MovieService {
     int page = 1,
   }) async {
     try {
-      final queryParams = {
-        'query': query,
-        'page': page.toString(),
-      };
+      final queryParams = {'query': query, 'page': page.toString()};
 
-      final url = Uri.parse('$_baseUrl/search/keyword').replace(
-        queryParameters: queryParams,
-      );
+      final url = Uri.parse(
+        '$_baseUrl/search/keyword',
+      ).replace(queryParameters: queryParams);
 
       final response = await _client.get(url, headers: _headers);
 
@@ -425,9 +513,9 @@ class MovieService {
         'page': page.toString(),
       };
 
-      final url = Uri.parse('$_baseUrl/keyword/$keywordId/movies').replace(
-        queryParameters: queryParams,
-      );
+      final url = Uri.parse(
+        '$_baseUrl/keyword/$keywordId/movies',
+      ).replace(queryParameters: queryParams);
 
       final response = await _client.get(url, headers: _headers);
 
@@ -436,7 +524,8 @@ class MovieService {
         return KeywordMoviesResponse.fromJson(data);
       } else {
         throw Exception(
-            'Failed to get movies by keyword: ${response.statusCode}');
+          'Failed to get movies by keyword: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Error getting movies by keyword: $e');
@@ -458,9 +547,9 @@ class MovieService {
         'page': page.toString(),
       };
 
-      final url = Uri.parse('$_baseUrl/search/tv').replace(
-        queryParameters: queryParams,
-      );
+      final url = Uri.parse(
+        '$_baseUrl/search/tv',
+      ).replace(queryParameters: queryParams);
 
       final response = await _client.get(url, headers: _headers);
 
@@ -481,14 +570,11 @@ class MovieService {
     String language = 'en-US',
   }) async {
     try {
-      final queryParams = {
-        'language': language,
-                'include_adult': 'true',
-      };
+      final queryParams = {'language': language, 'include_adult': 'true'};
 
-      final url = Uri.parse('$_baseUrl/tv/$tvId/credits').replace(
-        queryParameters: queryParams,
-      );
+      final url = Uri.parse(
+        '$_baseUrl/tv/$tvId/credits',
+      ).replace(queryParameters: queryParams);
 
       final response = await _client.get(url, headers: _headers);
 
@@ -496,18 +582,16 @@ class MovieService {
         final Map<String, dynamic> data = json.decode(response.body);
         return TVCredits.fromJson(data);
       } else {
-//         final response = await getMovieCredits(movieId: tvId, language: language);
-// return TVCredits(
-//           cast: response.cast,
-//           crew: response.crew,
-//         );
-throw Exception('Error fetching TV credits: ');
-
+        //         final response = await getMovieCredits(movieId: tvId, language: language);
+        // return TVCredits(
+        //           cast: response.cast,
+        //           crew: response.crew,
+        //         );
+        throw Exception('Error fetching TV credits: ');
       }
     } catch (e) {
-throw Exception('Error fetching TV credits: $e');
+      throw Exception('Error fetching TV credits: $e');
     }
-
   }
 
   void dispose() {

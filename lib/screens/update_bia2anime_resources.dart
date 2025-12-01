@@ -14,15 +14,17 @@ import 'package:path/path.dart' as p;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:miko/providers/csv_detail_process_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:path_provider/path_provider.dart'; // Added import
 
-class CrawlerHomePage5 extends StatefulWidget {
-  const CrawlerHomePage5({super.key});
+class UpdateBia2AnimeResources extends StatefulWidget {
+  const UpdateBia2AnimeResources({super.key});
 
   @override
-  State<CrawlerHomePage5> createState() => _CrawlerHomePage5State();
+  State<UpdateBia2AnimeResources> createState() =>
+      _UpdateBia2AnimeResourcesState();
 }
 
-class _CrawlerHomePage5State extends State<CrawlerHomePage5> {
+class _UpdateBia2AnimeResourcesState extends State<UpdateBia2AnimeResources> {
   // Constants
   // NEW: Concurrency control
   static const int maxConcurrentRequests = 10;
@@ -33,6 +35,8 @@ class _CrawlerHomePage5State extends State<CrawlerHomePage5> {
   String _selectedExtension = ".mkv";
   bool _createZip = false;
   final bool _processAsSeries = true;
+  bool _saveToApp = false;
+  String _targetProvider = 'Anime'; // 'Anime' or 'TV'
 
   // Crawler control state
   bool _isProcessing = false;
@@ -72,9 +76,7 @@ class _CrawlerHomePage5State extends State<CrawlerHomePage5> {
   Future<void> _startProcessing() async {
     if (_fileNameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill in the Base Name.'),
-        ),
+        const SnackBar(content: Text('Please fill in the Base Name.')),
       );
       return;
     }
@@ -215,18 +217,24 @@ class _CrawlerHomePage5State extends State<CrawlerHomePage5> {
         } else if (item.depth == 1) {
           // Process post page for downloads
           String seriesName = _extractSeriesNameFromPage(bs);
-          var content = bs.find('div', class_: 'content')?.find('div', class_: 'post2');
+          var content = bs
+              .find('div', class_: 'content')
+              ?.find('div', class_: 'post2');
           if (content != null) {
             var accordion = content.find('div', class_: 'accordion');
             if (accordion != null) {
               var items = accordion.findAll('div', class_: 'accordion-item');
               for (var accItem in items) {
-                String season = _parseSeason(accItem.find('h4')?.find('button')?.text ?? '');
+                String season = _parseSeason(
+                  accItem.find('h4')?.find('button')?.text ?? '',
+                );
                 var body = accItem.find('div', class_: 'accordion-body');
                 if (body != null) {
                   var episodes = body.findAll('div', class_: 'download_item');
                   for (var ep in episodes) {
-                    String episode = _parseEpisode(ep.find('div', class_: 'serial-dl-info')?.text ?? '');
+                    String episode = _parseEpisode(
+                      ep.find('div', class_: 'serial-dl-info')?.text ?? '',
+                    );
                     Map<String, String> qualities = {};
                     String subUrl = '';
                     var buttons = ep.findAll('a', class_: 'button');
@@ -235,12 +243,23 @@ class _CrawlerHomePage5State extends State<CrawlerHomePage5> {
                       String text = btn.text.trim();
                       if (text.contains('1080p')) {
                         qualities['1080p'] = href;
-                      } else if (text.contains('720p')) qualities['720p'] = href;
-                      else if (text.contains('480p')) qualities['480p'] = href;
-                      else if (text.contains('زیرنویس')) subUrl = href;
+                      } else if (text.contains('720p'))
+                        qualities['720p'] = href;
+                      else if (text.contains('540p'))
+                        qualities['540p'] = href;
+                      else if (text.contains('480p'))
+                        qualities['480p'] = href;
+                      else if (text.contains('زیرنویس'))
+                        subUrl = href;
                     }
                     String key = '${seriesName}_$season$episode';
-                    pivotData.putIfAbsent(key, () => {'Series': seriesName, 'Episode': '$season$episode'});
+                    pivotData.putIfAbsent(
+                      key,
+                      () => {
+                        'Series': seriesName,
+                        'Episode': '$season$episode',
+                      },
+                    );
                     pivotData[key]!.addAll(qualities);
                     if (subUrl.isNotEmpty) pivotData[key]!['Subtitle'] = subUrl;
                   }
@@ -378,20 +397,14 @@ class _CrawlerHomePage5State extends State<CrawlerHomePage5> {
   Future<void> _saveSeriesResults(String baseName) async {
     _log("... Found ${pivotData.length} unique episodes. Saving files.");
 
-    final String? dirPath = await FilePicker.platform.getDirectoryPath();
-    if (dirPath == null) {
-      _log("❌ Save cancelled. No directory selected.");
-      return;
-    }
-    _log("📂 Saving files to: $dirPath");
-
     final headers = [
       'Series',
       'Episode',
       '1080p',
       '720p',
+      '540p',
       '480p',
-      'Subtitle',
+      'Dubbed',
     ];
     List<List<dynamic>> rows = [headers];
 
@@ -400,6 +413,42 @@ class _CrawlerHomePage5State extends State<CrawlerHomePage5> {
       final episodeData = pivotData[key]!;
       rows.add(headers.map((h) => episodeData[h] ?? '').toList());
     }
+
+    // --- Save to App Storage ---
+    if (_saveToApp) {
+      try {
+        final dir = await getApplicationDocumentsDirectory();
+        final filename = _targetProvider == 'Anime'
+            ? 'local_anime_series_link.csv'
+            : 'local_tv_series_link.csv';
+        final file = File('${dir.path}/$filename');
+
+        if (await file.exists()) {
+          // Append mode: Skip header row
+          final dataRows = rows.skip(1).toList();
+          if (dataRows.isNotEmpty) {
+            final csvToAppend = const ListToCsvConverter().convert(dataRows);
+            await file.writeAsString('\n$csvToAppend', mode: FileMode.append);
+            _log("✅ Appended to App Storage: $filename");
+          }
+        } else {
+          // Create mode: Use all rows (including header)
+          final csvData = const ListToCsvConverter().convert(rows);
+          await file.writeAsString(csvData);
+          _log("✅ Saved to App Storage: $filename");
+        }
+      } catch (e) {
+        _log("❌ Error saving to App Storage: $e");
+      }
+    }
+    // ---------------------------
+
+    final String? dirPath = await FilePicker.platform.getDirectoryPath();
+    if (dirPath == null) {
+      _log("❌ Save cancelled. No directory selected.");
+      return;
+    }
+    _log("📂 Saving files to: $dirPath");
 
     final csvFilePath = p.join(dirPath, '$baseName.csv');
     await File(
@@ -555,6 +604,36 @@ class _CrawlerHomePage5State extends State<CrawlerHomePage5> {
             controlAffinity: ListTileControlAffinity.leading,
             contentPadding: EdgeInsets.zero,
           ),
+          CheckboxListTile(
+            title: const Text('Save to App Internal Storage (Merge)'),
+            value: _saveToApp,
+            onChanged: _isProcessing
+                ? null
+                : (v) => setState(() => _saveToApp = v!),
+            controlAffinity: ListTileControlAffinity.leading,
+            contentPadding: EdgeInsets.zero,
+          ),
+          if (_saveToApp)
+            Padding(
+              padding: const EdgeInsets.only(left: 16.0),
+              child: Row(
+                children: [
+                  const Text("Target: "),
+                  DropdownButton<String>(
+                    value: _targetProvider,
+                    items: ['Anime', 'TV'].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: _isProcessing
+                        ? null
+                        : (v) => setState(() => _targetProvider = v!),
+                  ),
+                ],
+              ),
+            ),
           const SizedBox(height: 24),
           if (_isProcessing) ...[
             LinearProgressIndicator(
@@ -875,6 +954,38 @@ class TmdbDatailsProcess extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.save_alt),
+                    label: const Text('Save to App (Anime)'),
+                    onPressed: provider.isProcessing || provider.results.isEmpty
+                        ? null
+                        : () => provider.saveToAppStorage('Anime'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.save_alt),
+                    label: const Text('Save to App (TV)'),
+                    onPressed: provider.isProcessing || provider.results.isEmpty
+                        ? null
+                        : () => provider.saveToAppStorage('TV'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 15),
             ElevatedButton.icon(
               icon: const Icon(Icons.play_arrow),
@@ -968,5 +1079,3 @@ class TmdbDatailsProcess extends StatelessWidget {
     );
   }
 }
-
-

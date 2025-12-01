@@ -18,7 +18,7 @@ class LocalScanService {
   final LocalScanIndexService _indexService;
 
   LocalScanService({LocalScanIndexService? indexService})
-      : _indexService = indexService ?? const LocalScanIndexService();
+    : _indexService = indexService ?? const LocalScanIndexService();
 
   // State
   bool _isScanning = false;
@@ -32,13 +32,14 @@ class LocalScanService {
   final _musicResults = <Music>[];
   final _musicVideoResults = <MusicVideo>[];
   final _photoResults = <Photo>[];
-  
+
   final _progressController = StreamController<double>.broadcast();
   final _statusController = StreamController<String>.broadcast();
   final _movieResultsController = StreamController<List<Movie>>.broadcast();
   final _tvResultsController = StreamController<List<TvSeries>>.broadcast();
   final _musicResultsController = StreamController<List<Music>>.broadcast();
-  final _musicVideoResultsController = StreamController<List<MusicVideo>>.broadcast();
+  final _musicVideoResultsController =
+      StreamController<List<MusicVideo>>.broadcast();
   final _photoResultsController = StreamController<List<Photo>>.broadcast();
 
   // Public streams
@@ -47,16 +48,19 @@ class LocalScanService {
   Stream<List<Movie>> get movieResultsStream => _movieResultsController.stream;
   Stream<List<TvSeries>> get tvResultsStream => _tvResultsController.stream;
   Stream<List<Music>> get musicResultsStream => _musicResultsController.stream;
-  Stream<List<MusicVideo>> get musicVideoResultsStream => _musicVideoResultsController.stream;
+  Stream<List<MusicVideo>> get musicVideoResultsStream =>
+      _musicVideoResultsController.stream;
   Stream<List<Photo>> get photoResultsStream => _photoResultsController.stream;
 
   bool get isScanning => _isScanning;
   bool get isFetchingMetadata => _isFetchingMetadata;
-  double get progress => _totalCandidates == 0 ? 0 : _processed / _totalCandidates;
+  double get progress =>
+      _totalCandidates == 0 ? 0 : _processed / _totalCandidates;
   List<Movie> get movieResults => List.unmodifiable(_movieResults);
   List<TvSeries> get tvResults => List.unmodifiable(_tvResults);
   List<Music> get musicResults => List.unmodifiable(_musicResults);
-  List<MusicVideo> get musicVideoResults => List.unmodifiable(_musicVideoResults);
+  List<MusicVideo> get musicVideoResults =>
+      List.unmodifiable(_musicVideoResults);
   List<Photo> get photoResults => List.unmodifiable(_photoResults);
   int get totalCandidates => _totalCandidates;
   int get processed => _processed;
@@ -132,7 +136,9 @@ class LocalScanService {
     _processed = 0;
     _totalCandidates = 0;
 
-    _statusController.add('Scanning ${_contentTypeLabel(contentType)} files...');
+    _statusController.add(
+      'Scanning ${_contentTypeLabel(contentType)} files...',
+    );
 
     final candidates = await _collectCandidates(rootDir, contentType);
     _totalCandidates = candidates.length;
@@ -148,7 +154,9 @@ class LocalScanService {
       return;
     }
 
-    _statusController.add('Processing ${candidates.length} ${_contentTypeLabel(contentType)} files...');
+    _statusController.add(
+      'Processing ${candidates.length} ${_contentTypeLabel(contentType)} files...',
+    );
 
     // Route to appropriate scanner based on content type
     switch (contentType) {
@@ -158,7 +166,7 @@ class LocalScanService {
       case ContentType.tvSeries:
         await _scanTvSeries(candidates);
         // Also scan loose TV files in the root directory
-        await _scanLooseTvFiles(rootDir);
+        // await _scanLooseTvFiles(rootDir); // Removed as _scanTvSeries now handles virtual grouping for all files
         break;
       case ContentType.music:
         await _scanMusic(candidates);
@@ -175,7 +183,9 @@ class LocalScanService {
     }
 
     _isScanning = false;
-    _statusController.add(_cancelRequested ? 'Scan cancelled' : 'Scan complete');
+    _statusController.add(
+      _cancelRequested ? 'Scan cancelled' : 'Scan complete',
+    );
   }
 
   void cancel() {
@@ -271,9 +281,11 @@ class LocalScanService {
       final metadata = await Metadata.fromFile(file);
       final movieName = parsed.name.isEmpty ? 'Unknown Movie' : parsed.name;
       final moviePath = file.parent.path;
-            final seriesFolderName = moviePath.split(Platform.pathSeparator).last;
+      final seriesFolderName = moviePath.split(Platform.pathSeparator).last;
 
-      final normalizedSeriesName = _normalizeFolderNameForTmdb(seriesFolderName);
+      final normalizedSeriesName = _normalizeFolderNameForTmdb(
+        seriesFolderName,
+      );
 
       var movie = _movieResults.firstWhere(
         (m) => m.path == moviePath && m.name == movieName,
@@ -327,10 +339,25 @@ class LocalScanService {
 
       if (!parsed.isTv) continue;
 
-      // Episodes are directly in the series folder (no season subfolder)
-      final seriesPath = file.parent.path;
-      final seriesFolderName = seriesPath.split(Platform.pathSeparator).last;
-      final normalizedSeriesName = _normalizeFolderNameForTmdb(seriesFolderName);
+      // Determine if we should use virtual grouping (based on filename) or folder grouping
+      // If parsed name has letters, assume it's a series name and use virtual grouping.
+      // Otherwise, fall back to folder name.
+
+      String seriesPath;
+      String seriesName;
+
+      final hasLetters = RegExp(r'[a-zA-Z]').hasMatch(parsed.name);
+
+      if (hasLetters && parsed.name.isNotEmpty) {
+        final normalizedName = _normalizeFolderNameForTmdb(parsed.name);
+        seriesPath =
+            '${file.parent.path}${Platform.pathSeparator}[VIRTUAL] $normalizedName';
+        seriesName = normalizedName;
+      } else {
+        seriesPath = file.parent.path;
+        final folderName = seriesPath.split(Platform.pathSeparator).last;
+        seriesName = _normalizeFolderNameForTmdb(folderName);
+      }
 
       var series = _tvResults.firstWhere(
         (s) => s.path == seriesPath,
@@ -338,7 +365,7 @@ class LocalScanService {
           final newSeries = TvSeries(
             path: seriesPath,
             parentPath: Directory(seriesPath).parent.path,
-            name: normalizedSeriesName,
+            name: seriesName,
           );
           _tvResults.add(newSeries);
           return newSeries;
@@ -372,7 +399,9 @@ class LocalScanService {
       final updatedEpisodes = [...season.episodes, episode];
       final updatedSeason = season.copyWith(episodes: updatedEpisodes);
 
-      final seasonIndex = series.seasons.indexWhere((s) => s.seasonNumber == seasonNum);
+      final seasonIndex = series.seasons.indexWhere(
+        (s) => s.seasonNumber == seasonNum,
+      );
       final updatedSeasons = List<Season>.from(series.seasons);
 
       if (seasonIndex >= 0) {
@@ -382,96 +411,6 @@ class LocalScanService {
       }
 
       final seriesIndex = _tvResults.indexWhere((s) => s.path == seriesPath);
-      _tvResults[seriesIndex] = series.copyWith(seasons: updatedSeasons);
-
-      _processed++;
-      if (_processed % 5 == 0) {
-        _tvResultsController.add(List.unmodifiable(_tvResults));
-      }
-      _emitProgress();
-      await Future.delayed(const Duration(milliseconds: 1));
-    }
-
-    _tvResultsController.add(List.unmodifiable(_tvResults));
-  }
-
-  Future<void> _scanLooseTvFiles(String rootDir) async {
-    final videoExts = <String>{'.mp4', '.mkv', '.avi', '.mov', '.m4v', '.webm'};
-    final dir = Directory(rootDir);
-    
-    if (!await dir.exists()) return;
-
-    // Get only files directly in the root directory (not in subdirectories)
-    await for (final entity in dir.list(followLinks: false)) {
-      if (_cancelRequested) break;
-      
-      if (entity is! File) continue;
-
-      final file = entity;
-      final ext = file.path.split('.').last.toLowerCase();
-      if (!videoExts.contains('.$ext')) continue;
-
-      final parsed = _parseMediaFromFilename(file.path);
-      final metadata = await Metadata.fromFile(file);
-
-      if (!parsed.isTv) continue;
-
-      // Use parsed series name as the virtual series folder name, normalized
-      final normalizedSeriesName = _normalizeFolderNameForTmdb(parsed.name);
-      
-      // Virtual series path (doesn't exist, but used as identifier)
-      final virtualSeriesPath = '${dir.path}${Platform.pathSeparator}[VIRTUAL] $normalizedSeriesName';
-
-      var series = _tvResults.firstWhere(
-        (s) => s.path == virtualSeriesPath,
-        orElse: () {
-          final newSeries = TvSeries(
-            path: virtualSeriesPath,
-            parentPath: dir.path,
-            name: normalizedSeriesName,
-          );
-          _tvResults.add(newSeries);
-          return newSeries;
-        },
-      );
-
-      final seasonNum = parsed.season ?? 1;
-      var season = series.seasons.firstWhere(
-        (s) => s.seasonNumber == seasonNum,
-        orElse: () => Season(
-          path: virtualSeriesPath,
-          parentPath: dir.path,
-          seasonNumber: seasonNum,
-          seriesId: series.id,
-          seriesName: series.name,
-        ),
-      );
-
-      final episodeNum = parsed.episode ?? 1;
-      final episode = Episode(
-        seasonNumber: seasonNum,
-        episodeNumber: episodeNum,
-        name: file.uri.pathSegments.last,
-        path: file.path, // Actual file path in base folder
-        parentPath: dir.path,
-        metadata: metadata,
-        tvSeriesId: series.id,
-        tvSeriesName: series.name,
-      );
-
-      final updatedEpisodes = [...season.episodes, episode];
-      final updatedSeason = season.copyWith(episodes: updatedEpisodes);
-
-      final seasonIndex = series.seasons.indexWhere((s) => s.seasonNumber == seasonNum);
-      final updatedSeasons = List<Season>.from(series.seasons);
-
-      if (seasonIndex >= 0) {
-        updatedSeasons[seasonIndex] = updatedSeason;
-      } else {
-        updatedSeasons.add(updatedSeason);
-      }
-
-      final seriesIndex = _tvResults.indexWhere((s) => s.path == virtualSeriesPath);
       _tvResults[seriesIndex] = series.copyWith(seasons: updatedSeasons);
 
       _processed++;
@@ -496,7 +435,7 @@ class LocalScanService {
       if (!audioExts.contains('.$ext')) continue;
 
       final metadata = await Metadata.fromFile(file);
-      
+
       // Get the immediate parent folder as album
       final albumPath = file.parent.path;
       final albumName = albumPath.split(Platform.pathSeparator).last;
@@ -569,7 +508,9 @@ class LocalScanService {
       );
 
       if (!_musicVideoResults.contains(musicVideo)) {
-        _musicVideoResults.add(musicVideo.copyWith(musicVideoItems: [musicVideoItem]));
+        _musicVideoResults.add(
+          musicVideo.copyWith(musicVideoItems: [musicVideoItem]),
+        );
       } else {
         final index = _musicVideoResults.indexOf(musicVideo);
         _musicVideoResults[index] = musicVideo.copyWith(
@@ -589,7 +530,14 @@ class LocalScanService {
   }
 
   Future<void> _scanPhotos(List<String> candidates) async {
-    final imageExts = <String>{'.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'};
+    final imageExts = <String>{
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.gif',
+      '.webp',
+      '.bmp',
+    };
 
     for (final path in candidates) {
       if (_cancelRequested) break;
@@ -599,7 +547,9 @@ class LocalScanService {
       if (!imageExts.contains('.$ext')) continue;
 
       final metadata = await Metadata.fromFile(file);
-      final collectionName = file.parent.path.split(Platform.pathSeparator).last;
+      final collectionName = file.parent.path
+          .split(Platform.pathSeparator)
+          .last;
       final collectionPath = file.parent.path;
 
       var photo = _photoResults.firstWhere(
@@ -641,7 +591,14 @@ class LocalScanService {
   Future<void> _scanMixedContent(List<String> candidates) async {
     final videoExts = <String>{'.mp4', '.mkv', '.avi', '.mov', '.m4v', '.webm'};
     final audioExts = <String>{'.mp3', '.flac', '.wav', '.m4a', '.aac', '.ogg'};
-    final imageExts = <String>{'.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'};
+    final imageExts = <String>{
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.gif',
+      '.webp',
+      '.bmp',
+    };
 
     // Create containers for mixed content (one per type)
     final mixedVideos = MusicVideo(
@@ -650,14 +607,14 @@ class LocalScanService {
       name: 'Mixed Videos',
       musicVideoItems: [],
     );
-    
+
     final mixedAudio = Music(
       path: 'mixed-audio',
       parentPath: '',
       name: 'Mixed Audio',
       musicItems: [],
     );
-    
+
     final mixedPhotos = Photo(
       path: 'mixed-photos',
       parentPath: '',
@@ -707,7 +664,9 @@ class LocalScanService {
         if (mixedVideos.musicVideoItems.isNotEmpty) {
           _musicVideoResults.clear();
           _musicVideoResults.add(mixedVideos);
-          _musicVideoResultsController.add(List.unmodifiable(_musicVideoResults));
+          _musicVideoResultsController.add(
+            List.unmodifiable(_musicVideoResults),
+          );
         }
         if (mixedAudio.musicItems.isNotEmpty) {
           _musicResults.clear();
@@ -742,7 +701,10 @@ class LocalScanService {
     }
   }
 
-  Future<List<String>> _collectCandidates(String rootDir, ContentType contentType) async {
+  Future<List<String>> _collectCandidates(
+    String rootDir,
+    ContentType contentType,
+  ) async {
     final files = <String>[];
     final dir = Directory(rootDir);
     if (!await dir.exists()) return files;
@@ -765,9 +727,24 @@ class LocalScanService {
         break;
       case ContentType.mixed:
         exts.addAll({
-          '.mp4', '.mkv', '.avi', '.mov', '.m4v', '.webm',
-          '.mp3', '.flac', '.wav', '.m4a', '.aac', '.ogg',
-          '.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'
+          '.mp4',
+          '.mkv',
+          '.avi',
+          '.mov',
+          '.m4v',
+          '.webm',
+          '.mp3',
+          '.flac',
+          '.wav',
+          '.m4a',
+          '.aac',
+          '.ogg',
+          '.jpg',
+          '.jpeg',
+          '.png',
+          '.gif',
+          '.webp',
+          '.bmp',
         });
         break;
     }
@@ -825,10 +802,26 @@ class LocalScanService {
       }
     }
 
+    // NEW LOGIC START: Check for " - (1)" pattern if not found yet
+    if (episode == null) {
+      final parenMatch = RegExp(r' - \((\d+)\)').firstMatch(noExt);
+      if (parenMatch != null) {
+        episode = int.tryParse(parenMatch.group(1)!);
+        isTv = true; // Assume TV if it has this pattern
+      }
+    }
+    // NEW LOGIC END
+
     // Try to extract a clean title by removing common tokens
     var name = noExt
         .replaceAll(RegExp(r'[._]'), ' ')
-        .replaceAll(RegExp(r'\b(1080p|720p|480p|x264|x265|Bluray|WEBRip|WEB-DL|HEVC|H264|H265|AAC|DVDRip)\b', caseSensitive: false), '')
+        .replaceAll(
+          RegExp(
+            r'\b(1080p|720p|480p|x264|x265|Bluray|WEBRip|WEB-DL|HEVC|H264|H265|AAC|DVDRip)\b',
+            caseSensitive: false,
+          ),
+          '',
+        )
         .replaceAll(RegExp(r'[\[\(].*?[\]\)]'), '')
         .trim();
 
@@ -855,10 +848,68 @@ class LocalScanService {
       }
     }
 
-    return _Parsed(name: name, isTv: isTv, season: season, episode: episode, year: year);
-  }
+    // Clean up name again for Season stuff
+    name = name.replaceAll(RegExp(r'\bS(\d+)\b', caseSensitive: false), '');
+    name = name.replaceAll(
+      RegExp(
+        r'\b(?:Season\s*\d+|\d+(?:st|nd|rd|th)?\s*Season)\b',
+        caseSensitive: false,
+      ),
+      '',
+    );
 
-  
+    name = name
+        .replaceAll(RegExp(r'-+$'), '')
+        .trim(); // Remove trailing hyphens first
+
+    // NEW LOGIC: Check for "Name N" where N is a number at the end, treating it as season
+    if (isTv && season == null) {
+      final endNumberMatch = RegExp(r'\s+(\d+)$').firstMatch(name);
+      if (endNumberMatch != null) {
+        season = int.tryParse(endNumberMatch.group(1)!);
+        name = name.substring(0, endNumberMatch.start).trim();
+      }
+    }
+
+    // NEW LOGIC: Extract season from name if present (e.g. "S5", "2nd Season")
+    if (isTv && season == null) {
+      // Check for "S5" or "Season 5" or "5th Season" in the original filename (noExt)
+      // We use noExt because 'name' has been stripped of brackets
+
+      // "S5" surrounded by spaces or end of string
+      final sMatch = RegExp(
+        r'\bS(\d+)\b',
+        caseSensitive: false,
+      ).firstMatch(noExt);
+      if (sMatch != null) {
+        season = int.tryParse(sMatch.group(1)!);
+        // Remove S5 from name
+        // name = name.replaceAll(RegExp(r'\bS\d+\b', caseSensitive: false), '').trim(); // Already done above
+      }
+
+      // "2nd Season", "Season 2"
+      final seasonMatch = RegExp(
+        r'\b(?:Season\s*(\d+)|(\d+)(?:st|nd|rd|th)?\s*Season)\b',
+        caseSensitive: false,
+      ).firstMatch(noExt);
+      if (seasonMatch != null) {
+        final sNum = seasonMatch.group(1) ?? seasonMatch.group(2);
+        if (sNum != null) {
+          season = int.tryParse(sNum);
+        }
+      }
+    }
+
+    name = name.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+    return _Parsed(
+      name: name,
+      isTv: isTv,
+      season: season,
+      episode: episode,
+      year: year,
+    );
+  }
 
   // --- Series Helpers (Unchanged) ---
   // ignore: unused_element
@@ -946,14 +997,16 @@ class LocalScanService {
     print('📊 Index loaded with ${index.entries.length} entries');
 
     // Fetch metadata for movies
-    print('🎥 Starting movie metadata fetch (${_movieResults.length} movies)...');
+    print(
+      '🎥 Starting movie metadata fetch (${_movieResults.length} movies)...',
+    );
     for (int i = 0; i < _movieResults.length; i++) {
       if (_cancelRequested) break;
 
       final movie = _movieResults[i];
       print('  [${i + 1}/${_movieResults.length}] Fetching: "${movie.name}"');
       try {
-        final updatedMovie = await _matchMovieWithTmdb( movie, null);
+        final updatedMovie = await _matchMovieWithTmdb(movie, null);
         _movieResults[i] = updatedMovie;
 
         print('    ✅ Found TMDB ID: ${updatedMovie.fetchedData.tmdbId}');
@@ -999,7 +1052,9 @@ class LocalScanService {
     }
 
     // Fetch metadata for TV series
-    print('📺 Starting TV series metadata fetch (${_tvResults.length} series)...');
+    print(
+      '📺 Starting TV series metadata fetch (${_tvResults.length} series)...',
+    );
     for (int i = 0; i < _tvResults.length; i++) {
       if (_cancelRequested) break;
 
@@ -1066,7 +1121,9 @@ class LocalScanService {
     _tvResultsController.add(List.unmodifiable(_tvResults));
 
     _isFetchingMetadata = false;
-    final finalStatus = _cancelRequested ? 'Metadata fetch cancelled' : 'TMDB metadata fetched';
+    final finalStatus = _cancelRequested
+        ? 'Metadata fetch cancelled'
+        : 'TMDB metadata fetched';
     print('🏁 TMDB Fetch Completed - $finalStatus');
     _statusController.add(finalStatus);
   }
@@ -1081,31 +1138,34 @@ class LocalScanService {
   /// - Spider-Man => Spider-Man (unchanged)
   String _normalizeFolderNameForTmdb(String folderName) {
     var normalized = folderName;
-    
+
     // Remove single quotes (apostrophes)
     normalized = normalized.replaceAll("'", '');
-    
+
     // Replace colons with hyphens
     normalized = normalized.replaceAll(':', '-');
-    
+
     // Replace dots and spaces with hyphens
     normalized = normalized.replaceAll(RegExp(r'[.\s]+'), '-');
-    
+
     // Remove year patterns (1900-2099)
     normalized = normalized.replaceAll(RegExp(r'-(?:19|20)\d{2}(?=-|$)'), '');
-    
+
     // Remove quality patterns (720p, 1080p, bluray, webrip, etc.)
     normalized = normalized.replaceAll(
-      RegExp(r'-(?:480p|720p|1080p|2160p|4k|bluray|webrip|web-dl|dvdrip|hdtv|bdrip|x264|x265|hevc)(?=-|$)', caseSensitive: false),
-      ''
+      RegExp(
+        r'-(?:480p|720p|1080p|2160p|4k|bluray|webrip|web-dl|dvdrip|hdtv|bdrip|x264|x265|hevc)(?=-|$)',
+        caseSensitive: false,
+      ),
+      '',
     );
-    
+
     // Remove resolution patterns (1920x1080, etc.)
     normalized = normalized.replaceAll(RegExp(r'-\d{3,4}x\d{3,4}(?=-|$)'), '');
-    
+
     // Clean up multiple consecutive hyphens
     normalized = normalized.replaceAll(RegExp(r'-+'), '-');
-    
+
     // Remove leading/trailing hyphens
     normalized = normalized.trim();
     if (normalized.startsWith('-')) {
@@ -1114,16 +1174,16 @@ class LocalScanService {
     if (normalized.endsWith('-')) {
       normalized = normalized.substring(0, normalized.length - 1);
     }
-    
+
     return normalized;
   }
-final MovieService _movieService= MovieService();
-  Future<Movie> _matchMovieWithTmdb( Movie movie, String? year) async {
+
+  final MovieService _movieService = MovieService();
+  Future<Movie> _matchMovieWithTmdb(Movie movie, String? year) async {
     final resp = await _movieService.searchMovies(query: movie.name);
     if (resp.results.isNotEmpty) {
+      final best = resp.results.first;
 
-      final  best = resp.results.first;
-      
       return movie.copyWith(
         fetchedData: FetchedData(
           tmdbId: best.id,
@@ -1132,7 +1192,7 @@ final MovieService _movieService= MovieService();
           posterPath: best.posterPath,
           backdropPath: best.backdropPath,
           overview: best.overview,
-          year: best.releaseDate
+          year: best.releaseDate,
         ),
       );
     }
@@ -1140,7 +1200,7 @@ final MovieService _movieService= MovieService();
   }
 
   Future<TvSeries> _matchTvWithTmdb(TvSeries series, String? year) async {
-    final resp = await _movieService.searchTV(query:series.name);
+    final resp = await _movieService.searchTV(query: series.name);
     if (resp.results.isNotEmpty) {
       final best = resp.results.first;
       return series.copyWith(
@@ -1171,5 +1231,11 @@ class _Parsed {
   final int? episode;
   final String? year;
 
-  _Parsed({required this.name, required this.isTv, this.season, this.episode, this.year});
+  _Parsed({
+    required this.name,
+    required this.isTv,
+    this.season,
+    this.episode,
+    this.year,
+  });
 }

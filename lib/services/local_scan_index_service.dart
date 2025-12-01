@@ -216,6 +216,9 @@ class LocalScanIndexService {
     String? tmdbBackdropPath,
     String? tmdbOverview,
     String? tmdbYear,
+    String? tmdbMediaType,
+    String? localPosterPath,
+    String? localBackdropPath,
     bool persistImmediately = false,
   }) async {
     final index = await load();
@@ -225,19 +228,17 @@ class LocalScanIndexService {
       return null;
     }
 
-    final updated = LocalScanIndexEntry(
-      path: existing.path,
-      rootDir: existing.rootDir,
-      contentType: existing.contentType,
-      sizeBytes: existing.sizeBytes,
-      modified: existing.modified,
-      tmdbId: tmdbId ?? existing.tmdbId,
-      tmdbTitle: tmdbTitle ?? existing.tmdbTitle,
-      tmdbOriginalTitle: tmdbOriginalTitle ?? existing.tmdbOriginalTitle,
-      tmdbPosterPath: tmdbPosterPath ?? existing.tmdbPosterPath,
-      tmdbBackdropPath: tmdbBackdropPath ?? existing.tmdbBackdropPath,
-      tmdbOverview: tmdbOverview ?? existing.tmdbOverview,
-      tmdbYear: tmdbYear ?? existing.tmdbYear,
+    final updated = existing.copyWith(
+      tmdbId: tmdbId,
+      tmdbTitle: tmdbTitle,
+      tmdbOriginalTitle: tmdbOriginalTitle,
+      tmdbPosterPath: tmdbPosterPath,
+      tmdbBackdropPath: tmdbBackdropPath,
+      tmdbOverview: tmdbOverview,
+      tmdbYear: tmdbYear,
+      tmdbMediaType: tmdbMediaType,
+      localPosterPath: localPosterPath,
+      localBackdropPath: localBackdropPath,
     );
 
     if (_metadataEquals(existing, updated)) {
@@ -256,6 +257,41 @@ class LocalScanIndexService {
     return updated;
   }
 
+  Future<void> updateLocalAssets(
+    String path, {
+    String? localPosterPath,
+    String? localBackdropPath,
+  }) async {
+    final index = await load();
+    // We need to find the entry by path. Since the key includes rootDir and contentType,
+    // and we only have path here, we might need to iterate or pass more info.
+    // However, path should be unique enough if we assume full path.
+    // But the map key is composite.
+
+    // Let's iterate to find the key.
+    String? key;
+    for (final k in index.entries.keys) {
+      if (index.entries[k]?.path == path) {
+        key = k;
+        break;
+      }
+    }
+
+    if (key == null) return;
+
+    final existingEntry = index.entries[key];
+    if (existingEntry == null) return;
+
+    final updatedEntry = existingEntry.copyWith(
+      localPosterPath: localPosterPath,
+      localBackdropPath: localBackdropPath,
+    );
+
+    index.entries[key] = updatedEntry;
+    _sessionEntries[key] = updatedEntry;
+    await save(index);
+  }
+
   /// Internal helper to sync [_sessionIndex] & [_sessionEntries].
   LocalScanIndex _hydrateSession(LocalScanIndex index) {
     _sessionIndex = index;
@@ -270,6 +306,9 @@ class LocalScanIndexService {
         a.tmdbPosterPath == b.tmdbPosterPath &&
         a.tmdbBackdropPath == b.tmdbBackdropPath &&
         a.tmdbOverview == b.tmdbOverview &&
-        a.tmdbYear == b.tmdbYear;
+        a.tmdbYear == b.tmdbYear &&
+        a.tmdbMediaType == b.tmdbMediaType &&
+        a.localPosterPath == b.localPosterPath &&
+        a.localBackdropPath == b.localBackdropPath;
   }
 }

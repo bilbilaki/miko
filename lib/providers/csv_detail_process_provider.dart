@@ -104,8 +104,10 @@ class ProcessingProvider extends ChangeNotifier {
     _progress = 0.0;
     notifyListeners();
 
-    final tmdb = TMDB(ApiKeys(_apiKey, 'apiReadAccessTokenv4'),
-        logConfig: const ConfigLogger(showLogs: false));
+    final tmdb = TMDB(
+      ApiKeys(_apiKey, 'apiReadAccessTokenv4'),
+      logConfig: const ConfigLogger(showLogs: false),
+    );
 
     for (int i = 0; i < _seriesToProcess.length; i++) {
       final seriesName = _seriesToProcess[i];
@@ -131,10 +133,14 @@ class ProcessingProvider extends ChangeNotifier {
 
           // Fetch details with appended responses
           final Map details = mediaType == 'tv'
-              ? await tmdb.v3.tv
-                  .getDetails(id, appendToResponse: 'credits,videos,keywords')
-              : await tmdb.v3.movies
-                  .getDetails(id, appendToResponse: 'credits,videos,keywords');
+              ? await tmdb.v3.tv.getDetails(
+                  id,
+                  appendToResponse: 'credits,videos,keywords',
+                )
+              : await tmdb.v3.movies.getDetails(
+                  id,
+                  appendToResponse: 'credits,videos,keywords',
+                );
 
           final mediaData = MediaData.fromTmdb(details, seriesName, mediaType);
           _results.add(mediaData);
@@ -166,7 +172,8 @@ class ProcessingProvider extends ChangeNotifier {
       }
     }
   }
-Future<void> exportToCsv() async {
+
+  Future<void> exportToCsv() async {
     await _requestStoragePermission();
     final String? dirPath = await FilePicker.platform.getDirectoryPath();
     if (dirPath == null) {
@@ -174,10 +181,12 @@ Future<void> exportToCsv() async {
     }
 
     final csvFilePath = p.join(
-        dirPath, 'tmdb_output_${DateTime.now().millisecondsSinceEpoch}.csv');
+      dirPath,
+      'tmdb_output_${DateTime.now().millisecondsSinceEpoch}.csv',
+    );
     List<List<String>> csvData = [
       MediaData.getCsvHeaders(),
-      ..._results.map((item) => item.toCsvRow())
+      ..._results.map((item) => item.toCsvRow()),
     ];
 
     String csv = const ListToCsvConverter().convert(csvData);
@@ -185,9 +194,49 @@ Future<void> exportToCsv() async {
 
     // Optionally show a toast here
   }
-  
 
-// Helper to get public downloads directory
+  Future<void> saveToAppStorage(String targetType) async {
+    // targetType: 'Anime', 'TV', 'Movie'
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      String filename;
+      if (targetType == 'Anime') {
+        filename = 'local_anime_series_details.csv';
+      } else if (targetType == 'TV') {
+        filename = 'local_tv_series_details.csv';
+      } else {
+        filename = 'local_movies_db.csv';
+      }
+
+      final file = File('${dir.path}/$filename');
+
+      List<List<String>> csvData = _results
+          .map((item) => item.toCsvRow())
+          .toList();
+
+      if (await file.exists()) {
+        // Append
+        if (csvData.isNotEmpty) {
+          final csvToAppend = const ListToCsvConverter().convert(csvData);
+          await file.writeAsString('\n$csvToAppend', mode: FileMode.append);
+          _statusMessage = "Appended to App Storage: $filename";
+          notifyListeners();
+        }
+      } else {
+        // Create
+        List<List<String>> fullData = [MediaData.getCsvHeaders(), ...csvData];
+        final csvString = const ListToCsvConverter().convert(fullData);
+        await file.writeAsString(csvString);
+        _statusMessage = "Saved to App Storage: $filename";
+        notifyListeners();
+      }
+    } catch (e) {
+      _statusMessage = "Error saving to App Storage: $e";
+      notifyListeners();
+    }
+  }
+
+  // Helper to get public downloads directory
   Future<Directory?> getDownloadsDirectory() async {
     if (Platform.isAndroid) {
       // This is the standard Downloads directory on Android
@@ -205,10 +254,9 @@ Future<void> exportToCsv() async {
 }
 // lib/text_tool_provider.dart
 
-
-
 // Enums to manage UI state clearly
 enum ReplaceMode { standard, pattern }
+
 enum PatternPlacement { start, end }
 
 class TextToolProvider extends ChangeNotifier {
@@ -250,7 +298,7 @@ class TextToolProvider extends ChangeNotifier {
     isRegex = value;
     notifyListeners();
   }
-  
+
   void setReplaceMode(ReplaceMode mode) {
     replaceMode = mode;
     notifyListeners();
@@ -311,7 +359,9 @@ class TextToolProvider extends ChangeNotifier {
     try {
       // 1. Get Save Path
       String? outputDir = await FilePicker.platform.getDirectoryPath();
-      final originalFileName = pickedFile!.path.split(Platform.pathSeparator).last;
+      final originalFileName = pickedFile!.path
+          .split(Platform.pathSeparator)
+          .last;
       final newFileName = 'processed_$originalFileName';
       final savePath = '$outputDir${Platform.pathSeparator}$newFileName';
 
@@ -320,7 +370,7 @@ class TextToolProvider extends ChangeNotifier {
       if (!isRegex) {
         findPattern = RegExp.escape(findPattern);
       }
-      
+
       // The user can enter '*' for an easy wildcard, which we convert to '.*?' for regex
       findPattern = findPattern.replaceAll('*', '(.*?)');
 
@@ -339,20 +389,30 @@ class TextToolProvider extends ChangeNotifier {
 
         if (replaceMode == ReplaceMode.standard) {
           processedLine = line.replaceAll(regex, replaceController.text);
-        } else { // Pattern Mode
+        } else {
+          // Pattern Mode
           processedLine = line.replaceAllMapped(regex, (match) {
             String numberString = matchCounter.toString();
             if (patternPadding != 'None') {
-              numberString = numberString.padLeft(patternPadding.length + 1, '0');
+              numberString = numberString.padLeft(
+                patternPadding.length + 1,
+                '0',
+              );
             }
 
             final separator = patternSeparatorController.text;
             // The user types 'n' in the replace field to signify the number's position
-            String replacement = replaceController.text.replaceAll('n', '$separator$numberString$separator');
-            
+            String replacement = replaceController.text.replaceAll(
+              'n',
+              '$separator$numberString$separator',
+            );
+
             // Handle regex capture groups ($1, $2) if present
             for (int i = 1; i <= match.groupCount; i++) {
-                replacement = replacement.replaceAll('\$$i', match.group(i) ?? '');
+              replacement = replacement.replaceAll(
+                '\$$i',
+                match.group(i) ?? '',
+              );
             }
 
             matchCounter++;
@@ -361,7 +421,7 @@ class TextToolProvider extends ChangeNotifier {
         }
         buffer.writeln(processedLine);
       }
-      
+
       // 4. Save to New File
       final outputFile = File(savePath);
       await outputFile.writeAsString(buffer.toString());
@@ -369,7 +429,6 @@ class TextToolProvider extends ChangeNotifier {
       isProcessing = false;
       notifyListeners();
       return "File successfully processed and saved to:\n$savePath";
-
     } catch (e) {
       isProcessing = false;
       notifyListeners();
