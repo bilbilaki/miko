@@ -74,52 +74,94 @@ class LocalScanService {
   Future<void> loadFromCache() async {
     if (_isScanning) return;
 
-    final index = await _indexService.load();
-    if (index.entries.isEmpty) {
-      return; // Nothing cached yet
-    }
+    try {
+      final index = await _indexService.load();
+      if (index.entries.isEmpty) {
+        print('No cached library data found');
+        return; // Nothing cached yet
+      }
 
-    _isScanning = true;
-    _cancelRequested = false;
-    _clearResults();
-    _processed = 0;
-    _totalCandidates = index.entries.length;
+      _isScanning = true;
+      _cancelRequested = false;
+      _clearResults();
+      _processed = 0;
+      _totalCandidates = index.entries.length;
 
-    _statusController.add('Loading cached local library...');
-    _emitProgress();
+      _statusController.add('Loading cached local library...');
+      _emitProgress();
 
-    // Bucket file paths by content type based on what was stored in the index.
-    final Map<ContentType, List<String>> byType = {
-      for (final type in ContentType.values) type: <String>[],
-    };
+      // Bucket file paths by content type based on what was stored in the index.
+      final Map<ContentType, List<String>> byType = {
+        for (final type in ContentType.values) type: <String>[],
+      };
 
-    for (final entry in index.entries.values) {
-      final type = _contentTypeFromName(entry.contentType);
-      byType[type]?.add(entry.path);
-    }
+      for (final entry in index.entries.values) {
+        try {
+          final type = _contentTypeFromName(entry.contentType);
+          byType[type]?.add(entry.path);
+        } catch (e) {
+          print('Error processing cached entry ${entry.path}: $e');
+          continue;
+        }
+      }
 
-    // Reuse the existing scan logic but with cached candidate lists.
-    if (byType[ContentType.movie]!.isNotEmpty) {
-      await _scanMovies(byType[ContentType.movie]!);
-    }
-    if (byType[ContentType.tvSeries]!.isNotEmpty) {
-      await _scanTvSeries(byType[ContentType.tvSeries]!);
-    }
-    if (byType[ContentType.music]!.isNotEmpty) {
-      await _scanMusic(byType[ContentType.music]!);
-    }
-    if (byType[ContentType.musicVideo]!.isNotEmpty) {
-      await _scanMusicVideos(byType[ContentType.musicVideo]!);
-    }
-    if (byType[ContentType.photo]!.isNotEmpty) {
-      await _scanPhotos(byType[ContentType.photo]!);
-    }
-    if (byType[ContentType.mixed]!.isNotEmpty) {
-      await _scanMixedContent(byType[ContentType.mixed]!);
-    }
+      // Reuse the existing scan logic but with cached candidate lists.
+      // Process each type even if others fail
+      try {
+        if (byType[ContentType.movie]!.isNotEmpty) {
+          await _scanMovies(byType[ContentType.movie]!);
+        }
+      } catch (e) {
+        print('Error loading cached movies: $e');
+      }
+      
+      try {
+        if (byType[ContentType.tvSeries]!.isNotEmpty) {
+          await _scanTvSeries(byType[ContentType.tvSeries]!);
+        }
+      } catch (e) {
+        print('Error loading cached TV series: $e');
+      }
+      
+      try {
+        if (byType[ContentType.music]!.isNotEmpty) {
+          await _scanMusic(byType[ContentType.music]!);
+        }
+      } catch (e) {
+        print('Error loading cached music: $e');
+      }
+      
+      try {
+        if (byType[ContentType.musicVideo]!.isNotEmpty) {
+          await _scanMusicVideos(byType[ContentType.musicVideo]!);
+        }
+      } catch (e) {
+        print('Error loading cached music videos: $e');
+      }
+      
+      try {
+        if (byType[ContentType.photo]!.isNotEmpty) {
+          await _scanPhotos(byType[ContentType.photo]!);
+        }
+      } catch (e) {
+        print('Error loading cached photos: $e');
+      }
+      
+      try {
+        if (byType[ContentType.mixed]!.isNotEmpty) {
+          await _scanMixedContent(byType[ContentType.mixed]!);
+        }
+      } catch (e) {
+        print('Error loading cached mixed content: $e');
+      }
 
-    _isScanning = false;
-    _statusController.add('Loaded cached local library');
+      _isScanning = false;
+      _statusController.add('Loaded cached local library');
+    } catch (e) {
+      _isScanning = false;
+      _statusController.add('Failed to load cache: $e');
+      print('Error loading cache: $e');
+    }
   }
 
   Future<void> startScan(
@@ -140,52 +182,60 @@ class LocalScanService {
       'Scanning ${_contentTypeLabel(contentType)} files...',
     );
 
-    final candidates = await _collectCandidates(rootDir, contentType);
-    _totalCandidates = candidates.length;
-    _emitProgress();
+    try {
+      final candidates = await _collectCandidates(rootDir, contentType);
+      _totalCandidates = candidates.length;
+      _emitProgress();
 
-    // Update the lightweight JSON index on disk. This will only
-    // write the file if something actually changed between scans.
-    await _indexService.updateForScan(rootDir, contentType, candidates);
+      // Update the lightweight JSON index on disk. This will only
+      // write the file if something actually changed between scans.
+      await _indexService.updateForScan(rootDir, contentType, candidates);
 
-    if (candidates.isEmpty) {
+      if (candidates.isEmpty) {
+        _isScanning = false;
+        _statusController.add('No media files found');
+        return;
+      }
+
+      _statusController.add(
+        'Processing ${candidates.length} ${_contentTypeLabel(contentType)} files...',
+      );
+
+      // Route to appropriate scanner based on content type
+      switch (contentType) {
+        case ContentType.movie:
+          await _scanMovies(candidates);
+          break;
+        case ContentType.tvSeries:
+          await _scanTvSeries(candidates);
+          // Also scan loose TV files in the root directory
+          // await _scanLooseTvFiles(rootDir); // Removed as _scanTvSeries now handles virtual grouping for all files
+          break;
+        case ContentType.music:
+          await _scanMusic(candidates);
+          break;
+        case ContentType.musicVideo:
+          await _scanMusicVideos(candidates);
+          break;
+        case ContentType.photo:
+          await _scanPhotos(candidates);
+          break;
+        case ContentType.mixed:
+          await _scanMixedContent(candidates);
+          break;
+      }
+
       _isScanning = false;
-      _statusController.add('No media files found');
-      return;
+      _statusController.add(
+        _cancelRequested ? 'Scan cancelled' : 'Scan complete',
+      );
+    } catch (e) {
+      // Ensure scanning state is reset even on error
+      _isScanning = false;
+      _statusController.add('Scan failed: $e');
+      print('Error during scan: $e');
+      rethrow;
     }
-
-    _statusController.add(
-      'Processing ${candidates.length} ${_contentTypeLabel(contentType)} files...',
-    );
-
-    // Route to appropriate scanner based on content type
-    switch (contentType) {
-      case ContentType.movie:
-        await _scanMovies(candidates);
-        break;
-      case ContentType.tvSeries:
-        await _scanTvSeries(candidates);
-        // Also scan loose TV files in the root directory
-        // await _scanLooseTvFiles(rootDir); // Removed as _scanTvSeries now handles virtual grouping for all files
-        break;
-      case ContentType.music:
-        await _scanMusic(candidates);
-        break;
-      case ContentType.musicVideo:
-        await _scanMusicVideos(candidates);
-        break;
-      case ContentType.photo:
-        await _scanPhotos(candidates);
-        break;
-      case ContentType.mixed:
-        await _scanMixedContent(candidates);
-        break;
-    }
-
-    _isScanning = false;
-    _statusController.add(
-      _cancelRequested ? 'Scan cancelled' : 'Scan complete',
-    );
   }
 
   void cancel() {
@@ -1158,10 +1208,11 @@ class LocalScanService {
       }
 
       _processed++;
-      if (_processed % 3 == 0) {
+      // Optimize: Update UI less frequently (every 5 items instead of 3)
+      if (_processed % 5 == 0) {
         _movieResultsController.add(List.unmodifiable(_movieResults));
+        _emitProgress();
       }
-      _emitProgress();
       await Future.delayed(const Duration(milliseconds: 500)); // Rate limit
     }
 
@@ -1215,22 +1266,28 @@ class LocalScanService {
       }
 
       _processed++;
-      if (_processed % 3 == 0) {
+      // Optimize: Update UI less frequently (every 5 items instead of 3)
+      if (_processed % 5 == 0) {
         _tvResultsController.add(List.unmodifiable(_tvResults));
+        _emitProgress();
       }
-      _emitProgress();
       await Future.delayed(const Duration(milliseconds: 500)); // Rate limit
     }
 
     // Save updated index if any metadata was fetched
     if (indexChanged) {
       print('💿 Saving updated index to cache...');
-      await _indexService.save(index);
-      print('✅ Index saved successfully');
+      try {
+        await _indexService.save(index);
+        print('✅ Index saved successfully');
+      } catch (e) {
+        print('❌ Error saving index: $e');
+      }
     } else {
       print('ℹ️  No changes to index, skipping save');
     }
 
+    // Final update to ensure all results are visible
     _movieResultsController.add(List.unmodifiable(_movieResults));
     _tvResultsController.add(List.unmodifiable(_tvResults));
 
