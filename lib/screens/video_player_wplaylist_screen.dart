@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:miko/providers/god_proovider.dart' as ss;
+import 'package:miko/screens/dl.dart';
 import 'package:miko/services/user_data_service.dart';
 import 'package:miko/services/local_file_playlist_service.dart';
 import 'package:miko/utils/colors.dart';
@@ -57,8 +59,7 @@ class VideoPlayerScreenPlState extends State<VideoPlayerScreenPl> {
       widget.playlist.isNotEmpty ? widget.playlist[currentIndex] : null;
   StreamSubscription? _completedSubscription;
   StreamSubscription? _errorSubscription;
-bool showSettings =
-      false;
+  bool showSettings = false;
   Timer? _hideTimer;
   String currentQuality = 'Auto';
   bool streamHasError = false;
@@ -117,7 +118,8 @@ bool showSettings =
 
     return currentchoice;
   }
-   void _showSettings() {
+
+  void _showSettings() {
     setState(() {
       showSettings = true;
     });
@@ -132,6 +134,7 @@ bool showSettings =
       }
     });
   }
+
   // New method to select and set external subtitle
   Future<void> _selectSubtitle() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -139,9 +142,7 @@ bool showSettings =
       allowedExtensions: ['srt', 'ass', 'vtt', 'sub'],
     );
     if (result != null && result.files.single.path != null) {
-       player.setSubtitleTrack(
-        SubtitleTrack.uri(result.files.single.path!),
-      );
+      player.setSubtitleTrack(SubtitleTrack.uri(result.files.single.path!));
       // Optionally hide settings after selection
       setState(() {
         showSettings = false;
@@ -156,7 +157,7 @@ bool showSettings =
       allowedExtensions: ['mp3', 'aac', 'm4a', 'wav'],
     );
     if (result != null && result.files.single.path != null) {
-       player.setAudioTrack(AudioTrack.uri(result.files.single.path!));
+      player.setAudioTrack(AudioTrack.uri(result.files.single.path!));
       // Optionally hide settings after selection
       setState(() {
         showSettings = false;
@@ -292,6 +293,7 @@ bool showSettings =
     if (widget.isLocalSource) {
       final playlist = await LocalFilePlaylistService.buildPlaylistFromFolder(
         urlToPlay,
+        "video",
       );
 
       if (playlist.isEmpty) {
@@ -300,10 +302,7 @@ bool showSettings =
       }
 
       // Find current file index
-      final currentIndex = LocalFilePlaylistService.findCurrentFileIndex(
-        playlist,
-        urlToPlay,
-      );
+
       await player.open(Playlist(playlist), play: false);
     } else {
       await player.open(Media(Uri.decodeComponent(urlToPlay)), play: false);
@@ -635,78 +634,78 @@ bool showSettings =
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                    if (showSettings)
-                    Container(
-                      width: 250, // Wider to accommodate buttons
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Subtitle size slider row
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.text_fields,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              Expanded(
-                                child: Slider(
-                                  value: subtitleSize,
-                                  min: 16.0,
-                                  max: 48.0,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      subtitleSize = value;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          // Button for selecting external subtitle
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: _selectSubtitle,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                foregroundColor: Colors.white,
-                              ),
-                              child: const Text('Select External Subtitle'),
+                if (showSettings)
+                  Container(
+                    width: 250, // Wider to accommodate buttons
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Subtitle size slider row
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.text_fields,
+                              color: Colors.white,
+                              size: 20,
                             ),
-                          ),
-                          const SizedBox(height: 5),
-                          // Button for selecting external audio
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: _selectAudio,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                foregroundColor: Colors.white,
+                            Expanded(
+                              child: Slider(
+                                value: subtitleSize,
+                                min: 16.0,
+                                max: 48.0,
+                                onChanged: (value) {
+                                  setState(() {
+                                    subtitleSize = value;
+                                  });
+                                },
                               ),
-                              child: const Text('Select External Audio'),
                             ),
-                          ),
-                          const SizedBox(height: 5),
-                          // Optional close button
-                          TextButton(
-                            onPressed: () {
-                              setState(() {
-                                showSettings = false;
-                              });
-                            },
-                            child: const Text(
-                              'Close',
-                              style: TextStyle(color: Colors.white),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        // Button for selecting external subtitle
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _selectSubtitle,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
                             ),
+                            child: const Text('Select External Subtitle'),
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 5),
+                        // Button for selecting external audio
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _selectAudio,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
+                            ),
+                            child: const Text('Select External Audio'),
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        // Optional close button
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              showSettings = false;
+                            });
+                          },
+                          child: const Text(
+                            'Close',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
                 IconButton(
                   onPressed: _showQualitySelectionDialog,
                   icon: Icon(Icons.hd_rounded),
@@ -719,6 +718,20 @@ bool showSettings =
                   tooltip: 'Change display mode',
                   onPressed: _cycleBoxFit,
                 ),
+                IconButton(
+                  icon: Icon(
+                    _playModeIcons[currentPlayMode] ?? Icons.aspect_ratio,
+                    color: Colors.white,
+                  ),
+                  tooltip: 'Change playList mode',
+                  onPressed: () async {
+                    setState(() {
+                       playlistMode(player);
+                   
+                    });
+                  },
+                ),
+
                 if (showSubtitleControls)
                   Container(
                     width: 200,
@@ -745,6 +758,17 @@ bool showSettings =
                       ],
                     ),
                   ),
+                IconButton(
+                  icon: Icon(Icons.screenshot, color: Colors.blueAccent),
+                  tooltip: 'Get Video Shot',
+                  onPressed: () async {
+                    await getshot(
+                      player,
+                      "${widget.seriesname}-${currentEpisode?.episodeIdentifier}",
+                    );
+                  },
+                ),
+
                 IconButton(
                   icon: const Icon(
                     Icons.closed_caption,
@@ -778,10 +802,10 @@ bool showSettings =
                     playEpisode(currentIndex + 1); // Consider bounds check
                   },
                 ),
-                     IconButton(
-                    icon: Icon(Icons.settings, color: Colors.white),
-                    onPressed: _showSettings, // Updated to show settings panel
-                  ),
+                IconButton(
+                  icon: Icon(Icons.settings, color: Colors.white),
+                  onPressed: _showSettings, // Updated to show settings panel
+                ),
               ],
             ),
           ),
@@ -917,6 +941,35 @@ bool showSettings =
   }
 }
 
+List<PlaylistMode> playModeOptions = [
+  PlaylistMode.none,
+  PlaylistMode.single,
+  PlaylistMode.loop,
+];
+int currentPlayModeIndex = 0;
+PlaylistMode get currentPlayMode => playModeOptions[currentPlayModeIndex];
+final Map<PlaylistMode, IconData> _playModeIcons = {
+  PlaylistMode.none: Icons.arrow_forward_ios,
+  PlaylistMode.single: Icons.repeat_on,
+  PlaylistMode.loop: Icons.loop,
+};
+void playlistMode(Player player) async {
+  currentPlayModeIndex = (currentPlayModeIndex + 1) % playModeOptions.length;
+  await player.setPlaylistMode(currentPlayMode);
+}
+
+Future<void> getshot(Player player, String videoName) async {
+  final Uint8List? screenshot = await player.screenshot();
+  if (screenshot != null) {
+    Directory basedir = await getTargetDirectory(folderUnderApp: "ScreenShots");
+    final fdir = await File(
+      p.join(basedir.path, videoName, '${DateTime.now()}.png'),
+    ).create();
+    await File(fdir.path).writeAsBytes((screenshot).toList());
+  }
+}
+
+// ignore: must_be_immutable
 class VideoPlayerScreen extends StatefulWidget {
   final String videoUrl;
   final String videoName;
@@ -1007,6 +1060,7 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
     if (widget.source == "local") {
       final playlist = await LocalFilePlaylistService.buildPlaylistFromFolder(
         urlToPlay,
+        "video",
       );
 
       if (playlist.isEmpty) {
@@ -1015,10 +1069,7 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
       }
 
       // Find current file index
-      final currentIndex = LocalFilePlaylistService.findCurrentFileIndex(
-        playlist,
-        urlToPlay,
-      );
+
       await player.open(Playlist(playlist), play: false);
     } else {
       await player.open(Media(Uri.decodeComponent(urlToPlay)), play: false);
@@ -1072,9 +1123,7 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
       allowedExtensions: ['srt', 'ass', 'vtt', 'sub'],
     );
     if (result != null && result.files.single.path != null) {
-       player.setSubtitleTrack(
-        SubtitleTrack.uri(result.files.single.path!),
-      );
+      player.setSubtitleTrack(SubtitleTrack.uri(result.files.single.path!));
       // Optionally hide settings after selection
       setState(() {
         showSettings = false;
@@ -1089,7 +1138,7 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
       allowedExtensions: ['mp3', 'aac', 'm4a', 'wav'],
     );
     if (result != null && result.files.single.path != null) {
-       player.setAudioTrack(AudioTrack.uri(result.files.single.path!));
+      player.setAudioTrack(AudioTrack.uri(result.files.single.path!));
       // Optionally hide settings after selection
       setState(() {
         showSettings = false;
@@ -1354,6 +1403,13 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
                       ),
                     ),
                   IconButton(
+                    icon: Icon(Icons.screenshot, color: Colors.blueAccent),
+                    tooltip: 'Get Video Shot',
+                    onPressed: () async {
+                      await getshot(player, widget.videoName);
+                    },
+                  ),
+                  IconButton(
                     icon: Icon(
                       _fitIcons[currentFit] ?? Icons.aspect_ratio,
                       color: Colors.white,
@@ -1361,6 +1417,19 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
                     tooltip: 'Change display mode',
                     onPressed: _cycleBoxFit,
                   ),
+                    IconButton(
+                  icon: Icon(
+                    _playModeIcons[currentPlayMode] ?? Icons.aspect_ratio,
+                    color: Colors.white,
+                  ),
+                  tooltip: 'Change playList mode',
+                  onPressed: () async {
+                    setState(() {
+                       playlistMode(player);
+                   
+                    });
+                  },
+                ),
                   IconButton(
                     icon: Icon(
                       Icons.picture_in_picture_outlined,

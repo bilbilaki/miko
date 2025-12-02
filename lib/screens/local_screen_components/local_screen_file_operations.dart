@@ -10,6 +10,30 @@ import '../video_player_wplaylist_screen.dart';
 import 'code_editor_dialog.dart';
 import 'local_screen_dialogs.dart';
 import 'zip_operation_dialogs.dart';
+import 'package:android_package_installer/android_package_installer.dart';
+
+final platform = Platform.isWindows
+    ? "windows"
+    : Platform.isAndroid
+    ? "android"
+    : "linux";
+
+Future<String> execute(String command, bool isSystem) async {
+  try {
+    final result = platform == "windows"
+        ? await Process.start(
+                isSystem ? 'sudo powershell' : 'powershell',
+                ['-Command', command],
+                mode: ProcessStartMode.inheritStdio,
+              )
+              as ProcessResult
+        : await Process.run(isSystem ? 'sudo bash' : 'bash', ['-c', command]);
+
+    return result.stdout.toString().trim();
+  } catch (e) {
+    return 'Failed to execute command: $e';
+  }
+}
 
 class LocalScreenFileOperations {
   /// Handles file tap actions based on file type
@@ -20,7 +44,23 @@ class LocalScreenFileOperations {
     Function(String) showSnackBar,
   ) async {
     try {
-      if (provider.isMovieFile(file)) {
+      final String filePath = file.path;
+      final String ext = p.extension(filePath).toLowerCase();
+      if (['.exe', '.msi', '.bat', '.cmd'].contains(ext) ||
+          ['.AppImage', '.run'].contains(ext)) {
+        execute(filePath, false);
+        showSnackBar('execute: $filePath');
+        return;
+      } else if (['.apk'].contains(ext)) {
+        int? statusCode = await AndroidPackageInstaller.installApk(
+          apkFilePath: filePath,
+        );
+        if (statusCode != null) {
+          PackageInstallerStatus installationStatus =
+              PackageInstallerStatus.byCode(statusCode);
+          showSnackBar("installing apk: $installationStatus");
+        }
+      } else if (provider.isMovieFile(file)) {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -34,11 +74,20 @@ class LocalScreenFileOperations {
       } else if (provider.isImageFile(file)) {
         showImageDialog(context, file, null);
       } else if (provider.isAudioFile(file)) {
-        final String filePath = file.path;
-        final String ext = p.extension(filePath).toLowerCase();
         if (!['.mp3', '.wav', '.aac', '.flac', '.ogg'].contains(ext)) {
           showSnackBar('Unsupported audio format: $ext');
           return;
+        }else {
+           Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => VideoPlayerScreen(
+              videoName: file.path,
+              source: 'local',
+              videoUrl: file.path,
+            ),
+          ),
+        );
         }
       } else if (provider.isTextFile(file)) {
         await showDocumentContentDialog(context, file, provider, showSnackBar);
@@ -59,9 +108,7 @@ class LocalScreenFileOperations {
   ) {
     SwipeImageGallery(
       context: context,
-      children: [
-        Image.file(imageFile, fit: BoxFit.contain),
-      ],
+      children: [Image.file(imageFile, fit: BoxFit.contain)],
     ).show();
   }
 
@@ -83,47 +130,50 @@ class LocalScreenFileOperations {
       return;
     }
 
-
     showDialog(
       context: context,
       builder: (context) {
-        return  CodeEditorDialog(
-         filePath: documentFile.path, initialContent: initialContent, onSave: (String newContent)async { 
-                final bool success = await provider.saveDocumentContent(
-                  documentFile.path,
-                  newContent,
-                );
-                if (success) {
-                  showSnackBar('File saved successfully.');
-                  Navigator.of(context).pop();
-                } else {
-                  showSnackBar('Failed to save file.');
-                } 
-                
-                },
-         onSaveAs: (String newContent)async  {                final String? newFileName = await LocalScreenDialogs.showInputDialog(
+        return CodeEditorDialog(
+          filePath: documentFile.path,
+          initialContent: initialContent,
+          onSave: (String newContent) async {
+            final bool success = await provider.saveDocumentContent(
+              documentFile.path,
+              newContent,
+            );
+            if (success) {
+              showSnackBar('File saved successfully.');
+              Navigator.of(context).pop();
+            } else {
+              showSnackBar('Failed to save file.');
+            }
+          },
+          onSaveAs: (String newContent) async {
+            final String? newFileName =
+                await LocalScreenDialogs.showInputDialog(
                   context,
                   'Save As',
                   'Enter new file name (e.g., my_document.txt):',
                   p.basename(documentFile.path),
                 );
-                if (newFileName != null && newFileName.isNotEmpty) {
-                  final String newFilePath = p.join(
-                    p.dirname(documentFile.path),
-                    newFileName,
-                  );
-                  final bool success = await provider.saveDocumentContentAs(
-                    newFilePath,
-                    newContent,
-                  );
-                  if (success) {
-                    showSnackBar('File saved as $newFileName successfully.');
-                    Navigator.of(context).pop();
-                  } else {
-                    showSnackBar('Failed to save file as $newFileName.');
-                  }
-                }
-         });
+            if (newFileName != null && newFileName.isNotEmpty) {
+              final String newFilePath = p.join(
+                p.dirname(documentFile.path),
+                newFileName,
+              );
+              final bool success = await provider.saveDocumentContentAs(
+                newFilePath,
+                newContent,
+              );
+              if (success) {
+                showSnackBar('File saved as $newFileName successfully.');
+                Navigator.of(context).pop();
+              } else {
+                showSnackBar('Failed to save file as $newFileName.');
+              }
+            }
+          },
+        );
       },
     );
   }
@@ -182,11 +232,12 @@ class LocalScreenFileOperations {
     String? currentFolderPath,
     Function(String) showSnackBar,
   ) async {
-    final String? destinationPath = await LocalScreenDialogs.showPathSelectionDialog(
-      context,
-      'Copy "${p.basename(file.path)}" to',
-      currentFolderPath,
-    );
+    final String? destinationPath =
+        await LocalScreenDialogs.showPathSelectionDialog(
+          context,
+          'Copy "${p.basename(file.path)}" to',
+          currentFolderPath,
+        );
     if (destinationPath != null) {
       final newFilePath = p.join(destinationPath, p.basename(file.path));
       if (await File(newFilePath).exists()) {
@@ -219,11 +270,12 @@ class LocalScreenFileOperations {
     String? currentFolderPath,
     Function(String) showSnackBar,
   ) async {
-    final String? destinationPath = await LocalScreenDialogs.showPathSelectionDialog(
-      context,
-      'Move "${p.basename(file.path)}" to',
-      currentFolderPath,
-    );
+    final String? destinationPath =
+        await LocalScreenDialogs.showPathSelectionDialog(
+          context,
+          'Move "${p.basename(file.path)}" to',
+          currentFolderPath,
+        );
     if (destinationPath != null) {
       final newFilePath = p.join(destinationPath, p.basename(file.path));
       if (await File(newFilePath).exists()) {
@@ -310,11 +362,12 @@ class LocalScreenFileOperations {
     String? currentFolderPath,
     Function(String) showSnackBar,
   ) async {
-    final String? destinationPath = await LocalScreenDialogs.showPathSelectionDialog(
-      context,
-      'Copy folder "${p.basename(folder.path)}" to',
-      currentFolderPath,
-    );
+    final String? destinationPath =
+        await LocalScreenDialogs.showPathSelectionDialog(
+          context,
+          'Copy folder "${p.basename(folder.path)}" to',
+          currentFolderPath,
+        );
     if (destinationPath != null) {
       final newDirPath = p.join(destinationPath, p.basename(folder.path));
       if (await Directory(newDirPath).exists()) {
@@ -350,11 +403,12 @@ class LocalScreenFileOperations {
     Function(String) showSnackBar,
     Function() goUp,
   ) async {
-    final String? destinationPath = await LocalScreenDialogs.showPathSelectionDialog(
-      context,
-      'Move folder "${p.basename(folder.path)}" to',
-      currentFolderPath,
-    );
+    final String? destinationPath =
+        await LocalScreenDialogs.showPathSelectionDialog(
+          context,
+          'Move folder "${p.basename(folder.path)}" to',
+          currentFolderPath,
+        );
     if (destinationPath != null) {
       final newDirPath = p.join(destinationPath, p.basename(folder.path));
       if (await Directory(newDirPath).exists()) {
@@ -411,6 +465,7 @@ class LocalScreenFileOperations {
       }
     }
   }
+
   /// Displays a dialog for batch renaming files in the current directory
   static Future<void> showBatchRenameDialog(
     BuildContext context,
@@ -418,35 +473,35 @@ class LocalScreenFileOperations {
     String? currentFolderPath,
     Function(String) showSnackBar,
   ) async {
-    await LocalScreenDialogs.showBatchRenameDialog(
-      context,
-      (prefix, postfix) async {
-        final String targetPath = currentFolderPath ?? provider.externalPath!;
-        if (targetPath.isEmpty) {
-          showSnackBar('No directory selected for batch rename.');
-          return;
-        }
+    await LocalScreenDialogs.showBatchRenameDialog(context, (
+      prefix,
+      postfix,
+    ) async {
+      final String targetPath = currentFolderPath ?? provider.externalPath!;
+      if (targetPath.isEmpty) {
+        showSnackBar('No directory selected for batch rename.');
+        return;
+      }
 
-        final bool? confirmed = await LocalScreenDialogs.showConfirmationDialog(
-          context,
-          'Confirm Batch Rename',
-          'Are you sure you want to batch rename all files in \n"$targetPath"?\nThis action cannot be easily undone.',
+      final bool? confirmed = await LocalScreenDialogs.showConfirmationDialog(
+        context,
+        'Confirm Batch Rename',
+        'Are you sure you want to batch rename all files in \n"$targetPath"?\nThis action cannot be easily undone.',
+      );
+
+      if (confirmed == true) {
+        final bool success = await provider.renameFilesInPath(
+          targetPath,
+          prefix: prefix,
+          postfix: postfix,
         );
-
-        if (confirmed == true) {
-          final bool success = await provider.renameFilesInPath(
-            targetPath,
-            prefix: prefix,
-            postfix: postfix,
-          );
-          if (success) {
-            showSnackBar('Batch rename completed.');
-          } else {
-            showSnackBar('Batch rename failed.');
-          }
+        if (success) {
+          showSnackBar('Batch rename completed.');
+        } else {
+          showSnackBar('Batch rename failed.');
         }
-      },
-    );
+      }
+    });
   }
 
   /// Browse a zip file and enter zip exploration mode
@@ -457,9 +512,9 @@ class LocalScreenFileOperations {
     Function(String) showSnackBar,
   ) async {
     showSnackBar('Opening ZIP file...');
-    
+
     final success = await zipProvider.enterZipMode(zipFile.path);
-    
+
     if (success) {
       showSnackBar('ZIP file opened: ${p.basename(zipFile.path)}');
       // Note: Navigation to ZipExplorerView would be handled by the calling screen
@@ -475,12 +530,12 @@ class LocalScreenFileOperations {
     ZipExplorerProvider zipProvider,
     Function(String) showSnackBar,
   ) async {
-              LocalProvider provider = LocalProvider();
+    LocalProvider provider = LocalProvider();
 
     showSnackBar('Loading file from ZIP...');
-    
+
     final content = await zipProvider.readFileFromZip(filePath);
-    
+
     if (content == null) {
       showSnackBar('Failed to read file from ZIP');
       return;
@@ -493,34 +548,37 @@ class LocalScreenFileOperations {
         initialContent: content,
         onSave: (newContent) async {
           showSnackBar('Saving file to ZIP...');
-          final success = await zipProvider.writeFileToZip(filePath, newContent);
+          final success = await zipProvider.writeFileToZip(
+            filePath,
+            newContent,
+          );
           if (success) {
             showSnackBar('File saved to ZIP successfully');
           } else {
             showSnackBar('Failed to save file to ZIP');
           }
-        }, onSaveAs: (String newContent )async {     final String? newFileName = await LocalScreenDialogs.showInputDialog(
-                  context,
-                  'Save As',
-                  'Enter new file name (e.g., my_document.txt):',
-                  p.basename(filePath),
-                );
-                if (newFileName != null && newFileName.isNotEmpty) {
-                  final String newFilePath = p.join(
-                    p.dirname(filePath),
-                    newFileName,
-                  );
-                  final bool success = await provider.saveDocumentContentAs(
-                    newFilePath,
-                    newContent,
-                  );
-                  if (success) {
-                    showSnackBar('File saved as $newFileName successfully.');
-                    Navigator.of(context).pop();
-                  } else {
-                    showSnackBar('Failed to save file as $newFileName.');
-                  }
-                } },
+        },
+        onSaveAs: (String newContent) async {
+          final String? newFileName = await LocalScreenDialogs.showInputDialog(
+            context,
+            'Save As',
+            'Enter new file name (e.g., my_document.txt):',
+            p.basename(filePath),
+          );
+          if (newFileName != null && newFileName.isNotEmpty) {
+            final String newFilePath = p.join(p.dirname(filePath), newFileName);
+            final bool success = await provider.saveDocumentContentAs(
+              newFilePath,
+              newContent,
+            );
+            if (success) {
+              showSnackBar('File saved as $newFileName successfully.');
+              Navigator.of(context).pop();
+            } else {
+              showSnackBar('Failed to save file as $newFileName.');
+            }
+          }
+        },
       ),
     );
   }
@@ -554,12 +612,12 @@ class LocalScreenFileOperations {
       'Delete from ZIP',
       'Are you sure you want to delete ${entryPaths.length} item(s) from the ZIP archive?',
     );
-    
+
     if (confirmed == true) {
       showSnackBar('Deleting from ZIP...');
-      
+
       final success = await zipProvider.removeFromZip(entryPaths);
-      
+
       if (success) {
         showSnackBar('Successfully deleted ${entryPaths.length} item(s)');
       } else {
@@ -582,14 +640,14 @@ class LocalScreenFileOperations {
       'Enter new name for "$oldName":',
       oldName,
     );
-    
+
     if (newName != null && newName.isNotEmpty && newName != oldName) {
       final newPath = p.join(p.dirname(entryPath), newName);
-      
+
       showSnackBar('Renaming in ZIP...');
-      
+
       final success = await zipProvider.renameInZip(entryPath, newPath);
-      
+
       if (success) {
         showSnackBar('Entry renamed to "$newName"');
       } else {
@@ -599,68 +657,69 @@ class LocalScreenFileOperations {
   }
 
   // --- NAVIGATION LOGIC ---
-static Future<void> handleEntryTap(
-  BuildContext context,
-  FsEntry entry,
-  LocalProvider provider,
-  Function(String) showSnackBar,
-) async {
-  final file = File(entry.path);
-  // Reuse existing logic
-  return handleFileTap(context, file, provider, showSnackBar);
-}
-static Future<void> renameEntry(
-  BuildContext context,
-  FsEntry entry,
-  LocalProvider provider,
-  Function(String) showSnackBar,
-) async {
-  final file = File(entry.path);
-  return renameFile(context, file, provider, showSnackBar);
-}
+  static Future<void> handleEntryTap(
+    BuildContext context,
+    FsEntry entry,
+    LocalProvider provider,
+    Function(String) showSnackBar,
+  ) async {
+    final file = File(entry.path);
+    // Reuse existing logic
+    return handleFileTap(context, file, provider, showSnackBar);
+  }
 
-static Future<void> deleteEntry(
-  BuildContext context,
-  FsEntry entry,
-  LocalProvider provider,
-  Function(String) showSnackBar,
-) async {
-  final file = File(entry.path);
-  return deleteFile(context, file, provider, showSnackBar);
-}
+  static Future<void> renameEntry(
+    BuildContext context,
+    FsEntry entry,
+    LocalProvider provider,
+    Function(String) showSnackBar,
+  ) async {
+    final file = File(entry.path);
+    return renameFile(context, file, provider, showSnackBar);
+  }
 
-static Future<void> copyEntry(
-  BuildContext context,
-  FsEntry entry,
-  LocalProvider provider,
-  String? currentFolderPath,
-  Function(String) showSnackBar,
-) async {
-  final file = File(entry.path);
-  return copyFile(context, file, provider, currentFolderPath, showSnackBar);
-}
+  static Future<void> deleteEntry(
+    BuildContext context,
+    FsEntry entry,
+    LocalProvider provider,
+    Function(String) showSnackBar,
+  ) async {
+    final file = File(entry.path);
+    return deleteFile(context, file, provider, showSnackBar);
+  }
 
-static Future<void> moveEntry(
-  BuildContext context,
-  FsEntry entry,
-  LocalProvider provider,
-  String? currentFolderPath,
-  Function(String) showSnackBar,
-) async {
-  final file = File(entry.path);
-  return moveFile(context, file, provider, currentFolderPath, showSnackBar);
-}
+  static Future<void> copyEntry(
+    BuildContext context,
+    FsEntry entry,
+    LocalProvider provider,
+    String? currentFolderPath,
+    Function(String) showSnackBar,
+  ) async {
+    final file = File(entry.path);
+    return copyFile(context, file, provider, currentFolderPath, showSnackBar);
+  }
 
-// For opening/editing document content:
-static Future<void> showEntryDocumentDialog(
-  BuildContext context,
-  FsEntry entry,
-  LocalProvider provider,
-  Function(String) showSnackBar,
-) async {
-  final file = File(entry.path);
-  return showDocumentContentDialog(context, file, provider, showSnackBar);
-}
+  static Future<void> moveEntry(
+    BuildContext context,
+    FsEntry entry,
+    LocalProvider provider,
+    String? currentFolderPath,
+    Function(String) showSnackBar,
+  ) async {
+    final file = File(entry.path);
+    return moveFile(context, file, provider, currentFolderPath, showSnackBar);
+  }
+
+  // For opening/editing document content:
+  static Future<void> showEntryDocumentDialog(
+    BuildContext context,
+    FsEntry entry,
+    LocalProvider provider,
+    Function(String) showSnackBar,
+  ) async {
+    final file = File(entry.path);
+    return showDocumentContentDialog(context, file, provider, showSnackBar);
+  }
+
   /// Displays a dialog for batch renaming files in the current directory
-
 }

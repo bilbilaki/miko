@@ -13,20 +13,25 @@ class LocalFilePlaylistService {
     'flv',
     'wmv',
     'webm',
-    'ts',
-    'm3u8',
     'mpg',
     'mpeg',
     'mts',
-    'm2ts',
-    'mxf',
-    'ogv',
     '3gp',
     'vob',
   ];
+  static const List<String> audioExtensions = [
+    'mp3',
+    'ogg',
+    'flac',
+    'wav',
+    'aac',
+  ];
 
   /// Scan parent folder for video files and create playlist
-  static Future<List<Media>> buildPlaylistFromFolder(String filePath) async {
+  static Future<List<Media>> buildPlaylistFromFolder(
+    String filePath,
+    String targetList,
+  ) async {
     try {
       final parentPath = p.dirname(filePath);
       final currentFileName = p.basename(filePath);
@@ -52,6 +57,15 @@ class LocalFilePlaylistService {
               return videoExtensions.contains(ext);
             }).toList()
             ..sort((a, b) => p.basename(a.path).compareTo(p.basename(b.path)));
+      final audioFiles =
+          files.whereType<File>().where((file) {
+              final ext = p
+                  .extension(file.path)
+                  .toLowerCase()
+                  .replaceFirst('.', '');
+              return audioExtensions.contains(ext);
+            }).toList()
+            ..sort((a, b) => p.basename(a.path).compareTo(p.basename(b.path)));
 
       debugPrint(
         'Found ${videoFiles.length} video files in $parentPath (sorted A-Z 0-9)',
@@ -60,14 +74,25 @@ class LocalFilePlaylistService {
 
       // Step 3: Find current file index in sorted list
       int currentFileIndex = -1;
-      for (int i = 0; i < videoFiles.length; i++) {
-        if (p.basename(videoFiles[i].path) == currentFileName) {
-          currentFileIndex = i;
-          debugPrint('Current file index in sorted list: $currentFileIndex');
-          break;
+      if (targetList == "video") {
+        for (int i = 0; i < videoFiles.length; i++) {
+          if (p.basename(videoFiles[i].path) == currentFileName) {
+            currentFileIndex = i;
+            debugPrint('Current file index in sorted list: $currentFileIndex');
+            break;
+          }
         }
-      }
+      } else {
+for (int i = 0; i < audioFiles.length; i++) {
+          if (p.basename(videoFiles[i].path) == currentFileName) {
+            currentFileIndex = i;
+            debugPrint('Current file index in sorted list: $currentFileIndex');
+            break;
+          }
+        }
 
+
+      }
       if (currentFileIndex == -1) {
         debugPrint(
           'Current file not found in scanned files, using original order',
@@ -79,11 +104,11 @@ class LocalFilePlaylistService {
       final reorganizedFiles = <File>[];
 
       // Add files from current index onwards
-      reorganizedFiles.addAll(videoFiles.sublist(currentFileIndex));
+      reorganizedFiles.addAll(targetList=="video"? videoFiles.sublist(currentFileIndex):audioFiles.sublist(currentFileIndex));
 
       // Add files before current index to the end
       if (currentFileIndex > 0) {
-        reorganizedFiles.addAll(videoFiles.sublist(0, currentFileIndex));
+        reorganizedFiles.addAll(targetList=="video"?videoFiles.sublist(0, currentFileIndex):audioFiles.sublist(0,currentFileIndex));
         debugPrint(
           'Moved ${currentFileIndex} files before current to end of playlist',
         );
@@ -167,6 +192,7 @@ class LocalFilePlaylistService {
     required Player player,
     required String currentFilePath,
     required bool isLocalSource,
+    required String targetList
   }) async {
     if (!isLocalSource) {
       debugPrint('Not a local source, skipping playlist generation');
@@ -177,7 +203,7 @@ class LocalFilePlaylistService {
       debugPrint('Building playlist for local file: $currentFilePath');
 
       // Build playlist from folder
-      final playlist = await buildPlaylistFromFolder(currentFilePath);
+      final playlist = await buildPlaylistFromFolder(currentFilePath,targetList);
 
       if (playlist.isEmpty) {
         debugPrint('No video files found in folder');
