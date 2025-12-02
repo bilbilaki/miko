@@ -38,7 +38,7 @@ class LocalScanService {
 
   // Performance tuning constants
   // Adjust these values based on your needs - see PERFORMANCE_OPTIMIZATION.md
-  static const int __progressUpdateInterval = 10; // UI update frequency (files)
+  static const int _progressUpdateInterval = 10; // UI update frequency (files)
   static const int _delayInterval = 100;         // Event loop yield frequency (files)
   static const int _fileDiscoveryFeedback = 100; // File discovery progress (files)
   static const int _metadataUpdateInterval = 5;  // TMDB fetch UI updates (items)
