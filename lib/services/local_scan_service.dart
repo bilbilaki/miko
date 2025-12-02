@@ -269,264 +269,331 @@ class LocalScanService {
 
   Future<void> _scanMovies(List<String> candidates) async {
     final videoExts = <String>{'.mp4', '.mkv', '.avi', '.mov', '.m4v', '.webm'};
+    const progressUpdateInterval = 10; // Update UI every 10 files instead of 5
 
     for (final path in candidates) {
       if (_cancelRequested) break;
 
-      final file = File(path);
-      final ext = file.path.split('.').last.toLowerCase();
-      if (!videoExts.contains('.$ext')) continue;
+      try {
+        final file = File(path);
+        final ext = file.path.split('.').last.toLowerCase();
+        if (!videoExts.contains('.$ext')) {
+          _processed++;
+          continue;
+        }
 
-      final parsed = _parseMediaFromFilename(path);
-      final metadata = await Metadata.fromFile(file);
-      final movieName = parsed.name.isEmpty ? 'Unknown Movie' : parsed.name;
-      final moviePath = file.parent.path;
-      final seriesFolderName = moviePath.split(Platform.pathSeparator).last;
+        final parsed = _parseMediaFromFilename(path);
+        final metadata = await Metadata.fromFile(file);
+        final movieName = parsed.name.isEmpty ? 'Unknown Movie' : parsed.name;
+        final moviePath = file.parent.path;
+        final seriesFolderName = moviePath.split(Platform.pathSeparator).last;
 
-      final normalizedSeriesName = _normalizeFolderNameForTmdb(
-        seriesFolderName,
-      );
-
-      var movie = _movieResults.firstWhere(
-        (m) => m.path == moviePath && m.name == movieName,
-        orElse: () => Movie(
-          path: moviePath,
-          parentPath: Directory(moviePath).parent.path,
-          name: normalizedSeriesName,
-          movieItems: [],
-        ),
-      );
-
-      final movieItem = MovieItem(
-        path: path,
-        parentPath: file.parent.path,
-        name: file.uri.pathSegments.last,
-        metadata: metadata,
-      );
-
-      if (!_movieResults.contains(movie)) {
-        _movieResults.add(movie.copyWith(movieItems: [movieItem]));
-      } else {
-        final index = _movieResults.indexOf(movie);
-        _movieResults[index] = movie.copyWith(
-          movieItems: [...movie.movieItems, movieItem],
+        final normalizedSeriesName = _normalizeFolderNameForTmdb(
+          seriesFolderName,
         );
-      }
 
-      _processed++;
-      if (_processed % 5 == 0) {
-        _movieResultsController.add(List.unmodifiable(_movieResults));
+        var movie = _movieResults.firstWhere(
+          (m) => m.path == moviePath && m.name == movieName,
+          orElse: () => Movie(
+            path: moviePath,
+            parentPath: Directory(moviePath).parent.path,
+            name: normalizedSeriesName,
+            movieItems: [],
+          ),
+        );
+
+        final movieItem = MovieItem(
+          path: path,
+          parentPath: file.parent.path,
+          name: file.uri.pathSegments.last,
+          metadata: metadata,
+        );
+
+        if (!_movieResults.contains(movie)) {
+          _movieResults.add(movie.copyWith(movieItems: [movieItem]));
+        } else {
+          final index = _movieResults.indexOf(movie);
+          _movieResults[index] = movie.copyWith(
+            movieItems: [...movie.movieItems, movieItem],
+          );
+        }
+
+        _processed++;
+        // Optimize: Update UI less frequently for better performance
+        if (_processed % progressUpdateInterval == 0) {
+          _movieResultsController.add(List.unmodifiable(_movieResults));
+          _emitProgress();
+        }
+      } catch (e) {
+        // Better error handling: Log and continue instead of crashing
+        print('Error processing movie file $path: $e');
+        _processed++;
+        continue;
       }
-      _emitProgress();
-      await Future.delayed(const Duration(milliseconds: 1));
+      
+      // Reduced delay for better throughput
+      if (_processed % 100 == 0) {
+        await Future.delayed(const Duration(milliseconds: 1));
+      }
     }
 
+    // Final update after scan completes
     _movieResultsController.add(List.unmodifiable(_movieResults));
+    _emitProgress();
   }
 
   Future<void> _scanTvSeries(List<String> candidates) async {
     final videoExts = <String>{'.mp4', '.mkv', '.avi', '.mov', '.m4v', '.webm'};
+    const progressUpdateInterval = 10; // Update UI every 10 files instead of 5
 
     for (final path in candidates) {
       if (_cancelRequested) break;
 
-      final file = File(path);
-      final ext = file.path.split('.').last.toLowerCase();
-      if (!videoExts.contains('.$ext')) continue;
+      try {
+        final file = File(path);
+        final ext = file.path.split('.').last.toLowerCase();
+        if (!videoExts.contains('.$ext')) {
+          _processed++;
+          continue;
+        }
 
-      final parsed = _parseMediaFromFilename(path);
-      final metadata = await Metadata.fromFile(file);
+        final parsed = _parseMediaFromFilename(path);
+        final metadata = await Metadata.fromFile(file);
 
-      if (!parsed.isTv) continue;
+        if (!parsed.isTv) {
+          _processed++;
+          continue;
+        }
 
-      // Determine if we should use virtual grouping (based on filename) or folder grouping
-      // If parsed name has letters, assume it's a series name and use virtual grouping.
-      // Otherwise, fall back to folder name.
+        // Determine if we should use virtual grouping (based on filename) or folder grouping
+        // If parsed name has letters, assume it's a series name and use virtual grouping.
+        // Otherwise, fall back to folder name.
 
-      String seriesPath;
-      String seriesName;
+        String seriesPath;
+        String seriesName;
 
-      final hasLetters = RegExp(r'[a-zA-Z]').hasMatch(parsed.name);
+        final hasLetters = RegExp(r'[a-zA-Z]').hasMatch(parsed.name);
 
-      if (hasLetters && parsed.name.isNotEmpty) {
-        final normalizedName = _normalizeFolderNameForTmdb(parsed.name);
-        seriesPath =
-            '${file.parent.path}${Platform.pathSeparator}[VIRTUAL] $normalizedName';
-        seriesName = normalizedName;
-      } else {
-        seriesPath = file.parent.path;
-        final folderName = seriesPath.split(Platform.pathSeparator).last;
-        seriesName = _normalizeFolderNameForTmdb(folderName);
-      }
+        if (hasLetters && parsed.name.isNotEmpty) {
+          final normalizedName = _normalizeFolderNameForTmdb(parsed.name);
+          seriesPath =
+              '${file.parent.path}${Platform.pathSeparator}[VIRTUAL] $normalizedName';
+          seriesName = normalizedName;
+        } else {
+          seriesPath = file.parent.path;
+          final folderName = seriesPath.split(Platform.pathSeparator).last;
+          seriesName = _normalizeFolderNameForTmdb(folderName);
+        }
 
-      var series = _tvResults.firstWhere(
-        (s) => s.path == seriesPath,
-        orElse: () {
-          final newSeries = TvSeries(
+        var series = _tvResults.firstWhere(
+          (s) => s.path == seriesPath,
+          orElse: () {
+            final newSeries = TvSeries(
+              path: seriesPath,
+              parentPath: Directory(seriesPath).parent.path,
+              name: seriesName,
+            );
+            _tvResults.add(newSeries);
+            return newSeries;
+          },
+        );
+
+        final seasonNum = parsed.season ?? 1;
+        var season = series.seasons.firstWhere(
+          (s) => s.seasonNumber == seasonNum,
+          orElse: () => Season(
             path: seriesPath,
             parentPath: Directory(seriesPath).parent.path,
-            name: seriesName,
-          );
-          _tvResults.add(newSeries);
-          return newSeries;
-        },
-      );
+            seasonNumber: seasonNum,
+            seriesId: series.id,
+            seriesName: series.name,
+          ),
+        );
 
-      final seasonNum = parsed.season ?? 1;
-      var season = series.seasons.firstWhere(
-        (s) => s.seasonNumber == seasonNum,
-        orElse: () => Season(
-          path: seriesPath,
-          parentPath: Directory(seriesPath).parent.path,
+        final episodeNum = parsed.episode ?? 1;
+        final episode = Episode(
           seasonNumber: seasonNum,
-          seriesId: series.id,
-          seriesName: series.name,
-        ),
-      );
+          episodeNumber: episodeNum,
+          name: file.uri.pathSegments.last,
+          path: path,
+          parentPath: file.parent.path,
+          metadata: metadata,
+          tvSeriesId: series.id,
+          tvSeriesName: series.name,
+        );
 
-      final episodeNum = parsed.episode ?? 1;
-      final episode = Episode(
-        seasonNumber: seasonNum,
-        episodeNumber: episodeNum,
-        name: file.uri.pathSegments.last,
-        path: path,
-        parentPath: file.parent.path,
-        metadata: metadata,
-        tvSeriesId: series.id,
-        tvSeriesName: series.name,
-      );
+        final updatedEpisodes = [...season.episodes, episode];
+        final updatedSeason = season.copyWith(episodes: updatedEpisodes);
 
-      final updatedEpisodes = [...season.episodes, episode];
-      final updatedSeason = season.copyWith(episodes: updatedEpisodes);
+        final seasonIndex = series.seasons.indexWhere(
+          (s) => s.seasonNumber == seasonNum,
+        );
+        final updatedSeasons = List<Season>.from(series.seasons);
 
-      final seasonIndex = series.seasons.indexWhere(
-        (s) => s.seasonNumber == seasonNum,
-      );
-      final updatedSeasons = List<Season>.from(series.seasons);
+        if (seasonIndex >= 0) {
+          updatedSeasons[seasonIndex] = updatedSeason;
+        } else {
+          updatedSeasons.add(updatedSeason);
+        }
 
-      if (seasonIndex >= 0) {
-        updatedSeasons[seasonIndex] = updatedSeason;
-      } else {
-        updatedSeasons.add(updatedSeason);
+        final seriesIndex = _tvResults.indexWhere((s) => s.path == seriesPath);
+        _tvResults[seriesIndex] = series.copyWith(seasons: updatedSeasons);
+
+        _processed++;
+        // Optimize: Update UI less frequently for better performance
+        if (_processed % progressUpdateInterval == 0) {
+          _tvResultsController.add(List.unmodifiable(_tvResults));
+          _emitProgress();
+        }
+      } catch (e) {
+        // Better error handling: Log and continue instead of crashing
+        print('Error processing TV series file $path: $e');
+        _processed++;
+        continue;
       }
 
-      final seriesIndex = _tvResults.indexWhere((s) => s.path == seriesPath);
-      _tvResults[seriesIndex] = series.copyWith(seasons: updatedSeasons);
-
-      _processed++;
-      if (_processed % 5 == 0) {
-        _tvResultsController.add(List.unmodifiable(_tvResults));
+      // Reduced delay for better throughput
+      if (_processed % 100 == 0) {
+        await Future.delayed(const Duration(milliseconds: 1));
       }
-      _emitProgress();
-      await Future.delayed(const Duration(milliseconds: 1));
     }
 
+    // Final update after scan completes
     _tvResultsController.add(List.unmodifiable(_tvResults));
+    _emitProgress();
   }
 
   Future<void> _scanMusic(List<String> candidates) async {
     final audioExts = <String>{'.mp3', '.flac', '.wav', '.m4a', '.aac', '.ogg'};
+    const progressUpdateInterval = 10;
 
     for (final path in candidates) {
       if (_cancelRequested) break;
 
-      final file = File(path);
-      final ext = file.path.split('.').last.toLowerCase();
-      if (!audioExts.contains('.$ext')) continue;
+      try {
+        final file = File(path);
+        final ext = file.path.split('.').last.toLowerCase();
+        if (!audioExts.contains('.$ext')) {
+          _processed++;
+          continue;
+        }
 
-      final metadata = await Metadata.fromFile(file);
+        final metadata = await Metadata.fromFile(file);
 
-      // Get the immediate parent folder as album
-      final albumPath = file.parent.path;
-      final albumName = albumPath.split(Platform.pathSeparator).last;
+        // Get the immediate parent folder as album
+        final albumPath = file.parent.path;
+        final albumName = albumPath.split(Platform.pathSeparator).last;
 
-      var music = _musicResults.firstWhere(
-        (m) => m.path == albumPath,
-        orElse: () => Music(
-          path: albumPath,
-          parentPath: Directory(albumPath).parent.path,
-          name: albumName,
-          musicItems: [],
-        ),
-      );
-
-      final musicItem = MusicItem(
-        path: path,
-        parentPath: albumPath,
-        name: file.uri.pathSegments.last,
-        metadata: metadata,
-      );
-
-      if (!_musicResults.contains(music)) {
-        _musicResults.add(music.copyWith(musicItems: [musicItem]));
-      } else {
-        final index = _musicResults.indexOf(music);
-        _musicResults[index] = music.copyWith(
-          musicItems: [...music.musicItems, musicItem],
+        var music = _musicResults.firstWhere(
+          (m) => m.path == albumPath,
+          orElse: () => Music(
+            path: albumPath,
+            parentPath: Directory(albumPath).parent.path,
+            name: albumName,
+            musicItems: [],
+          ),
         );
+
+        final musicItem = MusicItem(
+          path: path,
+          parentPath: albumPath,
+          name: file.uri.pathSegments.last,
+          metadata: metadata,
+        );
+
+        if (!_musicResults.contains(music)) {
+          _musicResults.add(music.copyWith(musicItems: [musicItem]));
+        } else {
+          final index = _musicResults.indexOf(music);
+          _musicResults[index] = music.copyWith(
+            musicItems: [...music.musicItems, musicItem],
+          );
+        }
+
+        _processed++;
+        if (_processed % progressUpdateInterval == 0) {
+          _musicResultsController.add(List.unmodifiable(_musicResults));
+          _emitProgress();
+        }
+      } catch (e) {
+        print('Error processing music file $path: $e');
+        _processed++;
+        continue;
       }
 
-      _processed++;
-      if (_processed % 5 == 0) {
-        _musicResultsController.add(List.unmodifiable(_musicResults));
+      if (_processed % 100 == 0) {
+        await Future.delayed(const Duration(milliseconds: 1));
       }
-      _emitProgress();
-      await Future.delayed(const Duration(milliseconds: 1));
     }
 
     _musicResultsController.add(List.unmodifiable(_musicResults));
+    _emitProgress();
   }
 
   Future<void> _scanMusicVideos(List<String> candidates) async {
     final videoExts = <String>{'.mp4', '.mkv', '.avi', '.mov', '.m4v', '.webm'};
+    const progressUpdateInterval = 10;
 
     for (final path in candidates) {
       if (_cancelRequested) break;
 
-      final file = File(path);
-      final ext = file.path.split('.').last.toLowerCase();
-      if (!videoExts.contains('.$ext')) continue;
+      try {
+        final file = File(path);
+        final ext = file.path.split('.').last.toLowerCase();
+        if (!videoExts.contains('.$ext')) {
+          _processed++;
+          continue;
+        }
 
-      final metadata = await Metadata.fromFile(file);
-      final videoName = file.parent.path.split(Platform.pathSeparator).last;
-      final videoPath = file.parent.path;
+        final metadata = await Metadata.fromFile(file);
+        final videoName = file.parent.path.split(Platform.pathSeparator).last;
+        final videoPath = file.parent.path;
 
-      var musicVideo = _musicVideoResults.firstWhere(
-        (m) => m.path == videoPath && m.name == videoName,
-        orElse: () => MusicVideo(
-          path: videoPath,
-          parentPath: Directory(videoPath).parent.path,
-          name: videoName,
-        ),
-      );
-
-      final musicVideoItem = MusicVideoItem(
-        path: path,
-        parentPath: file.parent.path,
-        name: file.uri.pathSegments.last,
-        metadata: metadata,
-      );
-
-      if (!_musicVideoResults.contains(musicVideo)) {
-        _musicVideoResults.add(
-          musicVideo.copyWith(musicVideoItems: [musicVideoItem]),
+        var musicVideo = _musicVideoResults.firstWhere(
+          (m) => m.path == videoPath && m.name == videoName,
+          orElse: () => MusicVideo(
+            path: videoPath,
+            parentPath: Directory(videoPath).parent.path,
+            name: videoName,
+          ),
         );
-      } else {
-        final index = _musicVideoResults.indexOf(musicVideo);
-        _musicVideoResults[index] = musicVideo.copyWith(
-          musicVideoItems: [...musicVideo.musicVideoItems, musicVideoItem],
+
+        final musicVideoItem = MusicVideoItem(
+          path: path,
+          parentPath: file.parent.path,
+          name: file.uri.pathSegments.last,
+          metadata: metadata,
         );
+
+        if (!_musicVideoResults.contains(musicVideo)) {
+          _musicVideoResults.add(
+            musicVideo.copyWith(musicVideoItems: [musicVideoItem]),
+          );
+        } else {
+          final index = _musicVideoResults.indexOf(musicVideo);
+          _musicVideoResults[index] = musicVideo.copyWith(
+            musicVideoItems: [...musicVideo.musicVideoItems, musicVideoItem],
+          );
+        }
+
+        _processed++;
+        if (_processed % progressUpdateInterval == 0) {
+          _musicVideoResultsController.add(List.unmodifiable(_musicVideoResults));
+          _emitProgress();
+        }
+      } catch (e) {
+        print('Error processing music video file $path: $e');
+        _processed++;
+        continue;
       }
 
-      _processed++;
-      if (_processed % 5 == 0) {
-        _musicVideoResultsController.add(List.unmodifiable(_musicVideoResults));
+      if (_processed % 100 == 0) {
+        await Future.delayed(const Duration(milliseconds: 1));
       }
-      _emitProgress();
-      await Future.delayed(const Duration(milliseconds: 1));
     }
 
     _musicVideoResultsController.add(List.unmodifiable(_musicVideoResults));
+    _emitProgress();
   }
 
   Future<void> _scanPhotos(List<String> candidates) async {
@@ -538,54 +605,68 @@ class LocalScanService {
       '.webp',
       '.bmp',
     };
+    const progressUpdateInterval = 10;
 
     for (final path in candidates) {
       if (_cancelRequested) break;
 
-      final file = File(path);
-      final ext = file.path.split('.').last.toLowerCase();
-      if (!imageExts.contains('.$ext')) continue;
+      try {
+        final file = File(path);
+        final ext = file.path.split('.').last.toLowerCase();
+        if (!imageExts.contains('.$ext')) {
+          _processed++;
+          continue;
+        }
 
-      final metadata = await Metadata.fromFile(file);
-      final collectionName = file.parent.path
-          .split(Platform.pathSeparator)
-          .last;
-      final collectionPath = file.parent.path;
+        final metadata = await Metadata.fromFile(file);
+        final collectionName = file.parent.path
+            .split(Platform.pathSeparator)
+            .last;
+        final collectionPath = file.parent.path;
 
-      var photo = _photoResults.firstWhere(
-        (p) => p.path == collectionPath && p.name == collectionName,
-        orElse: () => Photo(
-          path: collectionPath,
-          parentPath: Directory(collectionPath).parent.path,
-          name: collectionName,
-        ),
-      );
-
-      final photoItem = PhotoItem(
-        path: path,
-        parentPath: file.parent.path,
-        name: file.uri.pathSegments.last,
-        metadata: metadata,
-      );
-
-      if (!_photoResults.contains(photo)) {
-        _photoResults.add(photo.copyWith(photoItems: [photoItem]));
-      } else {
-        final index = _photoResults.indexOf(photo);
-        _photoResults[index] = photo.copyWith(
-          photoItems: [...photo.photoItems, photoItem],
+        var photo = _photoResults.firstWhere(
+          (p) => p.path == collectionPath && p.name == collectionName,
+          orElse: () => Photo(
+            path: collectionPath,
+            parentPath: Directory(collectionPath).parent.path,
+            name: collectionName,
+          ),
         );
+
+        final photoItem = PhotoItem(
+          path: path,
+          parentPath: file.parent.path,
+          name: file.uri.pathSegments.last,
+          metadata: metadata,
+        );
+
+        if (!_photoResults.contains(photo)) {
+          _photoResults.add(photo.copyWith(photoItems: [photoItem]));
+        } else {
+          final index = _photoResults.indexOf(photo);
+          _photoResults[index] = photo.copyWith(
+            photoItems: [...photo.photoItems, photoItem],
+          );
+        }
+
+        _processed++;
+        if (_processed % progressUpdateInterval == 0) {
+          _photoResultsController.add(List.unmodifiable(_photoResults));
+          _emitProgress();
+        }
+      } catch (e) {
+        print('Error processing photo file $path: $e');
+        _processed++;
+        continue;
       }
 
-      _processed++;
-      if (_processed % 5 == 0) {
-        _photoResultsController.add(List.unmodifiable(_photoResults));
+      if (_processed % 100 == 0) {
+        await Future.delayed(const Duration(milliseconds: 1));
       }
-      _emitProgress();
-      await Future.delayed(const Duration(milliseconds: 1));
     }
 
     _photoResultsController.add(List.unmodifiable(_photoResults));
+    _emitProgress();
   }
 
   Future<void> _scanMixedContent(List<String> candidates) async {
@@ -599,6 +680,7 @@ class LocalScanService {
       '.webp',
       '.bmp',
     };
+    const progressUpdateInterval = 10;
 
     // Create containers for mixed content (one per type)
     final mixedVideos = MusicVideo(
@@ -625,62 +707,71 @@ class LocalScanService {
     for (final path in candidates) {
       if (_cancelRequested) break;
 
-      final file = File(path);
-      final ext = file.path.split('.').last.toLowerCase();
-      final metadata = await Metadata.fromFile(file);
-      final fileName = file.uri.pathSegments.last;
+      try {
+        final file = File(path);
+        final ext = file.path.split('.').last.toLowerCase();
+        final metadata = await Metadata.fromFile(file);
+        final fileName = file.uri.pathSegments.last;
 
-      if (videoExts.contains('.$ext')) {
-        // Add as video item
-        final videoItem = MusicVideoItem(
-          path: path,
-          parentPath: file.parent.path,
-          name: fileName,
-          metadata: metadata,
-        );
-        mixedVideos.musicVideoItems.add(videoItem);
-      } else if (audioExts.contains('.$ext')) {
-        // Add as audio item
-        final audioItem = MusicItem(
-          path: path,
-          parentPath: file.parent.path,
-          name: fileName,
-          metadata: metadata,
-        );
-        mixedAudio.musicItems.add(audioItem);
-      } else if (imageExts.contains('.$ext')) {
-        // Add as photo item
-        final photoItem = PhotoItem(
-          path: path,
-          parentPath: file.parent.path,
-          name: fileName,
-          metadata: metadata,
-        );
-        mixedPhotos.photoItems.add(photoItem);
-      }
-
-      _processed++;
-      if (_processed % 5 == 0) {
-        if (mixedVideos.musicVideoItems.isNotEmpty) {
-          _musicVideoResults.clear();
-          _musicVideoResults.add(mixedVideos);
-          _musicVideoResultsController.add(
-            List.unmodifiable(_musicVideoResults),
+        if (videoExts.contains('.$ext')) {
+          // Add as video item
+          final videoItem = MusicVideoItem(
+            path: path,
+            parentPath: file.parent.path,
+            name: fileName,
+            metadata: metadata,
           );
+          mixedVideos.musicVideoItems.add(videoItem);
+        } else if (audioExts.contains('.$ext')) {
+          // Add as audio item
+          final audioItem = MusicItem(
+            path: path,
+            parentPath: file.parent.path,
+            name: fileName,
+            metadata: metadata,
+          );
+          mixedAudio.musicItems.add(audioItem);
+        } else if (imageExts.contains('.$ext')) {
+          // Add as photo item
+          final photoItem = PhotoItem(
+            path: path,
+            parentPath: file.parent.path,
+            name: fileName,
+            metadata: metadata,
+          );
+          mixedPhotos.photoItems.add(photoItem);
         }
-        if (mixedAudio.musicItems.isNotEmpty) {
-          _musicResults.clear();
-          _musicResults.add(mixedAudio);
-          _musicResultsController.add(List.unmodifiable(_musicResults));
+
+        _processed++;
+        if (_processed % progressUpdateInterval == 0) {
+          if (mixedVideos.musicVideoItems.isNotEmpty) {
+            _musicVideoResults.clear();
+            _musicVideoResults.add(mixedVideos);
+            _musicVideoResultsController.add(
+              List.unmodifiable(_musicVideoResults),
+            );
+          }
+          if (mixedAudio.musicItems.isNotEmpty) {
+            _musicResults.clear();
+            _musicResults.add(mixedAudio);
+            _musicResultsController.add(List.unmodifiable(_musicResults));
+          }
+          if (mixedPhotos.photoItems.isNotEmpty) {
+            _photoResults.clear();
+            _photoResults.add(mixedPhotos);
+            _photoResultsController.add(List.unmodifiable(_photoResults));
+          }
+          _emitProgress();
         }
-        if (mixedPhotos.photoItems.isNotEmpty) {
-          _photoResults.clear();
-          _photoResults.add(mixedPhotos);
-          _photoResultsController.add(List.unmodifiable(_photoResults));
-        }
+      } catch (e) {
+        print('Error processing mixed content file $path: $e');
+        _processed++;
+        continue;
       }
-      _emitProgress();
-      await Future.delayed(const Duration(milliseconds: 1));
+
+      if (_processed % 100 == 0) {
+        await Future.delayed(const Duration(milliseconds: 1));
+      }
     }
 
     // Final update
@@ -699,6 +790,7 @@ class LocalScanService {
       _photoResults.add(mixedPhotos);
       _photoResultsController.add(List.unmodifiable(_photoResults));
     }
+    _emitProgress();
   }
 
   Future<List<String>> _collectCandidates(
@@ -707,7 +799,10 @@ class LocalScanService {
   ) async {
     final files = <String>[];
     final dir = Directory(rootDir);
-    if (!await dir.exists()) return files;
+    if (!await dir.exists()) {
+      print('Directory does not exist: $rootDir');
+      return files;
+    }
 
     // Determine file extensions based on content type
     final exts = <String>{};
@@ -749,15 +844,34 @@ class LocalScanService {
         break;
     }
 
-    await for (final entity in dir.list(recursive: true, followLinks: false)) {
-      if (_cancelRequested) break;
-      if (entity is File) {
-        final ext = entity.path.split('.').last.toLowerCase();
-        if (exts.contains('.$ext')) {
-          files.add(entity.path);
+    try {
+      // Use stream processing with batching for better memory efficiency
+      await for (final entity in dir.list(recursive: true, followLinks: false)) {
+        if (_cancelRequested) break;
+        
+        try {
+          if (entity is File) {
+            final ext = entity.path.split('.').last.toLowerCase();
+            if (exts.contains('.$ext')) {
+              files.add(entity.path);
+              
+              // Provide early progress feedback for large directories
+              if (files.length % 100 == 0) {
+                _statusController.add('Found ${files.length} files...');
+              }
+            }
+          }
+        } catch (e) {
+          // Continue scanning even if individual entity fails
+          print('Error processing entity ${entity.path}: $e');
+          continue;
         }
       }
+    } catch (e) {
+      print('Error scanning directory $rootDir: $e');
+      // Return whatever files we found before the error
     }
+    
     return files;
   }
 
