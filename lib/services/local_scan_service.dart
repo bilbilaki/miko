@@ -536,7 +536,6 @@ class LocalScanService {
 
   Future<void> _scanMusic(List<String> candidates) async {
     final audioExts = <String>{'.mp3', '.flac', '.wav', '.m4a', '.aac', '.ogg'};
-    __progressUpdateInterval
 
     for (final path in candidates) {
       if (_cancelRequested) break;
@@ -603,7 +602,6 @@ class LocalScanService {
 
   Future<void> _scanMusicVideos(List<String> candidates) async {
     final videoExts = <String>{'.mp4', '.mkv', '.avi', '.mov', '.m4v', '.webm'};
-    __progressUpdateInterval
 
     for (final path in candidates) {
       if (_cancelRequested) break;
@@ -676,7 +674,6 @@ class LocalScanService {
       '.webp',
       '.bmp',
     };
-    __progressUpdateInterval
 
     for (final path in candidates) {
       if (_cancelRequested) break;
@@ -751,7 +748,6 @@ class LocalScanService {
       '.webp',
       '.bmp',
     };
-    __progressUpdateInterval
 
     // Create containers for mixed content (one per type)
     final mixedVideos = MusicVideo(
